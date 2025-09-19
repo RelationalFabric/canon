@@ -22,12 +22,12 @@ Canon provides a framework for treating types as a shared, foundational resource
 
 ### Usage
 
-Using Canon is a single, declarative step. You define a type that extends `Canon`, providing your axioms directly in the generic type parameter. This syntax enables IDE IntelliSense to work its magic, allowing you to intuitively compose your data model from a common set of primitives.
+Using Canon is a two step, declarative process. You define a type that extends `Canon`, providing your axioms directly in the generic type parameter. This syntax enables IDE IntelliSense to work its magic, allowing you to intuitively compose your data model from a common set of primitives.
 
 ```typescript
 // 1. Define your Canon's type and augment the global registry.
 // This is a type-level declaration with no runtime side effects.
-declare module '@canon/core' {
+declare module '@relational-fabric/canon' {
   interface Canons {
     myProject: Canon<{
       Id: {
@@ -48,9 +48,8 @@ declare module '@canon/core' {
   }
 }
 
-// 2. Define your Canon's runtime configuration using a helper.
-// This is a runtime function that returns a value and is type-safe.
-const myProjectCanon = defineCanon<keyof Canons>({
+// 2. Register the runtime configuration for your Canon.
+declareCanon({
   canon: 'myProject',
   axioms: {
     Id: {
