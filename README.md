@@ -49,8 +49,7 @@ declare module '@relational-fabric/canon' {
 }
 
 // 2. Register the runtime configuration for your Canon.
-declareCanon({
-  canon: 'myProject',
+declareCanon('myProject', {
   axioms: {
     Id: {
       basis: { id: 'string' },
