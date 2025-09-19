@@ -68,6 +68,7 @@ declareCanon({
     },
   },
 });
+```
 
 ### Sharing Canons
 
