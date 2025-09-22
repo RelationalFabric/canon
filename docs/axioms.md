@@ -35,23 +35,35 @@ type KeyNameAxiom = {
   meta?: Record<string, string>;  // Optional metadata
 };
 
-// Other axiom types for semantic concepts that might vary between codebases
+// Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = {
-  base: Record<string, unknown>;
-  key: string;
-  meta?: Record<string, string>;
+  // The timestamp type - could be number, string, Date, or custom type
+  type: number | string | Date | CustomTimestamp;
+  // Way to convert from this timestamp to canonical value
+  toCanonical: (value: this['type']) => CanonicalTimestamp;
+  // Way to convert from canonical value to this timestamp
+  fromCanonical: (value: CanonicalTimestamp) => this['type'];
+  // Metadata about the timestamp format
+  meta?: {
+    hasTimezone?: boolean;
+    format?: string;
+    precision?: 'millisecond' | 'second' | 'minute' | 'hour' | 'day';
+  };
 };
 
 type ReferenceAxiom = {
-  base: Record<string, unknown>;
-  key: string;
-  meta?: Record<string, string>;
-};
-
-type StatusAxiom = {
-  base: Record<string, unknown>;
-  key: string;
-  meta?: Record<string, string>;
+  // The reference type - could be string, object, or array
+  type: string | ReferenceObject | string[];
+  // Way to convert from this reference to canonical value
+  toCanonical: (value: this['type']) => CanonicalReference;
+  // Way to convert from canonical value to this reference
+  fromCanonical: (value: CanonicalReference) => this['type'];
+  // Metadata about the reference format
+  meta?: {
+    isArray?: boolean;
+    isObject?: boolean;
+    keyField?: string;
+  };
 };
 ```
 
@@ -63,9 +75,8 @@ interface Axioms {
   Id: KeyNameAxiom;        // Id concept - might be 'id', '@id', '_id', etc.
   Type: KeyNameAxiom;      // Type concept - might be 'type', '@type', '_type', etc.
   Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
-  Timestamp: TimestampAxiom; // Timestamp concept - might be 'createdAt', 'timestamp', 'date', etc.
-  Reference: ReferenceAxiom; // Reference concept - might be 'ref', 'parentId', 'ownerId', etc.
-  Status: StatusAxiom;     // Status concept - might be 'status', 'state', 'active', etc.
+  Timestamp: TimestampAxiom; // Timestamp concept - might be number, string, Date, etc.
+  Reference: ReferenceAxiom; // Reference concept - might be string, object, array, etc.
 }
 ```
 
@@ -105,14 +116,24 @@ type JsonLdCanon = Canon<{
     meta: { format: 'json-ld' };
   };
   Timestamp: {
-    base: { 'http://schema.org/dateCreated': string };
-    key: 'http://schema.org/dateCreated';
-    meta: { format: 'json-ld'; type: 'iso8601' };
+    type: string; // ISO8601 string
+    toCanonical: (value: string) => CanonicalTimestamp;
+    fromCanonical: (value: CanonicalTimestamp) => string;
+    meta: { 
+      format: 'json-ld'; 
+      hasTimezone: true; 
+      precision: 'millisecond' 
+    };
   };
   Reference: {
-    base: { 'http://schema.org/parent': string };
-    key: 'http://schema.org/parent';
-    meta: { format: 'json-ld'; type: 'uri' };
+    type: string; // URI string
+    toCanonical: (value: string) => CanonicalReference;
+    fromCanonical: (value: CanonicalReference) => string;
+    meta: { 
+      format: 'json-ld'; 
+      isArray: false; 
+      isObject: false 
+    };
   };
 }>;
 
@@ -129,14 +150,24 @@ type StandardCanon = Canon<{
     meta: { format: 'standard' };
   };
   Timestamp: {
-    base: { createdAt: Date };
-    key: 'createdAt';
-    meta: { format: 'standard'; type: 'date' };
+    type: Date; // JavaScript Date object
+    toCanonical: (value: Date) => CanonicalTimestamp;
+    fromCanonical: (value: CanonicalTimestamp) => Date;
+    meta: { 
+      format: 'standard'; 
+      hasTimezone: true; 
+      precision: 'millisecond' 
+    };
   };
   Reference: {
-    base: { parentId: string };
-    key: 'parentId';
-    meta: { format: 'standard'; type: 'uuid' };
+    type: string; // UUID string
+    toCanonical: (value: string) => CanonicalReference;
+    fromCanonical: (value: CanonicalReference) => string;
+    meta: { 
+      format: 'standard'; 
+      isArray: false; 
+      isObject: false 
+    };
   };
 }>;
 
@@ -153,14 +184,24 @@ type MongoCanon = Canon<{
     meta: { format: 'mongodb' };
   };
   Timestamp: {
-    base: { timestamp: number };
-    key: 'timestamp';
-    meta: { format: 'mongodb'; type: 'unix' };
+    type: number; // Unix timestamp
+    toCanonical: (value: number) => CanonicalTimestamp;
+    fromCanonical: (value: CanonicalTimestamp) => number;
+    meta: { 
+      format: 'mongodb'; 
+      hasTimezone: false; 
+      precision: 'millisecond' 
+    };
   };
   Reference: {
-    base: { ref: string };
-    key: 'ref';
-    meta: { format: 'mongodb'; type: 'objectid' };
+    type: string; // ObjectId string
+    toCanonical: (value: string) => CanonicalReference;
+    fromCanonical: (value: CanonicalReference) => string;
+    meta: { 
+      format: 'mongodb'; 
+      isArray: false; 
+      isObject: false 
+    };
   };
 }>;
 ```
@@ -208,16 +249,20 @@ function getId<T extends Canon<any>>(object: T, canon: T): string {
   return object[idAxiom.key] as string;
 }
 
-function getTimestamp<T extends Canon<any>>(object: T, canon: T): string | Date | number {
-  // The library doesn't need to know if it's 'createdAt', 'timestamp', or 'http://schema.org/dateCreated'
+function getTimestamp<T extends Canon<any>>(object: T, canon: T): CanonicalTimestamp {
+  // The library doesn't need to know if it's string, Date, or number
+  // It uses the axiom interface to convert to canonical format
   const timestampAxiom = getAxiom(canon, 'Timestamp');
-  return object[timestampAxiom.key];
+  const rawValue = object[timestampAxiom.key];
+  return timestampAxiom.toCanonical(rawValue);
 }
 
-function getReference<T extends Canon<any>>(object: T, canon: T): string {
-  // The library doesn't need to know if it's 'parentId', 'ref', or 'http://schema.org/parent'
+function getReference<T extends Canon<any>>(object: T, canon: T): CanonicalReference {
+  // The library doesn't need to know if it's string, object, or array
+  // It uses the axiom interface to convert to canonical format
   const referenceAxiom = getAxiom(canon, 'Reference');
-  return object[referenceAxiom.key] as string;
+  const rawValue = object[referenceAxiom.key];
+  return referenceAxiom.toCanonical(rawValue);
 }
 
 // Usage with different canons
@@ -245,12 +290,18 @@ const id1 = getId(jsonLdObject, JsonLdCanon);     // Uses @id
 const id2 = getId(standardObject, StandardCanon); // Uses id
 const id3 = getId(mongoObject, MongoCanon);       // Uses _id
 
-const timestamp1 = getTimestamp(jsonLdObject, JsonLdCanon);     // Uses http://schema.org/dateCreated
-const timestamp2 = getTimestamp(standardObject, StandardCanon); // Uses createdAt
-const timestamp3 = getTimestamp(mongoObject, MongoCanon);       // Uses timestamp
+// All return canonical timestamp format regardless of input format
+const timestamp1 = getTimestamp(jsonLdObject, JsonLdCanon);     // Converts ISO8601 string to canonical
+const timestamp2 = getTimestamp(standardObject, StandardCanon); // Converts Date to canonical
+const timestamp3 = getTimestamp(mongoObject, MongoCanon);       // Converts Unix timestamp to canonical
+
+// All return canonical reference format regardless of input format
+const ref1 = getReference(jsonLdObject, JsonLdCanon);     // Converts URI string to canonical
+const ref2 = getReference(standardObject, StandardCanon); // Converts UUID string to canonical
+const ref3 = getReference(mongoObject, MongoCanon);       // Converts ObjectId string to canonical
 ```
 
-This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, not specific implementations.
+This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, converting between different formats automatically.
 
 ## Runtime Axiom Processing
 
