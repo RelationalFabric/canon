@@ -122,40 +122,20 @@ This constraint system ensures:
 
 Each Canon **collects specific incarnations** of axioms for a given model. The axioms define what utilities expect, and the canon provides the specific implementation:
 
-### Axiom Type Definition and Registration
-
-First, axiom types are defined to specify what utilities will accept:
-
-```typescript
-// Define axiom types - these specify what utilities will accept
-type KeyNameAxiom = {
-  base: Record<string, unknown>;
-  key: string;
-  meta?: Record<string, string>;
-};
-
-// Register axioms in the global interface
-interface Axioms {
-  Id: KeyNameAxiom;        // Utilities expect this shape for ID concept
-  Type: KeyNameAxiom;      // Utilities expect this shape for Type concept
-  Version: KeyNameAxiom;   // Utilities expect this shape for Version concept
-}
-```
-
 ### Canon Implementation
 
-The canon provides specific implementations of these axioms for a given model:
+A canon provides specific implementations of axioms for a given data model:
 
 ```typescript
 // JSON-LD Canon - specific implementation for JSON-LD format
 type JsonLdCanon = Canon<{
   Id: {
-    base: { '@id': string };
+    basis: { '@id': string };
     key: '@id';
     meta: { format: 'json-ld' };
   };  // Specific implementation of Id axiom for JSON-LD
   Type: {
-    base: { '@type': string };
+    basis: { '@type': string };
     key: '@type';
     meta: { format: 'json-ld' };
   };  // Specific implementation of Type axiom for JSON-LD
@@ -164,12 +144,12 @@ type JsonLdCanon = Canon<{
 // Standard Canon - specific implementation for standard format
 type StandardCanon = Canon<{
   Id: {
-    base: { id: string };
+    basis: { id: string };
     key: 'id';
     meta: { format: 'standard' };
   };  // Specific implementation of Id axiom for standard format
   Type: {
-    base: { type: string };
+    basis: { type: string };
     key: 'type';
     meta: { format: 'standard' };
   };  // Specific implementation of Type axiom for standard format
