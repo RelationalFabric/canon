@@ -6,100 +6,158 @@
 
 ## What is an Axiom?
 
-An axiom is a **contract definition** that specifies both type and runtime requirements for implementors. When added to the global `Axioms` interface, an axiom defines what any Canon using that axiom must provide:
+An axiom is a **type definition** that specifies the shape `{ base, key, meta? }` for a particular concept. When added to the global `Axioms` interface, an axiom defines the structure that instances of that axiom must follow:
 
-1. **Type Requirements** - The TypeScript type structure that must be implemented
-2. **Runtime Requirements** - The runtime behavior, validators, and metadata that must be provided
-3. **Contract Enforcement** - The system ensures implementors fulfill both type and runtime obligations
+1. **Base** - The underlying TypeScript type structure
+2. **Key** - The canonical field name that serves as the primary identifier  
+3. **Meta** - Optional extensible metadata for validation, behavior, and documentation
 
-Think of axioms as **interface contracts** - they define what implementors must provide, not just what they can provide.
+Think of axioms as **type templates** - they define the shape that instances must conform to when used in Canons.
 
 ## The Axiom Type System
 
 ### Core Structure
 
-An axiom defines a complete contract that implementors must fulfill:
+An axiom defines the shape that instances must follow:
 
 ```typescript
 interface Axioms {
-  MyAxiom: {
-    // Type information that implementors must provide
-    type: { id: string; name: string };
-    // Runtime configuration that implementors must provide
-    runtime: {
-      validators: Validator[];
-      transformers: Transformer[];
-      metadata: AxiomMetadata;
-    };
+  Id: {
+    base: { id: string };
+    key: 'id';
+    meta?: { type: 'uuid'; required: boolean };
+  };
+  Version: {
+    base: { version: number };
+    key: 'version';
+    meta?: { default: number; min: number };
+  };
+  Type: {
+    base: { type: string };
+    key: 'type';
+    meta?: { enum: string[]; discriminator: boolean };
   };
 }
 ```
 
-This structure ensures that every axiom specifies both **type requirements** and **runtime requirements**, creating a complete contract for implementors.
+This structure ensures that every axiom specifies the **base type**, **canonical key**, and optional **metadata** that instances must conform to.
 
 ### Type-Level Composition
 
-Axioms compose naturally within Canon definitions by referencing the global `Axioms` interface:
+Axioms compose naturally within Canon definitions by creating instances that conform to the axiom shape:
 
 ```typescript
 // First, define axioms in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
     Id: {
-      type: { id: string };
-      runtime: { validators: [/* ... */]; metadata: { type: 'uuid'; required: true } };
+      base: { id: string };
+      key: 'id';
+      meta?: { type: 'uuid'; required: boolean };
     };
     Type: {
-      type: { type: string };
-      runtime: { validators: [/* ... */]; metadata: { enum: ['user', 'admin', 'guest'] } };
+      base: { type: string };
+      key: 'type';
+      meta?: { enum: string[]; discriminator: boolean };
     };
     Version: {
-      type: { version: number };
-      runtime: { validators: [/* ... */]; metadata: { default: 1; min: 1 } };
+      base: { version: number };
+      key: 'version';
+      meta?: { default: number; min: number };
     };
   }
 }
 
-// Then use them in Canon definitions
+// Then create instances in Canon definitions
 type MyCanon = Canon<{
-  Id: Axioms['Id'];        // Must implement the Id axiom contract
-  Type: Axioms['Type'];    // Must implement the Type axiom contract
-  Version: Axioms['Version']; // Must implement the Version axiom contract
+  Id: {
+    base: { id: string };
+    key: 'id';
+    meta: { type: 'uuid'; required: true };
+  };
+  Type: {
+    base: { type: string };
+    key: 'type';
+    meta: { enum: ['user', 'admin', 'guest']; discriminator: true };
+  };
+  Version: {
+    base: { version: number };
+    key: 'version';
+    meta: { default: 1; min: 1 };
+  };
 }>;
 ```
 
-Each axiom reference ensures the Canon must implement the complete contract defined in the `Axioms` interface.
+Each axiom instance must conform to the shape defined in the `Axioms` interface.
+
+### Runtime Configuration Interface
+
+Runtime behavior is defined in a separate augmentable interface that depends on the `Axioms` type:
+
+```typescript
+// Runtime configuration interface
+interface AxiomRuntime {
+  [K in keyof Axioms]: {
+    validators: Validator[];
+    transformers: Transformer[];
+    metadata: Axioms[K]['meta'] extends infer M ? M : never;
+  };
+}
+
+// Example runtime configuration
+declare module '@relational-fabric/canon' {
+  interface AxiomRuntime {
+    Id: {
+      validators: [isString, isUuid];
+      transformers: [normalizeUuid];
+      metadata: { type: 'uuid'; required: true };
+    };
+    Type: {
+      validators: [isString, isEnum(['user', 'admin', 'guest'])];
+      transformers: [normalizeType];
+      metadata: { enum: ['user', 'admin', 'guest']; discriminator: true };
+    };
+    Version: {
+      validators: [isNumber, isPositive];
+      transformers: [normalizeVersion];
+      metadata: { default: 1; min: 1 };
+    };
+  }
+}
+```
+
+This separation allows the type system to depend on `Axioms` while providing runtime behavior through `AxiomRuntime`.
 
 ## Runtime Axiom Processing
 
 ### Registration and Validation
 
-The runtime system processes axioms through a contract validation and registration pipeline:
+The runtime system processes axiom instances through validation and registration:
 
 ```typescript
-interface AxiomContract {
-  type: TypeDefinition;           // Type requirements
-  runtime: {
-    validators: ValidationRule[]; // Runtime validation rules
-    transformers: Transformer[];  // Runtime transformation functions
-    metadata: AxiomMetadata;      // Runtime metadata
-  };
+interface AxiomInstance {
+  base: Record<string, any>;      // The base type structure
+  key: string;                    // The canonical field name
+  meta?: Record<string, any>;     // Optional metadata
 }
 
-function processAxiom(name: string, contract: AxiomContract): ProcessedAxiom {
-  // 1. Validate the axiom contract structure
-  validateAxiomContract(contract);
+function processAxiomInstance(
+  axiomName: keyof Axioms, 
+  instance: AxiomInstance
+): ProcessedAxiomInstance {
+  // 1. Validate the instance conforms to axiom shape
+  validateAxiomInstance(axiomName, instance);
   
-  // 2. Register type requirements
-  registerTypeRequirements(name, contract.type);
+  // 2. Get runtime configuration for this axiom
+  const runtimeConfig = getAxiomRuntime(axiomName);
   
-  // 3. Setup runtime behavior
-  registerRuntimeBehavior(name, contract.runtime);
+  // 3. Register the instance with runtime behavior
+  registerAxiomInstance(axiomName, instance, runtimeConfig);
   
-  // 4. Validate implementor compliance
-  validateImplementorCompliance(name, contract);
+  // 4. Setup validation and transformation
+  setupInstanceBehavior(axiomName, instance, runtimeConfig);
   
-  return createProcessedAxiom(name, contract);
+  return createProcessedAxiomInstance(axiomName, instance, runtimeConfig);
 }
 ```
 
