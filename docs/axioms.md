@@ -45,10 +45,6 @@ type KeyNameAxiom = Axiom<{
   key: string;
 }>;
 
-// Type aliases for better type safety
-type SomeCanon = /* implementation details hidden */;  // Any registered canon
-type AnyCanon = /* implementation details hidden */;   // Any canon type
-
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = Axiom<{
   // The timestamp type - could be number, string, Date, or custom type
