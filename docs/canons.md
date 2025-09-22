@@ -40,40 +40,49 @@ type CanonDefinition = {
 ```
 
 This pattern ensures that:
-- **Axioms define requirements** - Each axiom in the `Axioms` interface specifies both type information and runtime requirements
-- **Canons must implement** - A Canon's type must extend from the available axioms in the global registry
+- **Axioms define structure** - Each axiom in the `Axioms` interface specifies the shape that instances must follow
+- **Canons create instances** - A Canon creates instances that conform to the axiom shapes
 - **Type safety is enforced** - The compiler ensures only valid axioms can be used in Canon definitions
 
-### How Axioms Define Implementation Requirements
+### How Axioms Define Structure Requirements
 
-When an axiom is added to the `Axioms` interface, it defines the **contract** that any Canon using that axiom must fulfill:
+When an axiom is added to the `Axioms` interface, it defines the **shape** that instances of that axiom must follow:
 
 ```typescript
-// Example: Adding an axiom to the global interface
+// Example: Adding axioms to the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
     Id: {
-      // Type information the implementor must provide
-      type: { id: string };
-      // Runtime information the implementor must provide  
-      runtime: {
-        validators: Validator[];
-        transformers: Transformer[];
-        metadata: AxiomMetadata;
-      };
+      base: { id: string };
+      key: 'id';
+      meta?: { type: 'uuid'; required: boolean };
+    };
+    Count: number;
+    Address: {
+      street: string;
+      city: string;
+      country: string;
     };
   }
 }
 
-// Now any Canon can use the Id axiom
+// Now any Canon can create instances of these axioms
 type MyCanon = Canon<{
-  Id: Axioms['Id'];  // Must implement the Id axiom contract
+  Id: {
+    base: { id: string };
+    key: 'id';
+    meta: { type: 'uuid'; required: true };
+  };
+  Count: 42;
+  Address: {
+    street: '123 Main St';
+    city: 'Anytown';
+    country: 'USA';
+  };
 }>;
 ```
 
-The axiom defines **both**:
-- **Type requirements** - What TypeScript types must be provided
-- **Runtime requirements** - What runtime behavior must be implemented
+The axiom defines the **structure** that instances must conform to, with different axioms having different shapes.
 
 ### CanonDefinition Constraint System
 
@@ -84,66 +93,73 @@ type CanonDefinition = {
   [K in keyof Axioms]?: Axioms[K];
 };
 
-// This means a Canon can only use axioms that exist in the Axioms interface
+// This means a Canon can only create instances of axioms that exist in the Axioms interface
 type ValidCanon = Canon<{
-  Id: Axioms['Id'];        // ✅ Valid - Id exists in Axioms
-  Name: Axioms['Name'];    // ✅ Valid - Name exists in Axioms  
+  Id: {
+    base: { id: string };
+    key: 'id';
+    meta: { type: 'uuid'; required: true };
+  };  // ✅ Valid - Instance conforms to Id axiom shape
+  Count: 42;  // ✅ Valid - Instance conforms to Count axiom shape
   Invalid: SomeOtherType;  // ❌ Error - Not in Axioms interface
 }>;
 ```
 
 This constraint system ensures:
 - **Type safety** - Only registered axioms can be used
-- **Runtime consistency** - All axioms have both type and runtime definitions
+- **Shape consistency** - All instances must conform to their axiom's shape
 - **Discoverability** - Available axioms are clearly defined in the interface
 
 ## Understanding Axioms in Canons
 
-Each Canon is built from **axioms** that are defined in the global `Axioms` interface. These axioms serve as **contracts** that specify both type and runtime requirements:
+Each Canon is built from **axiom instances** that conform to shapes defined in the global `Axioms` interface. These axioms serve as **templates** that define the structure instances must follow:
 
-### Axiom Contract Structure
+### Axiom Shape Definition
 
-When an axiom is added to the `Axioms` interface, it defines a complete contract:
+When an axiom is added to the `Axioms` interface, it defines the shape that instances must follow:
 
 ```typescript
 interface Axioms {
   Id: {
-    // Type information that implementors must provide
-    type: { id: string };
-    // Runtime configuration that implementors must provide
-    runtime: {
-      validators: [(value: unknown) => boolean];
-      transformers: [(value: unknown) => string];
-      metadata: {
-        description: string;
-        required: boolean;
-        format: 'uuid' | 'nanoid' | 'custom';
-      };
-    };
+    base: { id: string };
+    key: 'id';
+    meta?: { type: 'uuid'; required: boolean };
+  };
+  Count: number;
+  Address: {
+    street: string;
+    city: string;
+    country: string;
   };
 }
 ```
 
-### Canon Implementation Requirements
+### Canon Instance Creation
 
-When a Canon uses an axiom, it must implement the complete contract:
+When a Canon uses an axiom, it creates an instance that conforms to the axiom's shape:
 
 ```typescript
 type MyCanon = Canon<{
-  Id: Axioms['Id'];  // Must provide both type and runtime implementation
+  Id: {
+    base: { id: string };
+    key: 'id';
+    meta: { type: 'uuid'; required: true };
+  };  // Instance conforms to Id axiom shape
+  Count: 42;  // Instance conforms to Count axiom shape
+  Address: {  // Instance conforms to Address axiom shape
+    street: '123 Main St';
+    city: 'Anytown';
+    country: 'USA';
+  };
 }>;
-
-// The Canon implementation must satisfy:
-// 1. Type requirements: { id: string }
-// 2. Runtime requirements: validators, transformers, metadata
 ```
 
-### Type Safety Through Contracts
+### Type Safety Through Shape Conformance
 
 The augmentable interface pattern ensures that:
-- **All axioms are fully defined** - Both type and runtime requirements are specified
-- **Canons must implement completely** - No partial implementations are allowed
-- **Type checking is enforced** - The compiler validates contract compliance
+- **All axioms define clear shapes** - The structure instances must follow is specified
+- **Canons create conforming instances** - Instances must match the axiom's shape
+- **Type checking is enforced** - The compiler validates shape conformance
 
 ## Lazy Type Resolution
 

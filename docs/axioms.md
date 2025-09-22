@@ -6,20 +6,22 @@
 
 ## What is an Axiom?
 
-An axiom is a **type definition** that specifies the shape `{ base, key, meta? }` for a particular concept. When added to the global `Axioms` interface, an axiom defines the structure that instances of that axiom must follow:
+An axiom is a **type definition** that specifies the structure for a particular concept. When added to the global `Axioms` interface, an axiom defines the shape that instances of that axiom must follow.
 
+A common pattern for key-name axioms is the `{ base, key, meta? }` shape:
 1. **Base** - The underlying TypeScript type structure
 2. **Key** - The canonical field name that serves as the primary identifier  
 3. **Meta** - Optional extensible metadata for validation, behavior, and documentation
 
-Think of axioms as **type templates** - they define the shape that instances must conform to when used in Canons.
+However, axioms can have various shapes depending on their purpose. Think of axioms as **type templates** - they define the structure that instances must conform to when used in Canons.
 
 ## The Axiom Type System
 
 ### Core Structure
 
-An axiom defines the shape that instances must follow:
+Axioms define the shape that instances must follow. Here are some common patterns:
 
+#### Key-Name Axioms (Common Pattern)
 ```typescript
 interface Axioms {
   Id: {
@@ -40,7 +42,30 @@ interface Axioms {
 }
 ```
 
-This structure ensures that every axiom specifies the **base type**, **canonical key**, and optional **metadata** that instances must conform to.
+#### Other Axiom Shapes
+Axioms can have various structures depending on their purpose:
+
+```typescript
+interface Axioms {
+  // Simple value axiom
+  Count: number;
+  
+  // Complex nested axiom
+  Address: {
+    street: string;
+    city: string;
+    country: string;
+  };
+  
+  // Function-based axiom
+  Validator: (value: unknown) => boolean;
+  
+  // Generic axiom
+  Optional<T>: T | undefined;
+}
+```
+
+The key is that each axiom defines a consistent structure that instances must conform to.
 
 ### Type-Level Composition
 
@@ -60,10 +85,11 @@ declare module '@relational-fabric/canon' {
       key: 'type';
       meta?: { enum: string[]; discriminator: boolean };
     };
-    Version: {
-      base: { version: number };
-      key: 'version';
-      meta?: { default: number; min: number };
+    Count: number;
+    Address: {
+      street: string;
+      city: string;
+      country: string;
     };
   }
 }
@@ -80,10 +106,11 @@ type MyCanon = Canon<{
     key: 'type';
     meta: { enum: ['user', 'admin', 'guest']; discriminator: true };
   };
-  Version: {
-    base: { version: number };
-    key: 'version';
-    meta: { default: 1; min: 1 };
+  Count: 42;  // Instance of Count axiom
+  Address: {  // Instance of Address axiom
+    street: '123 Main St';
+    city: 'Anytown';
+    country: 'USA';
   };
 }>;
 ```
@@ -100,7 +127,7 @@ interface AxiomRuntime {
   [K in keyof Axioms]: {
     validators: Validator[];
     transformers: Transformer[];
-    metadata: Axioms[K]['meta'] extends infer M ? M : never;
+    metadata: Axioms[K] extends { meta?: infer M } ? M : never;
   };
 }
 
@@ -117,10 +144,15 @@ declare module '@relational-fabric/canon' {
       transformers: [normalizeType];
       metadata: { enum: ['user', 'admin', 'guest']; discriminator: true };
     };
-    Version: {
+    Count: {
       validators: [isNumber, isPositive];
-      transformers: [normalizeVersion];
-      metadata: { default: 1; min: 1 };
+      transformers: [normalizeNumber];
+      metadata: {};
+    };
+    Address: {
+      validators: [isObject, hasRequiredFields];
+      transformers: [normalizeAddress];
+      metadata: {};
     };
   }
 }
@@ -135,11 +167,8 @@ This separation allows the type system to depend on `Axioms` while providing run
 The runtime system processes axiom instances through validation and registration:
 
 ```typescript
-interface AxiomInstance {
-  base: Record<string, any>;      // The base type structure
-  key: string;                    // The canonical field name
-  meta?: Record<string, any>;     // Optional metadata
-}
+// Axiom instances can have various shapes
+type AxiomInstance = Axioms[keyof Axioms];
 
 function processAxiomInstance(
   axiomName: keyof Axioms, 
