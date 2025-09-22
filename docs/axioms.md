@@ -19,10 +19,7 @@ type KeyNameAxiom = {
 };
 
 // Utility type to abstract away the axiom type key
-type Axiom<Definition, ConfigType> = Definition & { 
-  axiomType: ConfigType;
-  meta?: Record<string, string>;  // Available to all axioms and configs
-};
+type Axiom<Definition, ConfigType> = /* implementation details hidden */;
 ```
 
 This defines what utilities expect - they know they'll get an object with a specific key name, but they don't know what that key name is. The **canon** provides the specific implementation, and the **runtime config** provides the actual values needed at runtime (like `'id'` vs `typeof 'id'`).
