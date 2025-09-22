@@ -37,8 +37,8 @@ type KeyNameAxiom = {
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = {
-  // The timestamp type - could be number, string, Date, etc.
-  type: number | string | Date;
+  // The timestamp type - could be number, string, Date, or custom type
+  type: number | string | Date | TypeGuard<unknown>;
   // Way to convert from this timestamp to canonical value
   toCanonical: (value: this['type']) => CanonicalTimestamp;
   // Way to convert from canonical value to this timestamp
@@ -52,8 +52,8 @@ type TimestampAxiom = {
 };
 
 type ReferenceAxiom = {
-  // The reference type - could be string, object, or array
-  type: string | ReferenceObject | string[];
+  // The reference type - could be string, object, array, or custom type
+  type: string | object | string[] | TypeGuard<unknown>;
   // Way to convert from this reference to canonical value
   toCanonical: (value: this['type']) => CanonicalReference;
   // Way to convert from canonical value to this reference
