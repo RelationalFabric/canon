@@ -84,11 +84,7 @@ declare module '@relational-fabric/canon' {
   }
   
   interface AxiomConfig {
-    [K in keyof Axioms]: {
-      axiomType: Axioms[K]['axiomType'];
-      keyValue: string;  // The actual key value at runtime
-      metaValues: Record<string, string>;  // The actual meta values at runtime
-    };
+    // Open for definers to map their axiom names to their config shapes
   }
 }
 ```
@@ -107,7 +103,7 @@ Each canon provides specific implementations of the same semantic concepts, whil
 
 ### Runtime Configuration
 
-The `AxiomConfig` interface provides actual runtime values for each axiom type, including the `axiomType` discriminator and runtime values for keys and metadata.
+The `AxiomConfig` interface is open for definers to map their axiom names to their own config shapes, providing whatever runtime configuration they need.
 
 ### Library API Generation
 
