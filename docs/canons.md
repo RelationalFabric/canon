@@ -15,67 +15,135 @@ A Canon is a type that defines its data model using a predefined set of universa
 
 ## The Type System Architecture
 
-### Compile-Time Type Definition
+### The Augmentable Interface Pattern
 
-At the type level, Canons leverage TypeScript's powerful generic system to create flexible, reusable type blueprints:
+Canons leverage TypeScript's **augmentable interface** pattern to create a global registry of available axioms. This is the foundational mechanism that enables type-safe composition:
 
 ```typescript
-type Canon<TAxioms extends Record<string, Axiom>> = {
-  [K in keyof TAxioms]: TAxioms[K]['basis'] & {
-    readonly [P in TAxioms[K]['key']]: TAxioms[K]['basis'][TAxioms[K]['key']];
-  };
+// Global augmentable interface for axioms
+interface Axioms {
+  // Axioms are registered here by implementors
+  // Each axiom defines both type and runtime requirements
+}
+
+// Canon definition uses the augmentable interface
+type Canon<T extends CanonDefinition> = {
+  [K in keyof T]: T[K] extends Axioms[keyof Axioms] 
+    ? T[K] 
+    : never;
+};
+
+// CanonDefinition constrains what can be used in a Canon
+type CanonDefinition = {
+  [K in keyof Axioms]?: Axioms[K];
 };
 ```
 
-This creates a **discriminated union** where each axiom contributes both its structural shape and canonical identity. The type system uses the `canon` key as a **discriminator**, enabling precise type narrowing and IntelliSense support.
+This pattern ensures that:
+- **Axioms define requirements** - Each axiom in the `Axioms` interface specifies both type information and runtime requirements
+- **Canons must implement** - A Canon's type must extend from the available axioms in the global registry
+- **Type safety is enforced** - The compiler ensures only valid axioms can be used in Canon definitions
 
-### Runtime Type Registration
+### How Axioms Define Implementation Requirements
 
-The runtime system maintains a global registry that bridges the gap between compile-time types and execution-time behavior:
+When an axiom is added to the `Axioms` interface, it defines the **contract** that any Canon using that axiom must fulfill:
 
 ```typescript
-// Global registry maintains canon configurations
-const canonRegistry = new Map<string, CanonConfiguration>();
-
-// Type-safe registration ensures runtime matches compile-time
-function declareCanon<T extends Canon<any>>(
-  name: string, 
-  config: CanonConfiguration<T>
-): void {
-  canonRegistry.set(name, config);
+// Example: Adding an axiom to the global interface
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    Id: {
+      // Type information the implementor must provide
+      type: { id: string };
+      // Runtime information the implementor must provide  
+      runtime: {
+        validators: Validator[];
+        transformers: Transformer[];
+        metadata: AxiomMetadata;
+      };
+    };
+  }
 }
+
+// Now any Canon can use the Id axiom
+type MyCanon = Canon<{
+  Id: Axioms['Id'];  // Must implement the Id axiom contract
+}>;
 ```
 
-This dual-layer approach ensures that:
-- **Types are preserved** during compilation for static analysis
-- **Configurations are available** at runtime for validation and behavior
-- **Identity is maintained** across module boundaries
+The axiom defines **both**:
+- **Type requirements** - What TypeScript types must be provided
+- **Runtime requirements** - What runtime behavior must be implemented
+
+### CanonDefinition Constraint System
+
+The `CanonDefinition` type ensures that Canons can only use valid axioms:
+
+```typescript
+type CanonDefinition = {
+  [K in keyof Axioms]?: Axioms[K];
+};
+
+// This means a Canon can only use axioms that exist in the Axioms interface
+type ValidCanon = Canon<{
+  Id: Axioms['Id'];        // ✅ Valid - Id exists in Axioms
+  Name: Axioms['Name'];    // ✅ Valid - Name exists in Axioms  
+  Invalid: SomeOtherType;  // ❌ Error - Not in Axioms interface
+}>;
+```
+
+This constraint system ensures:
+- **Type safety** - Only registered axioms can be used
+- **Runtime consistency** - All axioms have both type and runtime definitions
+- **Discoverability** - Available axioms are clearly defined in the interface
 
 ## Understanding Axioms in Canons
 
-Each Canon is built from **axioms** - fundamental building blocks that define:
+Each Canon is built from **axioms** that are defined in the global `Axioms` interface. These axioms serve as **contracts** that specify both type and runtime requirements:
 
-### Basis
-The underlying TypeScript type that defines the structural shape:
-```typescript
-basis: { id: string; name: string }
-```
+### Axiom Contract Structure
 
-### Key
-The canonical field name that serves as the primary identifier:
-```typescript
-key: 'id'  // Points to the most important field
-```
+When an axiom is added to the `Axioms` interface, it defines a complete contract:
 
-### Meta
-Extensible metadata for validation, documentation, and behavior:
 ```typescript
-meta: { 
-  type: 'uuid',
-  required: true,
-  description: 'Unique identifier'
+interface Axioms {
+  Id: {
+    // Type information that implementors must provide
+    type: { id: string };
+    // Runtime configuration that implementors must provide
+    runtime: {
+      validators: [(value: unknown) => boolean];
+      transformers: [(value: unknown) => string];
+      metadata: {
+        description: string;
+        required: boolean;
+        format: 'uuid' | 'nanoid' | 'custom';
+      };
+    };
+  };
 }
 ```
+
+### Canon Implementation Requirements
+
+When a Canon uses an axiom, it must implement the complete contract:
+
+```typescript
+type MyCanon = Canon<{
+  Id: Axioms['Id'];  // Must provide both type and runtime implementation
+}>;
+
+// The Canon implementation must satisfy:
+// 1. Type requirements: { id: string }
+// 2. Runtime requirements: validators, transformers, metadata
+```
+
+### Type Safety Through Contracts
+
+The augmentable interface pattern ensures that:
+- **All axioms are fully defined** - Both type and runtime requirements are specified
+- **Canons must implement completely** - No partial implementations are allowed
+- **Type checking is enforced** - The compiler validates contract compliance
 
 ## Lazy Type Resolution
 

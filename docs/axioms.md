@@ -6,137 +6,154 @@
 
 ## What is an Axiom?
 
-An axiom is a self-contained type definition that includes:
+An axiom is a **contract definition** that specifies both type and runtime requirements for implementors. When added to the global `Axioms` interface, an axiom defines what any Canon using that axiom must provide:
 
-1. **Basis** - The underlying TypeScript type structure
-2. **Key** - The canonical field name that serves as the primary identifier
-3. **Meta** - Extensible metadata for validation, behavior, and documentation
+1. **Type Requirements** - The TypeScript type structure that must be implemented
+2. **Runtime Requirements** - The runtime behavior, validators, and metadata that must be provided
+3. **Contract Enforcement** - The system ensures implementors fulfill both type and runtime obligations
 
-Think of axioms as the "atoms" of the Canon type system - they cannot be broken down further while maintaining their semantic meaning.
+Think of axioms as **interface contracts** - they define what implementors must provide, not just what they can provide.
 
 ## The Axiom Type System
 
 ### Core Structure
 
-At the type level, an axiom follows this fundamental structure:
+An axiom defines a complete contract that implementors must fulfill:
 
 ```typescript
-interface Axiom {
-  basis: Record<string, any>;     // The structural TypeScript type
-  key: keyof basis;               // The canonical field identifier
-  meta?: Record<string, any>;     // Optional extensible metadata
+interface Axioms {
+  MyAxiom: {
+    // Type information that implementors must provide
+    type: { id: string; name: string };
+    // Runtime configuration that implementors must provide
+    runtime: {
+      validators: Validator[];
+      transformers: Transformer[];
+      metadata: AxiomMetadata;
+    };
+  };
 }
 ```
 
-This structure ensures that every axiom provides both **shape** (via `basis`) and **identity** (via `key`), with optional **behavior** (via `meta`).
+This structure ensures that every axiom specifies both **type requirements** and **runtime requirements**, creating a complete contract for implementors.
 
 ### Type-Level Composition
 
-Axioms compose naturally within Canon definitions:
+Axioms compose naturally within Canon definitions by referencing the global `Axioms` interface:
 
 ```typescript
+// First, define axioms in the global interface
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    Id: {
+      type: { id: string };
+      runtime: { validators: [/* ... */]; metadata: { type: 'uuid'; required: true } };
+    };
+    Type: {
+      type: { type: string };
+      runtime: { validators: [/* ... */]; metadata: { enum: ['user', 'admin', 'guest'] } };
+    };
+    Version: {
+      type: { version: number };
+      runtime: { validators: [/* ... */]; metadata: { default: 1; min: 1 } };
+    };
+  }
+}
+
+// Then use them in Canon definitions
 type MyCanon = Canon<{
-  // Identity axiom
-  Id: {
-    basis: { id: string };
-    key: 'id';
-    meta: { type: 'uuid'; required: true };
-  };
-  
-  // Classification axiom  
-  Type: {
-    basis: { type: string };
-    key: 'type';
-    meta: { enum: ['user', 'admin', 'guest'] };
-  };
-  
-  // Versioning axiom
-  Version: {
-    basis: { version: number };
-    key: 'version';
-    meta: { default: 1; min: 1 };
-  };
+  Id: Axioms['Id'];        // Must implement the Id axiom contract
+  Type: Axioms['Type'];    // Must implement the Type axiom contract
+  Version: Axioms['Version']; // Must implement the Version axiom contract
 }>;
 ```
 
-Each axiom contributes its `basis` to the final type while maintaining its canonical `key` for identification and discrimination.
+Each axiom reference ensures the Canon must implement the complete contract defined in the `Axioms` interface.
 
 ## Runtime Axiom Processing
 
 ### Registration and Validation
 
-The runtime system processes axioms through a sophisticated validation and registration pipeline:
+The runtime system processes axioms through a contract validation and registration pipeline:
 
 ```typescript
-interface AxiomConfiguration {
-  basis: TypeDefinition;          // Runtime type definition
-  key: string;                    // Canonical field name
-  meta?: AxiomMetadata;          // Runtime metadata
-  validators?: ValidationRule[];  // Runtime validation rules
-  transformers?: Transformer[];   // Runtime transformation functions
+interface AxiomContract {
+  type: TypeDefinition;           // Type requirements
+  runtime: {
+    validators: ValidationRule[]; // Runtime validation rules
+    transformers: Transformer[];  // Runtime transformation functions
+    metadata: AxiomMetadata;      // Runtime metadata
+  };
 }
 
-function processAxiom(name: string, config: AxiomConfiguration): ProcessedAxiom {
-  // 1. Validate the axiom configuration
-  validateAxiomStructure(config);
+function processAxiom(name: string, contract: AxiomContract): ProcessedAxiom {
+  // 1. Validate the axiom contract structure
+  validateAxiomContract(contract);
   
-  // 2. Register type information
-  registerTypeDefinition(name, config.basis);
+  // 2. Register type requirements
+  registerTypeRequirements(name, contract.type);
   
-  // 3. Setup canonical key mapping
-  registerCanonicalKey(name, config.key);
+  // 3. Setup runtime behavior
+  registerRuntimeBehavior(name, contract.runtime);
   
-  // 4. Process metadata and setup behaviors
-  processMetadata(name, config.meta);
+  // 4. Validate implementor compliance
+  validateImplementorCompliance(name, contract);
   
-  return createProcessedAxiom(name, config);
+  return createProcessedAxiom(name, contract);
 }
 ```
 
 ### Scope Management
 
-Axioms exist in multiple scopes simultaneously:
+Axioms exist in multiple scopes simultaneously, each enforcing the contract:
 
 #### Type Scope
-At compile time, axioms contribute to the overall type structure:
+At compile time, axioms enforce type requirements through the `Axioms` interface:
 ```typescript
-// Type-level axiom contribution
-type ResolvedCanon = {
-  [K in keyof Axioms]: Axioms[K]['basis'] & {
-    readonly [P in Axioms[K]['key']]: Axioms[K]['basis'][Axioms[K]['key']];
-  }
-}[keyof Axioms];
+// Type-level contract enforcement
+type CanonDefinition = {
+  [K in keyof Axioms]?: Axioms[K];
+};
+
+// Canon must implement the complete axiom contract
+type MyCanon = Canon<{
+  Id: Axioms['Id'];  // Must provide both type and runtime requirements
+}>;
 ```
 
 #### Runtime Scope
-At execution time, axioms provide behavioral configuration:
+At execution time, axioms enforce runtime behavior through contract validation:
 ```typescript
 class AxiomRuntime {
-  private configurations = new Map<string, AxiomConfiguration>();
+  private contracts = new Map<string, AxiomContract>();
   private validators = new Map<string, ValidationRule[]>();
   private transformers = new Map<string, Transformer[]>();
   
-  register(name: string, config: AxiomConfiguration): void {
-    this.configurations.set(name, config);
-    this.setupValidation(name, config);
-    this.setupTransformation(name, config);
+  register(name: string, contract: AxiomContract): void {
+    this.contracts.set(name, contract);
+    this.setupValidation(name, contract.runtime.validators);
+    this.setupTransformation(name, contract.runtime.transformers);
+  }
+  
+  validateImplementor(name: string, implementation: any): boolean {
+    const contract = this.contracts.get(name);
+    return validateContractCompliance(contract, implementation);
   }
 }
 ```
 
 #### Instance Scope
-When data is processed, axioms define field-level behavior:
+When data is processed, axioms enforce field-level contract compliance:
 ```typescript
-function processInstance(data: unknown, canon: string): ProcessedInstance {
-  const axioms = getAxiomsForCanon(canon);
+function processInstance(data: unknown, canon: CanonDefinition): ProcessedInstance {
   const result = {};
   
-  for (const [axiomName, axiom] of axioms) {
-    const fieldValue = extractField(data, axiom.key);
-    const validatedValue = validateField(fieldValue, axiom.validators);
-    const transformedValue = transformField(validatedValue, axiom.transformers);
+  for (const [axiomName, axiomContract] of canon) {
+    const fieldValue = extractField(data, axiomContract.type);
+    const validatedValue = validateField(fieldValue, axiomContract.runtime.validators);
+    const transformedValue = transformField(validatedValue, axiomContract.runtime.transformers);
     
-    result[axiom.key] = transformedValue;
+    result[axiomName] = transformedValue;
   }
   
   return result as ProcessedInstance;
@@ -148,14 +165,20 @@ function processInstance(data: unknown, canon: string): ProcessedInstance {
 ### Identity Axioms
 Define unique identifiers and primary keys:
 ```typescript
-Id: {
-  basis: { id: string };
-  key: 'id';
-  meta: { 
-    type: 'uuid',
-    required: true,
-    immutable: true,
-    generate: () => crypto.randomUUID()
+// Define in Axioms interface
+interface Axioms {
+  Id: {
+    type: { id: string };
+    runtime: {
+      validators: [isString, isUuid];
+      transformers: [normalizeUuid];
+      metadata: { 
+        type: 'uuid',
+        required: true,
+        immutable: true,
+        generate: () => crypto.randomUUID()
+      };
+    };
   };
 }
 ```
@@ -163,13 +186,18 @@ Id: {
 ### Classification Axioms
 Define type discrimination and categorization:
 ```typescript
-Type: {
-  basis: { type: string };
-  key: 'type';
-  meta: { 
-    enum: ['user', 'admin', 'guest'],
-    discriminator: true,
-    required: true
+interface Axioms {
+  Type: {
+    type: { type: string };
+    runtime: {
+      validators: [isString, isEnum(['user', 'admin', 'guest'])];
+      transformers: [normalizeType];
+      metadata: { 
+        enum: ['user', 'admin', 'guest'],
+        discriminator: true,
+        required: true
+      };
+    };
   };
 }
 ```
@@ -177,13 +205,18 @@ Type: {
 ### Temporal Axioms
 Define time-based fields and versioning:
 ```typescript
-Timestamp: {
-  basis: { createdAt: Date };
-  key: 'createdAt';
-  meta: { 
-    autoGenerate: true,
-    immutable: true,
-    format: 'ISO8601'
+interface Axioms {
+  Timestamp: {
+    type: { createdAt: Date };
+    runtime: {
+      validators: [isDate, isValidTimestamp];
+      transformers: [normalizeDate, toISO8601];
+      metadata: { 
+        autoGenerate: true,
+        immutable: true,
+        format: 'ISO8601'
+      };
+    };
   };
 }
 ```
@@ -191,13 +224,18 @@ Timestamp: {
 ### Relational Axioms
 Define relationships between entities:
 ```typescript
-Reference: {
-  basis: { userId: string };
-  key: 'userId';
-  meta: { 
-    references: 'User.Id',
-    cascade: 'delete',
-    validate: 'foreign_key'
+interface Axioms {
+  Reference: {
+    type: { userId: string };
+    runtime: {
+      validators: [isString, isValidReference];
+      transformers: [normalizeReference];
+      metadata: { 
+        references: 'User.Id',
+        cascade: 'delete',
+        validate: 'foreign_key'
+      };
+    };
   };
 }
 ```
@@ -208,17 +246,24 @@ Reference: {
 Axioms can be conditionally included based on context:
 
 ```typescript
-type ConditionalAxiom<TCondition extends boolean> = TCondition extends true
-  ? {
-      basis: { debugInfo: string };
-      key: 'debugInfo';
-      meta: { environment: 'development' };
-    }
-  : never;
+// Define conditional axiom in Axioms interface
+interface Axioms {
+  DebugInfo: {
+    type: { debugInfo: string };
+    runtime: {
+      validators: [isString, isDebugInfo];
+      transformers: [normalizeDebugInfo];
+      metadata: { environment: 'development' };
+    };
+  };
+}
 
+// Use conditionally in Canon
 type DevelopmentCanon = Canon<{
-  Id: IdentityAxiom;
-  Debug: ConditionalAxiom<typeof process.env.NODE_ENV === 'development'>;
+  Id: Axioms['Id'];
+  Debug: typeof process.env.NODE_ENV === 'development' 
+    ? Axioms['DebugInfo'] 
+    : never;
 }>;
 ```
 
@@ -226,13 +271,18 @@ type DevelopmentCanon = Canon<{
 Axioms can derive their values from other fields:
 
 ```typescript
-Computed: {
-  basis: { fullName: string };
-  key: 'fullName';
-  meta: { 
-    computed: true,
-    dependencies: ['firstName', 'lastName'],
-    compute: (data) => `${data.firstName} ${data.lastName}`
+interface Axioms {
+  Computed: {
+    type: { fullName: string };
+    runtime: {
+      validators: [isString, isComputed];
+      transformers: [normalizeComputed];
+      metadata: { 
+        computed: true,
+        dependencies: ['firstName', 'lastName'],
+        compute: (data) => `${data.firstName} ${data.lastName}`
+      };
+    };
   };
 }
 ```
@@ -241,16 +291,21 @@ Computed: {
 Axioms can adapt their behavior based on type discrimination:
 
 ```typescript
-Polymorphic: {
-  basis: { content: string | number | boolean };
-  key: 'content';
-  meta: { 
-    polymorphic: true,
-    typeMap: {
-      'text': 'string',
-      'numeric': 'number', 
-      'boolean': 'boolean'
-    }
+interface Axioms {
+  Polymorphic: {
+    type: { content: string | number | boolean };
+    runtime: {
+      validators: [isPolymorphic, validateByType];
+      transformers: [normalizePolymorphic];
+      metadata: { 
+        polymorphic: true,
+        typeMap: {
+          'text': 'string',
+          'numeric': 'number', 
+          'boolean': 'boolean'
+        }
+      };
+    };
   };
 }
 ```
@@ -258,33 +313,39 @@ Polymorphic: {
 ## Axiom Lifecycle and Memory Management
 
 ### Initialization Phase
-1. **Type Registration** - Axiom types are registered in the global type registry
-2. **Validation Setup** - Validation rules are compiled and optimized
-3. **Metadata Processing** - Metadata is processed and indexed for fast access
+1. **Contract Registration** - Axiom contracts are registered in the global `Axioms` interface
+2. **Type Validation** - Type requirements are validated and registered
+3. **Runtime Setup** - Runtime behavior (validators, transformers) is configured
+4. **Compliance Checking** - Implementor compliance is validated
 
 ### Runtime Phase
-1. **Instance Creation** - New instances are validated against axiom rules
-2. **Field Access** - Field access is mediated by axiom configurations
-3. **Transformation** - Data transformations are applied based on axiom metadata
+1. **Contract Enforcement** - New instances are validated against axiom contracts
+2. **Type Safety** - Field access is mediated by type requirements
+3. **Runtime Behavior** - Validators and transformers are applied based on contracts
+4. **Compliance Monitoring** - Ongoing validation of implementor compliance
 
 ### Cleanup Phase
-1. **Reference Counting** - Unused axiom configurations are identified
-2. **Memory Cleanup** - Unused validators and transformers are garbage collected
-3. **Registry Maintenance** - The axiom registry is compacted and optimized
+1. **Contract Cleanup** - Unused axiom contracts are identified and removed
+2. **Memory Management** - Unused validators and transformers are garbage collected
+3. **Registry Optimization** - The axiom registry is compacted and optimized
 
 ## Integration with Type System Utilities
 
 ### With Type Guards
 ```typescript
-function isAxiomOfType<T extends Axiom>(
+function isAxiomContract<T extends keyof Axioms>(
   axiom: unknown,
   expectedType: T
-): axiom is T {
+): axiom is Axioms[T] {
   return (
     typeof axiom === 'object' &&
     axiom !== null &&
-    'basis' in axiom &&
-    'key' in axiom
+    'type' in axiom &&
+    'runtime' in axiom &&
+    typeof axiom.runtime === 'object' &&
+    'validators' in axiom.runtime &&
+    'transformers' in axiom.runtime &&
+    'metadata' in axiom.runtime
   );
 }
 ```
@@ -293,20 +354,23 @@ function isAxiomOfType<T extends Axiom>(
 ```typescript
 import { z } from 'zod';
 
-function createZodValidator(axiom: Axiom): z.ZodSchema {
-  const baseSchema = createSchemaFromBasis(axiom.basis);
-  const metaConstraints = createConstraintsFromMeta(axiom.meta);
-  return baseSchema.refine(...metaConstraints);
+function createZodValidator<T extends keyof Axioms>(axiom: Axioms[T]): z.ZodSchema {
+  const baseSchema = createSchemaFromType(axiom.type);
+  const runtimeConstraints = createConstraintsFromRuntime(axiom.runtime);
+  return baseSchema.refine(...runtimeConstraints);
 }
 ```
 
 ### With Serialization
 ```typescript
-function serializeAxiom(axiom: Axiom): SerializedAxiom {
+function serializeAxiomContract<T extends keyof Axioms>(axiom: Axioms[T]): SerializedAxiomContract {
   return {
-    basis: serializeTypeDefinition(axiom.basis),
-    key: axiom.key,
-    meta: serializeMetadata(axiom.meta)
+    type: serializeTypeDefinition(axiom.type),
+    runtime: {
+      validators: serializeValidators(axiom.runtime.validators),
+      transformers: serializeTransformers(axiom.runtime.transformers),
+      metadata: serializeMetadata(axiom.runtime.metadata)
+    }
   };
 }
 ```
@@ -317,34 +381,52 @@ function serializeAxiom(axiom: Axiom): SerializedAxiom {
 Each axiom should represent exactly one conceptual piece of data:
 ```typescript
 // Good: Single concept
-Id: { basis: { id: string }; key: 'id' }
+interface Axioms {
+  Id: {
+    type: { id: string };
+    runtime: { validators: [/* ... */]; metadata: { /* ... */ } };
+  };
+}
 
 // Bad: Multiple concepts
-UserInfo: { basis: { id: string; name: string; email: string }; key: 'id' }
+interface Axioms {
+  UserInfo: {
+    type: { id: string; name: string; email: string };
+    runtime: { validators: [/* ... */]; metadata: { /* ... */ } };
+  };
+}
 ```
 
 ### 2. Immutable Configuration
-Axiom configurations should be immutable once defined:
+Axiom contracts should be immutable once defined:
 ```typescript
-const axiomConfig = Object.freeze({
-  basis: { id: 'string' },
-  key: 'id',
-  meta: Object.freeze({ type: 'uuid' })
+const axiomContract = Object.freeze({
+  type: Object.freeze({ id: 'string' }),
+  runtime: Object.freeze({
+    validators: Object.freeze([/* ... */]),
+    transformers: Object.freeze([/* ... */]),
+    metadata: Object.freeze({ type: 'uuid' })
+  })
 });
 ```
 
 ### 3. Rich Metadata
 Use metadata extensively to capture behavior and constraints:
 ```typescript
-Email: {
-  basis: { email: string };
-  key: 'email';
-  meta: {
-    format: 'email',
-    required: true,
-    unique: true,
-    validate: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    sanitize: (email) => email.toLowerCase().trim()
+interface Axioms {
+  Email: {
+    type: { email: string };
+    runtime: {
+      validators: [isString, isEmail, isUnique];
+      transformers: [normalizeEmail, sanitizeEmail];
+      metadata: {
+        format: 'email',
+        required: true,
+        unique: true,
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        sanitize: (email) => email.toLowerCase().trim()
+      };
+    };
   };
 }
 ```
@@ -353,25 +435,41 @@ Email: {
 Choose axiom names that clearly convey their semantic meaning:
 ```typescript
 // Good: Clear semantic meaning
-UserIdentifier: { basis: { userId: string }; key: 'userId' }
-CreationTimestamp: { basis: { createdAt: Date }; key: 'createdAt' }
+interface Axioms {
+  UserIdentifier: {
+    type: { userId: string };
+    runtime: { validators: [/* ... */]; metadata: { /* ... */ } };
+  };
+  CreationTimestamp: {
+    type: { createdAt: Date };
+    runtime: { validators: [/* ... */]; metadata: { /* ... */ } };
+  };
+}
 
 // Bad: Generic or unclear naming
-Data: { basis: { value: any }; key: 'value' }
-Field1: { basis: { field1: string }; key: 'field1' }
+interface Axioms {
+  Data: {
+    type: { value: any };
+    runtime: { validators: [/* ... */]; metadata: { /* ... */ } };
+  };
+  Field1: {
+    type: { field1: string };
+    runtime: { validators: [/* ... */]; metadata: { /* ... */ } };
+  };
+}
 ```
 
 ## Debugging and Development Tools
 
 ### Axiom Inspector
 ```typescript
-function inspectAxiom(axiomName: string): AxiomInspection {
-  const config = getAxiomConfiguration(axiomName);
+function inspectAxiomContract<T extends keyof Axioms>(axiomName: T): AxiomContractInspection {
+  const contract = getAxiomContract(axiomName);
   return {
     name: axiomName,
-    structure: analyzeStructure(config.basis),
-    constraints: analyzeConstraints(config.meta),
-    dependencies: analyzeDependencies(config),
+    typeStructure: analyzeTypeStructure(contract.type),
+    runtimeConstraints: analyzeRuntimeConstraints(contract.runtime),
+    contractDependencies: analyzeContractDependencies(contract),
     usage: analyzeUsage(axiomName)
   };
 }
@@ -379,15 +477,15 @@ function inspectAxiom(axiomName: string): AxiomInspection {
 
 ### Runtime Validation
 ```typescript
-function validateAxiomAtRuntime(
-  axiomName: string, 
+function validateAxiomContractAtRuntime<T extends keyof Axioms>(
+  axiomName: T, 
   value: unknown
 ): ValidationResult {
-  const axiom = getAxiom(axiomName);
-  const validators = getValidators(axiomName);
+  const contract = getAxiomContract(axiomName);
+  const validators = contract.runtime.validators;
   
   return validators.reduce((result, validator) => {
-    const validationResult = validator(value, axiom);
+    const validationResult = validator(value, contract);
     return mergeValidationResults(result, validationResult);
   }, { valid: true, errors: [] });
 }
