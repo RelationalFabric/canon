@@ -35,10 +35,24 @@ type KeyNameAxiom = {
   meta?: Record<string, string>;  // Optional metadata
 };
 
-// Other axiom types
-type SimpleValueAxiom = number | string | boolean;
-type ObjectAxiom = Record<string, unknown>;
-type FunctionAxiom = (...args: any[]) => any;
+// Other axiom types for semantic concepts that might vary between codebases
+type TimestampAxiom = {
+  base: Record<string, unknown>;
+  key: string;
+  meta?: Record<string, string>;
+};
+
+type ReferenceAxiom = {
+  base: Record<string, unknown>;
+  key: string;
+  meta?: Record<string, string>;
+};
+
+type StatusAxiom = {
+  base: Record<string, unknown>;
+  key: string;
+  meta?: Record<string, string>;
+};
 ```
 
 #### Axiom Registration
@@ -46,15 +60,16 @@ Axioms are registered in the global `Axioms` interface using these type definiti
 
 ```typescript
 interface Axioms {
-  Id: KeyNameAxiom;        // Id must conform to KeyNameAxiom shape
-  Version: KeyNameAxiom;   // Version must conform to KeyNameAxiom shape
-  Type: KeyNameAxiom;      // Type must conform to KeyNameAxiom shape
-  Count: SimpleValueAxiom; // Count must conform to SimpleValueAxiom shape
-  Address: ObjectAxiom;    // Address must conform to ObjectAxiom shape
+  Id: KeyNameAxiom;        // Id concept - might be 'id', '@id', '_id', etc.
+  Type: KeyNameAxiom;      // Type concept - might be 'type', '@type', '_type', etc.
+  Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
+  Timestamp: TimestampAxiom; // Timestamp concept - might be 'createdAt', 'timestamp', 'date', etc.
+  Reference: ReferenceAxiom; // Reference concept - might be 'ref', 'parentId', 'ownerId', etc.
+  Status: StatusAxiom;     // Status concept - might be 'status', 'state', 'active', etc.
 }
 ```
 
-The key is that each axiom registration references a type definition that specifies the structure instances must conform to.
+The key is that each axiom represents a **semantic concept** that might vary in shape between codebases but is otherwise equivalent.
 
 ### Type-Level Composition
 
@@ -89,6 +104,16 @@ type JsonLdCanon = Canon<{
     key: '@type';
     meta: { format: 'json-ld' };
   };
+  Timestamp: {
+    base: { 'http://schema.org/dateCreated': string };
+    key: 'http://schema.org/dateCreated';
+    meta: { format: 'json-ld'; type: 'iso8601' };
+  };
+  Reference: {
+    base: { 'http://schema.org/parent': string };
+    key: 'http://schema.org/parent';
+    meta: { format: 'json-ld'; type: 'uri' };
+  };
 }>;
 
 // Standard Canon - provides specific implementation for standard format
@@ -102,6 +127,40 @@ type StandardCanon = Canon<{
     base: { type: string };
     key: 'type';
     meta: { format: 'standard' };
+  };
+  Timestamp: {
+    base: { createdAt: Date };
+    key: 'createdAt';
+    meta: { format: 'standard'; type: 'date' };
+  };
+  Reference: {
+    base: { parentId: string };
+    key: 'parentId';
+    meta: { format: 'standard'; type: 'uuid' };
+  };
+}>;
+
+// MongoDB Canon - provides specific implementation for MongoDB format
+type MongoCanon = Canon<{
+  Id: {
+    base: { _id: string };
+    key: '_id';
+    meta: { format: 'mongodb' };
+  };
+  Type: {
+    base: { _type: string };
+    key: '_type';
+    meta: { format: 'mongodb' };
+  };
+  Timestamp: {
+    base: { timestamp: number };
+    key: 'timestamp';
+    meta: { format: 'mongodb'; type: 'unix' };
+  };
+  Reference: {
+    base: { ref: string };
+    key: 'ref';
+    meta: { format: 'mongodb'; type: 'objectid' };
   };
 }>;
 ```
@@ -138,27 +197,60 @@ declare module '@relational-fabric/canon' {
 
 ### Library API Generation
 
-Libraries can operate on these concepts using the axiom interface:
+Libraries can operate on these semantic concepts using the axiom interface:
 
 ```typescript
 // A library function that works with any canon
 function getId<T extends Canon<any>>(object: T, canon: T): string {
-  // The library doesn't need to know the specific key name
+  // The library doesn't need to know if it's 'id', '@id', or '_id'
   // It uses the axiom interface to get the key
   const idAxiom = getAxiom(canon, 'Id');
   return object[idAxiom.key] as string;
 }
 
-// Usage with different canons
-const jsonLdObject = { '@id': 'user-123', '@type': 'Person' };
-const standardObject = { id: 'user-123', type: 'Person' };
+function getTimestamp<T extends Canon<any>>(object: T, canon: T): string | Date | number {
+  // The library doesn't need to know if it's 'createdAt', 'timestamp', or 'http://schema.org/dateCreated'
+  const timestampAxiom = getAxiom(canon, 'Timestamp');
+  return object[timestampAxiom.key];
+}
 
-// Same library function works with all formats
+function getReference<T extends Canon<any>>(object: T, canon: T): string {
+  // The library doesn't need to know if it's 'parentId', 'ref', or 'http://schema.org/parent'
+  const referenceAxiom = getAxiom(canon, 'Reference');
+  return object[referenceAxiom.key] as string;
+}
+
+// Usage with different canons
+const jsonLdObject = { 
+  '@id': 'user-123', 
+  '@type': 'Person',
+  'http://schema.org/dateCreated': '2023-01-01T00:00:00Z',
+  'http://schema.org/parent': 'org-456'
+};
+const standardObject = { 
+  id: 'user-123', 
+  type: 'Person',
+  createdAt: new Date('2023-01-01'),
+  parentId: 'org-456'
+};
+const mongoObject = { 
+  _id: 'user-123', 
+  _type: 'Person',
+  timestamp: 1672531200000,
+  ref: 'org-456'
+};
+
+// Same library functions work with all formats
 const id1 = getId(jsonLdObject, JsonLdCanon);     // Uses @id
 const id2 = getId(standardObject, StandardCanon); // Uses id
+const id3 = getId(mongoObject, MongoCanon);       // Uses _id
+
+const timestamp1 = getTimestamp(jsonLdObject, JsonLdCanon);     // Uses http://schema.org/dateCreated
+const timestamp2 = getTimestamp(standardObject, StandardCanon); // Uses createdAt
+const timestamp3 = getTimestamp(mongoObject, MongoCanon);       // Uses timestamp
 ```
 
-This enables **lazy typing** - libraries work with the axiom interface, not specific implementations.
+This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, not specific implementations.
 
 ## Runtime Axiom Processing
 
