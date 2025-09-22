@@ -109,29 +109,27 @@ This enables **lazy typing** - libraries work with semantic concepts through the
 
 ## Complete Example: The Id Axiom
 
-Here's a complete example showing all three parts of an axiom description:
+Here's a complete working example showing all three parts of an axiom description:
 
-### 1. Definition
 ```typescript
+import { Axiom, Satisfies, AxiomValue, inferAxiom } from '@relational-fabric/canon';
+
+// 1. Definition - The axiom type that defines the structure
 type KeyNameAxiom = Axiom<{
   base: Record<string, unknown>;  // Object with at least 1 string key
   key: string;                    // The field name that contains the concept
 }, {
   key: string;
 }>;
-```
 
-### 2. Registration
-```typescript
+// 2. Registration - Register the axiom in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
     Id: KeyNameAxiom;  // Id concept - might be 'id', '@id', '_id', etc.
   }
 }
-```
 
-### 3. API Specification
-```typescript
+// 3. API Specification - Functions that libraries can use
 function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
   const config = inferAxiom('Id', x);
   return x[config.key] as AxiomValue<'Id'>;
