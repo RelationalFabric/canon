@@ -97,465 +97,51 @@ The key is that each axiom represents a **semantic concept** that might vary in 
 
 ### Type-Level Composition
 
-Axioms define what utilities expect, canons provide specific implementations:
+Axioms define what utilities expect, canons provide specific implementations. For example:
 
-```typescript
-// First, define axiom types - these specify what utilities will accept
-type KeyNameAxiom = {
-  base: Record<string, unknown>;
-  key: string;
-  meta?: Record<string, string>;
-};
+- **JSON-LD Canon**: Uses `@id`, `@type`, ISO8601 strings, and URI references
+- **Standard Canon**: Uses `id`, `type`, Date objects, and UUID strings  
+- **MongoDB Canon**: Uses `_id`, `_type`, Unix timestamps, and ObjectId strings
 
-// Register axioms in the global interface
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Id: KeyNameAxiom;        // Utilities expect this shape for ID concept
-    Type: KeyNameAxiom;      // Utilities expect this shape for Type concept
-    Version: KeyNameAxiom;   // Utilities expect this shape for Version concept
-  }
-}
-
-// JSON-LD Canon - provides specific implementation for JSON-LD format
-type JsonLdCanon = Canon<{
-  Id: {
-    base: { '@id': string };
-    key: '@id';
-    meta: { format: 'json-ld' };
-  };
-  Type: {
-    base: { '@type': string };
-    key: '@type';
-    meta: { format: 'json-ld' };
-  };
-  Timestamp: {
-    type: string; // ISO8601 string
-    toCanonical: (value: string) => CanonicalTimestamp;
-    fromCanonical: (value: CanonicalTimestamp) => string;
-    meta: { 
-      format: 'json-ld'; 
-      hasTimezone: true; 
-      precision: 'millisecond' 
-    };
-  };
-  Reference: {
-    type: string; // URI string
-    toCanonical: (value: string) => CanonicalReference;
-    fromCanonical: (value: CanonicalReference) => string;
-    meta: { 
-      format: 'json-ld'; 
-      isArray: false; 
-      isObject: false 
-    };
-  };
-}>;
-
-// Standard Canon - provides specific implementation for standard format
-type StandardCanon = Canon<{
-  Id: {
-    base: { id: string };
-    key: 'id';
-    meta: { format: 'standard' };
-  };
-  Type: {
-    base: { type: string };
-    key: 'type';
-    meta: { format: 'standard' };
-  };
-  Timestamp: {
-    type: Date; // JavaScript Date object
-    toCanonical: (value: Date) => CanonicalTimestamp;
-    fromCanonical: (value: CanonicalTimestamp) => Date;
-    meta: { 
-      format: 'standard'; 
-      hasTimezone: true; 
-      precision: 'millisecond' 
-    };
-  };
-  Reference: {
-    type: string; // UUID string
-    toCanonical: (value: string) => CanonicalReference;
-    fromCanonical: (value: CanonicalReference) => string;
-    meta: { 
-      format: 'standard'; 
-      isArray: false; 
-      isObject: false 
-    };
-  };
-}>;
-
-// MongoDB Canon - provides specific implementation for MongoDB format
-type MongoCanon = Canon<{
-  Id: {
-    base: { _id: string };
-    key: '_id';
-    meta: { format: 'mongodb' };
-  };
-  Type: {
-    base: { _type: string };
-    key: '_type';
-    meta: { format: 'mongodb' };
-  };
-  Timestamp: {
-    type: number; // Unix timestamp
-    toCanonical: (value: number) => CanonicalTimestamp;
-    fromCanonical: (value: CanonicalTimestamp) => number;
-    meta: { 
-      format: 'mongodb'; 
-      hasTimezone: false; 
-      precision: 'millisecond' 
-    };
-  };
-  Reference: {
-    type: string; // ObjectId string
-    toCanonical: (value: string) => CanonicalReference;
-    fromCanonical: (value: CanonicalReference) => string;
-    meta: { 
-      format: 'mongodb'; 
-      isArray: false; 
-      isObject: false 
-    };
-  };
-}>;
-```
-
-The canon collects specific incarnations of the axioms for a given model, while utilities work with the axiom interface.
+Each canon provides specific implementations of the same semantic concepts, while utilities work with the axiom interface.
 
 ### Runtime Configuration
 
-The runtime config provides the actual values needed at runtime (e.g., `'id'` vs `typeof 'id'`):
-
-```typescript
-// Example runtime configuration using AxiomConfig
-declare module '@relational-fabric/canon' {
-  interface AxiomConfig {
-    Id: {
-      axiomType: 'KeyNameAxiom';
-      keyValue: 'id';  // Runtime value for the key
-      metaValues: { type: 'uuid'; required: 'true' };
-    };
-    Type: {
-      axiomType: 'KeyNameAxiom';
-      keyValue: 'type';
-      metaValues: { enum: 'user,admin,guest'; discriminator: 'true' };
-    };
-    Timestamp: {
-      axiomType: 'TimestampAxiom';
-      keyValue: 'createdAt';
-      metaValues: { format: 'iso8601'; hasTimezone: 'true' };
-    };
-    Reference: {
-      axiomType: 'ReferenceAxiom';
-      keyValue: 'parentId';
-      metaValues: { type: 'uuid'; isArray: 'false' };
-    };
-  }
-}
-```
+The `AxiomConfig` interface provides actual runtime values for each axiom type, including the `axiomType` discriminator and runtime values for keys and metadata.
 
 ### Library API Generation
 
-Libraries can operate on these semantic concepts using the axiom interface:
+Libraries can operate on semantic concepts using the axiom interface without knowing specific field names or formats. For example:
 
 ```typescript
-// A library function that works with any canon
 function getId<T extends Canon<any>>(object: T, canon: T): string {
-  // The library doesn't need to know if it's 'id', '@id', or '_id'
-  // It uses the axiom interface to get the key
   const idAxiom = getAxiom(canon, 'Id');
   return object[idAxiom.key] as string;
 }
 
 function getTimestamp<T extends Canon<any>>(object: T, canon: T): CanonicalTimestamp {
-  // The library doesn't need to know if it's string, Date, or number
-  // It uses the axiom interface to convert to canonical format
   const timestampAxiom = getAxiom(canon, 'Timestamp');
-  const rawValue = object[timestampAxiom.key];
-  return timestampAxiom.toCanonical(rawValue);
-}
-
-function getReference<T extends Canon<any>>(object: T, canon: T): CanonicalReference {
-  // The library doesn't need to know if it's string, object, or array
-  // It uses the axiom interface to convert to canonical format
-  const referenceAxiom = getAxiom(canon, 'Reference');
-  const rawValue = object[referenceAxiom.key];
-  return referenceAxiom.toCanonical(rawValue);
-}
-
-// Usage with different canons
-const jsonLdObject = { 
-  '@id': 'user-123', 
-  '@type': 'Person',
-  'http://schema.org/dateCreated': '2023-01-01T00:00:00Z',
-  'http://schema.org/parent': 'org-456'
-};
-const standardObject = { 
-  id: 'user-123', 
-  type: 'Person',
-  createdAt: new Date('2023-01-01'),
-  parentId: 'org-456'
-};
-const mongoObject = { 
-  _id: 'user-123', 
-  _type: 'Person',
-  timestamp: 1672531200000,
-  ref: 'org-456'
-};
-
-// Same library functions work with all formats
-const id1 = getId(jsonLdObject, JsonLdCanon);     // Uses @id
-const id2 = getId(standardObject, StandardCanon); // Uses id
-const id3 = getId(mongoObject, MongoCanon);       // Uses _id
-
-// All return canonical timestamp format regardless of input format
-const timestamp1 = getTimestamp(jsonLdObject, JsonLdCanon);     // Converts ISO8601 string to canonical
-const timestamp2 = getTimestamp(standardObject, StandardCanon); // Converts Date to canonical
-const timestamp3 = getTimestamp(mongoObject, MongoCanon);       // Converts Unix timestamp to canonical
-
-// All return canonical reference format regardless of input format
-const ref1 = getReference(jsonLdObject, JsonLdCanon);     // Converts URI string to canonical
-const ref2 = getReference(standardObject, StandardCanon); // Converts UUID string to canonical
-const ref3 = getReference(mongoObject, MongoCanon);       // Converts ObjectId string to canonical
-```
-
-This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, converting between different formats automatically.
-
-## Runtime Axiom Processing
-
-### Registration and Validation
-
-The runtime system processes axiom instances through validation and registration:
-
-```typescript
-// Axiom instances can have various shapes
-type AxiomInstance = Axioms[keyof Axioms];
-
-function processAxiomInstance(
-  axiomName: keyof Axioms, 
-  instance: AxiomInstance
-): ProcessedAxiomInstance {
-  // 1. Validate the instance conforms to axiom shape
-  validateAxiomInstance(axiomName, instance);
-  
-  // 2. Get runtime configuration for this axiom
-  const runtimeConfig = getAxiomRuntime(axiomName);
-  
-  // 3. Register the instance with runtime behavior
-  registerAxiomInstance(axiomName, instance, runtimeConfig);
-  
-  // 4. Setup validation and transformation
-  setupInstanceBehavior(axiomName, instance, runtimeConfig);
-  
-  return createProcessedAxiomInstance(axiomName, instance, runtimeConfig);
+  return timestampAxiom.toCanonical(object[timestampAxiom.key]);
 }
 ```
 
-### Scope Management
+This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, automatically converting between different formats.
 
-Axioms exist in multiple scopes simultaneously, each enforcing the contract:
+## Runtime Processing
 
-#### Type Scope
-At compile time, axioms enforce type requirements through the `Axioms` interface:
-```typescript
-// Type-level contract enforcement
-type CanonDefinition = {
-  [K in keyof Axioms]?: Axioms[K];
-};
+The runtime system processes axiom instances through validation and registration, enforcing contracts at type, runtime, and instance scopes.
 
-// Canon must implement the complete axiom contract
-type MyCanon = Canon<{
-  Id: Axioms['Id'];  // Must provide both type and runtime requirements
-}>;
-```
+## Axiom Categories
 
-#### Runtime Scope
-At execution time, axioms enforce runtime behavior through contract validation:
-```typescript
-class AxiomRuntime {
-  private contracts = new Map<string, AxiomContract>();
-  private validators = new Map<string, ValidationRule[]>();
-  private transformers = new Map<string, Transformer[]>();
-  
-  register(name: string, contract: AxiomContract): void {
-    this.contracts.set(name, contract);
-    this.setupValidation(name, contract.runtime.validators);
-    this.setupTransformation(name, contract.runtime.transformers);
-  }
-  
-  validateImplementor(name: string, implementation: any): boolean {
-    const contract = this.contracts.get(name);
-    return validateContractCompliance(contract, implementation);
-  }
-}
-```
+Common axiom patterns include:
+- **Identity Axioms**: Unique identifiers and primary keys
+- **Classification Axioms**: Type discrimination and categorization  
+- **Temporal Axioms**: Time-based fields and versioning
+- **Relational Axioms**: Relationships between entities
 
-#### Instance Scope
-When data is processed, axioms enforce field-level contract compliance:
-```typescript
-function processInstance(data: unknown, canon: CanonDefinition): ProcessedInstance {
-  const result = {};
-  
-  for (const [axiomName, axiomContract] of canon) {
-    const fieldValue = extractField(data, axiomContract.type);
-    const validatedValue = validateField(fieldValue, axiomContract.runtime.validators);
-    const transformedValue = transformField(validatedValue, axiomContract.runtime.transformers);
-    
-    result[axiomName] = transformedValue;
-  }
-  
-  return result as ProcessedInstance;
-}
-```
+## Advanced Features
 
-## Axiom Categories and Patterns
-
-### Identity Axioms
-Define unique identifiers and primary keys:
-```typescript
-// Define in Axioms interface
-interface Axioms {
-  Id: {
-    type: { id: string };
-    runtime: {
-      validators: [isString, isUuid];
-      transformers: [normalizeUuid];
-      metadata: { 
-        type: 'uuid',
-        required: true,
-        immutable: true,
-        generate: () => crypto.randomUUID()
-      };
-    };
-  };
-}
-```
-
-### Classification Axioms
-Define type discrimination and categorization:
-```typescript
-interface Axioms {
-  Type: {
-    type: { type: string };
-    runtime: {
-      validators: [isString, isEnum(['user', 'admin', 'guest'])];
-      transformers: [normalizeType];
-      metadata: { 
-        enum: ['user', 'admin', 'guest'],
-        discriminator: true,
-        required: true
-      };
-    };
-  };
-}
-```
-
-### Temporal Axioms
-Define time-based fields and versioning:
-```typescript
-interface Axioms {
-  Timestamp: {
-    type: { createdAt: Date };
-    runtime: {
-      validators: [isDate, isValidTimestamp];
-      transformers: [normalizeDate, toISO8601];
-      metadata: { 
-        autoGenerate: true,
-        immutable: true,
-        format: 'ISO8601'
-      };
-    };
-  };
-}
-```
-
-### Relational Axioms
-Define relationships between entities:
-```typescript
-interface Axioms {
-  Reference: {
-    type: { userId: string };
-    runtime: {
-      validators: [isString, isValidReference];
-      transformers: [normalizeReference];
-      metadata: { 
-        references: 'User.Id',
-        cascade: 'delete',
-        validate: 'foreign_key'
-      };
-    };
-  };
-}
-```
-
-## Advanced Axiom Features
-
-### Conditional Axioms
-Axioms can be conditionally included based on context:
-
-```typescript
-// Define conditional axiom in Axioms interface
-interface Axioms {
-  DebugInfo: {
-    type: { debugInfo: string };
-    runtime: {
-      validators: [isString, isDebugInfo];
-      transformers: [normalizeDebugInfo];
-      metadata: { environment: 'development' };
-    };
-  };
-}
-
-// Use conditionally in Canon
-type DevelopmentCanon = Canon<{
-  Id: Axioms['Id'];
-  Debug: typeof process.env.NODE_ENV === 'development' 
-    ? Axioms['DebugInfo'] 
-    : never;
-}>;
-```
-
-### Computed Axioms
-Axioms can derive their values from other fields:
-
-```typescript
-interface Axioms {
-  Computed: {
-    type: { fullName: string };
-    runtime: {
-      validators: [isString, isComputed];
-      transformers: [normalizeComputed];
-      metadata: { 
-        computed: true,
-        dependencies: ['firstName', 'lastName'],
-        compute: (data) => `${data.firstName} ${data.lastName}`
-      };
-    };
-  };
-}
-```
-
-### Polymorphic Axioms
-Axioms can adapt their behavior based on type discrimination:
-
-```typescript
-interface Axioms {
-  Polymorphic: {
-    type: { content: string | number | boolean };
-    runtime: {
-      validators: [isPolymorphic, validateByType];
-      transformers: [normalizePolymorphic];
-      metadata: { 
-        polymorphic: true,
-        typeMap: {
-          'text': 'string',
-          'numeric': 'number', 
-          'boolean': 'boolean'
-        }
-      };
-    };
-  };
-}
-```
+Axioms support conditional inclusion, computed values, and polymorphic behavior based on context and type discrimination.
 
 ## Axiom Lifecycle and Memory Management
 
