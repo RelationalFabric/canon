@@ -30,6 +30,7 @@ Axioms are type definitions that can be reused for multiple specific axiom types
 #### Key-Name Axiom Type
 ```typescript
 type KeyNameAxiom = {
+  discriminator: 'KeyNameAxiom';
   base: Record<string, unknown>;  // Object with at least 1 string key
   key: string;                    // The canonical field name
   meta?: Record<string, string>;  // Optional metadata
@@ -37,6 +38,7 @@ type KeyNameAxiom = {
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = {
+  discriminator: 'TimestampAxiom';
   // The timestamp type - could be number, string, Date, or custom type
   type: number | string | Date | TypeGuard<unknown>;
   // Way to convert from this timestamp to canonical value
@@ -52,6 +54,7 @@ type TimestampAxiom = {
 };
 
 type ReferenceAxiom = {
+  discriminator: 'ReferenceAxiom';
   // The reference type - could be string, object, array, or custom type
   type: string | object | string[] | TypeGuard<unknown>;
   // Way to convert from this reference to canonical value
@@ -78,6 +81,14 @@ declare module '@relational-fabric/canon' {
     Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
     Timestamp: TimestampAxiom; // Timestamp concept - might be number, string, Date, etc.
     Reference: ReferenceAxiom; // Reference concept - might be string, object, array, etc.
+  }
+  
+  interface AxiomConfig {
+    [K in keyof Axioms]: {
+      discriminator: Axioms[K]['discriminator'];
+      keyValue: string;  // The actual key value at runtime
+      metaValues: Record<string, string>;  // The actual meta values at runtime
+    };
   }
 }
 ```
@@ -215,24 +226,28 @@ The canon collects specific incarnations of the axioms for a given model, while 
 The runtime config provides the actual values needed at runtime (e.g., `'id'` vs `typeof 'id'`):
 
 ```typescript
-// Runtime configuration interface
-interface AxiomRuntime {
-  [K in keyof Axioms]: {
-    keyValue: string;  // The actual key value at runtime
-    metaValues: Record<string, string>;  // The actual meta values at runtime
-  };
-}
-
-// Example runtime configuration
+// Example runtime configuration using AxiomConfig
 declare module '@relational-fabric/canon' {
-  interface AxiomRuntime {
+  interface AxiomConfig {
     Id: {
+      discriminator: 'KeyNameAxiom';
       keyValue: 'id';  // Runtime value for the key
       metaValues: { type: 'uuid'; required: 'true' };
     };
     Type: {
+      discriminator: 'KeyNameAxiom';
       keyValue: 'type';
       metaValues: { enum: 'user,admin,guest'; discriminator: 'true' };
+    };
+    Timestamp: {
+      discriminator: 'TimestampAxiom';
+      keyValue: 'createdAt';
+      metaValues: { format: 'iso8601'; hasTimezone: 'true' };
+    };
+    Reference: {
+      discriminator: 'ReferenceAxiom';
+      keyValue: 'parentId';
+      metaValues: { type: 'uuid'; isArray: 'false' };
     };
   }
 }
