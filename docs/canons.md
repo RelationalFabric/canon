@@ -40,126 +40,138 @@ type CanonDefinition = {
 ```
 
 This pattern ensures that:
-- **Axioms define structure** - Each axiom in the `Axioms` interface specifies the shape that instances must follow
-- **Canons create instances** - A Canon creates instances that conform to the axiom shapes
+- **Axiom types define structure** - Each axiom type specifies the shape that instances must follow
+- **Axiom registrations enforce types** - The `Axioms` interface ensures only registered axiom types can be used
+- **Canons use axiom keys** - A Canon uses axiom keys to enforce the correct shape
 - **Type safety is enforced** - The compiler ensures only valid axioms can be used in Canon definitions
 
 ### How Axioms Define Structure Requirements
 
-When an axiom is added to the `Axioms` interface, it defines the **shape** that instances of that axiom must follow:
+When an axiom is registered in the `Axioms` interface, it references an axiom type that defines the **shape** that instances must follow:
 
 ```typescript
-// Example: Adding axioms to the global interface
+// First, define axiom types
+type KeyNameAxiom = {
+  base: Record<string, unknown>;
+  key: string;
+  meta?: Record<string, string>;
+};
+
+// Then register axioms in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Id: {
-      base: { id: string };
-      key: 'id';
-      meta?: { type: 'uuid'; required: boolean };
-    };
-    Count: number;
-    Address: {
-      street: string;
-      city: string;
-      country: string;
-    };
+    Id: KeyNameAxiom;        // Id must conform to KeyNameAxiom shape
+    Type: KeyNameAxiom;      // Type must conform to KeyNameAxiom shape
+    Version: KeyNameAxiom;   // Version must conform to KeyNameAxiom shape
   }
 }
 
-// Now any Canon can create instances of these axioms
+// Now any Canon can use these axiom keys - the shape is enforced by the axiom type
 type MyCanon = Canon<{
   Id: {
     base: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: true };
-  };
-  Count: 42;
-  Address: {
-    street: '123 Main St';
-    city: 'Anytown';
-    country: 'USA';
-  };
+    meta: { type: 'uuid'; required: 'true' };
+  };  // Must conform to KeyNameAxiom shape
+  Type: {
+    base: { type: string };
+    key: 'type';
+    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+  };  // Must conform to KeyNameAxiom shape
+  Version: {
+    base: { version: number };
+    key: 'version';
+    meta: { default: '1'; min: '1' };
+  };  // Must conform to KeyNameAxiom shape
 }>;
 ```
 
-The axiom defines the **structure** that instances must conform to, with different axioms having different shapes.
+The axiom type defines the **structure** that instances must conform to, and the axiom key enforces this conformance.
 
 ### CanonDefinition Constraint System
 
-The `CanonDefinition` type ensures that Canons can only use valid axioms:
+The `CanonDefinition` type ensures that Canons can only use valid axiom keys:
 
 ```typescript
 type CanonDefinition = {
   [K in keyof Axioms]?: Axioms[K];
 };
 
-// This means a Canon can only create instances of axioms that exist in the Axioms interface
+// This means a Canon can only use axiom keys that exist in the Axioms interface
 type ValidCanon = Canon<{
   Id: {
     base: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: true };
-  };  // ✅ Valid - Instance conforms to Id axiom shape
-  Count: 42;  // ✅ Valid - Instance conforms to Count axiom shape
+    meta: { type: 'uuid'; required: 'true' };
+  };  // ✅ Valid - Uses Id axiom key, must conform to KeyNameAxiom shape
+  Type: {
+    base: { type: string };
+    key: 'type';
+    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+  };  // ✅ Valid - Uses Type axiom key, must conform to KeyNameAxiom shape
   Invalid: SomeOtherType;  // ❌ Error - Not in Axioms interface
 }>;
 ```
 
 This constraint system ensures:
-- **Type safety** - Only registered axioms can be used
-- **Shape consistency** - All instances must conform to their axiom's shape
+- **Type safety** - Only registered axiom keys can be used
+- **Shape consistency** - All instances must conform to their axiom type's shape
 - **Discoverability** - Available axioms are clearly defined in the interface
 
 ## Understanding Axioms in Canons
 
-Each Canon is built from **axiom instances** that conform to shapes defined in the global `Axioms` interface. These axioms serve as **templates** that define the structure instances must follow:
+Each Canon is built using **axiom keys** that reference axiom types defined in the global `Axioms` interface. These axiom types serve as **templates** that define the structure instances must follow:
 
-### Axiom Shape Definition
+### Axiom Type Definition and Registration
 
-When an axiom is added to the `Axioms` interface, it defines the shape that instances must follow:
+First, axiom types are defined, then registered in the `Axioms` interface:
 
 ```typescript
+// Define axiom types
+type KeyNameAxiom = {
+  base: Record<string, unknown>;
+  key: string;
+  meta?: Record<string, string>;
+};
+
+// Register axioms in the global interface
 interface Axioms {
-  Id: {
-    base: { id: string };
-    key: 'id';
-    meta?: { type: 'uuid'; required: boolean };
-  };
-  Count: number;
-  Address: {
-    street: string;
-    city: string;
-    country: string;
-  };
+  Id: KeyNameAxiom;        // Id must conform to KeyNameAxiom shape
+  Type: KeyNameAxiom;      // Type must conform to KeyNameAxiom shape
+  Version: KeyNameAxiom;   // Version must conform to KeyNameAxiom shape
 }
 ```
 
-### Canon Instance Creation
+### Canon Axiom Key Usage
 
-When a Canon uses an axiom, it creates an instance that conforms to the axiom's shape:
+When a Canon uses an axiom key, it must create an instance that conforms to the axiom type's shape:
 
 ```typescript
 type MyCanon = Canon<{
   Id: {
     base: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: true };
-  };  // Instance conforms to Id axiom shape
-  Count: 42;  // Instance conforms to Count axiom shape
-  Address: {  // Instance conforms to Address axiom shape
-    street: '123 Main St';
-    city: 'Anytown';
-    country: 'USA';
-  };
+    meta: { type: 'uuid'; required: 'true' };
+  };  // Uses Id axiom key, must conform to KeyNameAxiom shape
+  Type: {
+    base: { type: string };
+    key: 'type';
+    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+  };  // Uses Type axiom key, must conform to KeyNameAxiom shape
+  Version: {
+    base: { version: number };
+    key: 'version';
+    meta: { default: '1'; min: '1' };
+  };  // Uses Version axiom key, must conform to KeyNameAxiom shape
 }>;
 ```
 
-### Type Safety Through Shape Conformance
+### Type Safety Through Axiom Key Enforcement
 
 The augmentable interface pattern ensures that:
-- **All axioms define clear shapes** - The structure instances must follow is specified
-- **Canons create conforming instances** - Instances must match the axiom's shape
-- **Type checking is enforced** - The compiler validates shape conformance
+- **Axiom types define clear shapes** - The structure instances must follow is specified
+- **Axiom keys enforce conformance** - Using an axiom key requires conforming to its type's shape
+- **Type checking is enforced** - The compiler validates shape conformance through axiom keys
 
 ## Lazy Type Resolution
 

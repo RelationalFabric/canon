@@ -6,116 +6,96 @@
 
 ## What is an Axiom?
 
-An axiom is a **type definition** that specifies the structure for a particular concept. When added to the global `Axioms` interface, an axiom defines the shape that instances of that axiom must follow.
+An axiom is a **type definition** that specifies the structure for a particular kind of concept. Axioms are reusable type templates that define the shape that specific axiom instances must follow.
 
-A common pattern for key-name axioms is the `{ base, key, meta? }` shape:
-1. **Base** - The underlying TypeScript type structure
-2. **Key** - The canonical field name that serves as the primary identifier  
-3. **Meta** - Optional extensible metadata for validation, behavior, and documentation
+A common axiom type is `KeyNameAxiom`:
+```typescript
+type KeyNameAxiom = {
+  base: Record<string, unknown>;  // The base must be an object with at least 1 string key
+  key: string;                    // The key name must be a string
+  meta?: Record<string, string>;  // Meta is a type of strings to strings
+};
+```
 
-However, axioms can have various shapes depending on their purpose. Think of axioms as **type templates** - they define the structure that instances must conform to when used in Canons.
+This axiom type can be used for all axioms that follow the key-name pattern. Other axiom types might have different shapes depending on their purpose. Think of axioms as **reusable type templates** - they define the structure that specific axiom instances must conform to.
 
 ## The Axiom Type System
 
 ### Core Structure
 
-Axioms define the shape that instances must follow. Here are some common patterns:
+Axioms are type definitions that can be reused for multiple specific axiom types. Here are some common axiom patterns:
 
-#### Key-Name Axioms (Common Pattern)
+#### Key-Name Axiom Type
 ```typescript
-interface Axioms {
-  Id: {
-    base: { id: string };
-    key: 'id';
-    meta?: { type: 'uuid'; required: boolean };
-  };
-  Version: {
-    base: { version: number };
-    key: 'version';
-    meta?: { default: number; min: number };
-  };
-  Type: {
-    base: { type: string };
-    key: 'type';
-    meta?: { enum: string[]; discriminator: boolean };
-  };
-}
+type KeyNameAxiom = {
+  base: Record<string, unknown>;  // Object with at least 1 string key
+  key: string;                    // The canonical field name
+  meta?: Record<string, string>;  // Optional metadata
+};
+
+// Other axiom types
+type SimpleValueAxiom = number | string | boolean;
+type ObjectAxiom = Record<string, unknown>;
+type FunctionAxiom = (...args: any[]) => any;
 ```
 
-#### Other Axiom Shapes
-Axioms can have various structures depending on their purpose:
+#### Axiom Registration
+Axioms are registered in the global `Axioms` interface using these type definitions:
 
 ```typescript
 interface Axioms {
-  // Simple value axiom
-  Count: number;
-  
-  // Complex nested axiom
-  Address: {
-    street: string;
-    city: string;
-    country: string;
-  };
-  
-  // Function-based axiom
-  Validator: (value: unknown) => boolean;
-  
-  // Generic axiom
-  Optional<T>: T | undefined;
+  Id: KeyNameAxiom;        // Id must conform to KeyNameAxiom shape
+  Version: KeyNameAxiom;   // Version must conform to KeyNameAxiom shape
+  Type: KeyNameAxiom;      // Type must conform to KeyNameAxiom shape
+  Count: SimpleValueAxiom; // Count must conform to SimpleValueAxiom shape
+  Address: ObjectAxiom;    // Address must conform to ObjectAxiom shape
 }
 ```
 
-The key is that each axiom defines a consistent structure that instances must conform to.
+The key is that each axiom registration references a type definition that specifies the structure instances must conform to.
 
 ### Type-Level Composition
 
-Axioms compose naturally within Canon definitions by creating instances that conform to the axiom shape:
+Axioms compose naturally within Canon definitions by using the axiom keys to enforce the correct shape:
 
 ```typescript
-// First, define axioms in the global interface
+// First, define axiom types
+type KeyNameAxiom = {
+  base: Record<string, unknown>;
+  key: string;
+  meta?: Record<string, string>;
+};
+
+// Then register axioms in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Id: {
-      base: { id: string };
-      key: 'id';
-      meta?: { type: 'uuid'; required: boolean };
-    };
-    Type: {
-      base: { type: string };
-      key: 'type';
-      meta?: { enum: string[]; discriminator: boolean };
-    };
-    Count: number;
-    Address: {
-      street: string;
-      city: string;
-      country: string;
-    };
+    Id: KeyNameAxiom;        // Id must be a KeyNameAxiom
+    Type: KeyNameAxiom;      // Type must be a KeyNameAxiom
+    Version: KeyNameAxiom;   // Version must be a KeyNameAxiom
   }
 }
 
-// Then create instances in Canon definitions
+// Then use axiom keys in Canon definitions - the shape is enforced by the axiom type
 type MyCanon = Canon<{
   Id: {
     base: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: true };
-  };
+    meta: { type: 'uuid'; required: 'true' };
+  };  // Must conform to KeyNameAxiom shape
   Type: {
     base: { type: string };
     key: 'type';
-    meta: { enum: ['user', 'admin', 'guest']; discriminator: true };
-  };
-  Count: 42;  // Instance of Count axiom
-  Address: {  // Instance of Address axiom
-    street: '123 Main St';
-    city: 'Anytown';
-    country: 'USA';
-  };
+    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+  };  // Must conform to KeyNameAxiom shape
+  Version: {
+    base: { version: number };
+    key: 'version';
+    meta: { default: '1'; min: '1' };
+  };  // Must conform to KeyNameAxiom shape
 }>;
 ```
 
-Each axiom instance must conform to the shape defined in the `Axioms` interface.
+The axiom keys enforce that instances must conform to the registered axiom type shape.
 
 ### Runtime Configuration Interface
 
