@@ -105,7 +105,7 @@ Libraries can operate on semantic concepts using the axiom interface without kno
 ```typescript
 function getId<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
   const config = inferAxiom('Id', x);
-  return x[config.key] as string;
+  return x[config.key] as AxiomValue<'Id'>;
 }
 
 function getTimestamp<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timestamp'> {
