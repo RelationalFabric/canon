@@ -120,14 +120,14 @@ This constraint system ensures:
 
 ## Understanding Axioms in Canons
 
-Each Canon is built using **axiom keys** that reference axiom types defined in the global `Axioms` interface. These axiom types serve as **templates** that define the structure instances must follow:
+Each Canon **collects specific incarnations** of axioms for a given model. The axioms define what utilities expect, and the canon provides the specific implementation:
 
 ### Axiom Type Definition and Registration
 
-First, axiom types are defined, then registered in the `Axioms` interface:
+First, axiom types are defined to specify what utilities will accept:
 
 ```typescript
-// Define axiom types
+// Define axiom types - these specify what utilities will accept
 type KeyNameAxiom = {
   base: Record<string, unknown>;
   key: string;
@@ -136,42 +136,80 @@ type KeyNameAxiom = {
 
 // Register axioms in the global interface
 interface Axioms {
-  Id: KeyNameAxiom;        // Id must conform to KeyNameAxiom shape
-  Type: KeyNameAxiom;      // Type must conform to KeyNameAxiom shape
-  Version: KeyNameAxiom;   // Version must conform to KeyNameAxiom shape
+  Id: KeyNameAxiom;        // Utilities expect this shape for ID concept
+  Type: KeyNameAxiom;      // Utilities expect this shape for Type concept
+  Version: KeyNameAxiom;   // Utilities expect this shape for Version concept
 }
 ```
 
-### Canon Axiom Key Usage
+### Canon Implementation
 
-When a Canon uses an axiom key, it must create an instance that conforms to the axiom type's shape:
+The canon provides specific implementations of these axioms for a given model:
 
 ```typescript
-type MyCanon = Canon<{
+// JSON-LD Canon - specific implementation for JSON-LD format
+type JsonLdCanon = Canon<{
+  Id: {
+    base: { '@id': string };
+    key: '@id';
+    meta: { format: 'json-ld' };
+  };  // Specific implementation of Id axiom for JSON-LD
+  Type: {
+    base: { '@type': string };
+    key: '@type';
+    meta: { format: 'json-ld' };
+  };  // Specific implementation of Type axiom for JSON-LD
+}>;
+
+// Standard Canon - specific implementation for standard format
+type StandardCanon = Canon<{
   Id: {
     base: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: 'true' };
-  };  // Uses Id axiom key, must conform to KeyNameAxiom shape
+    meta: { format: 'standard' };
+  };  // Specific implementation of Id axiom for standard format
   Type: {
     base: { type: string };
     key: 'type';
-    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
-  };  // Uses Type axiom key, must conform to KeyNameAxiom shape
-  Version: {
-    base: { version: number };
-    key: 'version';
-    meta: { default: '1'; min: '1' };
-  };  // Uses Version axiom key, must conform to KeyNameAxiom shape
+    meta: { format: 'standard' };
+  };  // Specific implementation of Type axiom for standard format
 }>;
 ```
 
-### Type Safety Through Axiom Key Enforcement
+### Runtime Configuration
+
+The runtime config provides the actual values needed at runtime:
+
+```typescript
+interface AxiomRuntime {
+  [K in keyof Axioms]: {
+    keyValue: string;  // The actual key value at runtime
+    metaValues: Record<string, string>;  // The actual meta values at runtime
+  };
+}
+
+// Example runtime configuration
+declare module '@relational-fabric/canon' {
+  interface AxiomRuntime {
+    Id: {
+      keyValue: 'id';  // Runtime value for the key
+      metaValues: { type: 'uuid'; required: 'true' };
+    };
+    Type: {
+      keyValue: 'type';
+      metaValues: { enum: 'user,admin,guest'; discriminator: 'true' };
+    };
+  }
+}
+```
+
+### Type Safety Through Axiom Interface
 
 The augmentable interface pattern ensures that:
-- **Axiom types define clear shapes** - The structure instances must follow is specified
-- **Axiom keys enforce conformance** - Using an axiom key requires conforming to its type's shape
-- **Type checking is enforced** - The compiler validates shape conformance through axiom keys
+- **Axiom types define what utilities expect** - The interface that utilities will work with
+- **Canons provide specific implementations** - Each canon implements the axioms for its format
+- **Runtime config provides actual values** - The real values needed at runtime
+- **Type checking is enforced** - The compiler validates conformance to the axiom interface
 
 ## Lazy Type Resolution
 
