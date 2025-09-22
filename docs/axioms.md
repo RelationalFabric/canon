@@ -13,11 +13,11 @@ An axiom is a **type definition** that specifies what utility types and function
 A common axiom type is the **KeyNameAxiom** concept. This represents the fundamental idea that many semantic concepts can be found by looking for a specific key name within an object. For example, an "ID" concept might be found at different key names depending on the data format - it could be `id`, `@id`, `_id`, or any other field name.
 
 The KeyNameAxiom concept captures this pattern by specifying that:
-- There must be a basis object with at least one string key
+- There must be a $basis object with at least one string key
 - There is a field name that contains the concept (which varies by data format)
 - Additional metadata can be attached to describe the concept
 
-Note that `key` is specific to `KeyNameAxiom` - other axiom types may have different structures, but all axioms share the universal distinguished keys `basis` and `meta`.
+Note that `key` is specific to `KeyNameAxiom` - other axiom types may have different structures, but all axioms share the universal distinguished keys `$basis` and `$meta`.
 
 This enables utilities to work with the concept of "ID" without knowing whether it's stored as `object.id`, `object['@id']`, or `object._id`. The **canon** provides the specific field name for each data format, while the **runtime config** provides the actual values needed at runtime.
 
@@ -25,10 +25,10 @@ This enables utilities to work with the concept of "ID" without knowing whether 
 
 ### Universal Distinguished Keys
 
-All axioms share two universal distinguished keys that have special meaning:
+All axioms share two universal distinguished keys that have special meaning to Canon:
 
-- **`basis`** - The underlying TypeScript type/object structure that contains the concept
-- **`meta`** - Additional metadata for validation, documentation, and behavior
+- **`$basis`** - The underlying TypeScript type/object structure that contains the concept
+- **`$meta`** - Additional metadata for validation, documentation, and behavior
 
 These keys are available to all axioms through the `Axiom` utility type, providing a consistent interface across different axiom types.
 
@@ -39,8 +39,8 @@ Axioms are type definitions that can be reused for multiple specific axiom types
 #### Key-Name Axiom Type
 ```typescript
 type KeyNameAxiom = Axiom<{
-  basis: Record<string, unknown>;  // Object with at least 1 string key
-  key: string;                     // The field name that contains the concept
+  $basis: Record<string, unknown>;  // Object with at least 1 string key
+  key: string;                      // The field name that contains the concept
 }, {
   key: string;
 }>;
