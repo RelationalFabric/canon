@@ -132,52 +132,6 @@ Common axiom patterns include:
 
 Axioms support conditional inclusion, computed values, and polymorphic behavior based on context and type discrimination.
 
-## Integration with Type System Utilities
-
-### With Type Guards
-```typescript
-function isAxiomContract<T extends keyof Axioms>(
-  axiom: unknown,
-  expectedType: T
-): axiom is Axioms[T] {
-  return (
-    typeof axiom === 'object' &&
-    axiom !== null &&
-    'type' in axiom &&
-    'runtime' in axiom &&
-    typeof axiom.runtime === 'object' &&
-    'validators' in axiom.runtime &&
-    'transformers' in axiom.runtime &&
-    'metadata' in axiom.runtime
-  );
-}
-```
-
-### With Validation Libraries
-```typescript
-import { z } from 'zod';
-
-function createZodValidator<T extends keyof Axioms>(axiom: Axioms[T]): z.ZodSchema {
-  const baseSchema = createSchemaFromType(axiom.type);
-  const runtimeConstraints = createConstraintsFromRuntime(axiom.runtime);
-  return baseSchema.refine(...runtimeConstraints);
-}
-```
-
-### With Serialization
-```typescript
-function serializeAxiomContract<T extends keyof Axioms>(axiom: Axioms[T]): SerializedAxiomContract {
-  return {
-    type: serializeTypeDefinition(axiom.type),
-    runtime: {
-      validators: serializeValidators(axiom.runtime.validators),
-      transformers: serializeTransformers(axiom.runtime.transformers),
-      metadata: serializeMetadata(axiom.runtime.metadata)
-    }
-  };
-}
-```
-
 ## Best Practices for Axiom Design
 
 ### 1. Single Responsibility
