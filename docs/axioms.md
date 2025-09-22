@@ -34,6 +34,10 @@ type KeyNameAxiom = Axiom<{
   key: string;
 }>;
 
+// Type aliases for better type safety
+type SomeCanon = Canon<Record<string, unknown>>;  // Any registered canon
+type AnyCanon = Canon<Record<string, unknown>>;   // Any canon type
+
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = Axiom<{
   // The timestamp type - could be number, string, Date, or custom type
@@ -99,12 +103,12 @@ The `AxiomConfig` interface works like the `Axioms` interface - definers map the
 Libraries can operate on semantic concepts using the axiom interface without knowing specific field names or formats. For example:
 
 ```typescript
-function getId<T extends Canon<any>>(object: T, canon: T): string {
+function getId<T extends SomeCanon>(object: T, canon: T): string {
   const idAxiom = getAxiom(canon, 'Id');
   return object[idAxiom.key] as string;
 }
 
-function getTimestamp<T extends Canon<any>>(object: T, canon: T): CanonicalTimestamp {
+function getTimestamp<T extends SomeCanon>(object: T, canon: T): CanonicalTimestamp {
   const timestampAxiom = getAxiom(canon, 'Timestamp');
   return timestampAxiom.toCanonical(object[timestampAxiom.key]);
 }
