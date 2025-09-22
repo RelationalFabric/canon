@@ -37,8 +37,8 @@ type KeyNameAxiom = Axiom<{
   key: string;                    // The canonical field name
   meta?: Record<string, string>;  // Optional metadata
 }, {
-  keyValue: string;
-  metaValues: Record<string, string>;
+  key: string;
+  meta: Record<string, string>;
 }>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
@@ -56,8 +56,8 @@ type TimestampAxiom = Axiom<{
     precision?: 'millisecond' | 'second' | 'minute' | 'hour' | 'day';
   };
 }, {
-  keyValue: string;
-  metaValues: Record<string, string>;
+  key: string;
+  meta: Record<string, string>;
 }>;
 
 type ReferenceAxiom = Axiom<{
@@ -74,8 +74,8 @@ type ReferenceAxiom = Axiom<{
     keyField?: string;
   };
 }, {
-  keyValue: string;
-  metaValues: Record<string, string>;
+  key: string;
+  meta: Record<string, string>;
 }>;
 ```
 
@@ -94,7 +94,7 @@ declare module '@relational-fabric/canon' {
   
   interface AxiomConfig {
     // Definers map their axiom names to config shapes that reference their axiom types
-    // Example: Id: Axiom<{ keyValue: string; metaValues: Record<string, string>; }, KeyNameAxiom['axiomType']>
+    // Example: Id: Axiom<{ key: string; meta: Record<string, string>; }, KeyNameAxiom['axiomType']>
   }
 }
 ```
