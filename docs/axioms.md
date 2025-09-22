@@ -116,4 +116,41 @@ function timestampOf<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timest
 
 This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, automatically converting between different formats.
 
+## Complete Example: The Id Axiom
+
+Here's a complete example showing all three parts of an axiom description:
+
+### 1. Definition
+```typescript
+type KeyNameAxiom = Axiom<{
+  base: Record<string, unknown>;  // Object with at least 1 string key
+  key: string;                    // The field name that contains the concept
+}, {
+  key: string;
+}>;
+```
+
+### 2. Registration
+```typescript
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    Id: KeyNameAxiom;  // Id concept - might be 'id', '@id', '_id', etc.
+  }
+  
+  interface AxiomConfig {
+    Id: {
+      key: string;
+    };
+  }
+}
+```
+
+### 3. API Specification
+```typescript
+function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
+  const config = inferAxiom('Id', x);
+  return x[config.key] as AxiomValue<'Id'>;
+}
+```
+
 This axiom system provides the foundation for Canon's powerful type composition, enabling developers to work with semantic concepts across different data formats through lazy typing and adaptability.
