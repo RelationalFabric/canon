@@ -103,14 +103,14 @@ The `AxiomConfig` interface works like the `Axioms` interface - definers map the
 Libraries can operate on semantic concepts using the axiom interface without knowing specific field names or formats. For example:
 
 ```typescript
-function getId<T extends SomeCanon>(object: T, canon: T): string {
-  const idAxiom = getAxiom(canon, 'Id');
-  return object[idAxiom.key] as string;
+function getId<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
+  const config = inferAxiom('Id', x);
+  return x[config.key] as string;
 }
 
-function getTimestamp<T extends SomeCanon>(object: T, canon: T): CanonicalTimestamp {
-  const timestampAxiom = getAxiom(canon, 'Timestamp');
-  return timestampAxiom.toCanonical(object[timestampAxiom.key]);
+function getTimestamp<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timestamp'> {
+  const config = inferAxiom('Timestamp', x);
+  return config.toCanonical(x[config.key]);
 }
 ```
 
