@@ -19,7 +19,7 @@ type KeyNameAxiom = {
 };
 
 // Utility type to abstract away the axiom type key
-type Axiom<Name extends string, Definition> = Definition & { axiomType: Name };
+type Axiom<Definition, ConfigType> = Definition & { axiomType: ConfigType };
 ```
 
 This defines what utilities expect - they know they'll get an object with a specific key name, but they don't know what that key name is. The **canon** provides the specific implementation, and the **runtime config** provides the actual values needed at runtime (like `'id'` vs `typeof 'id'`).
@@ -32,14 +32,17 @@ Axioms are type definitions that can be reused for multiple specific axiom types
 
 #### Key-Name Axiom Type
 ```typescript
-type KeyNameAxiom = Axiom<'KeyNameAxiom', {
+type KeyNameAxiom = Axiom<{
   base: Record<string, unknown>;  // Object with at least 1 string key
   key: string;                    // The canonical field name
   meta?: Record<string, string>;  // Optional metadata
+}, {
+  keyValue: string;
+  metaValues: Record<string, string>;
 }>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
-type TimestampAxiom = Axiom<'TimestampAxiom', {
+type TimestampAxiom = Axiom<{
   // The timestamp type - could be number, string, Date, or custom type
   type: number | string | Date | TypeGuard<unknown>;
   // Way to convert from this timestamp to canonical value
@@ -52,9 +55,12 @@ type TimestampAxiom = Axiom<'TimestampAxiom', {
     format?: string;
     precision?: 'millisecond' | 'second' | 'minute' | 'hour' | 'day';
   };
+}, {
+  keyValue: string;
+  metaValues: Record<string, string>;
 }>;
 
-type ReferenceAxiom = Axiom<'ReferenceAxiom', {
+type ReferenceAxiom = Axiom<{
   // The reference type - could be string, object, array, or custom type
   type: string | object | string[] | TypeGuard<unknown>;
   // Way to convert from this reference to canonical value
@@ -67,6 +73,9 @@ type ReferenceAxiom = Axiom<'ReferenceAxiom', {
     isObject?: boolean;
     keyField?: string;
   };
+}, {
+  keyValue: string;
+  metaValues: Record<string, string>;
 }>;
 ```
 
@@ -85,7 +94,7 @@ declare module '@relational-fabric/canon' {
   
   interface AxiomConfig {
     // Definers map their axiom names to config shapes that reference their axiom types
-    // Example: Id: Axiom<'KeyNameAxiom', { keyValue: string; metaValues: Record<string, string>; }>
+    // Example: Id: Axiom<{ keyValue: string; metaValues: Record<string, string>; }, KeyNameAxiom['axiomType']>
   }
 }
 ```
