@@ -35,8 +35,8 @@ type KeyNameAxiom = Axiom<{
 }>;
 
 // Type aliases for better type safety
-type SomeCanon = Canon<Record<string, unknown>>;  // Any registered canon
-type AnyCanon = Canon<Record<string, unknown>>;   // Any canon type
+type SomeCanon = /* implementation details hidden */;  // Any registered canon
+type AnyCanon = /* implementation details hidden */;   // Any canon type
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = Axiom<{
