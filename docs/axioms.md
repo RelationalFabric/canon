@@ -2,22 +2,24 @@
 
 ## Overview
 
-**Axioms** are the atomic building blocks that compose Canons. They represent fundamental, indivisible units of type definition that encapsulate both structural information and behavioral metadata. Each axiom defines a single conceptual piece of a data model with rich configuration options.
+**Axioms** are the atomic building blocks that enable **lazy typing** and **adaptability** in Canons. They provide a way to define where to find fundamental concepts (like ID, type, version) in different data structures, allowing libraries to operate on these concepts without knowing the specific field names or locations.
+
+The key purpose is to create a **shared set of concepts** that can mold themselves to different use cases and data formats, enabling type-safe operations across diverse data structures.
 
 ## What is an Axiom?
 
-An axiom is a **type definition** that specifies the structure for a particular kind of concept. Axioms are reusable type templates that define the shape that specific axiom instances must follow.
+An axiom is a **type definition** that specifies how to locate and access a fundamental concept within a data structure. Axioms enable **lazy typing** by allowing different data formats to specify where to find the same conceptual information.
 
 A common axiom type is `KeyNameAxiom`:
 ```typescript
 type KeyNameAxiom = {
   base: Record<string, unknown>;  // The base must be an object with at least 1 string key
-  key: string;                    // The key name must be a string
-  meta?: Record<string, string>;  // Meta is a type of strings to strings
+  key: string;                    // The key name that contains the concept
+  meta?: Record<string, string>;  // Additional metadata about the concept
 };
 ```
 
-This axiom type can be used for all axioms that follow the key-name pattern. Other axiom types might have different shapes depending on their purpose. Think of axioms as **reusable type templates** - they define the structure that specific axiom instances must conform to.
+This allows different canons to specify where to find the same concept in different ways. For example, an ID concept might be found at `object.id`, `object['@id']`, or `object._id` depending on the data format. Think of axioms as **location specifications** - they tell you where to find a concept, not what the concept is.
 
 ## The Axiom Type System
 
@@ -56,7 +58,7 @@ The key is that each axiom registration references a type definition that specif
 
 ### Type-Level Composition
 
-Axioms compose naturally within Canon definitions by using the axiom keys to enforce the correct shape:
+Axioms enable different data formats to specify where to find the same concepts:
 
 ```typescript
 // First, define axiom types
@@ -69,76 +71,87 @@ type KeyNameAxiom = {
 // Then register axioms in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Id: KeyNameAxiom;        // Id must be a KeyNameAxiom
-    Type: KeyNameAxiom;      // Type must be a KeyNameAxiom
-    Version: KeyNameAxiom;   // Version must be a KeyNameAxiom
+    Id: KeyNameAxiom;        // Id concept location
+    Type: KeyNameAxiom;      // Type concept location
+    Version: KeyNameAxiom;   // Version concept location
   }
 }
 
-// Then use axiom keys in Canon definitions - the shape is enforced by the axiom type
-type MyCanon = Canon<{
+// JSON-LD Canon - uses @id and @type
+type JsonLdCanon = Canon<{
+  Id: {
+    base: { '@id': string };
+    key: '@id';
+    meta: { format: 'json-ld' };
+  };
+  Type: {
+    base: { '@type': string };
+    key: '@type';
+    meta: { format: 'json-ld' };
+  };
+}>;
+
+// Standard Canon - uses id and type
+type StandardCanon = Canon<{
   Id: {
     base: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: 'true' };
-  };  // Must conform to KeyNameAxiom shape
+    meta: { format: 'standard' };
+  };
   Type: {
     base: { type: string };
     key: 'type';
-    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
-  };  // Must conform to KeyNameAxiom shape
-  Version: {
-    base: { version: number };
-    key: 'version';
-    meta: { default: '1'; min: '1' };
-  };  // Must conform to KeyNameAxiom shape
+    meta: { format: 'standard' };
+  };
+}>;
+
+// MongoDB Canon - uses _id and _type
+type MongoCanon = Canon<{
+  Id: {
+    base: { _id: string };
+    key: '_id';
+    meta: { format: 'mongodb' };
+  };
+  Type: {
+    base: { _type: string };
+    key: '_type';
+    meta: { format: 'mongodb' };
+  };
 }>;
 ```
 
-The axiom keys enforce that instances must conform to the registered axiom type shape.
+Each canon specifies where to find the same concepts in different data formats, enabling libraries to work with any of them.
 
-### Runtime Configuration Interface
+### Library API Generation
 
-Runtime behavior is defined in a separate augmentable interface that depends on the `Axioms` type:
+The real power comes from libraries that can operate on these concepts without knowing the specific field names:
 
 ```typescript
-// Runtime configuration interface
-interface AxiomRuntime {
-  [K in keyof Axioms]: {
-    validators: Validator[];
-    transformers: Transformer[];
-    metadata: Axioms[K] extends { meta?: infer M } ? M : never;
-  };
+// A library can provide generic functions that work with any canon
+function getId<T extends Canon<any>>(object: T, canon: T): string {
+  // The library doesn't need to know if it's object.id, object['@id'], or object._id
+  // The axiom tells us where to find the ID
+  const idAxiom = getAxiom(canon, 'Id');
+  return object[idAxiom.key] as string;
 }
 
-// Example runtime configuration
-declare module '@relational-fabric/canon' {
-  interface AxiomRuntime {
-    Id: {
-      validators: [isString, isUuid];
-      transformers: [normalizeUuid];
-      metadata: { type: 'uuid'; required: true };
-    };
-    Type: {
-      validators: [isString, isEnum(['user', 'admin', 'guest'])];
-      transformers: [normalizeType];
-      metadata: { enum: ['user', 'admin', 'guest']; discriminator: true };
-    };
-    Count: {
-      validators: [isNumber, isPositive];
-      transformers: [normalizeNumber];
-      metadata: {};
-    };
-    Address: {
-      validators: [isObject, hasRequiredFields];
-      transformers: [normalizeAddress];
-      metadata: {};
-    };
-  }
+function getType<T extends Canon<any>>(object: T, canon: T): string {
+  const typeAxiom = getAxiom(canon, 'Type');
+  return object[typeAxiom.key] as string;
 }
+
+// Usage with different canons
+const jsonLdObject = { '@id': 'user-123', '@type': 'Person' };
+const standardObject = { id: 'user-123', type: 'Person' };
+const mongoObject = { _id: 'user-123', _type: 'Person' };
+
+// Same library functions work with all formats
+const id1 = getId(jsonLdObject, JsonLdCanon);     // Uses @id
+const id2 = getId(standardObject, StandardCanon); // Uses id  
+const id3 = getId(mongoObject, MongoCanon);       // Uses _id
 ```
 
-This separation allows the type system to depend on `Axioms` while providing runtime behavior through `AxiomRuntime`.
+This enables **lazy typing** - libraries can work with typed entities without knowing where the concepts are located.
 
 ## Runtime Axiom Processing
 
