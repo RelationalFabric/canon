@@ -132,25 +132,6 @@ Common axiom patterns include:
 
 Axioms support conditional inclusion, computed values, and polymorphic behavior based on context and type discrimination.
 
-## Axiom Lifecycle and Memory Management
-
-### Initialization Phase
-1. **Contract Registration** - Axiom contracts are registered in the global `Axioms` interface
-2. **Type Validation** - Type requirements are validated and registered
-3. **Runtime Setup** - Runtime behavior (validators, transformers) is configured
-4. **Compliance Checking** - Implementor compliance is validated
-
-### Runtime Phase
-1. **Contract Enforcement** - New instances are validated against axiom contracts
-2. **Type Safety** - Field access is mediated by type requirements
-3. **Runtime Behavior** - Validators and transformers are applied based on contracts
-4. **Compliance Monitoring** - Ongoing validation of implementor compliance
-
-### Cleanup Phase
-1. **Contract Cleanup** - Unused axiom contracts are identified and removed
-2. **Memory Management** - Unused validators and transformers are garbage collected
-3. **Registry Optimization** - The axiom registry is compacted and optimized
-
 ## Integration with Type System Utilities
 
 ### With Type Guards
