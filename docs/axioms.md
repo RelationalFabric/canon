@@ -84,7 +84,8 @@ declare module '@relational-fabric/canon' {
   }
   
   interface AxiomConfig {
-    // Open for definers to map their axiom names to their config shapes
+    // Definers map their axiom names to config shapes that reference their axiom types
+    // Example: Id: { axiomType: 'KeyNameAxiom'; keyValue: string; metaValues: Record<string, string>; }
   }
 }
 ```
@@ -103,7 +104,7 @@ Each canon provides specific implementations of the same semantic concepts, whil
 
 ### Runtime Configuration
 
-The `AxiomConfig` interface is open for definers to map their axiom names to their own config shapes, providing whatever runtime configuration they need.
+The `AxiomConfig` interface works like the `Axioms` interface - definers map their axiom names to config shapes that reference their axiom types, reusing the structure and ensuring type consistency.
 
 ### Library API Generation
 
