@@ -74,11 +74,6 @@ declare module '@relational-fabric/canon' {
     Timestamp: TimestampAxiom; // Timestamp concept - might be number, string, Date, etc.
     Reference: ReferenceAxiom; // Reference concept - might be string, object, array, etc.
   }
-  
-  interface AxiomConfig {
-    // Definers map their axiom names to config shapes that reference their axiom types
-    // Example: Id: Axiom<{ key: string; }, KeyNameAxiom['axiomType']>
-  }
 }
 ```
 
@@ -93,10 +88,6 @@ Axioms define what utilities expect, canons provide specific implementations. Fo
 - **MongoDB Canon**: Uses `_id`, `_type`, Unix timestamps, and ObjectId strings
 
 Each canon provides specific implementations of the same semantic concepts, while utilities work with the axiom interface.
-
-### Runtime Configuration
-
-The `AxiomConfig` interface works like the `Axioms` interface - definers map their axiom names to config shapes that reference their axiom types, reusing the structure and ensuring type consistency.
 
 ### API Specification
 
@@ -135,12 +126,6 @@ type KeyNameAxiom = Axiom<{
 declare module '@relational-fabric/canon' {
   interface Axioms {
     Id: KeyNameAxiom;  // Id concept - might be 'id', '@id', '_id', etc.
-  }
-  
-  interface AxiomConfig {
-    Id: {
-      key: string;
-    };
   }
 }
 ```
