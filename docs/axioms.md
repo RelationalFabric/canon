@@ -14,10 +14,10 @@ A common axiom type is the **KeyNameAxiom** concept. This represents the fundame
 
 The KeyNameAxiom concept captures this pattern by specifying that:
 - There must be a base object with at least one string key
-- There is a canonical field name that contains the concept
+- There is a field name that contains the concept (which varies by data format)
 - Additional metadata can be attached to describe the concept
 
-This enables utilities to work with the concept of "ID" without knowing whether it's stored as `object.id`, `object['@id']`, or `object._id`. The **canon** provides the specific implementation for each data format, while the **runtime config** provides the actual values needed at runtime.
+This enables utilities to work with the concept of "ID" without knowing whether it's stored as `object.id`, `object['@id']`, or `object._id`. The **canon** provides the specific field name for each data format, while the **runtime config** provides the actual values needed at runtime.
 
 ## The Axiom Type System
 
