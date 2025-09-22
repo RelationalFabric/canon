@@ -98,9 +98,9 @@ Each canon provides specific implementations of the same semantic concepts, whil
 
 The `AxiomConfig` interface works like the `Axioms` interface - definers map their axiom names to config shapes that reference their axiom types, reusing the structure and ensuring type consistency.
 
-### Library API Generation
+### API Specification
 
-Libraries can operate on semantic concepts using the axiom interface without knowing specific field names or formats. For example:
+A complete axiom description includes its definition, registration, and API specification. The API provides functions that libraries can use to operate on semantic concepts without knowing specific field names or formats:
 
 ```typescript
 function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
