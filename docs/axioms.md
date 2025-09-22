@@ -10,19 +10,14 @@ The key purpose is to create a **shared set of concepts** that can mold themselv
 
 An axiom is a **type definition** that specifies what utility types and functions will accept. Axioms define the **interface** that utilities expect, enabling them to work with different data formats without knowing the specific field names.
 
-A common axiom type is `KeyNameAxiom`:
-```typescript
-type KeyNameAxiom = {
-  base: Record<string, unknown>;  // The base must be an object with at least 1 string key
-  key: string;                    // The key name that contains the concept
-  meta?: Record<string, string>;  // Additional metadata about the concept
-};
+A common axiom type is the **KeyNameAxiom** concept. This represents the fundamental idea that many semantic concepts can be found by looking for a specific key name within an object. For example, an "ID" concept might be found at different key names depending on the data format - it could be `id`, `@id`, `_id`, or any other field name.
 
-// Utility type to abstract away the axiom type key
-type Axiom<Definition, ConfigType> = /* implementation details hidden */;
-```
+The KeyNameAxiom concept captures this pattern by specifying that:
+- There must be a base object with at least one string key
+- There is a canonical field name that contains the concept
+- Additional metadata can be attached to describe the concept
 
-This defines what utilities expect - they know they'll get an object with a specific key name, but they don't know what that key name is. The **canon** provides the specific implementation, and the **runtime config** provides the actual values needed at runtime (like `'id'` vs `typeof 'id'`).
+This enables utilities to work with the concept of "ID" without knowing whether it's stored as `object.id`, `object['@id']`, or `object._id`. The **canon** provides the specific implementation for each data format, while the **runtime config** provides the actual values needed at runtime.
 
 ## The Axiom Type System
 
