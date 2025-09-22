@@ -71,12 +71,14 @@ type ReferenceAxiom = {
 Axioms are registered in the global `Axioms` interface using these type definitions:
 
 ```typescript
-interface Axioms {
-  Id: KeyNameAxiom;        // Id concept - might be 'id', '@id', '_id', etc.
-  Type: KeyNameAxiom;      // Type concept - might be 'type', '@type', '_type', etc.
-  Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
-  Timestamp: TimestampAxiom; // Timestamp concept - might be number, string, Date, etc.
-  Reference: ReferenceAxiom; // Reference concept - might be string, object, array, etc.
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    Id: KeyNameAxiom;        // Id concept - might be 'id', '@id', '_id', etc.
+    Type: KeyNameAxiom;      // Type concept - might be 'type', '@type', '_type', etc.
+    Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
+    Timestamp: TimestampAxiom; // Timestamp concept - might be number, string, Date, etc.
+    Reference: ReferenceAxiom; // Reference concept - might be string, object, array, etc.
+  }
 }
 ```
 
