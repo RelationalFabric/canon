@@ -13,7 +13,7 @@ An axiom is a **type definition** that specifies what utility types and function
 A common axiom type is the **KeyNameAxiom** concept. This represents the fundamental idea that many semantic concepts can be found by looking for a specific key name within an object. For example, an "ID" concept might be found at different key names depending on the data format - it could be `id`, `@id`, `_id`, or any other field name.
 
 The KeyNameAxiom concept captures this pattern by specifying that:
-- There must be a base object with at least one string key
+- There must be a basis object with at least one string key
 - There is a field name that contains the concept (which varies by data format)
 - Additional metadata can be attached to describe the concept
 
@@ -28,8 +28,8 @@ Axioms are type definitions that can be reused for multiple specific axiom types
 #### Key-Name Axiom Type
 ```typescript
 type KeyNameAxiom = Axiom<{
-  base: Record<string, unknown>;  // Object with at least 1 string key
-  key: string;                    // The canonical field name
+  basis: Record<string, unknown>;  // Object with at least 1 string key
+  key: string;                     // The field name that contains the concept
 }, {
   key: string;
 }>;
