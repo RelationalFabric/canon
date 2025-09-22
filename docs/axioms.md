@@ -52,22 +52,22 @@ type AnyCanon = /* implementation details hidden */;   // Any canon type
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = Axiom<{
   // The timestamp type - could be number, string, Date, or custom type
-  type: number | string | Date | TypeGuard<unknown>;
+  $basis: number | string | Date | TypeGuard<unknown>;
   // Way to convert from this timestamp to canonical value
-  toCanonical: (value: this['type']) => CanonicalTimestamp;
+  toCanonical: (value: this['$basis']) => CanonicalTimestamp;
   // Way to convert from canonical value to this timestamp
-  fromCanonical: (value: CanonicalTimestamp) => this['type'];
+  fromCanonical: (value: CanonicalTimestamp) => this['$basis'];
 }, {
   key: string;
 }>;
 
 type ReferenceAxiom = Axiom<{
   // The reference type - could be string, object, array, or custom type
-  type: string | object | string[] | TypeGuard<unknown>;
+  $basis: string | object | string[] | TypeGuard<unknown>;
   // Way to convert from this reference to canonical value
-  toCanonical: (value: this['type']) => CanonicalReference;
+  toCanonical: (value: this['$basis']) => CanonicalReference;
   // Way to convert from canonical value to this reference
-  fromCanonical: (value: CanonicalReference) => this['type'];
+  fromCanonical: (value: CanonicalReference) => this['$basis'];
 }, {
   key: string;
 }>;
