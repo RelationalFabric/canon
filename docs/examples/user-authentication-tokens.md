@@ -20,34 +20,30 @@ Use the existing core axioms (`Id` and `Type`) to identify tokens, then define `
 
 **Step 2: Compose the Canon and register it**
 ```typescript
-// Define the new axiom types
-type ExpirationAxiom = Axiom<{
-  $basis: Record<string, unknown>;
-  key: string;
-}, {
-  key: string;
-}>;
-
-type PermissionsAxiom = Axiom<{
-  $basis: Record<string, unknown>;
-  key: string;
-}, {
-  key: string;
-}>;
-
-// Register only the new axioms
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Expiration: ExpirationAxiom;
-    Permissions: PermissionsAxiom;
-  }
-}
-
 // Define the canon for this example
 type AuthCanon = Canon<{
+  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
+  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
   Expiration: { $basis: { expires: number }; key: 'expires'; $meta: { type: string } };
   Permissions: { $basis: { permissions: string[] }; key: 'permissions'; $meta: { type: string } };
 }>;
+
+// Register the canon globally
+declare module '@relational-fabric/canon' {
+  interface Canons {
+    auth: AuthCanon;
+  }
+}
+
+// Register the runtime configuration
+declareCanon('auth', {
+  axioms: {
+    Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
+    Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
+    Expiration: { $basis: { expires: 'number' }, key: 'expires', $meta: { type: 'string' } },
+    Permissions: { $basis: { permissions: 'string[]' }, key: 'permissions', $meta: { type: 'string' } },
+  },
+});
 ```
 
 **Step 3: Implement the API for the new axioms**

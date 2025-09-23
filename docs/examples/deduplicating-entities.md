@@ -25,6 +25,21 @@ type DeduplicationCanon = Canon<{
   Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
   Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
 }>;
+
+// Register the canon globally
+declare module '@relational-fabric/canon' {
+  interface Canons {
+    deduplication: DeduplicationCanon;
+  }
+}
+
+// Register the runtime configuration
+declareCanon('deduplication', {
+  axioms: {
+    Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
+    Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
+  },
+});
 ```
 
 **Step 3: The usage**
