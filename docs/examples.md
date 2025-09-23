@@ -2,21 +2,22 @@
 
 ## Overview
 
-This document walks through a complete, real-world example of using Canon's core axioms. We'll build a user management system that works seamlessly across different data formats (REST APIs, MongoDB, JSON-LD) using a single, universal codebase.
+This document walks through a complete, real-world example of using Canon's core axioms. We'll build a product catalog system that integrates data from multiple sources: our internal database, a JSON-LD API, and a REST API. This demonstrates why Canon is valuable - without it, you'd need format-specific code for each source.
 
 ## The Scenario
 
-Imagine you're building a user management system that needs to:
-- Handle users from multiple data sources with different formats
-- Support optimistic concurrency control
-- Provide audit logging
-- Work with relationships between entities
+Imagine you're building a product catalog system that needs to:
+- Display products from your internal database (standard format)
+- Integrate products from a JSON-LD e-commerce API
+- Import products from a REST API
+- Handle relationships between products, categories, and reviews
+- Support versioning and audit trails across all sources
 
-Without Canon, you'd need format-specific code for each data source. With Canon, you write universal code that works across all formats.
+Without Canon, you'd need separate code paths for each data source. With Canon, you write universal code that works across all formats.
 
 ## Step 1: Setting Up Our Application
 
-We'll start by importing the core axioms and creating our data models. The core axioms (Id, Type, Version, Timestamps, References) are already provided by Canon.
+We'll start by importing the core axioms. The core axioms (Id, Type, Version, Timestamps, References) are already provided by Canon.
 
 ```typescript
 import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon';
@@ -25,40 +26,55 @@ import type { Satisfies } from '@relational-fabric/canon';
 
 ## Step 2: Creating Our Data Models
 
-Now let's define our application's data models using the core axioms. We'll create a User model that can work with different data formats.
+Let's define our application's data models that can work with any data format.
 
 ```typescript
-// Our User model that works with any data format
-type User = {
+// Our internal models that work with any data format
+type Product = {
   id: string;
   type: string;
   version: number;
   createdAt: Date;
   updatedAt: Date;
   name: string;
-  email: string;
-  roleId: string;
+  description: string;
+  price: number;
+  categoryId: string;
+  sku: string;
+} & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>;
+
+type Category = {
+  id: string;
+  type: string;
+  version: number;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  parentId?: string;
+} & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>;
+
+type Review = {
+  id: string;
+  type: string;
+  version: number;
+  createdAt: Date;
+  updatedAt: Date;
+  productId: string;
+  userId: string;
+  rating: number;
+  comment: string;
 } & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>;
 
 // Define application-specific types
+interface ProductWithDetails extends Product {
+  category?: Category;
+  reviews?: Review[];
+  averageRating?: number;
+}
+
 interface ValidationResult {
   valid: boolean;
   error?: string;
-}
-
-interface AuditLog {
-  entityId: string;
-  action: string;
-  timestamp: Date;
-  createdAt: Date;
-}
-
-interface ResolvedUser extends User {
-  role?: {
-    id: string;
-    name: string;
-    permissions: string[];
-  };
 }
 ```
 
@@ -66,107 +82,117 @@ interface ResolvedUser extends User {
 
 Now we'll create services that work with any data format using the core axioms.
 
-### User Service
+### Product Service
 
 ```typescript
-class UserService {
-  private users: User[] = [];
+class ProductService {
+  private products: Product[] = [];
+  private categories: Category[] = [];
+  private reviews: Review[] = [];
 
-  // Create a new user - works with any format
-  async createUser<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps'>>(
-    userData: T
-  ): Promise<User> {
-    const id = idOf(userData);
-    const type = typeOf(userData);
-    const version = versionOf(userData) || 1;
-    const timestamp = timestampsOf(userData) || new Date();
+  // Import product from any source - this is where Canon shines!
+  async importProduct<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>>(
+    productData: T,
+    source: 'internal' | 'jsonld' | 'rest'
+  ): Promise<Product> {
+    const id = idOf(productData);
+    const type = typeOf(productData);
+    const version = versionOf(productData) || 1;
+    const timestamp = timestampsOf(productData) || new Date();
 
-    // Validate the user data
+    // Universal validation - works with any format
     if (!this.isValidId(id)) {
-      throw new Error('Invalid user ID');
+      throw new Error(`Invalid product ID from ${source}: ${id}`);
     }
 
     if (!this.isValidType(type)) {
-      throw new Error('Invalid user type');
+      throw new Error(`Invalid product type from ${source}: ${type}`);
     }
 
-    // Create the user with canonical format
-    const user: User = {
+    // Convert to our internal format - this is the magic!
+    const product: Product = {
       id,
       type,
       version,
       createdAt: timestamp,
       updatedAt: timestamp,
-      name: (userData as any).name,
-      email: (userData as any).email,
-      roleId: (userData as any).roleId || '',
+      name: (productData as any).name || (productData as any).title,
+      description: (productData as any).description || (productData as any).summary,
+      price: (productData as any).price || (productData as any).cost,
+      categoryId: referencesOf(productData) || (productData as any).categoryId,
+      sku: (productData as any).sku || (productData as any).productCode,
     };
 
-    this.users.push(user);
-    await this.auditService.logCreation(user);
+    this.products.push(product);
+    console.log(`✅ Imported product from ${source}:`, product.name);
     
-    return user;
+    return product;
   }
 
-  // Update user with optimistic concurrency control
-  async updateUser<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps'>>(
-    userData: T,
-    updates: Partial<User>
-  ): Promise<User> {
-    const id = idOf(userData);
-    const currentVersion = versionOf(userData);
+  // Get product with full details - works with any source
+  async getProductWithDetails(productId: string): Promise<ProductWithDetails | null> {
+    const product = this.products.find(p => p.id === productId);
+    if (!product) return null;
 
-    // Check for concurrent modifications
-    const existingUser = this.users.find(u => u.id === id);
-    if (!existingUser) {
-      throw new Error('User not found');
+    const category = this.categories.find(c => c.id === product.categoryId);
+    const productReviews = this.reviews.filter(r => r.productId === productId);
+    const averageRating = productReviews.length > 0 
+      ? productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length 
+      : 0;
+
+    return {
+      ...product,
+      category,
+      reviews: productReviews,
+      averageRating
+    };
+  }
+
+  // Find products by category - universal across all sources
+  async findProductsByCategory<T extends Satisfies<'References'>>(
+    categoryId: string,
+    since?: Date
+  ): Promise<Product[]> {
+    let products = this.products.filter(p => p.categoryId === categoryId);
+
+    if (since) {
+      products = products.filter(p => p.createdAt > since);
     }
 
-    if (existingUser.version !== currentVersion) {
-      throw new Error('User has been modified by another user');
+    return products;
+  }
+
+  // Update product - works with any format
+  async updateProduct<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps'>>(
+    productData: T,
+    updates: Partial<Product>
+  ): Promise<Product> {
+    const id = idOf(productData);
+    const currentVersion = versionOf(productData);
+
+    // Check for concurrent modifications
+    const existingProduct = this.products.find(p => p.id === id);
+    if (!existingProduct) {
+      throw new Error('Product not found');
+    }
+
+    if (existingProduct.version !== currentVersion) {
+      throw new Error('Product has been modified by another user');
     }
 
     // Apply updates
-    const updatedUser: User = {
-      ...existingUser,
+    const updatedProduct: Product = {
+      ...existingProduct,
       ...updates,
-      version: existingUser.version + 1,
+      version: existingProduct.version + 1,
       updatedAt: new Date(),
     };
 
-    const index = this.users.findIndex(u => u.id === id);
-    this.users[index] = updatedUser;
+    const index = this.products.findIndex(p => p.id === id);
+    this.products[index] = updatedProduct;
     
-    await this.auditService.logUpdate(existingUser, updatedUser);
-    
-    return updatedUser;
-  }
-
-  // Find users by type with time filtering
-  async findUsersByType<T extends Satisfies<'Type' | 'Timestamps'>>(
-    type: string,
-    since?: Date
-  ): Promise<User[]> {
-    let users = this.users.filter(user => user.type === type);
-
-    if (since) {
-      users = users.filter(user => user.createdAt > since);
-    }
-
-    return users;
-  }
-
-  // Resolve user relationships (e.g., role information)
-  async resolveUserRelationships<T extends Satisfies<'References'>>(
-    users: T[]
-  ): Promise<ResolvedUser[]> {
-    const roleIds = users.map(user => referencesOf(user));
-    const roles = await this.roleService.findByIds(roleIds);
-
-    return users.map(user => ({
-      ...user as User,
-      role: roles.find(role => role.id === referencesOf(user))
-    }));
+    console.log(`✅ Updated product:`, updatedProduct.name);
+    return updatedProduct;
   }
 
   // Validation helpers
@@ -175,178 +201,150 @@ class UserService {
   }
 
   private isValidType(type: string): boolean {
-    return ['User', 'Admin', 'Guest'].includes(type);
+    return ['Product', 'Item', 'Good'].includes(type);
   }
-
-  constructor(private auditService: AuditService, private roleService: RoleService) {}
 }
 ```
 
-### Audit Service
+### Category Service
 
 ```typescript
-class AuditService {
-  private auditLogs: AuditLog[] = [];
+class CategoryService {
+  private categories: Category[] = [];
 
-  async logCreation<T extends Satisfies<'Id' | 'Timestamps'>>(
-    entity: T
-  ): Promise<void> {
-    const id = idOf(entity);
-    const timestamp = timestampsOf(entity);
+  async importCategory<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>>(
+    categoryData: T,
+    source: 'internal' | 'jsonld' | 'rest'
+  ): Promise<Category> {
+    const id = idOf(categoryData);
+    const type = typeOf(categoryData);
+    const version = versionOf(categoryData) || 1;
+    const timestamp = timestampsOf(categoryData) || new Date();
 
-    const auditLog: AuditLog = {
-      entityId: id,
-      action: 'CREATE',
-      timestamp,
-      createdAt: new Date()
+    const category: Category = {
+      id,
+      type,
+      version,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      name: (categoryData as any).name || (categoryData as any).title,
+      parentId: referencesOf(categoryData) || (categoryData as any).parentId,
     };
 
-    this.auditLogs.push(auditLog);
+    this.categories.push(category);
+    console.log(`✅ Imported category from ${source}:`, category.name);
+    
+    return category;
   }
 
-  async logUpdate<T extends Satisfies<'Id' | 'Timestamps'>>(
-    oldEntity: T,
-    newEntity: T
-  ): Promise<void> {
-    const id = idOf(newEntity);
-    const timestamp = timestampsOf(newEntity);
-
-    const auditLog: AuditLog = {
-      entityId: id,
-      action: 'UPDATE',
-      timestamp,
-      createdAt: new Date()
-    };
-
-    this.auditLogs.push(auditLog);
-  }
-
-  async findRecentChanges<T extends Satisfies<'Timestamps'>>(
-    entities: T[],
-    since: Date
-  ): T[] {
-    return entities.filter(entity => 
-      timestampsOf(entity) > since
-    );
+  async getCategory(categoryId: string): Promise<Category | null> {
+    return this.categories.find(c => c.id === categoryId) || null;
   }
 }
 ```
 
-### Role Service
-
-```typescript
-import { referencesOf } from '@relational-fabric/canon';
-import type { Satisfies } from '@relational-fabric/canon';
-
-class RoleService {
-  private roles = [
-    { id: 'admin', name: 'Administrator', permissions: ['read', 'write', 'delete'] },
-    { id: 'user', name: 'User', permissions: ['read', 'write'] },
-    { id: 'guest', name: 'Guest', permissions: ['read'] }
-  ];
-
-  async findByIds<T extends Satisfies<'References'>>(
-    references: T[]
-  ): Promise<any[]> {
-    const ids = references.map(ref => referencesOf(ref));
-    return this.roles.filter(role => ids.includes(role.id));
-  }
-}
-```
-
-## Step 5: Using the Universal System
+## Step 4: Using the Universal System
 
 Now let's see how our universal system works with different data formats:
 
 ```typescript
 // Initialize services
-const auditService = new AuditService();
-const roleService = new RoleService();
-const userService = new UserService(auditService, roleService);
+const productService = new ProductService();
+const categoryService = new CategoryService();
 
-// Example 1: REST API format
-const restUser = {
-  id: "user-123",
-  type: "User",
+// Example 1: Internal database format (our standard)
+const internalProduct = {
+  id: "prod-123",
+  type: "Product",
   version: 1,
-  createdAt: "2022-01-01T00:00:00Z",
-  name: "John Doe",
-  email: "john@example.com",
-  roleId: "admin"
+  createdAt: new Date("2022-01-01"),
+  name: "Wireless Headphones",
+  description: "High-quality wireless headphones",
+  price: 99.99,
+  categoryId: "cat-electronics",
+  sku: "WH-001"
 };
 
-// Example 2: MongoDB format
-const mongoUser = {
-  _id: "user-456",
-  _type: "User",
-  _version: 1,
-  created_at: 1640995200,
-  name: "Jane Doe",
-  email: "jane@example.com",
-  roleId: "user"
-};
-
-// Example 3: JSON-LD format
-const jsonLdUser = {
-  "@id": "user-789",
-  "@type": "User",
+// Example 2: JSON-LD format from e-commerce API
+const jsonLdProduct = {
+  "@id": "https://api.store.com/products/wireless-mouse",
+  "@type": "Product",
   "@version": 1,
-  "dateCreated": "2022-01-01T00:00:00Z",
-  "name": "Bob Smith",
-  "email": "bob@example.com",
-  "roleId": "guest"
+  "dateCreated": "2022-01-15T10:30:00Z",
+  "name": "Wireless Mouse",
+  "summary": "Ergonomic wireless mouse with precision tracking",
+  "cost": 29.99,
+  "category": "https://api.store.com/categories/electronics",
+  "productCode": "WM-002"
 };
+
+// Example 3: REST API format from supplier
+const restProduct = {
+  id: "supplier-456",
+  type: "Item",
+  version: 1,
+  created_at: 1640995200,
+  title: "Mechanical Keyboard",
+  description: "RGB mechanical keyboard with blue switches",
+  price: 149.99,
+  categoryId: "cat-electronics",
+  sku: "KB-003"
+};
+
+// Import categories first
+await categoryService.importCategory({
+  id: "cat-electronics",
+  type: "Category",
+  name: "Electronics",
+  createdAt: new Date("2022-01-01")
+}, 'internal');
 
 // All formats work with the same service methods!
-const createdRestUser = await userService.createUser(restUser);
-const createdMongoUser = await userService.createUser(mongoUser);
-const createdJsonLdUser = await userService.createUser(jsonLdUser);
+const importedInternal = await productService.importProduct(internalProduct, 'internal');
+const importedJsonLd = await productService.importProduct(jsonLdProduct, 'jsonld');
+const importedRest = await productService.importProduct(restProduct, 'rest');
 
-console.log('Created users:', {
-  rest: createdRestUser.id,
-  mongo: createdMongoUser.id,
-  jsonLd: createdJsonLdUser.id
+console.log('Imported products:', {
+  internal: importedInternal.name,
+  jsonLd: importedJsonLd.name,
+  rest: importedRest.name
 });
 
-// Universal queries work across all formats
-const recentUsers = await userService.findUsersByType("User", new Date("2022-01-01"));
-console.log('Recent users:', recentUsers.length);
+// Get product with full details - works the same for all sources
+const productDetails = await productService.getProductWithDetails(importedJsonLd.id);
+console.log('Product details:', {
+  name: productDetails?.name,
+  category: productDetails?.category?.name,
+  averageRating: productDetails?.averageRating
+});
 
-// Resolve relationships
-const usersWithRoles = await userService.resolveUserRelationships([
-  createdRestUser,
-  createdMongoUser,
-  createdJsonLdUser
-]);
-
-console.log('Users with roles:', usersWithRoles.map(u => ({
-  name: u.name,
-  role: u.role?.name
-})));
+// Find products by category - universal across all sources
+const electronicsProducts = await productService.findProductsByCategory('cat-electronics');
+console.log('Electronics products:', electronicsProducts.map(p => p.name));
 ```
 
-## Step 6: Handling Updates with Optimistic Concurrency
+## Step 5: Handling Updates with Optimistic Concurrency
 
-Let's see how optimistic concurrency control works:
+Let's see how optimistic concurrency control works across different sources:
 
 ```typescript
-// Update a user - this will work with any format
+// Update a product from any source
 try {
-  const updatedUser = await userService.updateUser(createdRestUser, {
-    name: "John Updated",
-    email: "john.updated@example.com"
+  const updatedProduct = await productService.updateProduct(importedJsonLd, {
+    name: "Wireless Mouse Pro",
+    price: 34.99
   });
   
-  console.log('User updated successfully:', updatedUser.name);
-  console.log('New version:', updatedUser.version);
+  console.log('Product updated successfully:', updatedProduct.name);
+  console.log('New version:', updatedProduct.version);
 } catch (error) {
   console.error('Update failed:', error.message);
 }
 
 // Simulate concurrent modification
-const conflictingUser = { ...createdRestUser, version: 999 };
+const conflictingProduct = { ...importedRest, version: 999 };
 try {
-  await userService.updateUser(conflictingUser, {
+  await productService.updateProduct(conflictingProduct, {
     name: "Conflicting Update"
   });
 } catch (error) {
@@ -354,37 +352,51 @@ try {
 }
 ```
 
-## Step 7: Audit Trail
+## Step 6: The Power of Universal Code
 
-Let's check the audit trail:
+Let's demonstrate why Canon is valuable by showing what happens when we add a new data source:
 
 ```typescript
-// The audit service automatically logs all changes
-console.log('Audit logs:', auditService.auditLogs.map(log => ({
-  entityId: log.entityId,
-  action: log.action,
-  timestamp: log.timestamp
-})));
+// New data source: GraphQL API
+const graphqlProduct = {
+  id: "gql-789",
+  __typename: "Product",
+  version: 1,
+  createdAt: "2022-02-01T00:00:00Z",
+  title: "Smart Watch",
+  description: "Fitness tracking smart watch",
+  cost: 199.99,
+  category: "cat-electronics",
+  productCode: "SW-004"
+};
+
+// No new code needed! The same service method works
+const importedGraphql = await productService.importProduct(graphqlProduct, 'rest');
+console.log('✅ GraphQL product imported:', importedGraphql.name);
+
+// All queries work the same
+const allProducts = await productService.findProductsByCategory('cat-electronics');
+console.log('Total products:', allProducts.length);
 ```
 
 ## Key Benefits Demonstrated
 
-This example shows how Canon enables:
+This example shows why Canon is valuable:
 
-1. **Universal Code**: The same service methods work with REST, MongoDB, and JSON-LD formats
-2. **Type Safety**: TypeScript ensures compile-time validation across all formats
-3. **Optimistic Concurrency**: Built-in version checking prevents data conflicts
-4. **Audit Logging**: Automatic tracking of all changes regardless of format
-5. **Relationship Resolution**: Easy handling of entity relationships across formats
-6. **Format Independence**: Business logic doesn't need to know about data format differences
+1. **Universal Import**: Same `importProduct` method works with internal DB, JSON-LD, REST, and GraphQL
+2. **Format Independence**: Business logic doesn't need to know about data source differences
+3. **Easy Integration**: Adding new data sources requires no code changes
+4. **Type Safety**: TypeScript ensures compile-time validation across all formats
+5. **Consistent API**: All products work the same way regardless of source
+6. **Maintainable**: One codebase handles all data sources
 
 ## Conclusion
 
-By using Canon's core axioms, we've built a user management system that:
-- Works seamlessly across multiple data formats
-- Provides type safety and compile-time validation
-- Handles optimistic concurrency control
-- Maintains comprehensive audit trails
-- Resolves entity relationships automatically
+By using Canon's core axioms, we've built a product catalog system that:
+- Seamlessly integrates data from multiple sources (internal DB, JSON-LD API, REST API)
+- Provides a consistent API regardless of data source
+- Handles optimistic concurrency control across all sources
+- Requires no code changes when adding new data sources
+- Maintains type safety and validation across all formats
 
-The system is maintainable, testable, and easily extensible to new data formats without changing the core business logic.
+The system demonstrates the real value of Canon: **universal code that works across diverse data sources without format-specific logic**.
