@@ -133,7 +133,10 @@ import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisf
 
 **Type Definition**:
 ```typescript
-import { Axiom, CanonicalTimestamp, TypeGuard } from '@relational-fabric/canon';
+import { Axiom, TypeGuard } from '@relational-fabric/canon';
+
+// Define canonical timestamp type for your application
+type CanonicalTimestamp = Date;
 
 type TimestampsAxiom = Axiom<{
   $basis: number | string | Date | TypeGuard<unknown>;
@@ -176,7 +179,10 @@ import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisf
 
 **Type Definition**:
 ```typescript
-import { Axiom, CanonicalReference, TypeGuard } from '@relational-fabric/canon';
+import { Axiom, TypeGuard } from '@relational-fabric/canon';
+
+// Define canonical reference type for your application
+type CanonicalReference = string;
 
 type ReferencesAxiom = Axiom<{
   $basis: string | object | string[] | TypeGuard<unknown>;
@@ -215,18 +221,16 @@ import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisf
 
 ## Canonical Types
 
-The core axioms reference several canonical types that provide consistent representations across different formats. These types are provided by `@relational-fabric/canon`:
+The core axioms reference several canonical types that provide consistent representations across different formats. These types must be defined by the axiom author:
 
 ```typescript
-import { CanonicalTimestamp, CanonicalReference, TypeGuard } from '@relational-fabric/canon';
+import { TypeGuard } from '@relational-fabric/canon';
 
-// Canonical timestamp type - always a Date object
-// type CanonicalTimestamp = Date;
+// Define canonical types for your application
+type CanonicalTimestamp = Date;  // Always a Date object
+type CanonicalReference = string;  // Always a string
 
-// Canonical reference type - always a string  
-// type CanonicalReference = string;
-
-// Type guard utility type
+// TypeGuard is provided by @relational-fabric/canon
 // type TypeGuard<T> = (value: unknown) => value is T;
 ```
 

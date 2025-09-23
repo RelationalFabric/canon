@@ -38,7 +38,7 @@ Axioms are type definitions that can be reused for multiple specific axiom types
 
 #### Key-Name Axiom Type
 ```typescript
-import { Axiom, KeyNameAxiom, CanonicalTimestamp, CanonicalReference, TypeGuard } from '@relational-fabric/canon';
+import { Axiom, KeyNameAxiom, TypeGuard } from '@relational-fabric/canon';
 
 // KeyNameAxiom is provided by @relational-fabric/canon
 // type KeyNameAxiom = Axiom<{
@@ -47,6 +47,10 @@ import { Axiom, KeyNameAxiom, CanonicalTimestamp, CanonicalReference, TypeGuard 
 // }, {
 //   key: string;
 // }>;
+
+// Define canonical types for your application
+type CanonicalTimestamp = Date;
+type CanonicalReference = string;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = Axiom<{
