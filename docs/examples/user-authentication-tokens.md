@@ -10,12 +10,12 @@ Without a unified approach, you'd need separate validation code paths for each d
 
 ## The Canon Solution
 
-Use the existing core axioms (`Id` and `Type`) that are already set up by your framework. The canons are already registered - you just need to write universal validation logic.
+Use the existing core axioms (`Id` and `Type`) across multiple canons. The canons are already registered by different parts of your system - you just need to write universal validation logic.
 
 ## The Flow
 
-**Step 1: The canons are already set up**
-Your framework has already registered canons for different data sources:
+**Step 1: Multiple canons are already in use**
+Your system already has canons registered for different data sources:
 - `DatabaseCanon` for internal database entities
 - `RestApiCanon` for REST API responses  
 - `GraphQLCanon` for GraphQL responses
@@ -37,15 +37,27 @@ function canUpdateEntity<T extends Satisfies<'Id' | 'Type'>>(entity: T): boolean
 }
 ```
 
-**Step 3: Use in your update process**
+**Step 3: Use across multiple canons**
 ```typescript
-// Process updates from any source
+// Process updates from any source using any canon
 function processUpdates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[] {
   return entities
     .filter(validateEntity)
     .filter(canUpdateEntity)
     .map(applyUpdate);
 }
+
+// Works with database entities
+const dbEntities = await getDatabaseEntities();
+const validatedDb = processUpdates(dbEntities);
+
+// Works with REST API responses
+const apiEntities = await getRestApiEntities();
+const validatedApi = processUpdates(apiEntities);
+
+// Works with GraphQL responses
+const graphqlEntities = await getGraphQLEntities();
+const validatedGraphQL = processUpdates(graphqlEntities);
 ```
 
 ## The Magic
