@@ -140,20 +140,9 @@ declareCanon('User', {
 
 ### 3. How They Work Together
 
-The universal functions use **both** configurations:
+The universal functions (provided by the axiom implementer) use **both** configurations:
 
 ```typescript
-// Universal functions work with any canon that satisfies the axioms
-function getId<T extends Satisfies<'Id'>>(entity: T): string {
-  const config = inferAxiom('Id', entity);  // Uses runtime config to find the key
-  return entity[config.key] as string;      // Uses type config for validation
-}
-
-function getType<T extends Satisfies<'Type'>>(entity: T): string {
-  const config = inferAxiom('Type', entity);
-  return entity[config.key] as string;
-}
-
 // Usage with the User canon
 const user = {
   id: "user-123",
@@ -188,16 +177,10 @@ function getIdFromMongo(user: any) { return user["_id"]; }
 function getIdFromRest(user: any) { return user["id"]; }
 ```
 
-With Canon, you write universal code:
+With Canon, you use universal functions (provided by axiom implementers):
 
 ```typescript
-// Universal function that works with any format
-function getId<T extends Satisfies<'Id'>>(user: T): string {
-  const config = inferAxiom('Id', user);
-  return user[config.key] as string;
-}
-
-// All formats work with the same function
+// All formats work with the same universal function
 getId(jsonLdUser);  // "user-123" using @id
 getId(mongoUser);   // "user-123" using _id  
 getId(restUser);    // "user-123" using id
