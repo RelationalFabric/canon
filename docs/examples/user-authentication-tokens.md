@@ -2,11 +2,11 @@
 
 ## The Story
 
-You're building a microservices architecture where different services use different authentication mechanisms. Your API gateway needs to extract user information from JWT tokens, OAuth access tokens, and session cookies. Each has completely different structures, but you need the same business logic to work with all of them.
+You're building an update process for a microservices architecture where different services use different authentication mechanisms. As part of your workflow, you need to validate tokens from JWT, OAuth access tokens, and session cookies before processing updates. Each has completely different structures, but you need the same validation logic to work with all of them.
 
 ## The Problem
 
-Without a unified approach, you'd need separate code paths for each token type, leading to code duplication and maintenance nightmares. Your authorization middleware becomes a mess of `if (token.type === 'jwt')` statements.
+Without a unified approach, you'd need separate validation code paths for each token type in your update process, leading to code duplication and maintenance nightmares. Your update middleware becomes a mess of `if (token.type === 'jwt')` statements.
 
 ## The Canon Solution
 
@@ -71,4 +71,4 @@ function isTokenValid<T extends Satisfies<'Id' | 'Type' | 'Expiration'>>(token: 
 
 ## The Magic
 
-The same authorization logic works across JWT tokens (with `sub` and `exp` fields), OAuth tokens (with `user_id` and `expires_at`), and session cookies (with `userId` and `ttl`). You write the business logic once, and it works everywhere.
+The same validation logic works across JWT tokens (with `sub` and `exp` fields), OAuth tokens (with `user_id` and `expires_at`), and session cookies (with `userId` and `ttl`) in your update process. You write the validation logic once, and it works everywhere, making your update workflow robust and maintainable.

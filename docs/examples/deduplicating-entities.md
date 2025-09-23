@@ -2,11 +2,11 @@
 
 ## The Story
 
-You're building a search results page that aggregates data from multiple sources - your product database, a third-party API, and user-generated content. Users are seeing duplicate products because the same item appears with different IDs across sources.
+You're building an update process that needs to deduplicate entities from multiple sources - your product database, a third-party API, and user-generated content. As part of your workflow, you need to identify and merge duplicate products before applying updates, but the same item appears with different IDs across sources.
 
 ## The Problem
 
-Each source has different ways to identify the same logical entity. Your database uses `product_id`, the API uses `sku`, and user content uses `asin`. Without a unified approach, you'd need complex matching logic that breaks every time a new source is added.
+Each source has different ways to identify the same logical entity. Your database uses `product_id`, the API uses `sku`, and user content uses `asin`. Without a unified approach, you'd need complex matching logic in your update process that breaks every time a new source is added.
 
 ## The Canon Solution
 
@@ -73,4 +73,4 @@ function findDuplicates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[][
 
 ## The Magic
 
-The same deduplication algorithm works across your database products (with `name`, `brand`, `price`), API products (with `title`, `manufacturer`, `cost`), and user content (with `productName`, `company`, `amount`). You write the matching logic once, and it works everywhere.
+The same deduplication algorithm works across your database products (with `name`, `brand`, `price`), API products (with `title`, `manufacturer`, `cost`), and user content (with `productName`, `company`, `amount`) in your update process. You write the matching logic once, and it works everywhere, making your update workflow robust and maintainable.
