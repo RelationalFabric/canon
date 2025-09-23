@@ -29,12 +29,12 @@ type EntityCanon = Canon<{
 // Register the canon globally
 declare module '@relational-fabric/canon' {
   interface Canons {
-    entities: EntityCanon;
+    MyProject: EntityCanon;
   }
 }
 
 // Register the runtime configuration
-declareCanon('entities', {
+declareCanon('MyProject', {
   axioms: {
     Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
     Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
@@ -50,7 +50,7 @@ import { registerCanons } from '@relational-fabric/canon';
 
 // Register external canon using registerCanons
 registerCanons({ 
-  jsonLd: jsonLdCanon 
+  JsonLd: jsonLdCanon 
 });
 ```
 
