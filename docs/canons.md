@@ -71,24 +71,24 @@ type UserCanon = Canon<{
   Id: {
     $basis: { id: string };
     key: 'id';
-    $meta: { type: 'uuid'; required: 'true' };
+    $meta: { type: string; required: string };
   };
   Type: {
     $basis: { type: string };
     key: 'type';
-    $meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+    $meta: { enum: string; discriminator: string };
   };
   Version: {
     $basis: { version: number };
     key: 'version';
-    $meta: { default: '1'; min: '1' };
+    $meta: { default: string; min: string };
   };
   Timestamp: {
     $basis: { createdAt: Date };
     key: 'createdAt';
     toCanonical: (value: Date) => value;
     fromCanonical: (value: Date) => value;
-    $meta: { format: 'iso8601' };
+    $meta: { format: string };
   };
 }>;
 
@@ -136,7 +136,7 @@ declareCanon('User', {
 });
 ```
 
-**Why this matters**: The runtime system needs to know how to actually extract values and perform conversions when your code runs.
+**Why this matters**: The runtime system needs to know how to actually extract values and perform conversions when your code runs. Note that the `$meta` values here are the **actual metadata values**, while the type definition above specifies the **types** of those metadata fields.
 
 ### 3. How They Work Together
 
