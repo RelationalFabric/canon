@@ -19,99 +19,41 @@ A Canon is a type that defines its data model using a predefined set of universa
 
 ## The Type System Architecture
 
-### The Augmentable Interface Pattern
+### Why Two Kinds of Configuration?
 
-Canons leverage TypeScript's **augmentable interface** pattern to create a global registry of available axioms. This is the foundational mechanism that enables type-safe composition. See the [Axioms documentation](./axioms.md) for detailed information about how axioms are structured and registered.
+Canons require both **type-level** and **runtime** configurations because they serve different purposes:
 
-```typescript
-// Canon definition uses the augmentable interface
-type Canon<T extends CanonDefinition> = {
-  [K in keyof T]: T[K] extends Axioms[keyof Axioms] 
-    ? T[K] 
-    : never;
-};
+#### Type-Level Configuration
+- **Purpose**: Defines the structure and constraints at compile time
+- **Benefits**: Provides type safety, IntelliSense, and compile-time validation
+- **When**: Used during development to catch errors before runtime
 
-// CanonDefinition constrains what can be used in a Canon
-type CanonDefinition = {
-  [K in keyof Axioms]?: Axioms[K];
-};
-```
+#### Runtime Configuration  
+- **Purpose**: Provides actual values and behavior at execution time
+- **Benefits**: Enables dynamic behavior, format conversion, and runtime flexibility
+- **When**: Used during execution to determine how axioms behave with real data
 
-This pattern ensures that:
-- **Axiom types define structure** - Each axiom type specifies the shape that instances must follow
-- **Axiom registrations enforce types** - The `Axioms` interface ensures only registered axiom types can be used
-- **Canons use axiom keys** - A Canon uses axiom keys to enforce the correct shape
-- **Type safety is enforced** - The compiler ensures only valid axioms can be used in Canon definitions
+This dual approach enables **lazy typing** - you can write type-safe code that works with different data formats without knowing the specific field names or conversion logic at compile time.
 
-### How Axioms Define Structure Requirements
+### How Axioms Work with Canons
 
-When an axiom is registered in the `Axioms` interface, it references an axiom type that defines the **shape** that instances must follow. See the [Axioms documentation](./axioms.md) for detailed information about axiom types and their structure requirements.
+Axioms define the **semantic concepts** that canons implement. Each canon provides specific implementations of these concepts for different data formats. See the [Axioms documentation](./axioms.md) for detailed information about how axioms are structured and registered.
 
-```typescript
-// Now any Canon can use these axiom keys - the shape is enforced by the axiom type
-type MyCanon = Canon<{
-  Id: {
-    $basis: { id: string };
-    key: 'id';
-    $meta: { type: 'uuid'; required: 'true' };
-  };  // Must conform to KeyNameAxiom shape
-  Type: {
-    $basis: { type: string };
-    key: 'type';
-    $meta: { enum: 'user,admin,guest'; discriminator: 'true' };
-  };  // Must conform to KeyNameAxiom shape
-  Version: {
-    $basis: { version: number };
-    key: 'version';
-    $meta: { default: '1'; min: '1' };
-  };  // Must conform to KeyNameAxiom shape
-}>;
-```
-
-Note: The actual axiom structure uses the `Axiom<{...}, {...}>` type pattern as defined in the [Axioms documentation](./axioms.md). The examples above show the simplified structure for clarity.
-
-### CanonDefinition Constraint System
-
-The `CanonDefinition` type ensures that Canons can only use valid axiom keys:
-
-```typescript
-type CanonDefinition = {
-  [K in keyof Axioms]?: Axioms[K];
-};
-
-// This means a Canon can only use axiom keys that exist in the Axioms interface
-type ValidCanon = Canon<{
-  Id: {
-    $basis: { id: string };
-    key: 'id';
-    $meta: { type: 'uuid'; required: 'true' };
-  };  // ✅ Valid - Uses Id axiom key, must conform to KeyNameAxiom shape
-  Type: {
-    $basis: { type: string };
-    key: 'type';
-    $meta: { enum: 'user,admin,guest'; discriminator: 'true' };
-  };  // ✅ Valid - Uses Type axiom key, must conform to KeyNameAxiom shape
-  Invalid: SomeOtherType;  // ❌ Error - Not in Axioms interface
-}>;
-```
-
-Note: Axioms must be registered in the `@relational-fabric/canon` module as shown in the [Axioms documentation](./axioms.md).
-
-This constraint system ensures:
-- **Type safety** - Only registered axiom keys can be used
-- **Shape consistency** - All instances must conform to their axiom type's shape
-- **Discoverability** - Available axioms are clearly defined in the interface
+The key insight is that:
+- **Axioms define what utilities expect** - The interface that universal functions work with
+- **Canons provide specific implementations** - Each canon implements the axioms for its data format
+- **Type safety is enforced** - The compiler ensures only valid axioms can be used in canon definitions
 
 ## Complete Canon Example
 
-A complete canon requires both **type-level definitions** and **runtime configuration**. Here's a working example:
+A complete canon requires both **type-level definitions** and **runtime configuration**. Here's why both are needed and how they work together:
 
 ### 1. Type-Level Definition
 
-First, define the canon type and register it in the global interface:
+The type-level definition provides **compile-time safety** and **IntelliSense support**:
 
 ```typescript
-// Define the canon type
+// Define the canon type - this tells TypeScript what structure to expect
 type UserCanon = Canon<{
   Id: {
     $basis: { id: string };
@@ -137,7 +79,7 @@ type UserCanon = Canon<{
   };
 }>;
 
-// Register the canon type
+// Register the canon type globally
 declare module '@relational-fabric/canon' {
   interface Canons {
     User: UserCanon;
@@ -145,12 +87,14 @@ declare module '@relational-fabric/canon' {
 }
 ```
 
+**Why this matters**: TypeScript can now validate that your canon uses valid axioms and catch errors at compile time.
+
 ### 2. Runtime Configuration
 
-Next, register the runtime configuration:
+The runtime configuration provides **actual behavior** and **format conversion logic**:
 
 ```typescript
-// Register the runtime configuration
+// Register the runtime configuration - this tells the system how to behave at runtime
 declareCanon('User', {
   axioms: {
     Id: {
@@ -179,15 +123,17 @@ declareCanon('User', {
 });
 ```
 
-### 3. Usage
+**Why this matters**: The runtime system needs to know how to actually extract values and perform conversions when your code runs.
 
-Now the canon can be used with universal functions:
+### 3. How They Work Together
+
+The universal functions use **both** configurations:
 
 ```typescript
 // Universal functions work with any canon that satisfies the axioms
 function getId<T extends Satisfies<'Id'>>(entity: T): string {
-  const config = inferAxiom('Id', entity);
-  return entity[config.key] as string;
+  const config = inferAxiom('Id', entity);  // Uses runtime config to find the key
+  return entity[config.key] as string;      // Uses type config for validation
 }
 
 function getType<T extends Satisfies<'Type'>>(entity: T): string {
@@ -203,9 +149,11 @@ const user = {
   createdAt: new Date("2022-01-01")
 };
 
-console.log(getId(user));    // "user-123"
-console.log(getType(user));  // "user"
+console.log(getId(user));    // "user-123" - runtime finds 'id' key
+console.log(getType(user));  // "user" - runtime finds 'type' key
 ```
+
+**The magic**: TypeScript ensures type safety at compile time, while the runtime system provides the actual field names and conversion logic at execution time.
 
 ## Universal Data Operations
 
