@@ -33,23 +33,6 @@ Thank you for your interest in contributing to Canon! This document outlines the
 - Examples: `$basis`, `$meta` - these are reserved and have defined behaviors
 - **Never use `$` prefix for user-defined keys** - this is reserved for Canon's internal use
 
-### Canon Structure Conventions
-
-#### Canon Naming
-- Use **PascalCase** for canon names: `Internal`, `JsonLd`, `Mongo`, `Rest`
-- Use descriptive names that indicate the data format: `JsonLdCanon`, `MongoCanon`
-- Avoid domain-specific names: use `InternalCanon` not `UserCanon`
-
-#### Canon Registration
-- Always register both type-level and runtime configurations
-- Use `declare module '@relational-fabric/canon'` for type registration
-- Use `declareCanon()` for runtime registration
-
-#### Canon Purpose
-- Canons are for **data format differences**, not domain modeling
-- Most codebases have **one internal canon** (90% of the time)
-- Add new canons only when receiving **external data** that looks different
-- Don't create canons for domain concepts (use ontologies/schemas instead)
 
 ### Documentation Conventions
 
