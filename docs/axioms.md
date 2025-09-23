@@ -114,6 +114,51 @@ function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Time
 
 This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, automatically converting between different formats.
 
+## Understanding $basis Runtime Representation
+
+The `$basis` field in runtime configurations uses a **TypeGuard pattern** to ensure type safety and provide runtime validation. This is implemented as `TypeGuard<Satisfies<AxiomLabel, CanonLabel>>` where:
+
+- **`AxiomLabel`** - The specific axiom being configured (e.g., 'Id', 'Type', 'Version')
+- **`CanonLabel`** - The specific canon being configured (e.g., 'Internal', 'JsonLd', 'Mongo')
+- **`Satisfies`** - Ensures the configuration matches the expected axiom structure
+
+### How $basis TypeGuard Works
+
+The runtime representation of `$basis` is not just a simple object - it's a **TypeGuard predicate** that:
+
+1. **Validates Structure**: Ensures the runtime configuration matches the expected axiom type structure
+2. **Provides Type Safety**: TypeScript can infer the correct types at compile time
+3. **Enables Runtime Inference**: The system can automatically determine field names and conversion logic
+
+### Example: $basis TypeGuard in Action
+
+```typescript
+// Type-level definition specifies the structure
+type IdAxiom = {
+  $basis: { id: string };
+  key: 'id';
+  $meta: { type: string; required: string };
+}
+
+// Runtime configuration with TypeGuard validation
+const runtimeConfig = {
+  Id: {
+    $basis: { id: 'string' },  // TypeGuard<Satisfies<'Id', 'Internal'>>
+    key: 'id',
+    $meta: { type: 'uuid'; required: 'true' },
+  }
+};
+```
+
+**What happens at runtime:**
+1. The TypeGuard validates that `{ id: 'string' }` matches the expected `{ id: string }` structure
+2. The system can infer that the `id` field should be accessed as a string
+3. The `inferAxiom()` function uses this information to extract values correctly
+
+### Why This Matters
+
+This TypeGuard approach enables **lazy typing** - your code can work with semantic concepts without knowing the specific field names or conversion logic at compile time, while maintaining full type safety and runtime validation.
+
 ## Complete Example: The Id Axiom
 
 Here's a complete working example showing all three parts of an axiom description:

@@ -59,6 +59,8 @@ The key insight is that:
 
 ## Canon Registration Patterns
 
+> **Important**: Canon supports two distinct registration patterns. Understanding when to use each pattern is crucial for effective canon management.
+
 Canon supports two complementary registration patterns, each designed for different use cases:
 
 ### Declarative Style (Local Canons)

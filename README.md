@@ -132,7 +132,7 @@ For comprehensive guides and detailed information about using Canon, see the [Do
 
 - **[Axioms](./docs/axioms.md)** - Learn about the fundamental building blocks that enable lazy typing
 - **[Core Axioms](./docs/core-axioms.md)** - Explore the essential axiom set (Id, Type, Version, Timestamps, References)
-- **[Canons](./docs/canons.md)** - Understand how to create universal type blueprints for different data formats
+- **[Canons](./docs/canons.md)** - Understand how to create universal type blueprints for different data formats, including registration patterns
 
 ### Advanced Topics
 
