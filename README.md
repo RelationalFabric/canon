@@ -15,9 +15,9 @@ Canon provides a framework for treating types as a shared, foundational resource
     - **Hashing**: `object-hash`
     - **Immutability**: `immutable.js`
 - **Axiomatic Primitives**: A `Canon` is a type that defines its data model using a predefined set of universal axioms. Each axiom has a rich configuration that includes:
-    - `basis`: The underlying TypeScript type.
+    - `$basis`: The underlying TypeScript type.
     - `key`: The canonical name for the most important field.
-    - `meta`: An extensible type that defines the metadata for the axiom.
+    - `$meta`: An extensible type that defines the metadata for the axiom.
 - **Lazy Types**: A `Canon` is a type blueprint that can be defined once and be universally understood, regardless of where or when it is consumed. This enables a form of "lazy typing," where the full details of a type can be deferred, yet its canonical identity remains constant. The `canon` key serves as the type system's **discriminator**, allowing it to correctly identify and apply the correct type to a given configuration.
 
 ### Usage
@@ -31,17 +31,17 @@ declare module '@relational-fabric/canon' {
   interface Canons {
     myProject: Canon<{
       Id: {
-        basis: { id: string };
+        $basis: { id: string };
         key: 'id';
-        meta: { type: 'uuid' };
+        $meta: { type: 'uuid' };
       };
       type: {
-        basis: { type: string };
+        $basis: { type: string };
         key: 'type';
-        meta: { description: string };
+        $meta: { description: string };
       };
       version: {
-        basis: { version: number };
+        $basis: { version: number };
         key: 'version';
       };
     }>;
@@ -52,17 +52,17 @@ declare module '@relational-fabric/canon' {
 declareCanon('myProject', {
   axioms: {
     Id: {
-      basis: { id: 'string' },
+      $basis: { id: 'string' },
       key: 'id',
-      meta: { type: 'uuid' },
+      $meta: { type: 'uuid' },
     },
     type: {
-      basis: { type: 'string' },
+      $basis: { type: 'string' },
       key: 'type',
-      meta: { description: '...' },
+      $meta: { description: '...' },
     },
     version: {
-      basis: { version: 'number' },
+      $basis: { version: 'number' },
       key: 'version',
     },
   },
@@ -84,7 +84,7 @@ To facilitate this, the library provides a simple pattern for exporting and regi
 
     export type MyCanon = Canon<{
       Id: {
-        basis: { id: string };
+        $basis: { id: string };
         key: 'id';
       };
     }>;
@@ -92,7 +92,7 @@ To facilitate this, the library provides a simple pattern for exporting and regi
     export default defineCanon<MyCanon>({
       axioms: {
         Id: {
-          basis: { id: 'string' },
+          $basis: { id: 'string' },
           key: 'id',
         },
       },

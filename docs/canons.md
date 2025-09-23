@@ -51,46 +51,28 @@ This pattern ensures that:
 
 ### How Axioms Define Structure Requirements
 
-When an axiom is registered in the `Axioms` interface, it references an axiom type that defines the **shape** that instances must follow:
+When an axiom is registered in the `Axioms` interface, it references an axiom type that defines the **shape** that instances must follow. See the [Axioms documentation](./axioms.md) for detailed information about axiom types and their structure requirements.
 
 ```typescript
-// First, define axiom types
-type KeyNameAxiom = {
-  base: Record<string, unknown>;
-  key: string;
-  meta?: Record<string, string>;
-};
-
-// Then register axioms in the global interface
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Id: KeyNameAxiom;        // Id must conform to KeyNameAxiom shape
-    Type: KeyNameAxiom;      // Type must conform to KeyNameAxiom shape
-    Version: KeyNameAxiom;   // Version must conform to KeyNameAxiom shape
-  }
-}
-
 // Now any Canon can use these axiom keys - the shape is enforced by the axiom type
 type MyCanon = Canon<{
   Id: {
-    base: { id: string };
+    $basis: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: 'true' };
+    $meta: { type: 'uuid'; required: 'true' };
   };  // Must conform to KeyNameAxiom shape
   Type: {
-    base: { type: string };
+    $basis: { type: string };
     key: 'type';
-    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+    $meta: { enum: 'user,admin,guest'; discriminator: 'true' };
   };  // Must conform to KeyNameAxiom shape
   Version: {
-    base: { version: number };
+    $basis: { version: number };
     key: 'version';
-    meta: { default: '1'; min: '1' };
+    $meta: { default: '1'; min: '1' };
   };  // Must conform to KeyNameAxiom shape
 }>;
 ```
-
-The axiom type defines the **structure** that instances must conform to, and the axiom key enforces this conformance.
 
 ### CanonDefinition Constraint System
 
@@ -104,14 +86,14 @@ type CanonDefinition = {
 // This means a Canon can only use axiom keys that exist in the Axioms interface
 type ValidCanon = Canon<{
   Id: {
-    base: { id: string };
+    $basis: { id: string };
     key: 'id';
-    meta: { type: 'uuid'; required: 'true' };
+    $meta: { type: 'uuid'; required: 'true' };
   };  // ✅ Valid - Uses Id axiom key, must conform to KeyNameAxiom shape
   Type: {
-    base: { type: string };
+    $basis: { type: string };
     key: 'type';
-    meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+    $meta: { enum: 'user,admin,guest'; discriminator: 'true' };
   };  // ✅ Valid - Uses Type axiom key, must conform to KeyNameAxiom shape
   Invalid: SomeOtherType;  // ❌ Error - Not in Axioms interface
 }>;
@@ -134,28 +116,28 @@ A canon provides specific implementations of axioms for a given data model:
 // JSON-LD Canon - specific implementation for JSON-LD format
 type JsonLdCanon = Canon<{
   Id: {
-    basis: { '@id': string };
+    $basis: { '@id': string };
     key: '@id';
-    meta: { format: 'json-ld' };
+    $meta: { format: 'json-ld' };
   };  // Specific implementation of Id axiom for JSON-LD
   Type: {
-    basis: { '@type': string };
+    $basis: { '@type': string };
     key: '@type';
-    meta: { format: 'json-ld' };
+    $meta: { format: 'json-ld' };
   };  // Specific implementation of Type axiom for JSON-LD
 }>;
 
 // Standard Canon - specific implementation for standard format
 type StandardCanon = Canon<{
   Id: {
-    basis: { id: string };
+    $basis: { id: string };
     key: 'id';
-    meta: { format: 'standard' };
+    $meta: { format: 'standard' };
   };  // Specific implementation of Id axiom for standard format
   Type: {
-    basis: { type: string };
+    $basis: { type: string };
     key: 'type';
-    meta: { format: 'standard' };
+    $meta: { format: 'standard' };
   };  // Specific implementation of Type axiom for standard format
 }>;
 ```
@@ -238,16 +220,16 @@ The magic happens when you have multiple canons registered at runtime, each repr
 declare module '@relational-fabric/canon' {
   interface Canons {
     JsonLd: Canon<{
-      Id: { basis: { '@id': string }; key: '@id'; meta: { format: 'json-ld' } };
-      Type: { basis: { '@type': string }; key: '@type'; meta: { format: 'json-ld' } };
+      Id: { $basis: { '@id': string }; key: '@id'; $meta: { format: 'json-ld' } };
+      Type: { $basis: { '@type': string }; key: '@type'; $meta: { format: 'json-ld' } };
     }>;
     Mongo: Canon<{
-      Id: { basis: { '_id': string }; key: '_id'; meta: { format: 'mongodb' } };
-      Type: { basis: { '_type': string }; key: '_type'; meta: { format: 'mongodb' } };
+      Id: { $basis: { '_id': string }; key: '_id'; $meta: { format: 'mongodb' } };
+      Type: { $basis: { '_type': string }; key: '_type'; $meta: { format: 'mongodb' } };
     }>;
     Rest: Canon<{
-      Id: { basis: { 'id': string }; key: 'id'; meta: { format: 'rest' } };
-      Type: { basis: { 'type': string }; key: 'type'; meta: { format: 'rest' } };
+      Id: { $basis: { 'id': string }; key: 'id'; $meta: { format: 'rest' } };
+      Type: { $basis: { 'type': string }; key: 'type'; $meta: { format: 'rest' } };
     }>;
   }
 }
@@ -406,12 +388,12 @@ Types can reference each other without circular dependencies:
 declare module '@relational-fabric/canon' {
   interface Canons {
     User: Canon<{
-      Id: { basis: { id: string }; key: 'id' };
-      Profile: { basis: { profileId: string }; key: 'profileId' };
+      Id: { $basis: { id: string }; key: 'id' };
+      Profile: { $basis: { profileId: string }; key: 'profileId' };
     }>;
     Profile: Canon<{
-      Id: { basis: { profileId: string }; key: 'profileId' };
-      Owner: { basis: { userId: string }; key: 'userId' };
+      Id: { $basis: { profileId: string }; key: 'profileId' };
+      Owner: { $basis: { userId: string }; key: 'userId' };
     }>;
   }
 }
@@ -475,12 +457,12 @@ The runtime system efficiently manages canon configurations:
 Canons can extend and compose other canons:
 ```typescript
 type BaseCanon = Canon<{
-  Id: { basis: { id: string }; key: 'id' };
+  Id: { $basis: { id: string }; key: 'id' };
 }>;
 
 type ExtendedCanon = Canon<{
-  Id: { basis: { id: string }; key: 'id' };
-  Name: { basis: { name: string }; key: 'name' };
+  Id: { $basis: { id: string }; key: 'id' };
+  Name: { $basis: { name: string }; key: 'name' };
 }>;
 ```
 
@@ -488,9 +470,9 @@ type ExtendedCanon = Canon<{
 Axioms can be conditionally applied based on runtime context:
 ```typescript
 type ConditionalCanon<TEnv extends 'dev' | 'prod'> = Canon<{
-  Id: { basis: { id: string }; key: 'id' };
+  Id: { $basis: { id: string }; key: 'id' };
   Debug: TEnv extends 'dev' 
-    ? { basis: { debug: boolean }; key: 'debug' }
+    ? { $basis: { debug: boolean }; key: 'debug' }
     : never;
 }>;
 ```

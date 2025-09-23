@@ -6,6 +6,7 @@ Welcome to the Canon documentation. This directory contains comprehensive guides
 
 - [Canons](./canons.md) - Understanding Canon types and their implementation
 - [Axioms](./axioms.md) - Deep dive into axiomatic primitives and their role in the type system
+- [Examples](./examples.md) - Comprehensive examples of core axioms in practice
 
 ## Quick Start
 
