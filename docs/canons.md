@@ -21,15 +21,9 @@ A Canon is a type that defines its data model using a predefined set of universa
 
 ### The Augmentable Interface Pattern
 
-Canons leverage TypeScript's **augmentable interface** pattern to create a global registry of available axioms. This is the foundational mechanism that enables type-safe composition:
+Canons leverage TypeScript's **augmentable interface** pattern to create a global registry of available axioms. This is the foundational mechanism that enables type-safe composition. See the [Axioms documentation](./axioms.md) for detailed information about how axioms are structured and registered.
 
 ```typescript
-// Global augmentable interface for axioms
-interface Axioms {
-  // Axioms are registered here by implementors
-  // Each axiom defines both type and runtime requirements
-}
-
 // Canon definition uses the augmentable interface
 type Canon<T extends CanonDefinition> = {
   [K in keyof T]: T[K] extends Axioms[keyof Axioms] 
@@ -74,6 +68,8 @@ type MyCanon = Canon<{
 }>;
 ```
 
+Note: The actual axiom structure uses the `Axiom<{...}, {...}>` type pattern as defined in the [Axioms documentation](./axioms.md). The examples above show the simplified structure for clarity.
+
 ### CanonDefinition Constraint System
 
 The `CanonDefinition` type ensures that Canons can only use valid axiom keys:
@@ -98,6 +94,8 @@ type ValidCanon = Canon<{
   Invalid: SomeOtherType;  // ❌ Error - Not in Axioms interface
 }>;
 ```
+
+Note: Axioms must be registered in the `@relational-fabric/canon` module as shown in the [Axioms documentation](./axioms.md).
 
 This constraint system ensures:
 - **Type safety** - Only registered axiom keys can be used
@@ -144,29 +142,24 @@ type StandardCanon = Canon<{
 
 ### Runtime Configuration
 
-The runtime config provides the actual values needed at runtime:
+The runtime config provides the actual values needed at runtime. See the [Axioms documentation](./axioms.md) for detailed information about how runtime configuration works with the axiom system.
 
 ```typescript
-interface AxiomRuntime {
-  [K in keyof Axioms]: {
-    keyValue: string;  // The actual key value at runtime
-    metaValues: Record<string, string>;  // The actual meta values at runtime
-  };
-}
-
-// Example runtime configuration
-declare module '@relational-fabric/canon' {
-  interface AxiomRuntime {
+// Example runtime configuration for a canon
+declareCanon('myProject', {
+  axioms: {
     Id: {
-      keyValue: 'id';  // Runtime value for the key
-      metaValues: { type: 'uuid'; required: 'true' };
-    };
+      $basis: { id: 'string' },
+      key: 'id',
+      $meta: { type: 'uuid' },
+    },
     Type: {
-      keyValue: 'type';
-      metaValues: { enum: 'user,admin,guest'; discriminator: 'true' };
-    };
-  }
-}
+      $basis: { type: 'string' },
+      key: 'type',
+      $meta: { enum: 'user,admin,guest'; discriminator: 'true' },
+    },
+  },
+});
 ```
 
 ### Type Safety Through Axiom Interface
