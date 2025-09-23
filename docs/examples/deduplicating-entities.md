@@ -48,9 +48,8 @@ declareCanon('entities', {
 import jsonLdCanon, { type JsonLdCanon } from '@relational-fabric/canon/jsonld';
 import { registerCanons } from '@relational-fabric/canon';
 
-// Register all canons together
+// Register external canon using registerCanons
 registerCanons({ 
-  entities: entityCanon,
   jsonLd: jsonLdCanon 
 });
 ```
