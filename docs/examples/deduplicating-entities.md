@@ -57,15 +57,15 @@ registerCanons({
 **Step 4: The usage**
 ```typescript
 // One function works with all entity types using just core axioms
-function findDuplicates(entities: any[]): any[][] {
-  const groups = new Map();
+function findDuplicates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[][] {
+  const groups = new Map<string, T[]>();
   entities.forEach(entity => {
     const id = idOf(entity);
     const type = typeOf(entity);
     const groupKey = `${type}-${id}`;
     
     if (!groups.has(groupKey)) groups.set(groupKey, []);
-    groups.get(groupKey).push(entity);
+    groups.get(groupKey)!.push(entity);
   });
   return Array.from(groups.values()).filter(group => group.length > 1);
 }

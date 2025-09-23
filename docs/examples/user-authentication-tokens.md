@@ -49,18 +49,19 @@ declareCanon('auth', {
 **Step 3: Implement the API for the new axioms**
 ```typescript
 function expirationOf<T extends Satisfies<'Expiration'>>(token: T): number {
-  return (token as any).expires;
+  return (token as Record<string, unknown>).expires as number;
 }
 
 function permissionsOf<T extends Satisfies<'Permissions'>>(token: T): string[] {
-  return (token as any).permissions || [];
+  const permissions = (token as Record<string, unknown>).permissions;
+  return Array.isArray(permissions) ? permissions as string[] : [];
 }
 ```
 
 **Step 4: The usage**
 ```typescript
 // One function works with all token types
-function isTokenValid(token: any): boolean {
+function isTokenValid<T extends Satisfies<'Id' | 'Type' | 'Expiration'>>(token: T): boolean {
   const id = idOf(token);
   const type = typeOf(token);
   const expires = expirationOf(token);
