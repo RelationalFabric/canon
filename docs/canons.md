@@ -1,5 +1,18 @@
 # Canons: Universal Type Blueprints
 
+## Prerequisites
+
+**Before reading this document, please read the [Axioms documentation](./axioms.md).** 
+
+Canons build directly on the foundation of axioms. Understanding how axioms work is essential to understanding canons. The axioms document explains:
+
+- What axioms are and how they define semantic concepts
+- How the axiom type system works with `$basis` and `$meta`
+- How axioms are registered and used
+- The core axiom types like `KeyNameAxiom` and `TimestampAxiom`
+
+Without this foundation, the concepts in this document won't make sense.
+
 ## Overview
 
 A **Canon** is a universal type blueprint that serves as a foundational building block for robust, data-centric applications. Canons solve the "empty room problem" by providing a consistent set of initial design decisions and type primitives that can be shared and composed across any project.
