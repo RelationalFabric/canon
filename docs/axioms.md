@@ -46,7 +46,7 @@ type KeyNameAxiom = Axiom<{
 }>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
-type TimestampAxiom = Axiom<{
+type TimestampsAxiom = Axiom<{
   // The timestamp type - could be number, string, Date, or custom type
   $basis: number | string | Date | TypeGuard<unknown>;
   // Way to convert from this timestamp to standard value
@@ -57,7 +57,7 @@ type TimestampAxiom = Axiom<{
   key: string;
 }>;
 
-type ReferenceAxiom = Axiom<{
+type ReferencesAxiom = Axiom<{
   // The reference type - could be string, object, array, or custom type
   $basis: string | object | string[] | TypeGuard<unknown>;
   // Way to convert from this reference to standard value
@@ -78,8 +78,8 @@ declare module '@relational-fabric/canon' {
     Id: KeyNameAxiom;        // Id concept - might be 'id', '@id', '_id', etc.
     Type: KeyNameAxiom;      // Type concept - might be 'type', '@type', '_type', etc.
     Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
-    Timestamp: TimestampAxiom; // Timestamp concept - might be number, string, Date, etc.
-    Reference: ReferenceAxiom; // Reference concept - might be string, object, array, etc.
+    Timestamps: TimestampsAxiom; // Timestamps concept - might be number, string, Date, etc.
+    References: ReferencesAxiom; // References concept - might be string, object, array, etc.
   }
 }
 ```
@@ -106,8 +106,8 @@ function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
   return x[config.key] as AxiomValue<'Id'>;
 }
 
-function timestampOf<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timestamp'> {
-  const config = inferAxiom('Timestamp', x);
+function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
+  const config = inferAxiom('Timestamps', x);
   return config.toCanonical(x[config.key]);
 }
 ```

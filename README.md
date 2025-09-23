@@ -15,9 +15,11 @@ Canon provides a framework for treating types as a shared, foundational resource
     - **Hashing**: `object-hash`
     - **Immutability**: `immutable.js`
 - **Axiomatic Primitives**: A `Canon` is a type that defines its data model using a predefined set of universal axioms. Each axiom has a rich configuration that includes:
-    - `$basis`: The underlying TypeScript type.
+    - `$basis`: The underlying TypeScript type with TypeGuard validation.
     - `key`: The canonical name for the most important field.
     - `$meta`: An extensible type that defines the metadata for the axiom.
+    
+    For more information about how `$basis` TypeGuard validation works, see the [Canons documentation](./docs/canons.md).
 - **Lazy Types**: A `Canon` is a type blueprint that can be defined once and be universally understood, regardless of where or when it is consumed. This enables a form of "lazy typing," where the full details of a type can be deferred, yet its canonical identity remains constant. The `canon` key serves as the type system's **discriminator**, allowing it to correctly identify and apply the correct type to a given configuration.
 
 ### Usage
@@ -125,6 +127,17 @@ This pattern ensures that a canon's definition remains a single source of truth,
 ## Documentation
 
 For comprehensive guides and detailed information about using Canon, see the [Documentation](./docs/README.md) directory.
+
+### Quick Start Guides
+
+- **[Axioms](./docs/axioms.md)** - Learn about the fundamental building blocks that enable lazy typing
+- **[Core Axioms](./docs/core-axioms.md)** - Explore the essential axiom set (Id, Type, Version, Timestamps, References)
+- **[Canons](./docs/canons.md)** - Understand how to create universal type blueprints for different data formats
+
+### Advanced Topics
+
+- **[Examples](./docs/examples.md)** - See real-world usage patterns and integration examples
+- **[Contributing](./CONTRIBUTING.md)** - Learn about naming conventions and development guidelines
 
 ## Contributing
 

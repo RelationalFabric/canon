@@ -57,6 +57,86 @@ The key insight is that:
 - **Canons provide specific implementations** - Each canon implements the axioms for its data format
 - **Type safety is enforced** - The compiler ensures only valid axioms can be used in canon definitions
 
+## Canon Registration Patterns
+
+Canon supports two complementary registration patterns, each designed for different use cases:
+
+### Declarative Style (Local Canons)
+
+The **Declarative Style** is ideal for canons that are defined and used within a single project or module. This pattern uses `declareCanon()` to register both the type and runtime configuration in one place.
+
+**Use Cases:**
+- Internal data formats specific to your application
+- Project-specific canon configurations
+- Simple, self-contained canon definitions
+- When you want everything in one place for clarity
+
+**Example:**
+```typescript
+// Define and register in one step
+declareCanon('myProject', {
+  axioms: {
+    Id: {
+      $basis: { id: 'string' },
+      key: 'id',
+      $meta: { type: 'uuid' },
+    },
+    Type: {
+      $basis: { type: 'string' },
+      key: 'type',
+      $meta: { description: 'Entity type' },
+    },
+  },
+});
+```
+
+### Module Style (Shareable Canons)
+
+The **Module Style** is designed for canons that will be shared across multiple projects or published as reusable modules. This pattern separates type definition from runtime configuration, making canons more portable and composable.
+
+**Use Cases:**
+- Canons that will be shared between projects
+- Published libraries that provide canon definitions
+- Complex canons with multiple dependencies
+- When you want to separate concerns for better maintainability
+
+**Example:**
+```typescript
+// my-module/canon.ts - Define and export
+export type MyCanon = Canon<{
+  Id: { $basis: { id: string }; key: 'id' };
+  Type: { $basis: { type: string }; key: 'type' };
+}>;
+
+export default defineCanon<MyCanon>({
+  axioms: {
+    Id: { $basis: { id: 'string' }, key: 'id' },
+    Type: { $basis: { type: 'string' }, key: 'type' },
+  },
+});
+```
+
+```typescript
+// main.ts - Import and register
+import myCanon, { type MyCanon } from 'my-module/canon';
+import { registerCanons } from '@relationalfabric/canon';
+
+declare module '@relationalfabric/canon' {
+  interface Canons {
+    myCanon: MyCanon;
+  }
+}
+
+registerCanons({ myCanon });
+```
+
+### Choosing the Right Pattern
+
+- **Use Declarative Style** when your canon is specific to one project and you want simplicity
+- **Use Module Style** when your canon will be shared, published, or needs to be composed with other canons
+
+Both patterns result in the same runtime behavior - the choice is about organization and reusability.
+
 ## Complete Canon Example
 
 A complete canon requires both **type-level definitions** and **runtime configuration**. Here's why both are needed and how they work together:
@@ -129,6 +209,38 @@ declareCanon('Internal', {
 ```
 
 **Why this matters**: The runtime system needs to know how to actually extract values and perform conversions when your code runs. Note that the `$meta` values here are the **actual metadata values**, while the type definition above specifies the **types** of those metadata fields.
+
+### Understanding $basis TypeGuard Implementation
+
+The `$basis` field in runtime configurations uses a **TypeGuard pattern** to ensure type safety at runtime. This is implemented as `TypeGuard<Satisfies<AxiomLabel, CanonLabel>>` where:
+
+- **`AxiomLabel`** - The specific axiom being configured (e.g., 'Id', 'Type', 'Version')
+- **`CanonLabel`** - The specific canon being configured (e.g., 'Internal', 'JsonLd', 'Mongo')
+- **`Satisfies`** - Ensures the configuration matches the expected axiom structure
+
+**How it works:**
+1. **Compile-time**: TypeScript validates that your `$basis` configuration matches the expected axiom type
+2. **Runtime**: The TypeGuard ensures the actual values conform to the expected structure
+3. **Inference**: The system can automatically determine the correct field names and conversion logic
+
+**Example:**
+```typescript
+// Type-level definition specifies the structure
+Id: {
+  $basis: { id: string };
+  key: 'id';
+  $meta: { type: string; required: string };
+}
+
+// Runtime configuration provides actual values with TypeGuard validation
+Id: {
+  $basis: { id: 'string' },  // TypeGuard ensures this matches { id: string }
+  key: 'id',
+  $meta: { type: 'uuid'; required: 'true' },
+}
+```
+
+This dual approach enables **lazy typing** - your code can work with semantic concepts without knowing the specific field names or conversion logic at compile time, while maintaining full type safety.
 
 ### 3. How They Work Together
 
