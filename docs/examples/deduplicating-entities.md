@@ -18,7 +18,16 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 - `Id` and `Type` from core axioms (already provided)
 - No new axioms needed!
 
-**Step 2: The usage**
+**Step 2: Define the Canon**
+```typescript
+// Define the canon for this example using core axioms
+type DeduplicationCanon = Canon<{
+  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
+  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
+}>;
+```
+
+**Step 3: The usage**
 ```typescript
 // One function works with all entity types using just core axioms
 function findDuplicates(entities: any[]): any[][] {
