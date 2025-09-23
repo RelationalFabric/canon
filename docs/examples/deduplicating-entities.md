@@ -18,54 +18,40 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 - `Id` and `Type` from core axioms (already provided)
 - No new axioms needed!
 
-**Step 2: Define the Canons**
+**Step 2: Define the Canon**
 ```typescript
-// Define the canon for internal products
-type ProductCanon = Canon<{
+// Define the canon for your information model
+type EntityCanon = Canon<{
   Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
   Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
 }>;
 
-// Define the canon for external JSON-LD products
-type JsonLdProductCanon = Canon<{
-  Id: { $basis: { '@id': string }; key: '@id'; $meta: { type: string; required: string } };
-  Type: { $basis: { '@type': string }; key: '@type'; $meta: { enum: string; discriminator: string } };
-}>;
-
-// Register both canons globally
+// Register the canon globally
 declare module '@relational-fabric/canon' {
   interface Canons {
-    products: ProductCanon;
-    jsonLdProducts: JsonLdProductCanon;
+    entities: EntityCanon;
   }
 }
 
-// Register the runtime configurations
-declareCanon('products', {
+// Register the runtime configuration
+declareCanon('entities', {
   axioms: {
     Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
     Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
-  },
-});
-
-declareCanon('jsonLdProducts', {
-  axioms: {
-    Id: { $basis: { '@id': 'string' }, key: '@id', $meta: { type: 'string', required: 'true' } },
-    Type: { $basis: { '@type': 'string' }, key: '@type', $meta: { enum: 'string', discriminator: 'string' } },
   },
 });
 ```
 
 **Step 3: Import and register external canons**
 ```typescript
-// Import external canon from a module
-import jsonLdCanon, { type JsonLdProductCanon } from '@my-org/json-ld-canon';
+// Import JSON-LD canon from Canon
+import jsonLdCanon, { type JsonLdCanon } from '@relational-fabric/canon/jsonld';
 import { registerCanons } from '@relational-fabric/canon';
 
 // Register all canons together
 registerCanons({ 
-  products: productCanon,
-  jsonLdProducts: jsonLdCanon 
+  entities: entityCanon,
+  jsonLd: jsonLdCanon 
 });
 ```
 
