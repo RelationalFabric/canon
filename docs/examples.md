@@ -1,49 +1,57 @@
-# Canon Examples: A Complete Workflow
+# Canon Examples: Tree Walk Over Mixed Entities
 
 ## Overview
 
-This document walks through a complete, real-world example of using Canon's core axioms. We'll build a product catalog system that integrates data from multiple sources: our internal database, a JSON-LD API, and a REST API. This demonstrates why Canon is valuable - without it, you'd need format-specific code for each source.
+This document demonstrates a real-world scenario where we need to walk a tree of mixed entities from different sources and shapes. We'll define custom axioms for parent/child relationships and show how Canon enables uniform access across diverse data structures.
 
 ## The Scenario
 
-Imagine you're building a product catalog system that needs to:
-- Display products from your internal database (standard format)
-- Integrate products from a JSON-LD e-commerce API
-- Import products from a REST API
-- Handle relationships between products, categories, and reviews
-- Support versioning and audit trails across all sources
+Imagine you're building a file system browser that needs to:
+- Display a unified tree view of files and folders from multiple sources
+- Handle different data formats: internal database, JSON-LD API, REST API
+- Support parent/child relationships across all sources
+- Walk the tree uniformly regardless of source or shape
 
-Without Canon, you'd need separate code paths for each data source. With Canon, you write universal code that works across all formats.
+Without Canon, you'd need separate tree-walking logic for each data source. With Canon, you write universal tree operations that work across all formats.
 
 ## Step 1: Setting Up Our Application
 
-We'll start by importing the core axioms. The core axioms (Id, Type, Version, Timestamps, References) are already provided by Canon.
+We'll start by importing the core axioms and defining our custom axioms for parent/child relationships.
 
 ```typescript
 import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon';
-import type { Satisfies } from '@relational-fabric/canon';
-```
+import type { Satisfies, Axiom } from '@relational-fabric/canon';
 
-## Step 2: Creating Our Data Models
+// Define custom axioms for parent/child relationships
+type ParentAxiom = Axiom<{
+  $basis: Record<string, unknown>;
+  key: string;
+}, {
+  key: string;
+}>;
 
-Let's define our application's data models that can work with any data format.
+type ChildrenAxiom = Axiom<{
+  $basis: Record<string, unknown>;
+  key: string;
+}, {
+  key: string;
+}>;
 
-```typescript
-// Our internal models that work with any data format
-type Product = {
-  id: string;
-  type: string;
-  version: number;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string;
-  price: number;
-  categoryId: string;
-  sku: string;
-} & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>;
+// Register our custom axioms
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    Id: KeyNameAxiom;
+    Type: KeyNameAxiom;
+    Version: KeyNameAxiom;
+    Timestamps: TimestampsAxiom;
+    References: ReferencesAxiom;
+    Parent: ParentAxiom;
+    Children: ChildrenAxiom;
+  }
+}
 
-type Category = {
+// Define our universal tree node interface
+type TreeNode = {
   id: string;
   type: string;
   version: number;
@@ -51,148 +59,217 @@ type Category = {
   updatedAt: Date;
   name: string;
   parentId?: string;
-} & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>;
-
-type Review = {
-  id: string;
-  type: string;
-  version: number;
-  createdAt: Date;
-  updatedAt: Date;
-  productId: string;
-  userId: string;
-  rating: number;
-  comment: string;
-} & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>;
+  children?: string[];
+  size?: number;
+  mimeType?: string;
+} & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'Parent' | 'Children'>;
 
 // Define application-specific types
-interface ProductWithDetails extends Product {
-  category?: Category;
-  reviews?: Review[];
-  averageRating?: number;
+interface TreeWalkResult {
+  node: TreeNode;
+  depth: number;
+  path: string[];
+  source: string;
 }
 
-interface ValidationResult {
-  valid: boolean;
-  error?: string;
+interface TreeStats {
+  totalNodes: number;
+  totalSize: number;
+  maxDepth: number;
+  sourceCounts: Record<string, number>;
 }
 ```
 
-## Step 3: Building Universal Services
+## Step 2: Building Universal Tree Services
 
-Now we'll create services that work with any data format using the core axioms.
+Now we'll create services that can walk trees uniformly across all data sources.
 
-### Product Service
+### Tree Service
 
 ```typescript
-class ProductService {
-  private products: Product[] = [];
-  private categories: Category[] = [];
-  private reviews: Review[] = [];
+class TreeService {
+  private nodes: Map<string, TreeNode> = new Map();
+  private roots: Set<string> = new Set();
 
-  // Import product from any source - this is where Canon shines!
-  async importProduct<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>>(
-    productData: T,
+  // Import a tree node from any source - this is where Canon shines!
+  async importNode<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'Parent' | 'Children'>>(
+    nodeData: T,
     source: 'internal' | 'jsonld' | 'rest'
-  ): Promise<Product> {
-    const id = idOf(productData);
-    const type = typeOf(productData);
-    const version = versionOf(productData) || 1;
-    const timestamp = timestampsOf(productData) || new Date();
+  ): Promise<TreeNode> {
+    const id = idOf(nodeData);
+    const type = typeOf(nodeData);
+    const version = versionOf(nodeData) || 1;
+    const timestamp = timestampsOf(nodeData) || new Date();
 
     // Universal validation - works with any format
     if (!this.isValidId(id)) {
-      throw new Error(`Invalid product ID from ${source}: ${id}`);
+      throw new Error(`Invalid node ID from ${source}: ${id}`);
     }
 
     if (!this.isValidType(type)) {
-      throw new Error(`Invalid product type from ${source}: ${type}`);
+      throw new Error(`Invalid node type from ${source}: ${type}`);
     }
 
     // Convert to our internal format - this is the magic!
-    const product: Product = {
+    const node: TreeNode = {
       id,
       type,
       version,
       createdAt: timestamp,
       updatedAt: timestamp,
-      name: (productData as any).name || (productData as any).title,
-      description: (productData as any).description || (productData as any).summary,
-      price: (productData as any).price || (productData as any).cost,
-      categoryId: referencesOf(productData) || (productData as any).categoryId,
-      sku: (productData as any).sku || (productData as any).productCode,
+      name: (nodeData as any).name || (nodeData as any).title || (nodeData as any).filename,
+      parentId: this.getParentId(nodeData),
+      children: this.getChildren(nodeData),
+      size: (nodeData as any).size || (nodeData as any).fileSize || (nodeData as any).bytes,
+      mimeType: (nodeData as any).mimeType || (nodeData as any).contentType,
     };
 
-    this.products.push(product);
-    console.log(`✅ Imported product from ${source}:`, product.name);
+    this.nodes.set(id, node);
     
-    return product;
+    // Track root nodes (no parent)
+    if (!node.parentId) {
+      this.roots.add(id);
+    }
+
+    console.log(`✅ Imported ${node.type} from ${source}:`, node.name);
+    return node;
   }
 
-  // Get product with full details - works with any source
-  async getProductWithDetails(productId: string): Promise<ProductWithDetails | null> {
-    const product = this.products.find(p => p.id === productId);
-    if (!product) return null;
+  // Universal tree walk - works with any data source!
+  async walkTree(
+    startNodeId?: string,
+    maxDepth: number = 10
+  ): Promise<TreeWalkResult[]> {
+    const results: TreeWalkResult[] = [];
+    const visited = new Set<string>();
 
-    const category = this.categories.find(c => c.id === product.categoryId);
-    const productReviews = this.reviews.filter(r => r.productId === productId);
-    const averageRating = productReviews.length > 0 
-      ? productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length 
-      : 0;
+    // Start from root nodes if no specific node provided
+    const startNodes = startNodeId ? [startNodeId] : Array.from(this.roots);
 
-    return {
-      ...product,
-      category,
-      reviews: productReviews,
-      averageRating
+    for (const nodeId of startNodes) {
+      await this.walkNode(nodeId, 0, [], results, visited, maxDepth);
+    }
+
+    return results;
+  }
+
+  // Recursive tree walk - universal across all sources
+  private async walkNode(
+    nodeId: string,
+    depth: number,
+    path: string[],
+    results: TreeWalkResult[],
+    visited: Set<string>,
+    maxDepth: number
+  ): Promise<void> {
+    if (depth > maxDepth || visited.has(nodeId)) {
+      return;
+    }
+
+    const node = this.nodes.get(nodeId);
+    if (!node) return;
+
+    visited.add(nodeId);
+    const currentPath = [...path, node.name];
+
+    // Add current node to results
+    results.push({
+      node,
+      depth,
+      path: currentPath,
+      source: this.getNodeSource(node)
+    });
+
+    // Walk children - works with any data source!
+    if (node.children && node.children.length > 0) {
+      for (const childId of node.children) {
+        await this.walkNode(childId, depth + 1, currentPath, results, visited, maxDepth);
+      }
+    }
+  }
+
+  // Get tree statistics - universal across all sources
+  async getTreeStats(): Promise<TreeStats> {
+    const stats: TreeStats = {
+      totalNodes: this.nodes.size,
+      totalSize: 0,
+      maxDepth: 0,
+      sourceCounts: {}
     };
+
+    for (const node of this.nodes.values()) {
+      // Count by source
+      const source = this.getNodeSource(node);
+      stats.sourceCounts[source] = (stats.sourceCounts[source] || 0) + 1;
+
+      // Sum sizes
+      if (node.size) {
+        stats.totalSize += node.size;
+      }
+    }
+
+    // Calculate max depth
+    const walkResults = await this.walkTree();
+    stats.maxDepth = Math.max(...walkResults.map(r => r.depth));
+
+    return stats;
   }
 
-  // Find products by category - universal across all sources
-  async findProductsByCategory<T extends Satisfies<'References'>>(
-    categoryId: string,
+  // Find nodes by type - universal across all sources
+  async findNodesByType<T extends Satisfies<'Type'>>(
+    type: string,
     since?: Date
-  ): Promise<Product[]> {
-    let products = this.products.filter(p => p.categoryId === categoryId);
+  ): Promise<TreeNode[]> {
+    let nodes = Array.from(this.nodes.values()).filter(n => n.type === type);
 
     if (since) {
-      products = products.filter(p => p.createdAt > since);
+      nodes = nodes.filter(n => n.createdAt > since);
     }
 
-    return products;
+    return nodes;
   }
 
-  // Update product - works with any format
-  async updateProduct<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps'>>(
-    productData: T,
-    updates: Partial<Product>
-  ): Promise<Product> {
-    const id = idOf(productData);
-    const currentVersion = versionOf(productData);
+  // Get node by ID - universal across all sources
+  getNode(nodeId: string): TreeNode | undefined {
+    return this.nodes.get(nodeId);
+  }
 
-    // Check for concurrent modifications
-    const existingProduct = this.products.find(p => p.id === id);
-    if (!existingProduct) {
-      throw new Error('Product not found');
+  // Helper methods for extracting data from different formats
+  private getParentId<T extends Satisfies<'Parent'>>(nodeData: T): string | undefined {
+    const parentKey = this.getParentKey(nodeData);
+    return parentKey ? (nodeData as any)[parentKey] : undefined;
+  }
+
+  private getChildren<T extends Satisfies<'Children'>>(nodeData: T): string[] {
+    const childrenKey = this.getChildrenKey(nodeData);
+    const children = childrenKey ? (nodeData as any)[childrenKey] : [];
+    return Array.isArray(children) ? children : [];
+  }
+
+  private getParentKey<T extends Satisfies<'Parent'>>(nodeData: T): string | undefined {
+    // Try different common parent field names
+    const possibleKeys = ['parentId', 'parent_id', 'parent', 'folderId', 'folder_id'];
+    for (const key of possibleKeys) {
+      if (key in nodeData) return key;
     }
+    return undefined;
+  }
 
-    if (existingProduct.version !== currentVersion) {
-      throw new Error('Product has been modified by another user');
+  private getChildrenKey<T extends Satisfies<'Children'>>(nodeData: T): string | undefined {
+    // Try different common children field names
+    const possibleKeys = ['children', 'childIds', 'child_ids', 'files', 'subfolders'];
+    for (const key of possibleKeys) {
+      if (key in nodeData) return key;
     }
+    return undefined;
+  }
 
-    // Apply updates
-    const updatedProduct: Product = {
-      ...existingProduct,
-      ...updates,
-      version: existingProduct.version + 1,
-      updatedAt: new Date(),
-    };
-
-    const index = this.products.findIndex(p => p.id === id);
-    this.products[index] = updatedProduct;
-    
-    console.log(`✅ Updated product:`, updatedProduct.name);
-    return updatedProduct;
+  private getNodeSource(node: TreeNode): string {
+    // Determine source based on node characteristics
+    if (node.id.startsWith('internal-')) return 'internal';
+    if (node.id.startsWith('jsonld-')) return 'jsonld';
+    if (node.id.startsWith('rest-')) return 'rest';
+    return 'unknown';
   }
 
   // Validation helpers
@@ -201,202 +278,194 @@ class ProductService {
   }
 
   private isValidType(type: string): boolean {
-    return ['Product', 'Item', 'Good'].includes(type);
+    return ['File', 'Folder', 'Directory', 'Document'].includes(type);
   }
 }
 ```
 
-### Category Service
+## Step 3: Using the Universal Tree System
+
+Now let's see how our universal tree system works with mixed entities from different sources:
 
 ```typescript
-class CategoryService {
-  private categories: Category[] = [];
-
-  async importCategory<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'References'>>(
-    categoryData: T,
-    source: 'internal' | 'jsonld' | 'rest'
-  ): Promise<Category> {
-    const id = idOf(categoryData);
-    const type = typeOf(categoryData);
-    const version = versionOf(categoryData) || 1;
-    const timestamp = timestampsOf(categoryData) || new Date();
-
-    const category: Category = {
-      id,
-      type,
-      version,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      name: (categoryData as any).name || (categoryData as any).title,
-      parentId: referencesOf(categoryData) || (categoryData as any).parentId,
-    };
-
-    this.categories.push(category);
-    console.log(`✅ Imported category from ${source}:`, category.name);
-    
-    return category;
-  }
-
-  async getCategory(categoryId: string): Promise<Category | null> {
-    return this.categories.find(c => c.id === categoryId) || null;
-  }
-}
-```
-
-## Step 4: Using the Universal System
-
-Now let's see how our universal system works with different data formats:
-
-```typescript
-// Initialize services
-const productService = new ProductService();
-const categoryService = new CategoryService();
+// Initialize the tree service
+const treeService = new TreeService();
 
 // Example 1: Internal database format (our standard)
-const internalProduct = {
-  id: "prod-123",
-  type: "Product",
+const internalFolder = {
+  id: "internal-folder-1",
+  type: "Folder",
   version: 1,
   createdAt: new Date("2022-01-01"),
-  name: "Wireless Headphones",
-  description: "High-quality wireless headphones",
-  price: 99.99,
-  categoryId: "cat-electronics",
-  sku: "WH-001"
+  name: "Documents",
+  parentId: undefined,
+  children: ["internal-file-1", "internal-file-2"]
 };
 
-// Example 2: JSON-LD format from e-commerce API
-const jsonLdProduct = {
-  "@id": "https://api.store.com/products/wireless-mouse",
-  "@type": "Product",
+const internalFile = {
+  id: "internal-file-1",
+  type: "File",
+  version: 1,
+  createdAt: new Date("2022-01-01"),
+  name: "report.pdf",
+  parentId: "internal-folder-1",
+  children: [],
+  size: 1024000,
+  mimeType: "application/pdf"
+};
+
+// Example 2: JSON-LD format from cloud storage API
+const jsonLdFolder = {
+  "@id": "https://api.cloud.com/folders/projects",
+  "@type": "Directory",
   "@version": 1,
   "dateCreated": "2022-01-15T10:30:00Z",
-  "name": "Wireless Mouse",
-  "summary": "Ergonomic wireless mouse with precision tracking",
-  "cost": 29.99,
-  "category": "https://api.store.com/categories/electronics",
-  "productCode": "WM-002"
+  "title": "Projects",
+  "parent": "https://api.cloud.com/folders/root",
+  "subfolders": ["https://api.cloud.com/folders/project-a", "https://api.cloud.com/folders/project-b"]
 };
 
-// Example 3: REST API format from supplier
-const restProduct = {
-  id: "supplier-456",
-  type: "Item",
+const jsonLdFile = {
+  "@id": "https://api.cloud.com/files/readme.txt",
+  "@type": "Document",
+  "@version": 1,
+  "dateCreated": "2022-01-15T11:00:00Z",
+  "filename": "README.md",
+  "folder": "https://api.cloud.com/folders/project-a",
+  "files": [],
+  "bytes": 2048,
+  "contentType": "text/markdown"
+};
+
+// Example 3: REST API format from file server
+const restFolder = {
+  id: "rest-folder-1",
+  type: "Folder",
   version: 1,
   created_at: 1640995200,
-  title: "Mechanical Keyboard",
-  description: "RGB mechanical keyboard with blue switches",
-  price: 149.99,
-  categoryId: "cat-electronics",
-  sku: "KB-003"
+  title: "Images",
+  parent_id: "rest-folder-0",
+  child_ids: ["rest-file-1", "rest-file-2"]
 };
 
-// Import categories first
-await categoryService.importCategory({
-  id: "cat-electronics",
-  type: "Category",
-  name: "Electronics",
-  createdAt: new Date("2022-01-01")
-}, 'internal');
+const restFile = {
+  id: "rest-file-1",
+  type: "File",
+  version: 1,
+  created_at: 1640995200,
+  filename: "photo.jpg",
+  parent_id: "rest-folder-1",
+  child_ids: [],
+  fileSize: 512000,
+  mimeType: "image/jpeg"
+};
 
-// All formats work with the same service methods!
-const importedInternal = await productService.importProduct(internalProduct, 'internal');
-const importedJsonLd = await productService.importProduct(jsonLdProduct, 'jsonld');
-const importedRest = await productService.importProduct(restProduct, 'rest');
+// Import all nodes - same method works for all sources!
+await treeService.importNode(internalFolder, 'internal');
+await treeService.importNode(internalFile, 'internal');
+await treeService.importNode(jsonLdFolder, 'jsonld');
+await treeService.importNode(jsonLdFile, 'jsonld');
+await treeService.importNode(restFolder, 'rest');
+await treeService.importNode(restFile, 'rest');
 
-console.log('Imported products:', {
-  internal: importedInternal.name,
-  jsonLd: importedJsonLd.name,
-  rest: importedRest.name
+// Walk the entire tree - universal across all sources!
+const treeWalk = await treeService.walkTree();
+console.log('Tree walk results:');
+treeWalk.forEach(result => {
+  const indent = '  '.repeat(result.depth);
+  console.log(`${indent}${result.node.name} (${result.node.type}) [${result.source}]`);
 });
 
-// Get product with full details - works the same for all sources
-const productDetails = await productService.getProductWithDetails(importedJsonLd.id);
-console.log('Product details:', {
-  name: productDetails?.name,
-  category: productDetails?.category?.name,
-  averageRating: productDetails?.averageRating
-});
+// Get tree statistics - works across all sources
+const stats = await treeService.getTreeStats();
+console.log('Tree statistics:', stats);
 
-// Find products by category - universal across all sources
-const electronicsProducts = await productService.findProductsByCategory('cat-electronics');
-console.log('Electronics products:', electronicsProducts.map(p => p.name));
+// Find all files - universal across all sources
+const allFiles = await treeService.findNodesByType('File');
+console.log('All files:', allFiles.map(f => `${f.name} (${f.size} bytes)`));
 ```
 
-## Step 5: Handling Updates with Optimistic Concurrency
+## Step 4: Advanced Tree Operations
 
-Let's see how optimistic concurrency control works across different sources:
+Let's demonstrate more advanced tree operations that work uniformly across all sources:
 
 ```typescript
-// Update a product from any source
-try {
-  const updatedProduct = await productService.updateProduct(importedJsonLd, {
-    name: "Wireless Mouse Pro",
-    price: 34.99
-  });
-  
-  console.log('Product updated successfully:', updatedProduct.name);
-  console.log('New version:', updatedProduct.version);
-} catch (error) {
-  console.error('Update failed:', error.message);
-}
+// Find all nodes created after a certain date - universal across all sources
+const recentNodes = await treeService.findNodesByType('File', new Date('2022-01-10'));
+console.log('Recent files:', recentNodes.map(f => f.name));
 
-// Simulate concurrent modification
-const conflictingProduct = { ...importedRest, version: 999 };
-try {
-  await productService.updateProduct(conflictingProduct, {
-    name: "Conflicting Update"
+// Walk a specific subtree - works with any source
+const subtreeWalk = await treeService.walkTree('internal-folder-1');
+console.log('Subtree walk:', subtreeWalk.map(r => r.node.name));
+
+// Get node details - universal across all sources
+const node = treeService.getNode('internal-file-1');
+if (node) {
+  console.log('Node details:', {
+    name: node.name,
+    type: node.type,
+    size: node.size,
+    mimeType: node.mimeType
   });
-} catch (error) {
-  console.log('Concurrent modification detected:', error.message);
 }
 ```
 
-## Step 6: The Power of Universal Code
+## Step 5: Adding New Data Sources
 
-Let's demonstrate why Canon is valuable by showing what happens when we add a new data source:
+Let's demonstrate how easy it is to add new data sources:
 
 ```typescript
 // New data source: GraphQL API
-const graphqlProduct = {
-  id: "gql-789",
-  __typename: "Product",
+const graphqlFolder = {
+  id: "gql-folder-1",
+  __typename: "Directory",
   version: 1,
   createdAt: "2022-02-01T00:00:00Z",
-  title: "Smart Watch",
-  description: "Fitness tracking smart watch",
-  cost: 199.99,
-  category: "cat-electronics",
-  productCode: "SW-004"
+  title: "Videos",
+  parentId: "gql-folder-0",
+  files: ["gql-file-1"]
+};
+
+const graphqlFile = {
+  id: "gql-file-1",
+  __typename: "File",
+  version: 1,
+  createdAt: "2022-02-01T00:00:00Z",
+  filename: "demo.mp4",
+  parentId: "gql-folder-1",
+  files: [],
+  fileSize: 10485760,
+  mimeType: "video/mp4"
 };
 
 // No new code needed! The same service method works
-const importedGraphql = await productService.importProduct(graphqlProduct, 'rest');
-console.log('✅ GraphQL product imported:', importedGraphql.name);
+await treeService.importNode(graphqlFolder, 'rest');
+await treeService.importNode(graphqlFile, 'rest');
 
-// All queries work the same
-const allProducts = await productService.findProductsByCategory('cat-electronics');
-console.log('Total products:', allProducts.length);
+// All tree operations work the same
+const updatedTreeWalk = await treeService.walkTree();
+console.log('Updated tree walk:', updatedTreeWalk.map(r => r.node.name));
 ```
 
 ## Key Benefits Demonstrated
 
-This example shows why Canon is valuable:
+This example shows why Canon is valuable for tree operations:
 
-1. **Universal Import**: Same `importProduct` method works with internal DB, JSON-LD, REST, and GraphQL
-2. **Format Independence**: Business logic doesn't need to know about data source differences
-3. **Easy Integration**: Adding new data sources requires no code changes
-4. **Type Safety**: TypeScript ensures compile-time validation across all formats
-5. **Consistent API**: All products work the same way regardless of source
-6. **Maintainable**: One codebase handles all data sources
+1. **Universal Tree Walk**: Same `walkTree()` method works across all data sources
+2. **Custom Axioms**: We defined our own `Parent` and `Children` axioms for relationships
+3. **Mixed Sources**: Entities from internal DB, JSON-LD API, REST API, GraphQL
+4. **Mixed Shapes**: Different field names (`parentId` vs `parent` vs `parent_id`)
+5. **Format Independence**: Tree operations don't need to know about data source differences
+6. **Easy Extension**: Adding new data sources requires no code changes
+7. **Type Safety**: TypeScript ensures compile-time validation across all formats
 
 ## Conclusion
 
-By using Canon's core axioms, we've built a product catalog system that:
-- Seamlessly integrates data from multiple sources (internal DB, JSON-LD API, REST API)
-- Provides a consistent API regardless of data source
-- Handles optimistic concurrency control across all sources
+By using Canon's core axioms and defining custom axioms for parent/child relationships, we've built a file system browser that:
+- Seamlessly handles mixed entities from multiple sources and shapes
+- Provides universal tree walking operations regardless of data format
+- Supports custom relationship axioms for domain-specific needs
 - Requires no code changes when adding new data sources
 - Maintains type safety and validation across all formats
 
-The system demonstrates the real value of Canon: **universal code that works across diverse data sources without format-specific logic**.
+The system demonstrates the real value of Canon: **universal tree operations that work across diverse data structures with custom relationship semantics**.
