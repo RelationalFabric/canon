@@ -38,19 +38,12 @@ Axioms are type definitions that can be reused for multiple specific axiom types
 
 #### Key-Name Axiom Type
 ```typescript
-import { Axiom, KeyNameAxiom, TypeGuard } from '@relational-fabric/canon';
-
-// KeyNameAxiom is provided by @relational-fabric/canon
-// type KeyNameAxiom = Axiom<{
-//   $basis: Record<string, unknown>;  // Object with at least 1 string key
-//   key: string;                      // The field name that contains the concept
-// }, {
-//   key: string;
-// }>;
-
-// Define canonical types for your application
-type CanonicalTimestamp = Date;
-type CanonicalReference = string;
+type KeyNameAxiom = Axiom<{
+  $basis: Record<string, unknown>;  // Object with at least 1 string key
+  key: string;                      // The field name that contains the concept
+}, {
+  key: string;
+}>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampAxiom = Axiom<{
@@ -108,18 +101,15 @@ Each canon provides specific implementations of the same semantic concepts, whil
 A complete axiom description includes its definition, registration, and API specification. The API provides functions that libraries can use to operate on semantic concepts without knowing specific field names or formats:
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
+  const config = inferAxiom('Id', x);
+  return x[config.key] as AxiomValue<'Id'>;
+}
 
-// idOf and timestampOf are provided by @relational-fabric/canon
-// function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
-//   const config = inferAxiom('Id', x);
-//   return x[config.key] as AxiomValue<'Id'>;
-// }
-
-// function timestampOf<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timestamp'> {
-//   const config = inferAxiom('Timestamp', x);
-//   return config.toCanonical(x[config.key]);
-// }
+function timestampOf<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timestamp'> {
+  const config = inferAxiom('Timestamp', x);
+  return config.toCanonical(x[config.key]);
+}
 ```
 
 This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, automatically converting between different formats.
@@ -129,8 +119,6 @@ This enables **lazy typing** - libraries work with semantic concepts through the
 Here's a complete working example showing all three parts of an axiom description:
 
 ```typescript
-import { Axiom, KeyNameAxiom, Satisfies, AxiomValue, inferAxiom, idOf } from '@relational-fabric/canon';
-
 // 1. Registration - Register the axiom in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
@@ -139,11 +127,10 @@ declare module '@relational-fabric/canon' {
 }
 
 // 2. API Specification - Functions that libraries can use
-// idOf is provided by @relational-fabric/canon
-// function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
-//   const config = inferAxiom('Id', x);
-//   return x[config.key] as AxiomValue<'Id'>;
-// }
+function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
+  const config = inferAxiom('Id', x);
+  return x[config.key] as AxiomValue<'Id'>;
+}
 ```
 
 This axiom system provides the foundation for Canon's powerful type composition, enabling developers to work with semantic concepts across different data formats through lazy typing and adaptability.
