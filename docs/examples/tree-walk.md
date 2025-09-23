@@ -2,7 +2,7 @@
 
 ## Overview
 
-This example demonstrates how to walk a tree of mixed entities from different sources and shapes using custom axioms for parent/child relationships. It shows the power of Canon for universal tree operations across diverse data structures.
+This example demonstrates how to walk a tree of mixed entities from different sources and shapes using custom axioms for parent/child relationships. It shows the power of Canon for universal tree operations across diverse data structures without creating specific types.
 
 ## The Scenario
 
@@ -45,68 +45,45 @@ declare module '@relational-fabric/canon' {
     Children: ChildrenAxiom;
   }
 }
-
-// Define our universal tree node interface
-type TreeNode = {
-  id: string;
-  type: string;
-  version: number;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  parentId?: string;
-  children?: string[];
-  size?: number;
-  mimeType?: string;
-} & Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'Parent' | 'Children'>;
 ```
 
 ## Step 2: Building Universal Tree Service
 
 ```typescript
 class TreeService {
-  private nodes: Map<string, TreeNode> = new Map();
+  private nodes: Map<string, any> = new Map();
   private roots: Set<string> = new Set();
 
-  // Import a tree node from any source
+  // Import a tree node from any source - works with arbitrary types that satisfy axioms
   async importNode<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'Parent' | 'Children'>>(
     nodeData: T,
     source: 'internal' | 'jsonld' | 'rest'
-  ): Promise<TreeNode> {
+  ): Promise<T> {
     const id = idOf(nodeData);
     const type = typeOf(nodeData);
     const version = versionOf(nodeData) || 1;
     const timestamp = timestampsOf(nodeData) || new Date();
 
-    const node: TreeNode = {
-      id,
-      type,
-      version,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      name: (nodeData as any).name || (nodeData as any).title || (nodeData as any).filename,
-      parentId: this.getParentId(nodeData),
-      children: this.getChildren(nodeData),
-      size: (nodeData as any).size || (nodeData as any).fileSize || (nodeData as any).bytes,
-      mimeType: (nodeData as any).mimeType || (nodeData as any).contentType,
-    };
-
-    this.nodes.set(id, node);
+    // Store the original data - no conversion needed!
+    this.nodes.set(id, nodeData);
     
-    if (!node.parentId) {
+    // Check if this is a root node
+    const parentId = this.getParentId(nodeData);
+    if (!parentId) {
       this.roots.add(id);
     }
 
-    console.log(`✅ Imported ${node.type} from ${source}:`, node.name);
-    return node;
+    const name = this.getName(nodeData);
+    console.log(`✅ Imported ${type} from ${source}:`, name);
+    return nodeData;
   }
 
-  // Universal tree walk - works with any data source!
-  async walkTree(
+  // Universal tree walk - works with any data source and arbitrary types!
+  async walkTree<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'Parent' | 'Children'>>(
     startNodeId?: string,
     maxDepth: number = 10
-  ): Promise<TreeWalkResult[]> {
-    const results: TreeWalkResult[] = [];
+  ): Promise<TreeWalkResult<T>[]> {
+    const results: TreeWalkResult<T>[] = [];
     const visited = new Set<string>();
 
     const startNodes = startNodeId ? [startNodeId] : Array.from(this.roots);
@@ -118,12 +95,12 @@ class TreeService {
     return results;
   }
 
-  // Recursive tree walk - universal across all sources
-  private async walkNode(
+  // Recursive tree walk - universal across all sources and types
+  private async walkNode<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps' | 'Parent' | 'Children'>>(
     nodeId: string,
     depth: number,
     path: string[],
-    results: TreeWalkResult[],
+    results: TreeWalkResult<T>[],
     visited: Set<string>,
     maxDepth: number
   ): Promise<void> {
@@ -131,11 +108,11 @@ class TreeService {
       return;
     }
 
-    const node = this.nodes.get(nodeId);
+    const node = this.nodes.get(nodeId) as T;
     if (!node) return;
 
     visited.add(nodeId);
-    const currentPath = [...path, node.name];
+    const currentPath = [...path, this.getName(node)];
 
     results.push({
       node,
@@ -144,15 +121,16 @@ class TreeService {
       source: this.getNodeSource(node)
     });
 
-    // Walk children - works with any data source!
-    if (node.children && node.children.length > 0) {
-      for (const childId of node.children) {
+    // Walk children - works with any data source and type!
+    const children = this.getChildren(node);
+    if (children && children.length > 0) {
+      for (const childId of children) {
         await this.walkNode(childId, depth + 1, currentPath, results, visited, maxDepth);
       }
     }
   }
 
-  // Helper methods for extracting data from different formats
+  // Helper methods for extracting data from different formats using axioms
   private getParentId<T extends Satisfies<'Parent'>>(nodeData: T): string | undefined {
     const parentKey = this.getParentKey(nodeData);
     return parentKey ? (nodeData as any)[parentKey] : undefined;
@@ -162,6 +140,15 @@ class TreeService {
     const childrenKey = this.getChildrenKey(nodeData);
     const children = childrenKey ? (nodeData as any)[childrenKey] : [];
     return Array.isArray(children) ? children : [];
+  }
+
+  private getName<T extends Satisfies<'Id' | 'Type'>>(nodeData: T): string {
+    // Try different common name fields
+    const possibleKeys = ['name', 'title', 'filename', 'label'];
+    for (const key of possibleKeys) {
+      if (key in nodeData) return (nodeData as any)[key];
+    }
+    return idOf(nodeData); // Fallback to ID
   }
 
   private getParentKey<T extends Satisfies<'Parent'>>(nodeData: T): string | undefined {
@@ -180,16 +167,17 @@ class TreeService {
     return undefined;
   }
 
-  private getNodeSource(node: TreeNode): string {
-    if (node.id.startsWith('internal-')) return 'internal';
-    if (node.id.startsWith('jsonld-')) return 'jsonld';
-    if (node.id.startsWith('rest-')) return 'rest';
+  private getNodeSource<T extends Satisfies<'Id'>>(node: T): string {
+    const id = idOf(node);
+    if (id.startsWith('internal-')) return 'internal';
+    if (id.startsWith('jsonld-')) return 'jsonld';
+    if (id.startsWith('rest-')) return 'rest';
     return 'unknown';
   }
 }
 
-interface TreeWalkResult {
-  node: TreeNode;
+interface TreeWalkResult<T> {
+  node: T;
   depth: number;
   path: string[];
   source: string;
@@ -202,7 +190,7 @@ interface TreeWalkResult {
 // Initialize the tree service
 const treeService = new TreeService();
 
-// Example 1: Internal database format
+// Example 1: Internal database format - arbitrary type that satisfies axioms
 const internalFolder = {
   id: "internal-folder-1",
   type: "Folder",
@@ -210,7 +198,10 @@ const internalFolder = {
   createdAt: new Date("2022-01-01"),
   name: "Documents",
   parentId: undefined,
-  children: ["internal-file-1", "internal-file-2"]
+  children: ["internal-file-1", "internal-file-2"],
+  // Additional fields specific to internal format
+  internalId: 12345,
+  databaseVersion: "2.1.0"
 };
 
 const internalFile = {
@@ -222,10 +213,13 @@ const internalFile = {
   parentId: "internal-folder-1",
   children: [],
   size: 1024000,
-  mimeType: "application/pdf"
+  mimeType: "application/pdf",
+  // Additional fields specific to internal format
+  filePath: "/documents/report.pdf",
+  checksum: "abc123def456"
 };
 
-// Example 2: JSON-LD format from cloud storage API
+// Example 2: JSON-LD format from cloud storage API - different shape, same axioms
 const jsonLdFolder = {
   "@id": "https://api.cloud.com/folders/projects",
   "@type": "Directory",
@@ -233,7 +227,10 @@ const jsonLdFolder = {
   "dateCreated": "2022-01-15T10:30:00Z",
   "title": "Projects",
   "parent": "https://api.cloud.com/folders/root",
-  "subfolders": ["https://api.cloud.com/folders/project-a"]
+  "subfolders": ["https://api.cloud.com/folders/project-a"],
+  // Additional JSON-LD specific fields
+  "@context": "https://schema.org/",
+  "description": "Project files directory"
 };
 
 const jsonLdFile = {
@@ -245,10 +242,13 @@ const jsonLdFile = {
   "folder": "https://api.cloud.com/folders/project-a",
   "files": [],
   "bytes": 2048,
-  "contentType": "text/markdown"
+  "contentType": "text/markdown",
+  // Additional JSON-LD specific fields
+  "author": "https://api.cloud.com/users/john-doe",
+  "license": "MIT"
 };
 
-// Example 3: REST API format from file server
+// Example 3: REST API format from file server - different shape again
 const restFolder = {
   id: "rest-folder-1",
   type: "Folder",
@@ -256,7 +256,16 @@ const restFolder = {
   created_at: 1640995200,
   title: "Images",
   parent_id: "rest-folder-0",
-  child_ids: ["rest-file-1"]
+  child_ids: ["rest-file-1"],
+  // Additional REST API specific fields
+  _links: {
+    self: { href: "/api/folders/rest-folder-1" },
+    children: { href: "/api/folders/rest-folder-1/children" }
+  },
+  metadata: {
+    owner: "user123",
+    permissions: "rwxr-xr-x"
+  }
 };
 
 const restFile = {
@@ -268,31 +277,44 @@ const restFile = {
   parent_id: "rest-folder-1",
   child_ids: [],
   fileSize: 512000,
-  mimeType: "image/jpeg"
+  mimeType: "image/jpeg",
+  // Additional REST API specific fields
+  url: "https://files.example.com/photo.jpg",
+  thumbnailUrl: "https://files.example.com/thumbs/photo.jpg"
 };
 
-// Import all nodes - same method works for all sources!
-await treeService.importNode(internalFolder, 'internal');
-await treeService.importNode(internalFile, 'internal');
-await treeService.importNode(jsonLdFolder, 'jsonld');
-await treeService.importNode(jsonLdFile, 'jsonld');
-await treeService.importNode(restFolder, 'rest');
-await treeService.importNode(restFile, 'rest');
+// Import all nodes - same method works for all sources and arbitrary types!
+const importedInternalFolder = await treeService.importNode(internalFolder, 'internal');
+const importedInternalFile = await treeService.importNode(internalFile, 'internal');
+const importedJsonLdFolder = await treeService.importNode(jsonLdFolder, 'jsonld');
+const importedJsonLdFile = await treeService.importNode(jsonLdFile, 'jsonld');
+const importedRestFolder = await treeService.importNode(restFolder, 'rest');
+const importedRestFile = await treeService.importNode(restFile, 'rest');
 
-// Walk the entire tree - universal across all sources!
+// Walk the entire tree - universal across all sources and types!
 const treeWalk = await treeService.walkTree();
 console.log('Tree walk results:');
 treeWalk.forEach(result => {
   const indent = '  '.repeat(result.depth);
-  console.log(`${indent}${result.node.name} (${result.node.type}) [${result.source}]`);
+  const name = treeService.getName(result.node);
+  const type = typeOf(result.node);
+  console.log(`${indent}${name} (${type}) [${result.source}]`);
 });
+
+// The beauty: we can work with the original data structures!
+console.log('\nOriginal data preserved:');
+console.log('Internal folder internalId:', (importedInternalFolder as any).internalId);
+console.log('JSON-LD folder context:', (importedJsonLdFolder as any)['@context']);
+console.log('REST folder links:', (importedRestFolder as any)._links);
 ```
 
 ## Key Benefits
 
 This example demonstrates:
-- **Universal Tree Walk**: Same `walkTree()` method works across all data sources
+- **Universal Tree Walk**: Same `walkTree()` method works across all data sources and arbitrary types
 - **Custom Axioms**: We defined our own `Parent` and `Children` axioms for relationships
 - **Mixed Sources**: Entities from internal DB, JSON-LD API, REST API
-- **Mixed Shapes**: Different field names (`parentId` vs `parent` vs `parent_id`)
+- **Mixed Shapes**: Different field names (`parentId` vs `parent` vs `parent_id`) and additional fields
 - **Format Independence**: Tree operations don't need to know about data source differences
+- **Type Preservation**: Original data structures are preserved - no conversion needed
+- **Arbitrary Types**: Works with any type that satisfies the required axioms, not just predefined interfaces
