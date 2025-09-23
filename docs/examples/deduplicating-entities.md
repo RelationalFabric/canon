@@ -20,8 +20,8 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 
 **Step 2: Define the Canon**
 ```typescript
-// Define the canon for this example using core axioms
-type DeduplicationCanon = Canon<{
+// Define the canon for the entities using core axioms
+type ProductCanon = Canon<{
   Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
   Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
 }>;
@@ -29,12 +29,12 @@ type DeduplicationCanon = Canon<{
 // Register the canon globally
 declare module '@relational-fabric/canon' {
   interface Canons {
-    deduplication: DeduplicationCanon;
+    products: ProductCanon;
   }
 }
 
 // Register the runtime configuration
-declareCanon('deduplication', {
+declareCanon('products', {
   axioms: {
     Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
     Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
