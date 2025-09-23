@@ -10,37 +10,55 @@ Without a unified approach, you'd need separate validation code paths for each d
 
 ## The Canon Solution
 
-Use the existing core axioms (`Id` and `Type`) across multiple canons. The canons are already registered by different parts of your system - you just need to write universal validation logic.
+Use the existing core axioms (`Id` and `Type`) and define additional axioms for validation concepts. The canons are already registered by different parts of your system - you just need to define the validation axioms and write universal logic.
 
 ## The Flow
 
-**Step 1: Multiple canons are already in use**
-Your system already has canons registered for different data sources:
-- `DatabaseCanon` for internal database entities
-- `RestApiCanon` for REST API responses  
-- `GraphQLCanon` for GraphQL responses
+**Step 1: Define validation axioms**
+```typescript
+// Define validation-specific axioms
+type ValidationStatusAxiom = Axiom<{
+  $basis: Record<string, unknown>;
+  key: string;
+}, {
+  key: string;
+}>;
+
+// Register the new axiom
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    ValidationStatus: ValidationStatusAxiom;
+  }
+}
+
+// Implement the API for the new axiom
+function validationStatusOf<T extends Satisfies<'ValidationStatus'>>(entity: T): string {
+  return (entity as Record<string, unknown>).validationStatus as string;
+}
+```
 
 **Step 2: Write universal validation logic**
 ```typescript
 // One validation function works with all data sources
-function validateEntity<T extends Satisfies<'Id' | 'Type'>>(entity: T): boolean {
+function validateEntity<T extends Satisfies<'Id' | 'Type' | 'ValidationStatus'>>(entity: T): boolean {
   const id = idOf(entity);
   const entityType = typeOf(entity);
+  const status = validationStatusOf(entity);
   
   // Universal validation logic
-  return id && entityType && id.length > 0 && entityType.length > 0;
+  return id && entityType && id.length > 0 && entityType.length > 0 && status !== 'invalid';
 }
 
 // Validation for update operations
-function canUpdateEntity<T extends Satisfies<'Id' | 'Type'>>(entity: T): boolean {
-  return validateEntity(entity) && entityType !== 'readonly';
+function canUpdateEntity<T extends Satisfies<'Id' | 'Type' | 'ValidationStatus'>>(entity: T): boolean {
+  return validateEntity(entity) && entityType !== 'readonly' && validationStatusOf(entity) === 'valid';
 }
 ```
 
 **Step 3: Use across multiple canons**
 ```typescript
 // Process updates from any source using any canon
-function processUpdates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[] {
+function processUpdates<T extends Satisfies<'Id' | 'Type' | 'ValidationStatus'>>(entities: T[]): T[] {
   return entities
     .filter(validateEntity)
     .filter(canUpdateEntity)
