@@ -26,16 +26,10 @@ function findDuplicates(entities: any[]): any[][] {
   entities.forEach(entity => {
     const id = idOf(entity);
     const type = typeOf(entity);
+    const groupKey = `${type}-${id}`;
     
-    // Business logic: what makes entities "the same"
-    const name = (entity as any).name || (entity as any).title || (entity as any).productName;
-    const brand = (entity as any).brand || (entity as any).manufacturer || (entity as any).company;
-    const price = (entity as any).price || (entity as any).cost || (entity as any).amount;
-    
-    const deduplicationKey = `${type}-${name}-${brand}-${Math.round(price / 100)}`;
-    
-    if (!groups.has(deduplicationKey)) groups.set(deduplicationKey, []);
-    groups.get(deduplicationKey).push(entity);
+    if (!groups.has(groupKey)) groups.set(groupKey, []);
+    groups.get(groupKey).push(entity);
   });
   return Array.from(groups.values()).filter(group => group.length > 1);
 }
