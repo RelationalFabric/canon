@@ -121,3 +121,11 @@ To facilitate this, the library provides a simple pattern for exporting and regi
     ```
 
 This pattern ensures that a canon's definition remains a single source of truth, but its identity is globally recognized, enabling seamless interoperability and semantic-level communication across different parts of your ecosystem.
+
+## Documentation
+
+For comprehensive guides and detailed information about using Canon, see the [Documentation](./docs/README.md) directory.
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details on how to get involved.
