@@ -20,11 +20,9 @@ Use the existing core axioms (`Id` and `Type`) to identify tokens, then define `
 
 **Step 2: Compose the Canon and register it**
 ```typescript
-// Register the new axioms
+// Register only the new axioms
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Id: KeyNameAxiom;
-    Type: KeyNameAxiom;
     Expiration: ExpirationAxiom;
     Permissions: PermissionsAxiom;
   }
@@ -32,8 +30,6 @@ declare module '@relational-fabric/canon' {
 
 // Define the canon for this example
 type AuthCanon = Canon<{
-  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
-  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
   Expiration: { $basis: { expires: number }; key: 'expires'; $meta: { type: string } };
   Permissions: { $basis: { permissions: string[] }; key: 'permissions'; $meta: { type: string } };
 }>;
