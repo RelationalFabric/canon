@@ -163,21 +163,7 @@ The power of Canon lies in **universal data operations** - writing code that wor
 
 ### The Problem Canon Solves
 
-Without Canon, you need format-specific code:
-
-```typescript
-// Different data formats for the same concept
-const jsonLdUser = { "@id": "user-123", "@type": "Person" };
-const mongoUser = { "_id": "user-123", "_type": "Person" };
-const restUser = { "id": "user-123", "type": "Person" };
-
-// Format-specific code everywhere
-function getIdFromJsonLd(user: any) { return user["@id"]; }
-function getIdFromMongo(user: any) { return user["_id"]; }
-function getIdFromRest(user: any) { return user["id"]; }
-```
-
-With Canon, you use universal functions (provided by axiom implementers):
+Without Canon, you need format-specific code for each data format. With Canon, you use universal functions (provided by axiom implementers) that work across all formats:
 
 ```typescript
 // All formats work with the same universal function
