@@ -28,7 +28,7 @@ This enables utilities to work with the concept of "ID" without knowing whether 
 All axioms share two universal distinguished keys that have special meaning to Canon:
 
 - **`$basis`** - The underlying TypeScript type/object structure that contains the concept
-- **`$meta`** - Additional metadata for validation, documentation, and behavior
+- **`$meta`** - Additional metadata for documentation and behavior
 
 These keys are available to all axioms through the `Axiom` utility type, providing a consistent interface across different axiom types.
 
@@ -116,7 +116,7 @@ This enables **lazy typing** - libraries work with semantic concepts through the
 
 ## Understanding $basis Runtime Representation
 
-The `$basis` field in runtime configurations uses a **TypeGuard pattern** to ensure type safety and provide runtime validation. This is implemented as `TypeGuard<Satisfies<AxiomLabel, CanonLabel>>` where:
+The `$basis` field in runtime configurations uses a **TypeGuard pattern** to ensure type safety at runtime. This is implemented as `TypeGuard<Satisfies<AxiomLabel, CanonLabel>>` where:
 
 - **`AxiomLabel`** - The specific axiom being configured (e.g., 'Id', 'Type', 'Version')
 - **`CanonLabel`** - The specific canon being configured (e.g., 'Internal', 'JsonLd', 'Mongo')
@@ -140,7 +140,7 @@ type IdAxiom = {
   $meta: { type: string; required: string };
 }
 
-// Runtime configuration with TypeGuard validation
+// Runtime configuration with TypeGuard
 const runtimeConfig = {
   Id: {
     $basis: { id: 'string' },  // TypeGuard<Satisfies<'Id', 'Internal'>>
@@ -157,7 +157,7 @@ const runtimeConfig = {
 
 ### Why This Matters
 
-This TypeGuard approach enables **lazy typing** - your code can work with semantic concepts without knowing the specific field names or conversion logic at compile time, while maintaining full type safety and runtime validation.
+This TypeGuard approach enables **lazy typing** - your code can work with semantic concepts without knowing the specific field names or conversion logic at compile time, while maintaining full type safety.
 
 ## Complete Example: The Id Axiom
 

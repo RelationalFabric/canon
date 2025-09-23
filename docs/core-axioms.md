@@ -318,7 +318,7 @@ This enables seamless interoperability between different data sources while main
 
 While the core axioms cover the most common use cases, applications may need additional axioms for specific domains:
 
-- **Email**: For email address validation and formatting
+- **Email**: For email address formatting and processing
 - **URL**: For web resource references
 - **Currency**: For monetary values with locale support
 - **GeoLocation**: For geographic coordinates

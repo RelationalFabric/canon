@@ -25,7 +25,7 @@ A Canon is a type that defines its data model using a predefined set of universa
 
 1. **Structural Identity** - What fields and types comprise the data
 2. **Canonical Keys** - Which field serves as the primary identifier
-3. **Metadata Context** - Rich configuration and validation rules
+3. **Metadata Context** - Rich configuration and behavioral rules
 4. **Runtime Behavior** - How the type behaves at execution time
 
 **The Key Insight**: A Canon is a **format-specific implementation** of universal semantic concepts. Multiple Canons can exist simultaneously, each representing different data formats (JSON-LD, MongoDB, REST APIs, etc.), but they all implement the same semantic concepts. This enables developers to write **universal code** that works across all formats through a common API.
@@ -38,7 +38,7 @@ Canons require both **type-level** and **runtime** configurations because they s
 
 #### Type-Level Configuration
 - **Purpose**: Defines the structure and constraints at compile time
-- **Benefits**: Provides type safety, IntelliSense, and compile-time validation
+- **Benefits**: Provides type safety, IntelliSense, and compile-time type checking
 - **When**: Used during development to catch errors before runtime
 
 #### Runtime Configuration  
@@ -79,12 +79,14 @@ The **Declarative Style** is ideal for canons that are defined and used within a
 declareCanon('myProject', {
   axioms: {
     Id: {
-      $basis: { id: 'string' },
+      $basis: (value: unknown): value is { id: string } => 
+        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
       key: 'id',
       $meta: { type: 'uuid' },
     },
     Type: {
-      $basis: { type: 'string' },
+      $basis: (value: unknown): value is { type: string } => 
+        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
       key: 'type',
       $meta: { description: 'Entity type' },
     },
@@ -112,8 +114,16 @@ export type MyCanon = Canon<{
 
 export default defineCanon<MyCanon>({
   axioms: {
-    Id: { $basis: { id: 'string' }, key: 'id' },
-    Type: { $basis: { type: 'string' }, key: 'type' },
+    Id: { 
+      $basis: (value: unknown): value is { id: string } => 
+        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
+      key: 'id' 
+    },
+    Type: { 
+      $basis: (value: unknown): value is { type: string } => 
+        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
+      key: 'type' 
+    },
   },
 });
 ```
@@ -191,17 +201,19 @@ import { declareCanon } from '@relational-fabric/canon';
 declareCanon('Internal', {
   axioms: {
     Id: {
-      $basis: { id: 'string' },
+      $basis: (value: unknown): value is { id: string } => 
+        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
       key: 'id',
       $meta: { type: 'uuid'; required: 'true' },
     },
     Type: {
-      $basis: { type: 'string' },
+      $basis: (value: unknown): value is { type: string } => 
+        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
       key: 'type',
       $meta: { enum: 'user,admin,guest'; discriminator: 'true' },
     },
     Timestamps: {
-      $basis: Date,
+      $basis: (value: unknown): value is Date => value instanceof Date,
       toCanonical: (value: Date) => value,
       fromCanonical: (value: Date) => value,
       $meta: { format: 'iso8601' },
@@ -212,37 +224,48 @@ declareCanon('Internal', {
 
 **Why this matters**: The runtime system needs to know how to actually extract values and perform conversions when your code runs. Note that the `$meta` values here are the **actual metadata values**, while the type definition above specifies the **types** of those metadata fields.
 
-### Understanding $basis TypeGuard Implementation
+### Distinguished Keys
 
-The `$basis` field in runtime configurations uses a **TypeGuard pattern** to ensure type safety at runtime. This is implemented as `TypeGuard<Satisfies<AxiomLabel, CanonLabel>>` where:
+Canon uses special keys that have specific meaning to the system:
 
-- **`AxiomLabel`** - The specific axiom being configured (e.g., 'Id', 'Type', 'Version')
-- **`CanonLabel`** - The specific canon being configured (e.g., 'Internal', 'JsonLd', 'Mongo')
-- **`Satisfies`** - Ensures the configuration matches the expected axiom structure
+#### $basis Key
 
-**How it works:**
-1. **Compile-time**: TypeScript validates that your `$basis` configuration matches the expected axiom type
-2. **Runtime**: The TypeGuard ensures the actual values conform to the expected structure
-3. **Inference**: The system can automatically determine the correct field names and conversion logic
+The `$basis` field defines the underlying TypeScript type structure for an axiom. In runtime configurations, `$basis` must be a TypeGuard that discriminates between `T extends ExpectedType` and `unknown`.
 
-**Example:**
+**Type-level definition:**
 ```typescript
-// Type-level definition specifies the structure
 Id: {
   $basis: { id: string };
   key: 'id';
   $meta: { type: string; required: string };
 }
+```
 
-// Runtime configuration provides actual values with TypeGuard validation
+**Runtime configuration:**
+```typescript
 Id: {
-  $basis: { id: 'string' },  // TypeGuard ensures this matches { id: string }
+  $basis: (value: unknown): value is { id: string } => 
+    typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string';
   key: 'id',
   $meta: { type: 'uuid'; required: 'true' },
 }
 ```
 
-This dual approach enables **lazy typing** - your code can work with semantic concepts without knowing the specific field names or conversion logic at compile time, while maintaining full type safety.
+#### $meta Key
+
+The `$meta` field provides additional metadata about the axiom. This can include type information, constraints, or behavioral hints.
+
+**Example:**
+```typescript
+$meta: { 
+  type: 'uuid'; 
+  required: 'true';
+  format: 'iso8601';
+  description: 'Unique identifier for the entity';
+}
+```
+
+This approach enables **lazy typing** - your code can work with semantic concepts without knowing the specific field names or conversion logic at compile time, while maintaining full type safety.
 
 ### 3. How They Work Together
 
@@ -301,7 +324,7 @@ idOf(mongoData);     // "user-123" using '_id'
 1. **Complete Canon Definition**: Always include both type-level and runtime definitions
 2. **Use Core Axioms**: Start with the [core axiom set](./core-axioms.md) before adding custom ones
 3. **Register Early**: Register canons at application startup for best performance
-4. **Leverage Type Safety**: Use the `Satisfies` constraint to ensure compile-time validation
+4. **Leverage Type Safety**: Use the `Satisfies` constraint to ensure compile-time type checking
 5. **Document Dependencies**: Clearly document inter-canon relationships
 
 ## Integration

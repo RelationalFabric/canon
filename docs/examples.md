@@ -108,7 +108,7 @@ class TreeService {
     const version = versionOf(nodeData) || 1;
     const timestamp = timestampsOf(nodeData) || new Date();
 
-    // Universal validation - works with any format
+    // Universal type checking - works with any format
     if (!this.isValidId(id)) {
       throw new Error(`Invalid node ID from ${source}: ${id}`);
     }
@@ -279,7 +279,7 @@ class TreeService {
     return 'unknown';
   }
 
-  // Validation helpers
+  // Type checking helpers
   private isValidId(id: string): boolean {
     return id && id.length > 0;
   }
@@ -464,7 +464,7 @@ This example shows why Canon is valuable for tree operations:
 4. **Mixed Shapes**: Different field names (`parentId` vs `parent` vs `parent_id`)
 5. **Format Independence**: Tree operations don't need to know about data source differences
 6. **Easy Extension**: Adding new data sources requires no code changes
-7. **Type Safety**: TypeScript ensures compile-time validation across all formats
+7. **Type Safety**: TypeScript ensures compile-time type checking across all formats
 
 ## Conclusion
 
@@ -473,6 +473,6 @@ By using Canon's core axioms and defining custom axioms for parent/child relatio
 - Provides universal tree walking operations regardless of data format
 - Supports custom relationship axioms for domain-specific needs
 - Requires no code changes when adding new data sources
-- Maintains type safety and validation across all formats
+- Maintains type safety and type checking across all formats
 
 The system demonstrates the real value of Canon: **universal tree operations that work across diverse data structures with custom relationship semantics**.
