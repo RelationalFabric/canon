@@ -10,32 +10,59 @@ Each source has different ways to identify the same logical entity. Your databas
 
 ## The Canon Solution
 
-Define a `DeduplicationKey` axiom that captures how to identify the same logical entity across sources.
+Use the existing core axioms (`Id` and `Type`) to identify entities, then define a `DeduplicationKey` axiom for the business logic of what makes entities "the same".
 
 ## The Flow
 
-Start by defining what makes two entities "the same" - maybe it's a combination of name, brand, and price range. Create a `DeduplicationKey` axiom that extracts this signature from any entity.
+**Step 1: Decide which axioms are needed**
+- `Id` and `Type` from core axioms (already provided)
+- `DeduplicationKey` - new axiom for business logic
 
+**Step 2: Compose the Canon and register it**
 ```typescript
-// One simple axiom for deduplication - like Clojure's seq interface
-type DeduplicationKeyAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
+// Register the new axiom
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    Id: KeyNameAxiom;
+    Type: KeyNameAxiom;
+    DeduplicationKey: DeduplicationKeyAxiom;
+  }
+}
+
+// Define the canon for this example
+type DeduplicationCanon = Canon<{
+  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
+  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
+  DeduplicationKey: { $basis: { name: string; brand: string; price: number }; key: 'deduplicationKey'; $meta: { type: string } };
+}>;
 ```
 
-Now your deduplication logic can use `deduplicationKeyOf(entity)` to group similar items.
+**Step 3: Implement the API for the new axiom**
+```typescript
+function deduplicationKeyOf<T extends Satisfies<'DeduplicationKey'>>(entity: T): string {
+  const key = (entity as any).deduplicationKey;
+  return `${key.name}-${key.brand}-${Math.round(key.price / 100)}`;
+}
+```
 
-## The Magic
-
-The same deduplication algorithm works across your database products (with `name`, `brand`, `price`), API products (with `title`, `manufacturer`, `cost`), and user content (with `productName`, `company`, `amount`). You write the matching logic once, and it works everywhere.
-
+**Step 4: The usage**
 ```typescript
 // One function works with all entity types
 function findDuplicates(entities: any[]): any[][] {
   const groups = new Map();
   entities.forEach(entity => {
+    const id = idOf(entity);
+    const type = typeOf(entity);
     const key = deduplicationKeyOf(entity);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(entity);
+    const groupKey = `${type}-${key}`;
+    
+    if (!groups.has(groupKey)) groups.set(groupKey, []);
+    groups.get(groupKey).push(entity);
   });
   return Array.from(groups.values()).filter(group => group.length > 1);
 }
 ```
+
+## The Magic
+
+The same deduplication algorithm works across your database products (with `name`, `brand`, `price`), API products (with `title`, `manufacturer`, `cost`), and user content (with `productName`, `company`, `amount`). You write the matching logic once, and it works everywhere.

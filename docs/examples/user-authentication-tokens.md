@@ -10,30 +10,57 @@ Without a unified approach, you'd need separate code paths for each token type, 
 
 ## The Canon Solution
 
-Define just three axioms for the essential concepts, then write universal auth logic.
+Use the existing core axioms (`Id` and `Type`) to identify tokens, then define `Expiration` and `Permissions` axioms for the auth-specific concepts.
 
 ## The Flow
 
-Start by defining `UserIdentity`, `Expiration`, and `Permissions` axioms. These capture the core concepts you need: who the user is, when the token expires, and what they can do.
+**Step 1: Decide which axioms are needed**
+- `Id` and `Type` from core axioms (already provided)
+- `Expiration` and `Permissions` - new axioms for auth concepts
 
+**Step 2: Compose the Canon and register it**
 ```typescript
-// Just three simple axioms - like Clojure's seq interface
-type UserIdentityAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
-type ExpirationAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
-type PermissionsAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
+// Register the new axioms
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    Id: KeyNameAxiom;
+    Type: KeyNameAxiom;
+    Expiration: ExpirationAxiom;
+    Permissions: PermissionsAxiom;
+  }
+}
+
+// Define the canon for this example
+type AuthCanon = Canon<{
+  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
+  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
+  Expiration: { $basis: { expires: number }; key: 'expires'; $meta: { type: string } };
+  Permissions: { $basis: { permissions: string[] }; key: 'permissions'; $meta: { type: string } };
+}>;
 ```
 
-Now your auth middleware can extract these values using `userIdentityOf(token)`, `expirationOf(token)`, and `permissionsOf(token)` regardless of the token format.
+**Step 3: Implement the API for the new axioms**
+```typescript
+function expirationOf<T extends Satisfies<'Expiration'>>(token: T): number {
+  return (token as any).expires;
+}
+
+function permissionsOf<T extends Satisfies<'Permissions'>>(token: T): string[] {
+  return (token as any).permissions || [];
+}
+```
+
+**Step 4: The usage**
+```typescript
+// One function works with all token types
+function isTokenValid(token: any): boolean {
+  const id = idOf(token);
+  const type = typeOf(token);
+  const expires = expirationOf(token);
+  return id && type && expires > Date.now();
+}
+```
 
 ## The Magic
 
 The same authorization logic works across JWT tokens (with `sub` and `exp` fields), OAuth tokens (with `user_id` and `expires_at`), and session cookies (with `userId` and `ttl`). You write the business logic once, and it works everywhere.
-
-```typescript
-// One function works with all token types
-function isTokenValid(token: any): boolean {
-  const userId = userIdentityOf(token);
-  const expires = expirationOf(token);
-  return userId && expires > Date.now();
-}
-```
