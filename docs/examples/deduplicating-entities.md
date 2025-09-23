@@ -1,5 +1,7 @@
 # Deduplicating Entities in Heterogeneous Collections
 
+> **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](../examples.md). Make sure you understand the basic Canon concepts before proceeding.
+
 ## The Story
 
 You're building an update process that needs to deduplicate entities from multiple sources - your product database, a third-party API, and user-generated content. As part of your workflow, you need to identify and merge duplicate products before applying updates, but the same item appears with different IDs across sources.

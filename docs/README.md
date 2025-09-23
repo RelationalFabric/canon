@@ -19,3 +19,7 @@ Canon is a foundational library for building robust type ecosystems. It provides
 4. **Lazy Typing** - Deferred type resolution with canonical identity preservation
 
 For detailed usage examples and implementation guides, explore the individual documentation files above.
+
+## Contributing
+
+Interested in contributing to Canon? Check out our [Contributing Guidelines](../CONTRIBUTING.md) for conventions, development workflow, and how to get involved.

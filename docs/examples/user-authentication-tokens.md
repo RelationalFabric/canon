@@ -1,5 +1,7 @@
 # Cross-Source Data Transformation
 
+> **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](../examples.md). Make sure you understand the basic Canon concepts before proceeding.
+
 ## The Story
 
 You're building a data pipeline that needs to transform entities from multiple sources - your internal database, a REST API, and a GraphQL endpoint - into a unified format for reporting. Each source has different field names and structures, but you need the same transformation logic to work with all of them as part of your larger workflow.

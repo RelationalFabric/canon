@@ -185,7 +185,7 @@ idOf(mongoData);     // "user-123" using '_id'
 ## Best Practices
 
 1. **Complete Canon Definition**: Always include both type-level and runtime definitions
-2. **Use Core Axioms**: Start with the core axiom set before adding custom ones
+2. **Use Core Axioms**: Start with the [core axiom set](./core-axioms.md) before adding custom ones
 3. **Register Early**: Register canons at application startup for best performance
 4. **Leverage Type Safety**: Use the `Satisfies` constraint to ensure compile-time validation
 5. **Document Dependencies**: Clearly document inter-canon relationships
