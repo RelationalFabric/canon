@@ -4,7 +4,7 @@
 
 This document provides comprehensive examples of how to use Canon's core axioms in real-world applications. It demonstrates the power of the axiom system through practical examples, showing how semantic concepts can be implemented across different data formats while maintaining type safety and consistency.
 
-For detailed information about the axiom system architecture, see the [Axioms documentation](./axioms.md). For information about how canons work with axioms, see the [Canons documentation](./canons.md).
+For detailed information about the axiom system architecture, see the [Axioms documentation](./axioms.md). For information about how canons work with axioms, see the [Canons documentation](./canons.md). For the complete definition of the core axioms, see the [Core Axioms documentation](./core-axioms.md).
 
 ## The Need for a Core Set of Axioms
 
@@ -53,23 +53,23 @@ getId(graphqlData); // Uses 'id'
 
 ## Core Axiom Set
 
-Based on analysis of common data patterns across different systems, we believe the core axiom set should include:
+The core axiom set consists of five essential axioms that cover the fundamental concepts found in most data-centric applications. These are fully defined in the [Core Axioms documentation](./core-axioms.md):
 
-### 1. **Id** - Unique Identifiers
-### 2. **Type** - Entity Classification  
-### 3. **Version** - Data Versioning
-### 4. **Timestamp** - Time-based Data
-### 5. **Reference** - Entity Relationships
+1. **Id** - Unique Identifiers
+2. **Type** - Entity Classification  
+3. **Version** - Data Versioning
+4. **Timestamp** - Time-based Data
+5. **Reference** - Entity Relationships
 
-These five axioms cover the fundamental concepts that appear in virtually all data-centric applications, providing a solid foundation for semantic programming.
+These five axioms provide a solid foundation for semantic programming across diverse data formats.
 
-## Core Axiom Details
+## Core Axiom Examples
 
-### 1. Id Axiom
+The following examples demonstrate how to use each of the core axioms in practice. For complete axiom definitions and API specifications, see the [Core Axioms documentation](./core-axioms.md).
+
+### 1. Id Axiom Examples
 
 **Purpose**: Represents unique identifiers for entities across different data formats.
-
-**Definition**: A `KeyNameAxiom` that specifies where to find the primary identifier in a data structure.
 
 **Common Implementations**:
 - REST APIs: `{ id: "user-123" }`
@@ -80,13 +80,6 @@ These five axioms cover the fundamental concepts that appear in virtually all da
 **Example Usage**:
 
 ```typescript
-// Register the Id axiom
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Id: KeyNameAxiom;
-  }
-}
-
 // Universal function that works with any format
 function getId<T extends Satisfies<'Id'>>(entity: T): string {
   const config = inferAxiom('Id', entity);
@@ -120,11 +113,9 @@ class UserService {
 }
 ```
 
-### 2. Type Axiom
+### 2. Type Axiom Examples
 
 **Purpose**: Represents entity classification or schema information across different data formats.
-
-**Definition**: A `KeyNameAxiom` that specifies where to find the entity type information.
 
 **Common Implementations**:
 - REST APIs: `{ type: "User" }`
@@ -135,13 +126,6 @@ class UserService {
 **Example Usage**:
 
 ```typescript
-// Register the Type axiom
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Type: KeyNameAxiom;
-  }
-}
-
 // Universal type checking
 function getType<T extends Satisfies<'Type'>>(entity: T): string {
   const config = inferAxiom('Type', entity);
@@ -193,11 +177,9 @@ class EntityValidator {
 }
 ```
 
-### 3. Version Axiom
+### 3. Version Axiom Examples
 
 **Purpose**: Represents version information for data entities, enabling optimistic concurrency control and change tracking.
-
-**Definition**: A `KeyNameAxiom` that specifies where to find version information.
 
 **Common Implementations**:
 - REST APIs: `{ version: 1 }`
@@ -208,13 +190,6 @@ class EntityValidator {
 **Example Usage**:
 
 ```typescript
-// Register the Version axiom
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Version: KeyNameAxiom;
-  }
-}
-
 // Universal version handling
 function getVersion<T extends Satisfies<'Version'>>(entity: T): number {
   const config = inferAxiom('Version', entity);
@@ -269,11 +244,9 @@ class OptimisticConcurrencyService {
 }
 ```
 
-### 4. Timestamp Axiom
+### 4. Timestamp Axiom Examples
 
 **Purpose**: Represents time-based data with automatic conversion between different timestamp formats.
-
-**Definition**: A `TimestampAxiom` that provides conversion functions between different timestamp representations.
 
 **Common Implementations**:
 - Unix timestamps: `{ createdAt: 1640995200 }`
@@ -284,13 +257,6 @@ class OptimisticConcurrencyService {
 **Example Usage**:
 
 ```typescript
-// Register the Timestamp axiom
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Timestamp: TimestampAxiom;
-  }
-}
-
 // Universal timestamp handling
 function getTimestamp<T extends Satisfies<'Timestamp'>>(entity: T): Date {
   const config = inferAxiom('Timestamp', entity);
