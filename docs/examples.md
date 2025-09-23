@@ -38,11 +38,10 @@ This leads to:
 Canon's core axioms provide a **semantic layer** that abstracts away format differences. Instead of writing format-specific code, developers write **semantic code** that works across all formats:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 // With axioms - universal semantic code
-function idOf<T extends Satisfies<'Id'>>(data: T): string {
-  const config = inferAxiom('Id', data);
-  return data[config.key] as string;
-}
+// idOf is imported from @relational-fabric/canon
 
 // Works with ALL formats automatically
 idOf(restData);    // Uses 'id'
@@ -58,8 +57,8 @@ The core axiom set consists of five essential axioms that cover the fundamental 
 1. **Id** - Unique Identifiers
 2. **Type** - Entity Classification  
 3. **Version** - Data Versioning
-4. **Timestampss** - Time-based Data
-5. **Referencess** - Entity Relationships
+4. **Timestamps** - Time-based Data
+5. **References** - Entity Relationships
 
 These five axioms provide a solid foundation for semantic programming across diverse data formats.
 
@@ -80,11 +79,10 @@ The following examples demonstrate how to use each of the core axioms in practic
 **Example Usage**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 // Universal function that works with any format
-function idOf<T extends Satisfies<'Id'>>(entity: T): string {
-  const config = inferAxiom('Id', entity);
-  return entity[config.key] as string;
-}
+// idOf is imported from @relational-fabric/canon
 
 // Usage across different formats
 const restUser = { id: "user-123", name: "John" };
@@ -99,6 +97,8 @@ console.log(idOf(jsonLdUser));  // "user-789"
 **Business Logic Example**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 class UserService {
   async findUserById<T extends Satisfies<'Id'>>(id: string): Promise<T | null> {
     // Universal ID extraction - works with any format
@@ -126,11 +126,10 @@ class UserService {
 **Example Usage**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 // Universal type checking
-function typeOf<T extends Satisfies<'Type'>>(entity: T): string {
-  const config = inferAxiom('Type', entity);
-  return entity[config.key] as string;
-}
+// typeOf is imported from @relational-fabric/canon
 
 function isUser<T extends Satisfies<'Type'>>(entity: T): boolean {
   const type = typeOf(entity);
@@ -154,6 +153,14 @@ console.log(isUser(jsonLdUser));   // true
 **Business Logic Example**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// Define application-specific types
+interface ValidationResult {
+  valid: boolean;
+  error?: string;
+}
+
 class EntityValidator {
   validateEntity<T extends Satisfies<'Type'>>(entity: T): ValidationResult {
     const type = typeOf(entity);
@@ -190,11 +197,10 @@ class EntityValidator {
 **Example Usage**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 // Universal version handling
-function getVersion<T extends Satisfies<'Version'>>(entity: T): number {
-  const config = inferAxiom('Version', entity);
-  return entity[config.key] as number;
-}
+// versionOf is imported from @relational-fabric/canon
 
 function incrementVersion<T extends Satisfies<'Version'>>(entity: T): T {
   const config = inferAxiom('Version', entity);
@@ -218,12 +224,14 @@ console.log(versionOf(updatedRest));    // 2
 **Business Logic Example**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 class OptimisticConcurrencyService {
   async updateEntity<T extends Satisfies<'Id' | 'Version'>>(
     entity: T, 
     updates: Partial<T>
   ): Promise<T> {
-    const id = getId(entity);
+    const id = idOf(entity);
     const currentVersion = versionOf(entity);
     
     // Check if entity has been modified since last read
@@ -257,11 +265,10 @@ class OptimisticConcurrencyService {
 **Example Usage**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 // Universal timestamp handling
-function getTimestamps<T extends Satisfies<'Timestamps'>>(entity: T): Date {
-  const config = inferAxiom('Timestamps', entity);
-  return config.toCanonical(entity[config.key]);
-}
+// timestampsOf is imported from @relational-fabric/canon
 
 function setTimestamps<T extends Satisfies<'Timestamps'>>(
   entity: T, 
@@ -287,12 +294,22 @@ console.log(timestampsOf(dateEntity));  // 2022-01-01T00:00:00.000Z
 **Business Logic Example**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// Define application-specific types
+interface AuditLog {
+  entityId: string;
+  action: string;
+  timestamp: Date;
+  createdAt: Date;
+}
+
 class AuditService {
   async createAuditLog<T extends Satisfies<'Id' | 'Timestamps'>>(
     entity: T,
     action: string
   ): Promise<AuditLog> {
-    const id = getId(entity);
+    const id = idOf(entity);
     const timestamp = timestampsOf(entity);
     
     return {
@@ -329,18 +346,10 @@ class AuditService {
 **Example Usage**:
 
 ```typescript
-// Register the References axiom
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    References: ReferencesAxiom;
-  }
-}
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
 
 // Universal reference handling
-function getReferences<T extends Satisfies<'References'>>(entity: T): string {
-  const config = inferAxiom('References', entity);
-  return config.toCanonical(entity[config.key]);
-}
+// referencesOf is imported from @relational-fabric/canon
 
 function setReferences<T extends Satisfies<'References'>>(
   entity: T, 
@@ -366,8 +375,21 @@ console.log(referencesOf(arrayRef));   // "tag1,tag2"
 **Business Logic Example**:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// Define application-specific types
+interface ResolvedEntity {
+  [key: string]: any;
+  resolvedReferences?: any;
+}
+
+interface Entity {
+  id: string;
+  [key: string]: any;
+}
+
 class RelationshipService {
-  async resolveReferencess<T extends Satisfies<'References'>>(
+  async resolveReferences<T extends Satisfies<'References'>>(
     entities: T[]
   ): Promise<ResolvedEntity[]> {
     const references = entities.map(entity => referencesOf(entity));
@@ -396,6 +418,8 @@ class RelationshipService {
 Here's a comprehensive example showing how all core axioms work together in a real application:
 
 ```typescript
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
 // 1. Register all core axioms
 declare module '@relational-fabric/canon' {
   interface Axioms {
@@ -413,7 +437,7 @@ class UniversalEntityService {
   async createEntity<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps'>>(
     entityData: T
   ): Promise<T> {
-    const id = getId(entityData);
+    const id = idOf(entityData);
     const type = typeOf(entityData);
     const version = versionOf(entityData) || 1;
     const timestamp = timestampsOf(entityData) || new Date();
@@ -445,7 +469,7 @@ class UniversalEntityService {
     entity: T,
     updates: Partial<T>
   ): Promise<T> {
-    const id = getId(entity);
+    const id = idOf(entity);
     const currentVersion = versionOf(entity);
     
     // Check for concurrent modifications

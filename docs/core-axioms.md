@@ -22,6 +22,8 @@ The core axiom set consists of five essential axioms that cover the fundamental 
 
 **Type Definition**:
 ```typescript
+import { KeyNameAxiom } from '@relational-fabric/canon';
+
 type IdAxiom = KeyNameAxiom;
 ```
 
@@ -42,10 +44,13 @@ declare module '@relational-fabric/canon' {
 
 **API Functions**:
 ```typescript
-function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
-  const config = inferAxiom('Id', x);
-  return x[config.key] as AxiomValue<'Id'>;
-}
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// idOf is provided by @relational-fabric/canon
+// function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
+//   const config = inferAxiom('Id', x);
+//   return x[config.key] as AxiomValue<'Id'>;
+// }
 ```
 
 ### 2. Type Axiom
@@ -54,6 +59,8 @@ function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
 
 **Type Definition**:
 ```typescript
+import { KeyNameAxiom } from '@relational-fabric/canon';
+
 type TypeAxiom = KeyNameAxiom;
 ```
 
@@ -74,10 +81,13 @@ declare module '@relational-fabric/canon' {
 
 **API Functions**:
 ```typescript
-function typeOf<T extends Satisfies<'Type'>>(x: T): AxiomValue<'Type'> {
-  const config = inferAxiom('Type', x);
-  return x[config.key] as AxiomValue<'Type'>;
-}
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// typeOf is provided by @relational-fabric/canon
+// function typeOf<T extends Satisfies<'Type'>>(x: T): AxiomValue<'Type'> {
+//   const config = inferAxiom('Type', x);
+//   return x[config.key] as AxiomValue<'Type'>;
+// }
 ```
 
 ### 3. Version Axiom
@@ -86,6 +96,8 @@ function typeOf<T extends Satisfies<'Type'>>(x: T): AxiomValue<'Type'> {
 
 **Type Definition**:
 ```typescript
+import { KeyNameAxiom } from '@relational-fabric/canon';
+
 type VersionAxiom = KeyNameAxiom;
 ```
 
@@ -106,10 +118,13 @@ declare module '@relational-fabric/canon' {
 
 **API Functions**:
 ```typescript
-function versionOf<T extends Satisfies<'Version'>>(x: T): AxiomValue<'Version'> {
-  const config = inferAxiom('Version', x);
-  return x[config.key] as AxiomValue<'Version'>;
-}
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// versionOf is provided by @relational-fabric/canon
+// function versionOf<T extends Satisfies<'Version'>>(x: T): AxiomValue<'Version'> {
+//   const config = inferAxiom('Version', x);
+//   return x[config.key] as AxiomValue<'Version'>;
+// }
 ```
 
 ### 4. Timestamps Axiom
@@ -118,6 +133,8 @@ function versionOf<T extends Satisfies<'Version'>>(x: T): AxiomValue<'Version'> 
 
 **Type Definition**:
 ```typescript
+import { Axiom, CanonicalTimestamp, TypeGuard } from '@relational-fabric/canon';
+
 type TimestampsAxiom = Axiom<{
   $basis: number | string | Date | TypeGuard<unknown>;
   toCanonical: (value: this['$basis']) => CanonicalTimestamp;
@@ -144,10 +161,13 @@ declare module '@relational-fabric/canon' {
 
 **API Functions**:
 ```typescript
-function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
-  const config = inferAxiom('Timestamps', x);
-  return config.toCanonical(x[config.key]);
-}
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// timestampsOf is provided by @relational-fabric/canon
+// function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
+//   const config = inferAxiom('Timestamps', x);
+//   return config.toCanonical(x[config.key]);
+// }
 ```
 
 ### 5. References Axiom
@@ -156,6 +176,8 @@ function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Time
 
 **Type Definition**:
 ```typescript
+import { Axiom, CanonicalReference, TypeGuard } from '@relational-fabric/canon';
+
 type ReferencesAxiom = Axiom<{
   $basis: string | object | string[] | TypeGuard<unknown>;
   toCanonical: (value: this['$basis']) => CanonicalReference;
@@ -182,58 +204,65 @@ declare module '@relational-fabric/canon' {
 
 **API Functions**:
 ```typescript
-function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'References'> {
-  const config = inferAxiom('References', x);
-  return config.toCanonical(x[config.key]);
-}
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+
+// referencesOf is provided by @relational-fabric/canon
+// function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'References'> {
+//   const config = inferAxiom('References', x);
+//   return config.toCanonical(x[config.key]);
+// }
 ```
 
 ## Canonical Types
 
-The core axioms reference several canonical types that provide consistent representations across different formats:
+The core axioms reference several canonical types that provide consistent representations across different formats. These types are provided by `@relational-fabric/canon`:
 
 ```typescript
-// Canonical timestamp type - always a Date object
-type CanonicalTimestamp = Date;
+import { CanonicalTimestamp, CanonicalReference, TypeGuard } from '@relational-fabric/canon';
 
-// Canonical reference type - always a string
-type CanonicalReference = string;
+// Canonical timestamp type - always a Date object
+// type CanonicalTimestamp = Date;
+
+// Canonical reference type - always a string  
+// type CanonicalReference = string;
 
 // Type guard utility type
-type TypeGuard<T> = (value: unknown) => value is T;
+// type TypeGuard<T> = (value: unknown) => value is T;
 ```
 
 ## Utility Types
 
-The core axioms are built on top of the fundamental axiom utility types:
+The core axioms are built on top of the fundamental axiom utility types. These types are provided by `@relational-fabric/canon`:
 
 ```typescript
+import { Axiom, KeyNameAxiom, Satisfies, AxiomValue, inferAxiom } from '@relational-fabric/canon';
+
 // Base axiom type with universal distinguished keys
-type Axiom<TBasis, TMeta> = {
-  $basis: TBasis;
-  $meta: TMeta;
-};
+// type Axiom<TBasis, TMeta> = {
+//   $basis: TBasis;
+//   $meta: TMeta;
+// };
 
 // Key-name axiom for simple field-based concepts
-type KeyNameAxiom = Axiom<{
-  $basis: Record<string, unknown>;
-  key: string;
-}, {
-  key: string;
-}>;
+// type KeyNameAxiom = Axiom<{
+//   $basis: Record<string, unknown>;
+//   key: string;
+// }, {
+//   key: string;
+// }>;
 
 // Utility types for working with axioms
-type Satisfies<T extends keyof Axioms> = {
-  [K in keyof Axioms[T]['$basis']]: Axioms[T]['$basis'][K];
-};
+// type Satisfies<T extends keyof Axioms> = {
+//   [K in keyof Axioms[T]['$basis']]: Axioms[T]['$basis'][K];
+// };
 
-type AxiomValue<T extends keyof Axioms> = Axioms[T]['$basis'][keyof Axioms[T]['$basis']];
+// type AxiomValue<T extends keyof Axioms> = Axioms[T]['$basis'][keyof Axioms[T]['$basis']];
 
 // Runtime axiom inference
-declare function inferAxiom<T extends keyof Axioms>(
-  axiom: T, 
-  value: Satisfies<T>
-): Axioms[T];
+// declare function inferAxiom<T extends keyof Axioms>(
+//   axiom: T, 
+//   value: Satisfies<T>
+// ): Axioms[T];
 ```
 
 ## Implementation Notes
