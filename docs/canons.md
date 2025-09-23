@@ -140,8 +140,8 @@ const internalData = {
   createdAt: new Date("2022-01-01")
 };
 
-console.log(getId(internalData));    // "user-123" - runtime finds 'id' key
-console.log(getType(internalData));  // "user" - runtime finds 'type' key
+console.log(idOf(internalData));    // "user-123" - runtime finds 'id' key
+console.log(typeOf(internalData));  // "user" - runtime finds 'type' key
 ```
 
 **The magic**: TypeScript ensures type safety at compile time, while the runtime system provides the actual field names and conversion logic at execution time.
@@ -163,9 +163,9 @@ const jsonLdData = { "@id": "user-123", "@type": "Person" };
 const mongoData = { "_id": "user-123", "_type": "User" };
 
 // All formats work with the same universal function
-getId(internalData);  // "user-123" using 'id'
-getId(jsonLdData);    // "user-123" using '@id'
-getId(mongoData);     // "user-123" using '_id'
+idOf(internalData);  // "user-123" using 'id'
+idOf(jsonLdData);    // "user-123" using '@id'
+idOf(mongoData);     // "user-123" using '_id'
 ```
 
 ### Real-World Benefits
