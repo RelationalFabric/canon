@@ -118,13 +118,10 @@ function versionOf<T extends Satisfies<'Version'>>(x: T): AxiomValue<'Version'> 
 
 **Type Definition**:
 ```typescript
-// Define canonical timestamp type for your application
-type CanonicalTimestamp = Date;
-
 type TimestampsAxiom = Axiom<{
   $basis: number | string | Date | TypeGuard<unknown>;
-  toCanonical: (value: this['$basis']) => CanonicalTimestamp;
-  fromCanonical: (value: CanonicalTimestamp) => this['$basis'];
+  toCanonical: (value: this['$basis']) => unknown;
+  fromCanonical: (value: unknown) => this['$basis'];
 }, {
   key: string;
 }>;
@@ -159,13 +156,10 @@ function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Time
 
 **Type Definition**:
 ```typescript
-// Define canonical reference type for your application
-type CanonicalReference = string;
-
 type ReferencesAxiom = Axiom<{
   $basis: string | object | string[] | TypeGuard<unknown>;
-  toCanonical: (value: this['$basis']) => CanonicalReference;
-  fromCanonical: (value: CanonicalReference) => this['$basis'];
+  toCanonical: (value: this['$basis']) => unknown;
+  fromCanonical: (value: unknown) => this['$basis'];
 }, {
   key: string;
 }>;
@@ -194,14 +188,13 @@ function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'Refe
 }
 ```
 
-## Canonical Types
+## Conversion Types
 
-The core axioms reference several canonical types that provide consistent representations across different formats. These types must be defined by the axiom author:
+The core axioms use conversion functions that work with different data formats. The specific types are determined by the axiom implementation:
 
 ```typescript
-// Define canonical types for your application
-type CanonicalTimestamp = Date;  // Always a Date object
-type CanonicalReference = string;  // Always a string
+// Conversion functions work with any type
+// The specific types are determined by the axiom implementation
 ```
 
 ## Utility Types

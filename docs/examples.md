@@ -31,14 +31,14 @@ declare module '@relational-fabric/canon' {
 }
 ```
 
-## Step 2: Defining Canonical Types
+## Step 2: Defining Conversion Types
 
-We need to define the canonical types that our axioms will convert to. These represent the "standard" format for our application.
+We need to define the types that our axioms will convert to. These represent the "standard" format for our application.
 
 ```typescript
-// Define canonical types for our application
-type CanonicalTimestamp = Date;
-type CanonicalReference = string;
+// Define conversion types for our application
+type TimestampType = Date;
+type ReferenceType = string;
 ```
 
 ## Step 3: Creating Our Data Models
