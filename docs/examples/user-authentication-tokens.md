@@ -1,74 +1,53 @@
-# User Authentication Tokens
+# Cross-Source Data Validation
 
 ## The Story
 
-You're building an update process for a microservices architecture where different services use different authentication mechanisms. As part of your workflow, you need to validate tokens from JWT, OAuth access tokens, and session cookies before processing updates. Each has completely different structures, but you need the same validation logic to work with all of them.
+You're building an update process that needs to validate data from multiple sources - your internal database, a REST API, and a GraphQL endpoint. Each source has different field names and structures, but you need the same validation logic to work with all of them as part of your larger workflow.
 
 ## The Problem
 
-Without a unified approach, you'd need separate validation code paths for each token type in your update process, leading to code duplication and maintenance nightmares. Your update middleware becomes a mess of `if (token.type === 'jwt')` statements.
+Without a unified approach, you'd need separate validation code paths for each data source in your update process, leading to code duplication and maintenance nightmares. Your validation middleware becomes a mess of `if (data.source === 'database')` statements.
 
 ## The Canon Solution
 
-Use the existing core axioms (`Id` and `Type`) to identify tokens, then define `Expiration` and `Permissions` axioms for the auth-specific concepts.
+Use the existing core axioms (`Id` and `Type`) that are already set up by your framework. The canons are already registered - you just need to write universal validation logic.
 
 ## The Flow
 
-**Step 1: Decide which axioms are needed**
-- `Id` and `Type` from core axioms (already provided)
-- `Expiration` and `Permissions` - new axioms for auth concepts
+**Step 1: The canons are already set up**
+Your framework has already registered canons for different data sources:
+- `DatabaseCanon` for internal database entities
+- `RestApiCanon` for REST API responses  
+- `GraphQLCanon` for GraphQL responses
 
-**Step 2: Compose the Canon and register it**
+**Step 2: Write universal validation logic**
 ```typescript
-// Define the canon for this example
-type AuthCanon = Canon<{
-  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
-  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
-  Expiration: { $basis: { expires: number }; key: 'expires'; $meta: { type: string } };
-  Permissions: { $basis: { permissions: string[] }; key: 'permissions'; $meta: { type: string } };
-}>;
-
-// Register the canon globally
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    auth: AuthCanon;
-  }
+// One validation function works with all data sources
+function validateEntity<T extends Satisfies<'Id' | 'Type'>>(entity: T): boolean {
+  const id = idOf(entity);
+  const entityType = typeOf(entity);
+  
+  // Universal validation logic
+  return id && entityType && id.length > 0 && entityType.length > 0;
 }
 
-// Register the runtime configuration
-declareCanon('auth', {
-  axioms: {
-    Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
-    Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
-    Expiration: { $basis: { expires: 'number' }, key: 'expires', $meta: { type: 'string' } },
-    Permissions: { $basis: { permissions: 'string[]' }, key: 'permissions', $meta: { type: 'string' } },
-  },
-});
-```
-
-**Step 3: Implement the API for the new axioms**
-```typescript
-function expirationOf<T extends Satisfies<'Expiration'>>(token: T): number {
-  return (token as Record<string, unknown>).expires as number;
-}
-
-function permissionsOf<T extends Satisfies<'Permissions'>>(token: T): string[] {
-  const permissions = (token as Record<string, unknown>).permissions;
-  return Array.isArray(permissions) ? permissions as string[] : [];
+// Validation for update operations
+function canUpdateEntity<T extends Satisfies<'Id' | 'Type'>>(entity: T): boolean {
+  return validateEntity(entity) && entityType !== 'readonly';
 }
 ```
 
-**Step 4: The usage**
+**Step 3: Use in your update process**
 ```typescript
-// One function works with all token types
-function isTokenValid<T extends Satisfies<'Id' | 'Type' | 'Expiration'>>(token: T): boolean {
-  const id = idOf(token);
-  const tokenType = typeOf(token);
-  const expires = expirationOf(token);
-  return id && tokenType && expires > Date.now();
+// Process updates from any source
+function processUpdates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[] {
+  return entities
+    .filter(validateEntity)
+    .filter(canUpdateEntity)
+    .map(applyUpdate);
 }
 ```
 
 ## The Magic
 
-The same validation logic works across JWT tokens (with `sub` and `exp` fields), OAuth tokens (with `user_id` and `expires_at`), and session cookies (with `userId` and `ttl`) in your update process. You write the validation logic once, and it works everywhere, making your update workflow robust and maintainable.
+The same validation logic works across your database entities (with `id` and `type` fields), REST API responses (with `@id` and `@type` fields), and GraphQL responses (with `nodeId` and `__typename` fields) in your update process. You write the validation logic once, and it works everywhere, making your update workflow robust and maintainable.
