@@ -151,9 +151,9 @@ const runtimeConfig = {
 ```
 
 **What happens at runtime:**
-1. The TypeGuard validates that `{ id: 'string' }` matches the expected `{ id: string }` structure
-2. The system can infer that the `id` field should be accessed as a string
-3. The `inferAxiom()` function uses this information to extract values correctly
+1. The TypeGuard validates that the runtime configuration structure matches the expected axiom type
+2. The string literals (`'string'`, `'number'`) represent the actual runtime type information
+3. The `inferAxiom()` function uses this information to extract values with the correct types
 
 ### Why This Matters
 

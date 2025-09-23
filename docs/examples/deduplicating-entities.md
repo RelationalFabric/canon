@@ -38,8 +38,8 @@ declare module '@relational-fabric/canon' {
 // Register the runtime configuration
 declareCanon('MyProject', {
   axioms: {
-    Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
-    Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
+    Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'uuid', required: 'true' } },
+    Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'product,user,order', discriminator: 'true' } },
   },
 });
 ```

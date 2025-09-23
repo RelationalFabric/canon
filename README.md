@@ -61,7 +61,7 @@ declareCanon('myProject', {
     type: {
       $basis: { type: 'string' },
       key: 'type',
-      $meta: { description: '...' },
+      $meta: { description: 'Entity type classification' },
     },
     version: {
       $basis: { version: 'number' },
