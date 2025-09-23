@@ -38,10 +38,9 @@ This leads to:
 Canon's core axioms provide a **semantic layer** that abstracts away format differences. Instead of writing format-specific code, developers write **semantic code** that works across all formats:
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+import { idOf } from '@relational-fabric/canon';
 
 // With axioms - universal semantic code
-// idOf is imported from @relational-fabric/canon
 
 // Works with ALL formats automatically
 idOf(restData);    // Uses 'id'
@@ -79,10 +78,9 @@ The following examples demonstrate how to use each of the core axioms in practic
 **Example Usage**:
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+import { idOf } from '@relational-fabric/canon';
 
 // Universal function that works with any format
-// idOf is imported from @relational-fabric/canon
 
 // Usage across different formats
 const restUser = { id: "user-123", name: "John" };
@@ -97,7 +95,7 @@ console.log(idOf(jsonLdUser));  // "user-789"
 **Business Logic Example**:
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+import { idOf, Satisfies } from '@relational-fabric/canon';
 
 class UserService {
   async findUserById<T extends Satisfies<'Id'>>(id: string): Promise<T | null> {
@@ -126,10 +124,9 @@ class UserService {
 **Example Usage**:
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+import { typeOf, Satisfies } from '@relational-fabric/canon';
 
 // Universal type checking
-// typeOf is imported from @relational-fabric/canon
 
 function isUser<T extends Satisfies<'Type'>>(entity: T): boolean {
   const type = typeOf(entity);
@@ -153,7 +150,7 @@ console.log(isUser(jsonLdUser));   // true
 **Business Logic Example**:
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom, Satisfies, AxiomValue } from '@relational-fabric/canon';
+import { typeOf, Satisfies } from '@relational-fabric/canon';
 
 // Define application-specific types
 interface ValidationResult {
