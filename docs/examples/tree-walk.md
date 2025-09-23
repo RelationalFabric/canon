@@ -1,24 +1,25 @@
 # Tree Walk Over Mixed Entities
 
-## Overview
+## The Real Problem
 
-This example demonstrates how to walk a tree of mixed entities from different sources and shapes using custom axioms for parent/child relationships. It shows the power of Canon for universal tree operations across diverse data structures without creating specific types.
+You're building a file browser that needs to work with data from multiple sources:
+- Your internal database (PostgreSQL)
+- A cloud storage API (Google Drive)
+- A legacy file system API
 
-## The Scenario
+Each has different field names and structures, but they're all hierarchical. Without Canon, you'd need separate code for each source or complex mapping logic.
 
-Building a file system browser that needs to:
-- Display a unified tree view of files and folders from multiple sources
-- Handle different data formats: internal database, JSON-LD API, REST API
-- Support parent/child relationships across all sources
-- Walk the tree uniformly regardless of source or shape
+## The Canon Solution
 
-## Step 1: Setting Up Custom Axioms
+Define just two custom axioms for parent/child relationships, then write tree operations that work on any data source.
+
+## Step 1: Define Two Simple Axioms
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon';
+import { idOf, typeOf } from '@relational-fabric/canon';
 import type { Satisfies, Axiom } from '@relational-fabric/canon';
 
-// Define custom axioms for parent/child relationships
+// Just two axioms for tree relationships - like Clojure's seq interface
 type ParentAxiom = Axiom<{
   $basis: Record<string, unknown>;
   key: string;
@@ -33,14 +34,11 @@ type ChildrenAxiom = Axiom<{
   key: string;
 }>;
 
-// Register our custom axioms
+// Register them
 declare module '@relational-fabric/canon' {
   interface Axioms {
     Id: KeyNameAxiom;
     Type: KeyNameAxiom;
-    Version: KeyNameAxiom;
-    Timestamps: TimestampsAxiom;
-    References: ReferencesAxiom;
     Parent: ParentAxiom;
     Children: ChildrenAxiom;
   }
