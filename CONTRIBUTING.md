@@ -28,10 +28,11 @@ Thank you for your interest in contributing to Canon! This document outlines the
 
 ### Axiom Structure Conventions
 
-#### Universal Distinguished Keys
-- Always use `$basis` for the underlying TypeScript type/object structure
-- Always use `$meta` for additional metadata
-- These keys are available to all axioms through the `Axiom` utility type
+#### Distinguished Keys
+- Use `$` prefix for keys that Canon understands and has specific behaviors for
+- These are **distinguished keys** that have special meaning to the Canon system
+- Examples: `$basis`, `$meta` - these are reserved and have defined behaviors
+- **Never use `$` prefix for user-defined keys** - this is reserved for Canon's internal use
 
 #### Key-Name Axioms
 - Must have `$basis: Record<string, unknown>` (object with at least one string key)
