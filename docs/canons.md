@@ -80,8 +80,8 @@ type InternalCanon = Canon<{
   };
   Timestamps: {
     $basis: Date;
-    toCanonical: (value: Date) => value;
-    fromCanonical: (value: Date) => value;
+    toCanonical: (value: Date) => Date;
+    fromCanonical: (value: Date) => Date;
     $meta: { format: string };
   };
 }>;
@@ -115,7 +115,7 @@ declareCanon('Internal', {
       $meta: { enum: 'user,admin,guest'; discriminator: 'true' },
     },
     Timestamps: {
-      $basis: 'Date',
+      $basis: Date,
       toCanonical: (value: Date) => value,
       fromCanonical: (value: Date) => value,
       $meta: { format: 'iso8601' },
