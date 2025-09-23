@@ -4,12 +4,12 @@
 
 **Before reading this document, please read the [Axioms documentation](./axioms.md).** 
 
-Canons build directly on the foundation of axioms. Understanding how axioms work is essential to understanding canons. The axioms document explains:
+Canons build directly on the foundation of axioms. Understanding how axioms work is essential to understanding canons. The axioms document covers:
 
-- What axioms are and how they define semantic concepts
-- How the axiom type system works with `$basis` and `$meta`
+- The fundamental concepts and purpose of axioms
+- How the axiom type system works
 - How axioms are registered and used
-- The core axiom types like `KeyNameAxiom` and `TimestampAxiom`
+- The core axiom types and their patterns
 
 Without this foundation, the concepts in this document won't make sense.
 
