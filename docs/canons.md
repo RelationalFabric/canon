@@ -4,6 +4,8 @@
 
 A **Canon** is a universal type blueprint that serves as a foundational building block for robust, data-centric applications. Canons solve the "empty room problem" by providing a consistent set of initial design decisions and type primitives that can be shared and composed across any project.
 
+But Canon's true power goes beyond just solving the empty room problem. **Multiple canons can exist at runtime**, each representing different data formats (JSON-LD, MongoDB, REST APIs, etc.), yet developers can program against a **single, common API** for semantic properties. This enables truly universal code that works across diverse data structures without format-specific logic.
+
 ## What is a Canon?
 
 A Canon is a type that defines its data model using a predefined set of universal axioms. Think of it as a contract that establishes:
@@ -12,6 +14,8 @@ A Canon is a type that defines its data model using a predefined set of universa
 2. **Canonical Keys** - Which field serves as the primary identifier
 3. **Metadata Context** - Rich configuration and validation rules
 4. **Runtime Behavior** - How the type behaves at execution time
+
+**The Key Insight**: A Canon is a **format-specific implementation** of universal semantic concepts. Multiple Canons can exist simultaneously, each representing different data formats (JSON-LD, MongoDB, REST APIs, etc.), but they all implement the same semantic concepts. This enables developers to write **universal code** that works across all formats through a common API.
 
 ## The Type System Architecture
 
@@ -190,6 +194,207 @@ The augmentable interface pattern ensures that:
 - **Canons provide specific implementations** - Each canon implements the axioms for its format
 - **Runtime config provides actual values** - The real values needed at runtime
 - **Type checking is enforced** - The compiler validates conformance to the axiom interface
+
+## Universal Data Structure Operations
+
+The most powerful feature of Canon is **universal data structure operations** - the ability to write code that works identically across completely different data formats through a common semantic API. This is where Canon's true value shines.
+
+### The Problem Canon Solves
+
+Consider a typical application that needs to work with data from multiple sources:
+
+```typescript
+// Different data formats for the same semantic concept
+const jsonLdUser = { "@id": "user-123", "@type": "Person", "name": "John" };
+const mongoUser = { "_id": "user-123", "_type": "Person", "name": "John" };
+const restUser = { "id": "user-123", "type": "Person", "name": "John" };
+const graphqlUser = { "id": "user-123", "__typename": "Person", "name": "John" };
+
+// Without Canon - format-specific code everywhere
+function getIdFromJsonLd(user: any) { return user["@id"]; }
+function getIdFromMongo(user: any) { return user["_id"]; }
+function getIdFromRest(user: any) { return user["id"]; }
+function getIdFromGraphQL(user: any) { return user["id"]; }
+
+// With Canon - universal code that works everywhere
+function getId<T extends Satisfies<'Id'>>(user: T): string {
+  const config = inferAxiom('Id', user);
+  return user[config.key] as string;
+}
+
+// All of these work with the same function:
+getId(jsonLdUser);  // Returns "user-123" using @id
+getId(mongoUser);   // Returns "user-123" using _id  
+getId(restUser);    // Returns "user-123" using id
+getId(graphqlUser); // Returns "user-123" using id
+```
+
+### Multiple Canons, Single API
+
+The magic happens when you have multiple canons registered at runtime, each representing different data formats, but your code uses a **single, universal API**:
+
+```typescript
+// Register multiple canons for different data formats
+declare module '@relational-fabric/canon' {
+  interface Canons {
+    JsonLd: Canon<{
+      Id: { basis: { '@id': string }; key: '@id'; meta: { format: 'json-ld' } };
+      Type: { basis: { '@type': string }; key: '@type'; meta: { format: 'json-ld' } };
+    }>;
+    Mongo: Canon<{
+      Id: { basis: { '_id': string }; key: '_id'; meta: { format: 'mongodb' } };
+      Type: { basis: { '_type': string }; key: '_type'; meta: { format: 'mongodb' } };
+    }>;
+    Rest: Canon<{
+      Id: { basis: { 'id': string }; key: 'id'; meta: { format: 'rest' } };
+      Type: { basis: { 'type': string }; key: 'type'; meta: { format: 'rest' } };
+    }>;
+  }
+}
+
+// Universal utility functions that work across ALL formats
+function getId<T extends Satisfies<'Id'>>(data: T): string {
+  const config = inferAxiom('Id', data);
+  return data[config.key] as string;
+}
+
+function getType<T extends Satisfies<'Type'>>(data: T): string {
+  const config = inferAxiom('Type', data);
+  return data[config.key] as string;
+}
+
+function isUser<T extends Satisfies<'Type'>>(data: T): boolean {
+  return getType(data) === 'User' || getType(data) === 'Person';
+}
+
+// These functions work identically regardless of data format:
+const jsonLdData = { "@id": "123", "@type": "User" };
+const mongoData = { "_id": "123", "_type": "User" };
+const restData = { "id": "123", "type": "User" };
+
+getId(jsonLdData);    // "123" - uses @id
+getId(mongoData);     // "123" - uses _id
+getId(restData);      // "123" - uses id
+
+isUser(jsonLdData);   // true - checks @type
+isUser(mongoData);    // true - checks _type  
+isUser(restData);     // true - checks type
+```
+
+### Real-World Benefits
+
+This universal API approach provides massive benefits:
+
+1. **Write Once, Run Everywhere**: Your business logic doesn't need to know about data format differences
+2. **Easy Data Source Migration**: Switch from MongoDB to PostgreSQL without changing business logic
+3. **API Versioning**: Support multiple API versions with the same codebase
+4. **Microservice Interoperability**: Different services can use different formats but share business logic
+5. **Testing Simplicity**: Test with simple objects, deploy with complex formats
+
+### Advanced Universal Patterns
+
+```typescript
+// Universal data transformation
+function transformToStandard<T extends Satisfies<'Id' | 'Type'>>(data: T) {
+  return {
+    id: getId(data),
+    type: getType(data),
+    // ... other universal properties
+  };
+}
+
+// Universal validation
+function validateUser<T extends Satisfies<'Id' | 'Type'>>(data: T): boolean {
+  return getId(data).length > 0 && isUser(data);
+}
+
+// Universal serialization
+function serializeForApi<T extends Satisfies<'Id' | 'Type'>>(data: T, targetFormat: 'json-ld' | 'rest' | 'mongo') {
+  const id = getId(data);
+  const type = getType(data);
+  
+  switch (targetFormat) {
+    case 'json-ld': return { '@id': id, '@type': type };
+    case 'mongo': return { '_id': id, '_type': type };
+    case 'rest': return { 'id': id, 'type': type };
+  }
+}
+```
+
+This is the true power of Canon: **semantic programming** where you write code against concepts, not formats.
+
+### Business Logic Example
+
+Here's a real-world example showing how business logic becomes format-agnostic:
+
+```typescript
+// Business logic that works with ANY data format
+class UserService {
+  // Universal user operations - no format knowledge needed
+  async createUser<T extends Satisfies<'Id' | 'Type' | 'Email'>>(userData: T): Promise<T> {
+    const id = getId(userData);
+    const type = getType(userData);
+    const email = getEmail(userData);
+    
+    // Business validation - same logic regardless of format
+    if (!this.isValidEmail(email)) {
+      throw new Error('Invalid email format');
+    }
+    
+    if (!this.isValidUserType(type)) {
+      throw new Error('Invalid user type');
+    }
+    
+    // Store in database - format doesn't matter
+    return await this.database.save(userData);
+  }
+  
+  async findUserById<T extends Satisfies<'Id'>>(id: string): Promise<T | null> {
+    // Database query - works with any format
+    return await this.database.findById(id);
+  }
+  
+  async updateUser<T extends Satisfies<'Id' | 'Type'>>(userData: T): Promise<T> {
+    const id = getId(userData);
+    const type = getType(userData);
+    
+    // Business rules - format independent
+    if (type === 'Admin' && !this.hasAdminPermissions()) {
+      throw new Error('Insufficient permissions');
+    }
+    
+    return await this.database.update(id, userData);
+  }
+  
+  // Format-agnostic utility methods
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+  
+  private isValidUserType(type: string): boolean {
+    return ['User', 'Admin', 'Guest'].includes(type);
+  }
+}
+
+// Usage - same service works with different formats
+const service = new UserService();
+
+// JSON-LD format
+const jsonLdUser = { "@id": "user-123", "@type": "User", "email": "john@example.com" };
+await service.createUser(jsonLdUser);
+
+// MongoDB format  
+const mongoUser = { "_id": "user-456", "_type": "Admin", "email": "admin@example.com" };
+await service.createUser(mongoUser);
+
+// REST API format
+const restUser = { "id": "user-789", "type": "User", "email": "jane@example.com" };
+await service.createUser(restUser);
+
+// All use the same business logic!
+```
+
+This demonstrates how Canon enables **true separation of concerns**: business logic focuses on semantics, while data format concerns are handled by the canon system.
 
 ## Lazy Type Resolution
 
