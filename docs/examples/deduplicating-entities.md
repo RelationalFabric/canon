@@ -18,31 +18,58 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 - `Id` and `Type` from core axioms (already provided)
 - No new axioms needed!
 
-**Step 2: Define the Canon**
+**Step 2: Define the Canons**
 ```typescript
-// Define the canon for the entities using core axioms
+// Define the canon for internal products
 type ProductCanon = Canon<{
   Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
   Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
 }>;
 
-// Register the canon globally
+// Define the canon for external JSON-LD products
+type JsonLdProductCanon = Canon<{
+  Id: { $basis: { '@id': string }; key: '@id'; $meta: { type: string; required: string } };
+  Type: { $basis: { '@type': string }; key: '@type'; $meta: { enum: string; discriminator: string } };
+}>;
+
+// Register both canons globally
 declare module '@relational-fabric/canon' {
   interface Canons {
     products: ProductCanon;
+    jsonLdProducts: JsonLdProductCanon;
   }
 }
 
-// Register the runtime configuration
+// Register the runtime configurations
 declareCanon('products', {
   axioms: {
     Id: { $basis: { id: 'string' }, key: 'id', $meta: { type: 'string', required: 'true' } },
     Type: { $basis: { type: 'string' }, key: 'type', $meta: { enum: 'string', discriminator: 'string' } },
   },
 });
+
+declareCanon('jsonLdProducts', {
+  axioms: {
+    Id: { $basis: { '@id': 'string' }, key: '@id', $meta: { type: 'string', required: 'true' } },
+    Type: { $basis: { '@type': 'string' }, key: '@type', $meta: { enum: 'string', discriminator: 'string' } },
+  },
+});
 ```
 
-**Step 3: The usage**
+**Step 3: Import and register external canons**
+```typescript
+// Import external canon from a module
+import jsonLdCanon, { type JsonLdProductCanon } from '@my-org/json-ld-canon';
+import { registerCanons } from '@relational-fabric/canon';
+
+// Register all canons together
+registerCanons({ 
+  products: productCanon,
+  jsonLdProducts: jsonLdCanon 
+});
+```
+
+**Step 4: The usage**
 ```typescript
 // One function works with all entity types using just core axioms
 function findDuplicates(entities: any[]): any[][] {
