@@ -49,10 +49,10 @@ type KeyNameAxiom = Axiom<{
 type TimestampAxiom = Axiom<{
   // The timestamp type - could be number, string, Date, or custom type
   $basis: number | string | Date | TypeGuard<unknown>;
-  // Way to convert from this timestamp to canonical value
-  toCanonical: (value: this['$basis']) => CanonicalTimestamp;
-  // Way to convert from canonical value to this timestamp
-  fromCanonical: (value: CanonicalTimestamp) => this['$basis'];
+  // Way to convert from this timestamp to standard value
+  toCanonical: (value: this['$basis']) => unknown;
+  // Way to convert from standard value to this timestamp
+  fromCanonical: (value: unknown) => this['$basis'];
 }, {
   key: string;
 }>;
@@ -60,10 +60,10 @@ type TimestampAxiom = Axiom<{
 type ReferenceAxiom = Axiom<{
   // The reference type - could be string, object, array, or custom type
   $basis: string | object | string[] | TypeGuard<unknown>;
-  // Way to convert from this reference to canonical value
-  toCanonical: (value: this['$basis']) => CanonicalReference;
-  // Way to convert from canonical value to this reference
-  fromCanonical: (value: CanonicalReference) => this['$basis'];
+  // Way to convert from this reference to standard value
+  toCanonical: (value: this['$basis']) => unknown;
+  // Way to convert from standard value to this reference
+  fromCanonical: (value: unknown) => this['$basis'];
 }, {
   key: string;
 }>;
@@ -119,8 +119,6 @@ This enables **lazy typing** - libraries work with semantic concepts through the
 Here's a complete working example showing all three parts of an axiom description:
 
 ```typescript
-import { Axiom, KeyNameAxiom, Satisfies, AxiomValue, inferAxiom } from '@relational-fabric/canon';
-
 // 1. Registration - Register the axiom in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {

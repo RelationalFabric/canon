@@ -66,6 +66,8 @@ A complete canon requires both **type-level definitions** and **runtime configur
 The type-level definition provides **compile-time safety** and **IntelliSense support**:
 
 ```typescript
+import type { Canon } from '@relational-fabric/canon';
+
 // Define the canon type for your internal data format
 type InternalCanon = Canon<{
   Id: {
@@ -101,6 +103,8 @@ declare module '@relational-fabric/canon' {
 The runtime configuration provides **actual behavior** and **format conversion logic**:
 
 ```typescript
+import { declareCanon } from '@relational-fabric/canon';
+
 // Register the runtime configuration for your internal format
 declareCanon('Internal', {
   axioms: {
@@ -131,6 +135,8 @@ declareCanon('Internal', {
 The universal functions (provided by the axiom implementer) use **both** configurations:
 
 ```typescript
+import { idOf, typeOf, timestampsOf } from '@relational-fabric/canon';
+
 // Usage with your internal data format
 const internalData = {
   id: "user-123",
@@ -154,6 +160,8 @@ The power of Canon lies in **universal data operations** - writing code that wor
 Most codebases have **one internal data format** and only need additional canons when receiving **external data** that looks different. Without Canon, you need format-specific code for each external source. With Canon, you use universal functions that work across all formats:
 
 ```typescript
+import { idOf } from '@relational-fabric/canon';
+
 // Your internal data format
 const internalData = { id: "user-123", type: "user" };
 
