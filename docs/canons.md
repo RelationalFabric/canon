@@ -4,7 +4,7 @@
 
 A **Canon** is a universal type blueprint that serves as a foundational building block for robust, data-centric applications. Canons solve the "empty room problem" by providing a consistent set of initial design decisions and type primitives that can be shared and composed across any project.
 
-**The Core Power**: Multiple canons can exist at runtime, each representing different data formats (JSON-LD, MongoDB, REST APIs, etc.), yet developers can program against a **single, common API** for semantic properties. This enables truly universal code that works across diverse data structures without format-specific logic.
+But Canon's true power goes beyond just solving the empty room problem. **Multiple canons can exist at runtime**, each representing different data formats (JSON-LD, MongoDB, REST APIs, etc.), yet developers can program against a **single, common API** for semantic properties. This enables truly universal code that works across diverse data structures without format-specific logic.
 
 ## What is a Canon?
 
