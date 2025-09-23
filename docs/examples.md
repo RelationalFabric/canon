@@ -14,40 +14,20 @@ Imagine you're building a user management system that needs to:
 
 Without Canon, you'd need format-specific code for each data source. With Canon, you write universal code that works across all formats.
 
-## Step 1: Setting Up Core Axioms
+## Step 1: Setting Up Our Application
 
-First, we need to register the core axioms that our application will use. These define the semantic concepts we'll work with.
-
-```typescript
-// Register core axioms for our application
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    Id: KeyNameAxiom;
-    Type: KeyNameAxiom;
-    Version: KeyNameAxiom;
-    Timestamps: TimestampsAxiom;
-    References: ReferencesAxiom;
-  }
-}
-```
-
-## Step 2: Defining Conversion Types
-
-We need to define the types that our axioms will convert to. These represent the "standard" format for our application.
+We'll start by importing the core axioms and creating our data models. The core axioms (Id, Type, Version, Timestamps, References) are already provided by Canon.
 
 ```typescript
-// Define conversion types for our application
-type TimestampType = Date;
-type ReferenceType = string;
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon';
+import type { Satisfies } from '@relational-fabric/canon';
 ```
 
-## Step 3: Creating Our Data Models
+## Step 2: Creating Our Data Models
 
 Now let's define our application's data models using the core axioms. We'll create a User model that can work with different data formats.
 
 ```typescript
-import type { Satisfies } from '@relational-fabric/canon';
-
 // Our User model that works with any data format
 type User = {
   id: string;
@@ -82,16 +62,13 @@ interface ResolvedUser extends User {
 }
 ```
 
-## Step 4: Building Universal Services
+## Step 3: Building Universal Services
 
 Now we'll create services that work with any data format using the core axioms.
 
 ### User Service
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon';
-import type { Satisfies } from '@relational-fabric/canon';
-
 class UserService {
   private users: User[] = [];
 
@@ -208,9 +185,6 @@ class UserService {
 ### Audit Service
 
 ```typescript
-import { idOf, timestampsOf } from '@relational-fabric/canon';
-import type { Satisfies } from '@relational-fabric/canon';
-
 class AuditService {
   private auditLogs: AuditLog[] = [];
 
