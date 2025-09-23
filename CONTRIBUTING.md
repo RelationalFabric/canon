@@ -26,28 +26,12 @@ Thank you for your interest in contributing to Canon! This document outlines the
 - Use **camelCase** for function parameters: `entity`, `value`, `config`
 - Use **camelCase** for local variables: `currentVersion`, `latestEntity`
 
-### Axiom Structure Conventions
+### Distinguished Keys Convention
 
-#### Distinguished Keys
 - Use `$` prefix for keys that Canon understands and has specific behaviors for
 - These are **distinguished keys** that have special meaning to the Canon system
 - Examples: `$basis`, `$meta` - these are reserved and have defined behaviors
 - **Never use `$` prefix for user-defined keys** - this is reserved for Canon's internal use
-
-#### Key-Name Axioms
-- Must have `$basis: Record<string, unknown>` (object with at least one string key)
-- Must have `key: string` (the field name that contains the concept)
-- Example: `Id`, `Type`, `Version` axioms
-
-#### Conversion Axioms
-- Must have `toCanonical: (value: this['$basis']) => CanonicalType`
-- Must have `fromCanonical: (value: CanonicalType) => this['$basis']`
-- Example: `Timestamps`, `References` axioms
-
-#### Metadata Conventions
-- Type-level: `$meta: { fieldName: Type }` (describes the types of metadata fields)
-- Runtime-level: `$meta: { fieldName: 'actualValue' }` (provides actual metadata values)
-- Use descriptive field names: `type`, `required`, `format`, `enum`, `discriminator`
 
 ### Canon Structure Conventions
 
