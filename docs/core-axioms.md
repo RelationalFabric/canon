@@ -11,8 +11,8 @@ The core axiom set consists of five essential axioms that cover the fundamental 
 1. **Id** - Unique identifiers for entities
 2. **Type** - Entity classification and schema information  
 3. **Version** - Data versioning for optimistic concurrency control
-4. **Timestamp** - Time-based data with format conversion
-5. **Reference** - Entity relationships and references
+4. **Timestamps** - Time-based data with format conversion
+5. **References** - Entity relationships and references
 
 ## Axiom Definitions
 
@@ -112,13 +112,13 @@ function versionOf<T extends Satisfies<'Version'>>(x: T): AxiomValue<'Version'> 
 }
 ```
 
-### 4. Timestamp Axiom
+### 4. Timestamps Axiom
 
 **Purpose**: Represents time-based data with automatic conversion between different timestamp formats.
 
 **Type Definition**:
 ```typescript
-type TimestampAxiom = Axiom<{
+type TimestampsAxiom = Axiom<{
   $basis: number | string | Date | TypeGuard<unknown>;
   toCanonical: (value: this['$basis']) => CanonicalTimestamp;
   fromCanonical: (value: CanonicalTimestamp) => this['$basis'];
@@ -131,7 +131,7 @@ type TimestampAxiom = Axiom<{
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Timestamp: TimestampAxiom;
+    Timestamps: TimestampsAxiom;
   }
 }
 ```
@@ -144,19 +144,19 @@ declare module '@relational-fabric/canon' {
 
 **API Functions**:
 ```typescript
-function timestampOf<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timestamp'> {
-  const config = inferAxiom('Timestamp', x);
+function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
+  const config = inferAxiom('Timestamps', x);
   return config.toCanonical(x[config.key]);
 }
 ```
 
-### 5. Reference Axiom
+### 5. References Axiom
 
 **Purpose**: Represents relationships between entities with automatic conversion between different reference formats.
 
 **Type Definition**:
 ```typescript
-type ReferenceAxiom = Axiom<{
+type ReferencesAxiom = Axiom<{
   $basis: string | object | string[] | TypeGuard<unknown>;
   toCanonical: (value: this['$basis']) => CanonicalReference;
   fromCanonical: (value: CanonicalReference) => this['$basis'];
@@ -169,7 +169,7 @@ type ReferenceAxiom = Axiom<{
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Reference: ReferenceAxiom;
+    References: ReferencesAxiom;
   }
 }
 ```
@@ -182,8 +182,8 @@ declare module '@relational-fabric/canon' {
 
 **API Functions**:
 ```typescript
-function referenceOf<T extends Satisfies<'Reference'>>(x: T): AxiomValue<'Reference'> {
-  const config = inferAxiom('Reference', x);
+function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'References'> {
+  const config = inferAxiom('References', x);
   return config.toCanonical(x[config.key]);
 }
 ```
@@ -257,7 +257,7 @@ While the core axioms define the semantic concepts, the actual field names vary 
 
 ### Conversion Functions
 
-Axioms that support multiple data formats (like `Timestamp` and `Reference`) include conversion functions:
+Axioms that support multiple data formats (like `Timestamps` and `References`) include conversion functions:
 
 - `toCanonical`: Convert from the specific format to the canonical format
 - `fromCanonical`: Convert from the canonical format to the specific format

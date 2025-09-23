@@ -39,16 +39,16 @@ Canon's core axioms provide a **semantic layer** that abstracts away format diff
 
 ```typescript
 // With axioms - universal semantic code
-function getId<T extends Satisfies<'Id'>>(data: T): string {
+function idOf<T extends Satisfies<'Id'>>(data: T): string {
   const config = inferAxiom('Id', data);
   return data[config.key] as string;
 }
 
 // Works with ALL formats automatically
-getId(restData);    // Uses 'id'
-getId(mongoData);   // Uses '_id'  
-getId(jsonLdData);  // Uses '@id'
-getId(graphqlData); // Uses 'id'
+idOf(restData);    // Uses 'id'
+idOf(mongoData);   // Uses '_id'  
+idOf(jsonLdData);  // Uses '@id'
+idOf(graphqlData); // Uses 'id'
 ```
 
 ## Core Axiom Set
@@ -58,8 +58,8 @@ The core axiom set consists of five essential axioms that cover the fundamental 
 1. **Id** - Unique Identifiers
 2. **Type** - Entity Classification  
 3. **Version** - Data Versioning
-4. **Timestamp** - Time-based Data
-5. **Reference** - Entity Relationships
+4. **Timestampss** - Time-based Data
+5. **Referencess** - Entity Relationships
 
 These five axioms provide a solid foundation for semantic programming across diverse data formats.
 
@@ -81,7 +81,7 @@ The following examples demonstrate how to use each of the core axioms in practic
 
 ```typescript
 // Universal function that works with any format
-function getId<T extends Satisfies<'Id'>>(entity: T): string {
+function idOf<T extends Satisfies<'Id'>>(entity: T): string {
   const config = inferAxiom('Id', entity);
   return entity[config.key] as string;
 }
@@ -91,9 +91,9 @@ const restUser = { id: "user-123", name: "John" };
 const mongoUser = { _id: "user-456", name: "Jane" };
 const jsonLdUser = { "@id": "user-789", name: "Bob" };
 
-console.log(getId(restUser));    // "user-123"
-console.log(getId(mongoUser));   // "user-456" 
-console.log(getId(jsonLdUser));  // "user-789"
+console.log(idOf(restUser));    // "user-123"
+console.log(idOf(mongoUser));   // "user-456" 
+console.log(idOf(jsonLdUser));  // "user-789"
 ```
 
 **Business Logic Example**:
@@ -103,11 +103,11 @@ class UserService {
   async findUserById<T extends Satisfies<'Id'>>(id: string): Promise<T | null> {
     // Universal ID extraction - works with any format
     const entities = await this.database.findByField('id', id);
-    return entities.find(entity => getId(entity) === id) || null;
+    return entities.find(entity => idOf(entity) === id) || null;
   }
   
   async updateUser<T extends Satisfies<'Id'>>(userData: T): Promise<T> {
-    const id = getId(userData);
+    const id = idOf(userData);
     return await this.database.update(id, userData);
   }
 }
@@ -127,13 +127,13 @@ class UserService {
 
 ```typescript
 // Universal type checking
-function getType<T extends Satisfies<'Type'>>(entity: T): string {
+function typeOf<T extends Satisfies<'Type'>>(entity: T): string {
   const config = inferAxiom('Type', entity);
   return entity[config.key] as string;
 }
 
 function isUser<T extends Satisfies<'Type'>>(entity: T): boolean {
-  const type = getType(entity);
+  const type = typeOf(entity);
   return type === 'User' || type === 'Person';
 }
 
@@ -142,9 +142,9 @@ const restUser = { id: "123", type: "User", name: "John" };
 const mongoUser = { _id: "456", _type: "User", name: "Jane" };
 const jsonLdUser = { "@id": "789", "@type": "Person", name: "Bob" };
 
-console.log(getType(restUser));    // "User"
-console.log(getType(mongoUser));   // "User"
-console.log(getType(jsonLdUser));  // "Person"
+console.log(typeOf(restUser));    // "User"
+console.log(typeOf(mongoUser));   // "User"
+console.log(typeOf(jsonLdUser));  // "Person"
 
 console.log(isUser(restUser));     // true
 console.log(isUser(mongoUser));    // true
@@ -156,7 +156,7 @@ console.log(isUser(jsonLdUser));   // true
 ```typescript
 class EntityValidator {
   validateEntity<T extends Satisfies<'Type'>>(entity: T): ValidationResult {
-    const type = getType(entity);
+    const type = typeOf(entity);
     
     switch (type) {
       case 'User':
@@ -200,7 +200,7 @@ function incrementVersion<T extends Satisfies<'Version'>>(entity: T): T {
   const config = inferAxiom('Version', entity);
   return {
     ...entity,
-    [config.key]: getVersion(entity) + 1
+    [config.key]: versionOf(entity) + 1
   };
 }
 
@@ -208,11 +208,11 @@ function incrementVersion<T extends Satisfies<'Version'>>(entity: T): T {
 const restEntity = { id: "123", type: "User", version: 1, name: "John" };
 const mongoEntity = { _id: "456", _type: "User", _version: 2, name: "Jane" };
 
-console.log(getVersion(restEntity));     // 1
-console.log(getVersion(mongoEntity));    // 2
+console.log(versionOf(restEntity));     // 1
+console.log(versionOf(mongoEntity));    // 2
 
 const updatedRest = incrementVersion(restEntity);
-console.log(getVersion(updatedRest));    // 2
+console.log(versionOf(updatedRest));    // 2
 ```
 
 **Business Logic Example**:
@@ -224,11 +224,11 @@ class OptimisticConcurrencyService {
     updates: Partial<T>
   ): Promise<T> {
     const id = getId(entity);
-    const currentVersion = getVersion(entity);
+    const currentVersion = versionOf(entity);
     
     // Check if entity has been modified since last read
     const latestEntity = await this.database.findById(id);
-    if (getVersion(latestEntity) !== currentVersion) {
+    if (versionOf(latestEntity) !== currentVersion) {
       throw new Error('Entity has been modified by another user');
     }
     
@@ -244,7 +244,7 @@ class OptimisticConcurrencyService {
 }
 ```
 
-### 4. Timestamp Axiom Examples
+### 4. Timestamps Axiom Examples
 
 **Purpose**: Represents time-based data with automatic conversion between different timestamp formats.
 
@@ -258,16 +258,16 @@ class OptimisticConcurrencyService {
 
 ```typescript
 // Universal timestamp handling
-function getTimestamp<T extends Satisfies<'Timestamp'>>(entity: T): Date {
-  const config = inferAxiom('Timestamp', entity);
+function getTimestamps<T extends Satisfies<'Timestamps'>>(entity: T): Date {
+  const config = inferAxiom('Timestamps', entity);
   return config.toCanonical(entity[config.key]);
 }
 
-function setTimestamp<T extends Satisfies<'Timestamp'>>(
+function setTimestamps<T extends Satisfies<'Timestamps'>>(
   entity: T, 
   timestamp: Date
 ): T {
-  const config = inferAxiom('Timestamp', entity);
+  const config = inferAxiom('Timestamps', entity);
   return {
     ...entity,
     [config.key]: config.fromCanonical(timestamp)
@@ -279,21 +279,21 @@ const unixEntity = { id: "123", createdAt: 1640995200 };
 const isoEntity = { id: "456", createdAt: "2022-01-01T00:00:00Z" };
 const dateEntity = { id: "789", createdAt: new Date("2022-01-01") };
 
-console.log(getTimestamp(unixEntity));  // 2022-01-01T00:00:00.000Z
-console.log(getTimestamp(isoEntity));   // 2022-01-01T00:00:00.000Z
-console.log(getTimestamp(dateEntity));  // 2022-01-01T00:00:00.000Z
+console.log(timestampsOf(unixEntity));  // 2022-01-01T00:00:00.000Z
+console.log(timestampsOf(isoEntity));   // 2022-01-01T00:00:00.000Z
+console.log(timestampsOf(dateEntity));  // 2022-01-01T00:00:00.000Z
 ```
 
 **Business Logic Example**:
 
 ```typescript
 class AuditService {
-  async createAuditLog<T extends Satisfies<'Id' | 'Timestamp'>>(
+  async createAuditLog<T extends Satisfies<'Id' | 'Timestamps'>>(
     entity: T,
     action: string
   ): Promise<AuditLog> {
     const id = getId(entity);
-    const timestamp = getTimestamp(entity);
+    const timestamp = timestampsOf(entity);
     
     return {
       entityId: id,
@@ -303,22 +303,22 @@ class AuditService {
     };
   }
   
-  async findRecentChanges<T extends Satisfies<'Timestamp'>>(
+  async findRecentChanges<T extends Satisfies<'Timestamps'>>(
     entities: T[],
     since: Date
   ): T[] {
     return entities.filter(entity => 
-      getTimestamp(entity) > since
+      timestampsOf(entity) > since
     );
   }
 }
 ```
 
-### 5. Reference Axiom
+### 5. References Axiom
 
 **Purpose**: Represents relationships between entities with automatic conversion between different reference formats.
 
-**Definition**: A `ReferenceAxiom` that provides conversion functions between different reference representations.
+**Definition**: A `ReferencesAxiom` that provides conversion functions between different reference representations.
 
 **Common Implementations**:
 - String IDs: `{ userId: "user-123" }`
@@ -329,24 +329,24 @@ class AuditService {
 **Example Usage**:
 
 ```typescript
-// Register the Reference axiom
+// Register the References axiom
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Reference: ReferenceAxiom;
+    References: ReferencesAxiom;
   }
 }
 
 // Universal reference handling
-function getReference<T extends Satisfies<'Reference'>>(entity: T): string {
-  const config = inferAxiom('Reference', entity);
+function getReferences<T extends Satisfies<'References'>>(entity: T): string {
+  const config = inferAxiom('References', entity);
   return config.toCanonical(entity[config.key]);
 }
 
-function setReference<T extends Satisfies<'Reference'>>(
+function setReferences<T extends Satisfies<'References'>>(
   entity: T, 
   reference: string
 ): T {
-  const config = inferAxiom('Reference', entity);
+  const config = inferAxiom('References', entity);
   return {
     ...entity,
     [config.key]: config.fromCanonical(reference)
@@ -358,34 +358,34 @@ const stringRef = { id: "123", userId: "user-456" };
 const objectRef = { id: "789", user: { id: "user-456", name: "John" } };
 const arrayRef = { id: "101", tags: ["tag1", "tag2"] };
 
-console.log(getReference(stringRef));  // "user-456"
-console.log(getReference(objectRef));  // "user-456"
-console.log(getReference(arrayRef));   // "tag1,tag2"
+console.log(referencesOf(stringRef));  // "user-456"
+console.log(referencesOf(objectRef));  // "user-456"
+console.log(referencesOf(arrayRef));   // "tag1,tag2"
 ```
 
 **Business Logic Example**:
 
 ```typescript
 class RelationshipService {
-  async resolveReferences<T extends Satisfies<'Reference'>>(
+  async resolveReferencess<T extends Satisfies<'References'>>(
     entities: T[]
   ): Promise<ResolvedEntity[]> {
-    const references = entities.map(entity => getReference(entity));
+    const references = entities.map(entity => referencesOf(entity));
     const resolvedRefs = await this.database.findByIds(references);
     
     return entities.map(entity => ({
       ...entity,
-      resolvedReference: resolvedRefs.find(ref => 
-        ref.id === getReference(entity)
+      resolvedReferences: resolvedRefs.find(ref => 
+        ref.id === referencesOf(entity)
       )
     }));
   }
   
-  async findRelatedEntities<T extends Satisfies<'Reference'>>(
+  async findRelatedEntities<T extends Satisfies<'References'>>(
     entity: T,
     relationType: string
   ): Promise<Entity[]> {
-    const reference = getReference(entity);
+    const reference = referencesOf(entity);
     return await this.database.findByRelation(relationType, reference);
   }
 }
@@ -402,21 +402,21 @@ declare module '@relational-fabric/canon' {
     Id: KeyNameAxiom;
     Type: KeyNameAxiom;
     Version: KeyNameAxiom;
-    Timestamp: TimestampAxiom;
-    Reference: ReferenceAxiom;
+    Timestamps: TimestampsAxiom;
+    References: ReferencesAxiom;
   }
 }
 
 // 2. Universal entity operations
 class UniversalEntityService {
   // Create entity with all core properties
-  async createEntity<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamp'>>(
+  async createEntity<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps'>>(
     entityData: T
   ): Promise<T> {
     const id = getId(entityData);
-    const type = getType(entityData);
-    const version = getVersion(entityData) || 1;
-    const timestamp = getTimestamp(entityData) || new Date();
+    const type = typeOf(entityData);
+    const version = versionOf(entityData) || 1;
+    const timestamp = timestampsOf(entityData) || new Date();
     
     // Validate entity
     if (!this.isValidId(id)) {
@@ -430,7 +430,7 @@ class UniversalEntityService {
     // Store with audit trail
     const entity = {
       ...entityData,
-      ...setTimestamp(entityData, timestamp),
+      ...setTimestamps(entityData, timestamp),
       ...incrementVersion(entityData)
     };
     
@@ -441,16 +441,16 @@ class UniversalEntityService {
   }
   
   // Update entity with optimistic concurrency
-  async updateEntity<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamp'>>(
+  async updateEntity<T extends Satisfies<'Id' | 'Type' | 'Version' | 'Timestamps'>>(
     entity: T,
     updates: Partial<T>
   ): Promise<T> {
     const id = getId(entity);
-    const currentVersion = getVersion(entity);
+    const currentVersion = versionOf(entity);
     
     // Check for concurrent modifications
     const latestEntity = await this.database.findById(id);
-    if (getVersion(latestEntity) !== currentVersion) {
+    if (versionOf(latestEntity) !== currentVersion) {
       throw new Error('Entity has been modified by another user');
     }
     
@@ -458,7 +458,7 @@ class UniversalEntityService {
     const updatedEntity = {
       ...entity,
       ...updates,
-      ...setTimestamp(entity, new Date()),
+      ...setTimestamps(entity, new Date()),
       ...incrementVersion(entity)
     };
     
@@ -469,7 +469,7 @@ class UniversalEntityService {
   }
   
   // Find entities by type with time filtering
-  async findEntitiesByType<T extends Satisfies<'Type' | 'Timestamp'>>(
+  async findEntitiesByType<T extends Satisfies<'Type' | 'Timestamps'>>(
     type: string,
     since?: Date
   ): Promise<T[]> {
@@ -477,7 +477,7 @@ class UniversalEntityService {
     
     if (since) {
       return entities.filter(entity => 
-        getTimestamp(entity) > since
+        timestampsOf(entity) > since
       );
     }
     
@@ -485,16 +485,16 @@ class UniversalEntityService {
   }
   
   // Resolve entity relationships
-  async resolveRelationships<T extends Satisfies<'Reference'>>(
+  async resolveRelationships<T extends Satisfies<'References'>>(
     entities: T[]
   ): Promise<ResolvedEntity[]> {
-    const references = entities.map(entity => getReference(entity));
+    const references = entities.map(entity => referencesOf(entity));
     const resolvedRefs = await this.database.findByIds(references);
     
     return entities.map(entity => ({
       ...entity,
-      resolvedReference: resolvedRefs.find(ref => 
-        ref.id === getReference(entity)
+      resolvedReferences: resolvedRefs.find(ref => 
+        ref.id === referencesOf(entity)
       )
     }));
   }
@@ -554,7 +554,7 @@ const allUsers = await service.findEntitiesByType("User");
 
 ## Best Practices
 
-1. **Start with Core Axioms**: Begin with the five core axioms (Id, Type, Version, Timestamp, Reference) before adding custom ones.
+1. **Start with Core Axioms**: Begin with the five core axioms (Id, Type, Version, Timestamps, References) before adding custom ones.
 
 2. **Use Semantic Names**: Choose axiom names that represent business concepts, not technical implementation details.
 

@@ -140,7 +140,7 @@ const internalData = {
 
 console.log(idOf(internalData));    // "user-123" - runtime finds 'id' key
 console.log(typeOf(internalData));  // "user" - runtime finds 'type' key
-console.log(timestampOf(internalData.createdAt));  // Date object - converts to canonical format
+console.log(timestampsOf(internalData.createdAt));  // Date object - converts to canonical format
 ```
 
 **The magic**: TypeScript ensures type safety at compile time, while the runtime system provides the actual field names and conversion logic at execution time.
