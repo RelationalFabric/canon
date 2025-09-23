@@ -102,383 +102,162 @@ This constraint system ensures:
 - **Shape consistency** - All instances must conform to their axiom type's shape
 - **Discoverability** - Available axioms are clearly defined in the interface
 
-## Understanding Axioms in Canons
+## Complete Canon Example
 
-Each Canon **collects specific incarnations** of axioms for a given model. The axioms define what utilities expect, and the canon provides the specific implementation:
+A complete canon requires both **type-level definitions** and **runtime configuration**. Here's a working example:
 
-### Canon Implementation
+### 1. Type-Level Definition
 
-A canon provides specific implementations of axioms for a given data model:
+First, define the canon type and register it in the global interface:
 
 ```typescript
-// JSON-LD Canon - specific implementation for JSON-LD format
-type JsonLdCanon = Canon<{
-  Id: {
-    $basis: { '@id': string };
-    key: '@id';
-    $meta: { format: 'json-ld' };
-  };  // Specific implementation of Id axiom for JSON-LD
-  Type: {
-    $basis: { '@type': string };
-    key: '@type';
-    $meta: { format: 'json-ld' };
-  };  // Specific implementation of Type axiom for JSON-LD
-}>;
-
-// Standard Canon - specific implementation for standard format
-type StandardCanon = Canon<{
+// Define the canon type
+type UserCanon = Canon<{
   Id: {
     $basis: { id: string };
     key: 'id';
-    $meta: { format: 'standard' };
-  };  // Specific implementation of Id axiom for standard format
+    $meta: { type: 'uuid'; required: 'true' };
+  };
   Type: {
     $basis: { type: string };
     key: 'type';
-    $meta: { format: 'standard' };
-  };  // Specific implementation of Type axiom for standard format
+    $meta: { enum: 'user,admin,guest'; discriminator: 'true' };
+  };
+  Version: {
+    $basis: { version: number };
+    key: 'version';
+    $meta: { default: '1'; min: '1' };
+  };
+  Timestamp: {
+    $basis: { createdAt: Date };
+    key: 'createdAt';
+    toCanonical: (value: Date) => value;
+    fromCanonical: (value: Date) => value;
+    $meta: { format: 'iso8601' };
+  };
 }>;
+
+// Register the canon type
+declare module '@relational-fabric/canon' {
+  interface Canons {
+    User: UserCanon;
+  }
+}
 ```
 
-### Runtime Configuration
+### 2. Runtime Configuration
 
-The runtime config provides the actual values needed at runtime. See the [Axioms documentation](./axioms.md) for detailed information about how runtime configuration works with the axiom system.
+Next, register the runtime configuration:
 
 ```typescript
-// Example runtime configuration for a canon
-declareCanon('myProject', {
+// Register the runtime configuration
+declareCanon('User', {
   axioms: {
     Id: {
       $basis: { id: 'string' },
       key: 'id',
-      $meta: { type: 'uuid' },
+      $meta: { type: 'uuid'; required: 'true' },
     },
     Type: {
       $basis: { type: 'string' },
       key: 'type',
       $meta: { enum: 'user,admin,guest'; discriminator: 'true' },
     },
+    Version: {
+      $basis: { version: 'number' },
+      key: 'version',
+      $meta: { default: '1'; min: '1' },
+    },
+    Timestamp: {
+      $basis: { createdAt: 'Date' },
+      key: 'createdAt',
+      toCanonical: (value: Date) => value,
+      fromCanonical: (value: Date) => value,
+      $meta: { format: 'iso8601' },
+    },
   },
 });
 ```
 
-### Type Safety Through Axiom Interface
+### 3. Usage
 
-The augmentable interface pattern ensures that:
-- **Axiom types define what utilities expect** - The interface that utilities will work with
-- **Canons provide specific implementations** - Each canon implements the axioms for its format
-- **Runtime config provides actual values** - The real values needed at runtime
-- **Type checking is enforced** - The compiler validates conformance to the axiom interface
+Now the canon can be used with universal functions:
 
-## Universal Data Structure Operations
+```typescript
+// Universal functions work with any canon that satisfies the axioms
+function getId<T extends Satisfies<'Id'>>(entity: T): string {
+  const config = inferAxiom('Id', entity);
+  return entity[config.key] as string;
+}
 
-The most powerful feature of Canon is **universal data structure operations** - the ability to write code that works identically across completely different data formats through a common semantic API. This is where Canon's true value shines.
+function getType<T extends Satisfies<'Type'>>(entity: T): string {
+  const config = inferAxiom('Type', entity);
+  return entity[config.key] as string;
+}
+
+// Usage with the User canon
+const user = {
+  id: "user-123",
+  type: "user", 
+  version: 1,
+  createdAt: new Date("2022-01-01")
+};
+
+console.log(getId(user));    // "user-123"
+console.log(getType(user));  // "user"
+```
+
+## Universal Data Operations
+
+The power of Canon lies in **universal data operations** - writing code that works across different data formats through a common semantic API.
 
 ### The Problem Canon Solves
 
-Consider a typical application that needs to work with data from multiple sources:
+Without Canon, you need format-specific code:
 
 ```typescript
-// Different data formats for the same semantic concept
-const jsonLdUser = { "@id": "user-123", "@type": "Person", "name": "John" };
-const mongoUser = { "_id": "user-123", "_type": "Person", "name": "John" };
-const restUser = { "id": "user-123", "type": "Person", "name": "John" };
-const graphqlUser = { "id": "user-123", "__typename": "Person", "name": "John" };
+// Different data formats for the same concept
+const jsonLdUser = { "@id": "user-123", "@type": "Person" };
+const mongoUser = { "_id": "user-123", "_type": "Person" };
+const restUser = { "id": "user-123", "type": "Person" };
 
-// Without Canon - format-specific code everywhere
+// Format-specific code everywhere
 function getIdFromJsonLd(user: any) { return user["@id"]; }
 function getIdFromMongo(user: any) { return user["_id"]; }
 function getIdFromRest(user: any) { return user["id"]; }
-function getIdFromGraphQL(user: any) { return user["id"]; }
+```
 
-// With Canon - universal code that works everywhere
+With Canon, you write universal code:
+
+```typescript
+// Universal function that works with any format
 function getId<T extends Satisfies<'Id'>>(user: T): string {
   const config = inferAxiom('Id', user);
   return user[config.key] as string;
 }
 
-// All of these work with the same function:
-getId(jsonLdUser);  // Returns "user-123" using @id
-getId(mongoUser);   // Returns "user-123" using _id  
-getId(restUser);    // Returns "user-123" using id
-getId(graphqlUser); // Returns "user-123" using id
-```
-
-### Multiple Canons, Single API
-
-The magic happens when you have multiple canons registered at runtime, each representing different data formats, but your code uses a **single, universal API**:
-
-```typescript
-// Register multiple canons for different data formats
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    JsonLd: Canon<{
-      Id: { $basis: { '@id': string }; key: '@id'; $meta: { format: 'json-ld' } };
-      Type: { $basis: { '@type': string }; key: '@type'; $meta: { format: 'json-ld' } };
-    }>;
-    Mongo: Canon<{
-      Id: { $basis: { '_id': string }; key: '_id'; $meta: { format: 'mongodb' } };
-      Type: { $basis: { '_type': string }; key: '_type'; $meta: { format: 'mongodb' } };
-    }>;
-    Rest: Canon<{
-      Id: { $basis: { 'id': string }; key: 'id'; $meta: { format: 'rest' } };
-      Type: { $basis: { 'type': string }; key: 'type'; $meta: { format: 'rest' } };
-    }>;
-  }
-}
-
-// Universal utility functions that work across ALL formats
-function getId<T extends Satisfies<'Id'>>(data: T): string {
-  const config = inferAxiom('Id', data);
-  return data[config.key] as string;
-}
-
-function getType<T extends Satisfies<'Type'>>(data: T): string {
-  const config = inferAxiom('Type', data);
-  return data[config.key] as string;
-}
-
-function isUser<T extends Satisfies<'Type'>>(data: T): boolean {
-  return getType(data) === 'User' || getType(data) === 'Person';
-}
-
-// These functions work identically regardless of data format:
-const jsonLdData = { "@id": "123", "@type": "User" };
-const mongoData = { "_id": "123", "_type": "User" };
-const restData = { "id": "123", "type": "User" };
-
-getId(jsonLdData);    // "123" - uses @id
-getId(mongoData);     // "123" - uses _id
-getId(restData);      // "123" - uses id
-
-isUser(jsonLdData);   // true - checks @type
-isUser(mongoData);    // true - checks _type  
-isUser(restData);     // true - checks type
+// All formats work with the same function
+getId(jsonLdUser);  // "user-123" using @id
+getId(mongoUser);   // "user-123" using _id  
+getId(restUser);    // "user-123" using id
 ```
 
 ### Real-World Benefits
 
-This universal API approach provides massive benefits:
-
-1. **Write Once, Run Everywhere**: Your business logic doesn't need to know about data format differences
-2. **Easy Data Source Migration**: Switch from MongoDB to PostgreSQL without changing business logic
-3. **API Versioning**: Support multiple API versions with the same codebase
-4. **Microservice Interoperability**: Different services can use different formats but share business logic
-5. **Testing Simplicity**: Test with simple objects, deploy with complex formats
-
-### Advanced Universal Patterns
-
-```typescript
-// Universal data transformation
-function transformToStandard<T extends Satisfies<'Id' | 'Type'>>(data: T) {
-  return {
-    id: getId(data),
-    type: getType(data),
-    // ... other universal properties
-  };
-}
-
-// Universal validation
-function validateUser<T extends Satisfies<'Id' | 'Type'>>(data: T): boolean {
-  return getId(data).length > 0 && isUser(data);
-}
-
-// Universal serialization
-function serializeForApi<T extends Satisfies<'Id' | 'Type'>>(data: T, targetFormat: 'json-ld' | 'rest' | 'mongo') {
-  const id = getId(data);
-  const type = getType(data);
-  
-  switch (targetFormat) {
-    case 'json-ld': return { '@id': id, '@type': type };
-    case 'mongo': return { '_id': id, '_type': type };
-    case 'rest': return { 'id': id, 'type': type };
-  }
-}
-```
-
-This is the true power of Canon: **semantic programming** where you write code against concepts, not formats.
-
-### Business Logic Example
-
-Here's a real-world example showing how business logic becomes format-agnostic:
-
-```typescript
-// Business logic that works with ANY data format
-class UserService {
-  // Universal user operations - no format knowledge needed
-  async createUser<T extends Satisfies<'Id' | 'Type' | 'Email'>>(userData: T): Promise<T> {
-    const id = getId(userData);
-    const type = getType(userData);
-    const email = getEmail(userData);
-    
-    // Business validation - same logic regardless of format
-    if (!this.isValidEmail(email)) {
-      throw new Error('Invalid email format');
-    }
-    
-    if (!this.isValidUserType(type)) {
-      throw new Error('Invalid user type');
-    }
-    
-    // Store in database - format doesn't matter
-    return await this.database.save(userData);
-  }
-  
-  async findUserById<T extends Satisfies<'Id'>>(id: string): Promise<T | null> {
-    // Database query - works with any format
-    return await this.database.findById(id);
-  }
-  
-  async updateUser<T extends Satisfies<'Id' | 'Type'>>(userData: T): Promise<T> {
-    const id = getId(userData);
-    const type = getType(userData);
-    
-    // Business rules - format independent
-    if (type === 'Admin' && !this.hasAdminPermissions()) {
-      throw new Error('Insufficient permissions');
-    }
-    
-    return await this.database.update(id, userData);
-  }
-  
-  // Format-agnostic utility methods
-  private isValidEmail(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-  
-  private isValidUserType(type: string): boolean {
-    return ['User', 'Admin', 'Guest'].includes(type);
-  }
-}
-
-// Usage - same service works with different formats
-const service = new UserService();
-
-// JSON-LD format
-const jsonLdUser = { "@id": "user-123", "@type": "User", "email": "john@example.com" };
-await service.createUser(jsonLdUser);
-
-// MongoDB format  
-const mongoUser = { "_id": "user-456", "_type": "Admin", "email": "admin@example.com" };
-await service.createUser(mongoUser);
-
-// REST API format
-const restUser = { "id": "user-789", "type": "User", "email": "jane@example.com" };
-await service.createUser(restUser);
-
-// All use the same business logic!
-```
-
-This demonstrates how Canon enables **true separation of concerns**: business logic focuses on semantics, while data format concerns are handled by the canon system.
-
-## Lazy Type Resolution
-
-One of Canon's most powerful features is **lazy typing** - the ability to defer full type resolution while maintaining canonical identity. This enables:
-
-### Deferred Composition
-Types can reference each other without circular dependencies:
-```typescript
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    User: Canon<{
-      Id: { $basis: { id: string }; key: 'id' };
-      Profile: { $basis: { profileId: string }; key: 'profileId' };
-    }>;
-    Profile: Canon<{
-      Id: { $basis: { profileId: string }; key: 'profileId' };
-      Owner: { $basis: { userId: string }; key: 'userId' };
-    }>;
-  }
-}
-```
-
-### Cross-Module Type Sharing
-Canons can be defined in one module and consumed in another without losing type safety:
-```typescript
-// In library module
-export type MyCanon = Canon<{ /* axioms */ }>;
-export default defineCanon<MyCanon>({ /* config */ });
-
-// In consuming application
-import myCanon, { type MyCanon } from 'library/canon';
-declare module '@relational-fabric/canon' {
-  interface Canons { myCanon: MyCanon; }
-}
-registerCanons({ myCanon });
-```
-
-## Runtime Scope and Execution
-
-### Global Registry Pattern
-Canon uses a **global registry pattern** to maintain runtime configurations:
-
-```typescript
-// Type augmentation creates compile-time registry
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    myProject: MyCanon;
-  }
-}
-
-// Runtime registration creates execution-time registry
-declareCanon('myProject', {
-  axioms: { /* runtime config */ }
-});
-```
-
-This pattern ensures:
-- **Single source of truth** for each canon definition
-- **Global accessibility** across the entire application
-- **Type-safe registration** with compile-time validation
-
-### Scope Isolation and Composition
-While canons are globally registered, they maintain **scope isolation**:
-
-1. **Module Scope** - Each canon is defined within its own module
-2. **Application Scope** - Canons are composed at the application level
-3. **Runtime Scope** - Configurations are available globally but accessed safely
-
-### Memory Management
-The runtime system efficiently manages canon configurations:
-- **Lazy Loading** - Configurations are only loaded when accessed
-- **Weak References** - Unused canons can be garbage collected
-- **Immutable Configs** - Once registered, configurations are immutable
-
-## Advanced Patterns
-
-### Canon Inheritance
-Canons can extend and compose other canons:
-```typescript
-type BaseCanon = Canon<{
-  Id: { $basis: { id: string }; key: 'id' };
-}>;
-
-type ExtendedCanon = Canon<{
-  Id: { $basis: { id: string }; key: 'id' };
-  Name: { $basis: { name: string }; key: 'name' };
-}>;
-```
-
-### Conditional Axioms
-Axioms can be conditionally applied based on runtime context:
-```typescript
-type ConditionalCanon<TEnv extends 'dev' | 'prod'> = Canon<{
-  Id: { $basis: { id: string }; key: 'id' };
-  Debug: TEnv extends 'dev' 
-    ? { $basis: { debug: boolean }; key: 'debug' }
-    : never;
-}>;
-```
+- **Write Once, Run Everywhere**: Business logic doesn't need to know about data format differences
+- **Easy Migration**: Switch from MongoDB to PostgreSQL without changing business logic
+- **API Versioning**: Support multiple API versions with the same codebase
+- **Testing Simplicity**: Test with simple objects, deploy with complex formats
 
 ## Best Practices
 
-1. **Keep Axioms Atomic** - Each axiom should represent a single concept
-2. **Use Descriptive Keys** - Choose canonical keys that clearly identify the primary field
-3. **Leverage Meta Extensively** - Use metadata for validation, documentation, and behavior
-4. **Register Early** - Register canons at application startup for best performance
-5. **Document Dependencies** - Clearly document inter-canon relationships
+1. **Complete Canon Definition**: Always include both type-level and runtime definitions
+2. **Use Core Axioms**: Start with the core axiom set before adding custom ones
+3. **Register Early**: Register canons at application startup for best performance
+4. **Leverage Type Safety**: Use the `Satisfies` constraint to ensure compile-time validation
+5. **Document Dependencies**: Clearly document inter-canon relationships
 
-## Integration with the Broader Ecosystem
+## Integration
 
 Canon is designed as a **universal adapter** that composes with existing TypeScript libraries:
 
