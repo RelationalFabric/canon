@@ -14,8 +14,26 @@ Define just three axioms for the essential concepts, then write universal auth l
 
 ## The Flow
 
-Start by defining `UserIdentity`, `Expiration`, and `Permissions` axioms. These capture the core concepts you need: who the user is, when the token expires, and what they can do. Now your auth middleware can extract these values using `userIdentityOf(token)`, `expirationOf(token)`, and `permissionsOf(token)` regardless of the token format.
+Start by defining `UserIdentity`, `Expiration`, and `Permissions` axioms. These capture the core concepts you need: who the user is, when the token expires, and what they can do.
+
+```typescript
+// Just three simple axioms - like Clojure's seq interface
+type UserIdentityAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
+type ExpirationAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
+type PermissionsAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
+```
+
+Now your auth middleware can extract these values using `userIdentityOf(token)`, `expirationOf(token)`, and `permissionsOf(token)` regardless of the token format.
 
 ## The Magic
 
 The same authorization logic works across JWT tokens (with `sub` and `exp` fields), OAuth tokens (with `user_id` and `expires_at`), and session cookies (with `userId` and `ttl`). You write the business logic once, and it works everywhere.
+
+```typescript
+// One function works with all token types
+function isTokenValid(token: any): boolean {
+  const userId = userIdentityOf(token);
+  const expires = expirationOf(token);
+  return userId && expires > Date.now();
+}
+```

@@ -14,8 +14,28 @@ Define a `DeduplicationKey` axiom that captures how to identify the same logical
 
 ## The Flow
 
-Start by defining what makes two entities "the same" - maybe it's a combination of name, brand, and price range. Create a `DeduplicationKey` axiom that extracts this signature from any entity. Now your deduplication logic can use `deduplicationKeyOf(entity)` to group similar items.
+Start by defining what makes two entities "the same" - maybe it's a combination of name, brand, and price range. Create a `DeduplicationKey` axiom that extracts this signature from any entity.
+
+```typescript
+// One simple axiom for deduplication - like Clojure's seq interface
+type DeduplicationKeyAxiom = Axiom<{ $basis: Record<string, unknown>; key: string }, { key: string }>;
+```
+
+Now your deduplication logic can use `deduplicationKeyOf(entity)` to group similar items.
 
 ## The Magic
 
 The same deduplication algorithm works across your database products (with `name`, `brand`, `price`), API products (with `title`, `manufacturer`, `cost`), and user content (with `productName`, `company`, `amount`). You write the matching logic once, and it works everywhere.
+
+```typescript
+// One function works with all entity types
+function findDuplicates(entities: any[]): any[][] {
+  const groups = new Map();
+  entities.forEach(entity => {
+    const key = deduplicationKeyOf(entity);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(entity);
+  });
+  return Array.from(groups.values()).filter(group => group.length > 1);
+}
+```
