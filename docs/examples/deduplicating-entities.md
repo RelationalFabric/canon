@@ -10,58 +10,32 @@ Each source has different ways to identify the same logical entity. Your databas
 
 ## The Canon Solution
 
-Use the existing core axioms (`Id` and `Type`) to identify entities, then define a `DeduplicationKey` axiom for the business logic of what makes entities "the same".
+Use the existing core axioms (`Id` and `Type`) to identify entities. No new axioms needed - just use the business logic of what makes entities "the same".
 
 ## The Flow
 
 **Step 1: Decide which axioms are needed**
 - `Id` and `Type` from core axioms (already provided)
-- `DeduplicationKey` - new axiom for business logic
+- No new axioms needed!
 
-**Step 2: Compose the Canon and register it**
+**Step 2: The usage**
 ```typescript
-// Define the new axiom type
-type DeduplicationKeyAxiom = Axiom<{
-  $basis: Record<string, unknown>;
-  key: string;
-}, {
-  key: string;
-}>;
-
-// Register only the new axiom
-declare module '@relational-fabric/canon' {
-  interface Axioms {
-    DeduplicationKey: DeduplicationKeyAxiom;
-  }
-}
-
-// Define the canon for this example
-type DeduplicationCanon = Canon<{
-  DeduplicationKey: { $basis: { name: string; brand: string; price: number }; key: 'deduplicationKey'; $meta: { type: string } };
-}>;
-```
-
-**Step 3: Implement the API for the new axiom**
-```typescript
-function deduplicationKeyOf<T extends Satisfies<'DeduplicationKey'>>(entity: T): string {
-  const key = (entity as any).deduplicationKey;
-  return `${key.name}-${key.brand}-${Math.round(key.price / 100)}`;
-}
-```
-
-**Step 4: The usage**
-```typescript
-// One function works with all entity types
+// One function works with all entity types using just core axioms
 function findDuplicates(entities: any[]): any[][] {
   const groups = new Map();
   entities.forEach(entity => {
     const id = idOf(entity);
     const type = typeOf(entity);
-    const key = deduplicationKeyOf(entity);
-    const groupKey = `${type}-${key}`;
     
-    if (!groups.has(groupKey)) groups.set(groupKey, []);
-    groups.get(groupKey).push(entity);
+    // Business logic: what makes entities "the same"
+    const name = (entity as any).name || (entity as any).title || (entity as any).productName;
+    const brand = (entity as any).brand || (entity as any).manufacturer || (entity as any).company;
+    const price = (entity as any).price || (entity as any).cost || (entity as any).amount;
+    
+    const deduplicationKey = `${type}-${name}-${brand}-${Math.round(price / 100)}`;
+    
+    if (!groups.has(deduplicationKey)) groups.set(deduplicationKey, []);
+    groups.get(deduplicationKey).push(entity);
   });
   return Array.from(groups.values()).filter(group => group.length > 1);
 }
