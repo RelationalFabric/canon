@@ -61,8 +61,8 @@ function findDuplicates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[][
   const groups = new Map<string, T[]>();
   entities.forEach(entity => {
     const id = idOf(entity);
-    const type = typeOf(entity);
-    const groupKey = `${type}-${id}`;
+    const entityType = typeOf(entity);
+    const groupKey = `${entityType}-${id}`;
     
     if (!groups.has(groupKey)) groups.set(groupKey, []);
     groups.get(groupKey)!.push(entity);

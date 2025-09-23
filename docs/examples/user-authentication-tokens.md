@@ -63,9 +63,9 @@ function permissionsOf<T extends Satisfies<'Permissions'>>(token: T): string[] {
 // One function works with all token types
 function isTokenValid<T extends Satisfies<'Id' | 'Type' | 'Expiration'>>(token: T): boolean {
   const id = idOf(token);
-  const type = typeOf(token);
+  const tokenType = typeOf(token);
   const expires = expirationOf(token);
-  return id && type && expires > Date.now();
+  return id && tokenType && expires > Date.now();
 }
 ```
 
