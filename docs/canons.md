@@ -66,8 +66,8 @@ A complete canon requires both **type-level definitions** and **runtime configur
 The type-level definition provides **compile-time safety** and **IntelliSense support**:
 
 ```typescript
-// Define the canon type - this tells TypeScript what structure to expect
-type UserCanon = Canon<{
+// Define the canon type for your internal data format
+type InternalCanon = Canon<{
   Id: {
     $basis: { id: string };
     key: 'id';
@@ -77,11 +77,6 @@ type UserCanon = Canon<{
     $basis: { type: string };
     key: 'type';
     $meta: { enum: string; discriminator: string };
-  };
-  Version: {
-    $basis: { version: number };
-    key: 'version';
-    $meta: { default: string; min: string };
   };
   Timestamp: {
     $basis: { createdAt: Date };
@@ -95,7 +90,7 @@ type UserCanon = Canon<{
 // Register the canon type globally
 declare module '@relational-fabric/canon' {
   interface Canons {
-    User: UserCanon;
+    Internal: InternalCanon;
   }
 }
 ```
@@ -107,8 +102,8 @@ declare module '@relational-fabric/canon' {
 The runtime configuration provides **actual behavior** and **format conversion logic**:
 
 ```typescript
-// Register the runtime configuration - this tells the system how to behave at runtime
-declareCanon('User', {
+// Register the runtime configuration for your internal format
+declareCanon('Internal', {
   axioms: {
     Id: {
       $basis: { id: 'string' },
@@ -119,11 +114,6 @@ declareCanon('User', {
       $basis: { type: 'string' },
       key: 'type',
       $meta: { enum: 'user,admin,guest'; discriminator: 'true' },
-    },
-    Version: {
-      $basis: { version: 'number' },
-      key: 'version',
-      $meta: { default: '1'; min: '1' },
     },
     Timestamp: {
       $basis: { createdAt: 'Date' },
@@ -143,16 +133,15 @@ declareCanon('User', {
 The universal functions (provided by the axiom implementer) use **both** configurations:
 
 ```typescript
-// Usage with the User canon
-const user = {
+// Usage with your internal data format
+const internalData = {
   id: "user-123",
   type: "user", 
-  version: 1,
   createdAt: new Date("2022-01-01")
 };
 
-console.log(getId(user));    // "user-123" - runtime finds 'id' key
-console.log(getType(user));  // "user" - runtime finds 'type' key
+console.log(getId(internalData));    // "user-123" - runtime finds 'id' key
+console.log(getType(internalData));  // "user" - runtime finds 'type' key
 ```
 
 **The magic**: TypeScript ensures type safety at compile time, while the runtime system provides the actual field names and conversion logic at execution time.
@@ -163,13 +152,20 @@ The power of Canon lies in **universal data operations** - writing code that wor
 
 ### The Problem Canon Solves
 
-Without Canon, you need format-specific code for each data format. With Canon, you use universal functions (provided by axiom implementers) that work across all formats:
+Most codebases have **one internal data format** and only need additional canons when receiving **external data** that looks different. Without Canon, you need format-specific code for each external source. With Canon, you use universal functions that work across all formats:
 
 ```typescript
+// Your internal data format
+const internalData = { id: "user-123", type: "user" };
+
+// External data from different sources
+const jsonLdData = { "@id": "user-123", "@type": "Person" };
+const mongoData = { "_id": "user-123", "_type": "User" };
+
 // All formats work with the same universal function
-getId(jsonLdUser);  // "user-123" using @id
-getId(mongoUser);   // "user-123" using _id  
-getId(restUser);    // "user-123" using id
+getId(internalData);  // "user-123" using 'id'
+getId(jsonLdData);    // "user-123" using '@id'
+getId(mongoData);     // "user-123" using '_id'
 ```
 
 ### Real-World Benefits
