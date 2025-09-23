@@ -20,6 +20,14 @@ Use the existing core axioms (`Id` and `Type`) to identify entities, then define
 
 **Step 2: Compose the Canon and register it**
 ```typescript
+// Define the new axiom type
+type DeduplicationKeyAxiom = Axiom<{
+  $basis: Record<string, unknown>;
+  key: string;
+}, {
+  key: string;
+}>;
+
 // Register only the new axiom
 declare module '@relational-fabric/canon' {
   interface Axioms {
