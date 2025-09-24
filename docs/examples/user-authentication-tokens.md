@@ -1,6 +1,6 @@
 # Cross-Source Data Transformation
 
-> **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](../examples.md). Make sure you understand the basic Canon concepts before proceeding.
+> **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
 
 ## The Story
 

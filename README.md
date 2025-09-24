@@ -139,7 +139,7 @@ For comprehensive guides and detailed information about using Canon, see the [Do
 
 ### Advanced Topics
 
-- **[Examples](./docs/examples.md)** - See real-world usage patterns and integration examples
+- **[Examples](./docs/examples/)** - See real-world usage patterns and integration examples
 - **[Contributing](./CONTRIBUTING.md)** - Learn about naming conventions and development guidelines
 
 ## Contributing
