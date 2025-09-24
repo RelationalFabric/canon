@@ -2,9 +2,12 @@
 
 This document describes the augmentable interfaces that can be extended by users to add custom functionality to the utility system.
 
-## Default Values
+## Available Interfaces
 
-### `Axioms`
+### `Axioms` (Canon)
+**Purpose**: Extend the Canon axiom system with custom domain-specific axioms.
+
+**Default**:
 ```typescript
 interface Axioms {
   Id: IdAxiom;
@@ -14,23 +17,6 @@ interface Axioms {
   References: ReferencesAxiom;
 }
 ```
-
-### `Canons`
-```typescript
-interface Canons {
-}
-```
-
-### `NativeTypes`
-```typescript
-interface NativeTypes {
-}
-```
-
-## Available Interfaces
-
-### `Axioms` (Canon)
-**Purpose**: Extend the Canon axiom system with custom domain-specific axioms.
 
 **Usage Example**:
 ```typescript
@@ -44,6 +30,12 @@ declare module '@relational-fabric/canon' {
 ### `Canons` (Canon)
 **Purpose**: Extend the Canon system with custom canon implementations for different data formats.
 
+**Default**:
+```typescript
+interface Canons {
+}
+```
+
 **Usage Example**:
 ```typescript
 declare module '@relational-fabric/canon' {
@@ -55,6 +47,12 @@ declare module '@relational-fabric/canon' {
 
 ### `NativeTypes`
 **Purpose**: Define native type mappings for different data sources, mapping source labels to their internal type unions.
+
+**Default**:
+```typescript
+interface NativeTypes {
+}
+```
 
 **Usage Example**:
 ```typescript
