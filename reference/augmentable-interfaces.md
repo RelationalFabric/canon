@@ -10,9 +10,9 @@ This document describes the augmentable interfaces that can be extended by users
 **Default**:
 ```typescript
 interface Axioms {
-  Id: IdAxiom;
-  Type: TypeAxiom;
-  Version: VersionAxiom;
+  Id: KeyNameAxiom;
+  Type: KeyNameAxiom;
+  Version: KeyNameAxiom;
   Timestamps: TimestampsAxiom;
   References: ReferencesAxiom;
 }
