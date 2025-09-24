@@ -35,13 +35,25 @@ declare module '@relational-fabric/canon' {
 ```typescript
 declare module '@relational-fabric/canon' {
   interface NativeTypes {
-    'string': string;
-    'number': number;
-    'boolean': boolean;
-    'object': object;
-    'function': Function;
-    'symbol': symbol;
-    'bigint': bigint;
+    'Date': Date;
+    'RegExp': RegExp;
+    'Map': Map<unknown, unknown>;
+    'Set': Set<unknown>;
+    'WeakMap': WeakMap<object, unknown>;
+    'WeakSet': WeakSet<object>;
+    'ArrayBuffer': ArrayBuffer;
+    'DataView': DataView;
+    'Int8Array': Int8Array;
+    'Uint8Array': Uint8Array;
+    'Uint8ClampedArray': Uint8ClampedArray;
+    'Int16Array': Int16Array;
+    'Uint16Array': Uint16Array;
+    'Int32Array': Int32Array;
+    'Uint32Array': Uint32Array;
+    'Float32Array': Float32Array;
+    'Float64Array': Float64Array;
+    'BigInt64Array': BigInt64Array;
+    'BigUint64Array': BigUint64Array;
   }
 }
 ```
