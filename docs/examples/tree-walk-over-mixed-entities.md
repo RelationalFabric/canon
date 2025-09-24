@@ -29,6 +29,11 @@ We'll start by importing the core axioms and defining our custom axioms for pare
 import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon';
 import type { Satisfies, Axiom } from '@relational-fabric/canon';
 
+// Type definitions for this example
+type CanonDefinition = Record<string, unknown>;
+type AxiomDefinition = Record<string, unknown>;
+type AxiomConfig = Record<string, unknown>;
+
 // Define custom axioms for parent/child relationships
 type ParentAxiom = Axiom<{
   $basis: Record<string, unknown>;

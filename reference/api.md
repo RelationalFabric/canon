@@ -116,12 +116,6 @@ type Canon<T extends CanonDefinition> = T;
 ```
 Canon type that represents a universal type blueprint.
 
-### `CanonDefinition`
-```typescript
-type CanonDefinition = // TBD
-```
-Type definition for canon structure.
-
 ### `Axiom<T extends AxiomDefinition, C extends AxiomConfig>`
 ```typescript
 type Axiom<T extends AxiomDefinition, C extends AxiomConfig> = { 
@@ -130,15 +124,3 @@ type Axiom<T extends AxiomDefinition, C extends AxiomConfig> = {
 };
 ```
 Axiom type that pairs axiom definition with configuration.
-
-### `AxiomDefinition`
-```typescript
-type AxiomDefinition = // TBD
-```
-Type definition for axiom structure.
-
-### `AxiomConfig`
-```typescript
-type AxiomConfig = // TBD
-```
-Configuration type for axiom runtime behavior.

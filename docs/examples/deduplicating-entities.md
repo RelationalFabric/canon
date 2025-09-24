@@ -32,6 +32,11 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 import jsonLdCanon, { type JsonLdCanon } from '@relational-fabric/canon/jsonld';
 import { registerCanons } from '@relational-fabric/canon';
 
+// Type definitions for this example
+type CanonDefinition = Record<string, unknown>;
+type AxiomDefinition = Record<string, unknown>;
+type AxiomConfig = Record<string, unknown>;
+
 // Register external canon using registerCanons
 registerCanons({ 
   JsonLd: jsonLdCanon 

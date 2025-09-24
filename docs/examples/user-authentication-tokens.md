@@ -24,6 +24,19 @@ The core axioms are already registered in the global `Axioms` interface:
 
 **Step 2: Write universal transformation logic using existing APIs**
 ```typescript
+// Type definitions for this example
+type CanonDefinition = Record<string, unknown>;
+type AxiomDefinition = Record<string, unknown>;
+type AxiomConfig = Record<string, unknown>;
+type ReportEntity = {
+  reportId: string;
+  reportType: string;
+  reportTimestamp: unknown;
+  source: string;
+  name: string;
+  status: string;
+};
+
 // Transform any entity into a unified report format
 function transformToReport<T extends Satisfies<'Id' | 'Type' | 'Timestamps'>>(entity: T): ReportEntity {
   const id = idOf(entity);
