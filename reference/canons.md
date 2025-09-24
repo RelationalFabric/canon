@@ -33,20 +33,20 @@ export type JsonLdCanon = Canon<{
     key: '@version';
   };
   Timestamps: {
-    $basis: JsonLdEntity;
-    toCanonical: (value: JsonLdEntity) => Date;
-    fromCanonical: (value: Date) => JsonLdEntity;
+    $basis: string | Date;
+    toCanonical: (value: string | Date) => Date;
+    fromCanonical: (value: Date) => string | Date;
   } & {
-    toCanonical: (value: JsonLdEntity) => Date;
-    fromCanonical: (value: Date) => JsonLdEntity;
+    toCanonical: (value: string | Date) => Date;
+    fromCanonical: (value: Date) => string | Date;
   };
   References: {
-    $basis: JsonLdEntity;
-    toCanonical: (value: JsonLdEntity) => string[];
-    fromCanonical: (value: string[]) => JsonLdEntity;
+    $basis: string | string[];
+    toCanonical: (value: string | string[]) => string[];
+    fromCanonical: (value: string[]) => string | string[];
   } & {
-    toCanonical: (value: JsonLdEntity) => string[];
-    fromCanonical: (value: string[]) => JsonLdEntity;
+    toCanonical: (value: string | string[]) => string[];
+    fromCanonical: (value: string[]) => string | string[];
   };
 }>;
 
@@ -70,28 +70,22 @@ export default defineCanon<JsonLdCanon>({
       key: '@version'
     },
     Timestamps: {
-      $basis: (value: unknown): value is JsonLdEntity => 
-        isPojo(value) && 'dateCreated' in value && 
-        (typeof value['dateCreated'] === 'string' || value['dateCreated'] instanceof Date),
-      toCanonical: (value: JsonLdEntity) => {
-        const timestamp = value['dateCreated'];
-        if (timestamp instanceof Date) return timestamp;
-        if (typeof timestamp === 'string') return new Date(timestamp);
-        return new Date();
+      $basis: (value: unknown): value is string | Date => 
+        typeof value === 'string' || value instanceof Date,
+      toCanonical: (value: string | Date) => {
+        if (value instanceof Date) return value;
+        return new Date(value);
       },
-      fromCanonical: (value: Date) => ({ 'dateCreated': value } as JsonLdEntity)
+      fromCanonical: (value: Date) => value.toISOString()
     },
     References: {
-      $basis: (value: unknown): value is JsonLdEntity => 
-        isPojo(value) && 'references' in value && 
-        (typeof value['references'] === 'string' || Array.isArray(value['references'])),
-      toCanonical: (value: JsonLdEntity) => {
-        const refs = value['references'];
-        if (Array.isArray(refs)) return refs;
-        if (typeof refs === 'string') return [refs];
-        return [];
+      $basis: (value: unknown): value is string | string[] => 
+        typeof value === 'string' || Array.isArray(value),
+      toCanonical: (value: string | string[]) => {
+        if (Array.isArray(value)) return value;
+        return [value];
       },
-      fromCanonical: (value: string[]) => ({ 'references': value } as JsonLdEntity)
+      fromCanonical: (value: string[]) => value.length === 1 ? value[0] : value
     }
   }
 });
