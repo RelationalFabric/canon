@@ -4,9 +4,28 @@ This document describes the augmentable interfaces that can be extended by users
 
 ## Default Values
 
-- **Axioms**: Core axioms (Id, Type, Version, Timestamps, References)
-- **Canons**: None by default
-- **NativeTypes**: None by default
+### `Axioms`
+```typescript
+interface Axioms {
+  Id: IdAxiom;
+  Type: TypeAxiom;
+  Version: VersionAxiom;
+  Timestamps: TimestampsAxiom;
+  References: ReferencesAxiom;
+}
+```
+
+### `Canons`
+```typescript
+interface Canons {
+}
+```
+
+### `NativeTypes`
+```typescript
+interface NativeTypes {
+}
+```
 
 ## Available Interfaces
 
