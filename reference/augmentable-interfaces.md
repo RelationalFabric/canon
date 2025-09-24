@@ -13,20 +13,8 @@ interface Axioms {
   Id: KeyNameAxiom;
   Type: KeyNameAxiom;
   Version: KeyNameAxiom;
-  Timestamps: Axiom<{
-    $basis: number | string | Date | TypeGuard<unknown>;
-    toCanonical: (value: this['$basis']) => unknown;
-    fromCanonical: (value: unknown) => this['$basis'];
-  }, {
-    key: string;
-  }>;
-  References: Axiom<{
-    $basis: string | object | string[] | TypeGuard<unknown>;
-    toCanonical: (value: this['$basis']) => unknown;
-    fromCanonical: (value: unknown) => this['$basis'];
-  }, {
-    key: string;
-  }>;
+  Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
+  References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
 }
 ```
 
