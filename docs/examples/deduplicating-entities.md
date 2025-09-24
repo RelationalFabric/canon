@@ -20,38 +20,10 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 - `Id` and `Type` from core axioms (already provided)
 - No new axioms needed!
 
-**Step 2: Define the Canon**
+**Step 2: Use the existing core axioms**
 ```typescript
-// Define the canon for your information model
-type EntityCanon = Canon<{
-  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
-  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
-}>;
-
-// Register the canon globally
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    MyProject: EntityCanon;
-  }
-}
-
-// Register the runtime configuration
-declareCanon('MyProject', {
-  axioms: {
-    Id: { 
-      $basis: (value: unknown): value is { id: string } => 
-        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
-      key: 'id', 
-      $meta: { type: 'uuid', required: 'true' } 
-    },
-    Type: { 
-      $basis: (value: unknown): value is { type: string } => 
-        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
-      key: 'type', 
-      $meta: { enum: 'product,user,order', discriminator: 'true' } 
-    },
-  },
-});
+// The core axioms (Id, Type) are already defined and registered
+// No need to redefine them - just use them directly in your business logic
 ```
 
 **Step 3: Import and register external canons**

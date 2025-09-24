@@ -47,11 +47,6 @@ type ChildrenAxiom = Axiom<{
 // Register our custom axioms
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Id: KeyNameAxiom;
-    Type: KeyNameAxiom;
-    Version: KeyNameAxiom;
-    Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
-    References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
     Parent: ParentAxiom;
     Children: ChildrenAxiom;
   }
