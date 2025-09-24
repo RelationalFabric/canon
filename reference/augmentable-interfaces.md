@@ -2,6 +2,12 @@
 
 This document describes the augmentable interfaces that can be extended by users to add custom functionality to the utility system.
 
+## Default Values
+
+- **Axioms**: Core axioms (Id, Type, Version, Timestamps, References)
+- **Canons**: None by default
+- **NativeTypes**: None by default
+
 ## Available Interfaces
 
 ### `Axioms` (Canon)
