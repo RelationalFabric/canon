@@ -19,6 +19,7 @@ if (isPojo(data)) {
 interface UserData extends Pojo {
   name: string;
   age: number;
+  email: string;
 }
 
 const userData: unknown = { name: "John", age: 30, email: "john@example.com" };
@@ -35,20 +36,29 @@ if (isPojo<UserData>(userData)) {
 
 ```typescript
 // Numeric keys
-type NumericPojo = PojoWith<number>;
+interface NumericPojo extends PojoWith<number> {
+  0: string;
+  1: string;
+}
 const numericData: NumericPojo = { 0: "first", 1: "second" };
 
 // Symbol keys
 const sym = Symbol("key");
-type SymbolPojo = PojoWith<symbol>;
+interface SymbolPojo extends PojoWith<symbol> {
+  [sym]: string;
+}
 const symbolData: SymbolPojo = { [sym]: "value" };
 
-// Mixed key types
-type MixedPojo = PojoWith<ObjectKey>;
+// Mixed key types - this is more complex with interfaces
+interface MixedPojo extends Pojo {
+  stringKey: string;
+  42: number;
+  [Symbol("symbolKey")]: boolean;
+}
 const mixedData: MixedPojo = { 
-  "stringKey": "value1", 
-  42: "value2", 
-  [Symbol("symbolKey")]: "value3" 
+  stringKey: "value1", 
+  42: 42, 
+  [Symbol("symbolKey")]: true 
 };
 ```
 

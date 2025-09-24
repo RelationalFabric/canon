@@ -10,9 +10,11 @@ Union type representing all valid JavaScript object key types.
 
 ### `Pojo`
 ```typescript
-type Pojo = Record<ObjectKey, unknown>;
+interface Pojo {
+  [key: ObjectKey]: unknown;
+}
 ```
-Type alias for Plain Old JavaScript Objects with ObjectKey keys and unknown values.
+Interface for Plain Old JavaScript Objects with ObjectKey keys and unknown values.
 
 ### `isPojo`
 ```typescript
@@ -24,9 +26,11 @@ Type guard that checks if a value is a Plain Old JavaScript Object.
 
 ### `PojoWith<K extends ObjectKey>`
 ```typescript
-type PojoWith<K extends ObjectKey> = Record<K, unknown>;
+interface PojoWith<K extends ObjectKey> {
+  [key in K]: unknown;
+}
 ```
-POJO type with specific key types.
+POJO interface with specific key types.
 
 ### `PojoOf<O extends Pojo>`
 ```typescript
