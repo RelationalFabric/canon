@@ -35,25 +35,10 @@ declare module '@relational-fabric/canon' {
 ```typescript
 declare module '@relational-fabric/canon' {
   interface NativeTypes {
-    'Date': Date;
-    'RegExp': RegExp;
-    'Map': Map<unknown, unknown>;
-    'Set': Set<unknown>;
-    'WeakMap': WeakMap<object, unknown>;
-    'WeakSet': WeakSet<object>;
-    'ArrayBuffer': ArrayBuffer;
-    'DataView': DataView;
-    'Int8Array': Int8Array;
-    'Uint8Array': Uint8Array;
-    'Uint8ClampedArray': Uint8ClampedArray;
-    'Int16Array': Int16Array;
-    'Uint16Array': Uint16Array;
-    'Int32Array': Int32Array;
-    'Uint32Array': Uint32Array;
-    'Float32Array': Float32Array;
-    'Float64Array': Float64Array;
-    'BigInt64Array': BigInt64Array;
-    'BigUint64Array': BigUint64Array;
+    'ES5': Date | RegExp;
+    'ES2015': Map<unknown, unknown> | Set<unknown> | WeakMap<object, unknown> | WeakSet<object> | ArrayBuffer | DataView;
+    'ES2017': Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array;
+    'ES2020': BigInt64Array | BigUint64Array;
   }
 }
 ```
