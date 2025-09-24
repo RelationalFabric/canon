@@ -17,7 +17,7 @@ Thank you for your interest in contributing to Canon! This document outlines the
 - Use **camelCase** for utility functions: `inferAxiom()`, `declareCanon()`
 
 #### Type Names
-- Use **PascalCase** for type definitions: `KeyNameAxiom`, `RepresentationAxiom`, `TimestampsAxiom`, `ReferencesAxiom`
+- Use **PascalCase** for type definitions: `KeyNameAxiom`, `RepresentationAxiom`
 - Use **PascalCase** for canon types: `InternalCanon`, `JsonLdCanon`, `MongoCanon`
 - Use **PascalCase** for utility types: `Satisfies`, `AxiomValue`, `CanonDefinition`
 

@@ -170,7 +170,7 @@ type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<un
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Timestamps: TimestampsAxiom;
+    Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
   }
 }
 ```
@@ -214,7 +214,7 @@ type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuar
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    References: ReferencesAxiom;
+    References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
   }
 }
 ```

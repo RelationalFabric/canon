@@ -20,7 +20,7 @@ Use the existing core axioms (`Id`, `Type`, `Timestamp`) that are already define
 The core axioms are already registered in the global `Axioms` interface:
 - `Id: KeyNameAxiom` - for entity identification
 - `Type: KeyNameAxiom` - for entity typing
-- `Timestamps: TimestampsAxiom` - for timestamps
+- `Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>` - for timestamps
 
 **Step 2: Write universal transformation logic using existing APIs**
 ```typescript
