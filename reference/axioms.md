@@ -142,13 +142,7 @@ console.log(versionOf(jsonLdData));  // "2.1"
 
 **Type Definition**:
 ```typescript
-type TimestampsAxiom = Axiom<{
-  $basis: number | string | Date | TypeGuard<unknown>;
-  toCanonical: (value: this['$basis']) => unknown;
-  fromCanonical: (value: unknown) => this['$basis'];
-}, {
-  key: string;
-}>;
+type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
 ```
 
 **Registration**:
@@ -192,13 +186,7 @@ console.log(timestampsOf(dateData));  // Converted to canonical format
 
 **Type Definition**:
 ```typescript
-type ReferencesAxiom = Axiom<{
-  $basis: string | object | string[] | TypeGuard<unknown>;
-  toCanonical: (value: this['$basis']) => unknown;
-  fromCanonical: (value: unknown) => this['$basis'];
-}, {
-  key: string;
-}>;
+type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
 ```
 
 **Registration**:
@@ -260,6 +248,15 @@ type Axiom<TBasis, TMeta> = {
 type KeyNameAxiom = Axiom<{
   $basis: Record<string, unknown>;
   key: string;
+}, {
+  key: string;
+}>;
+
+// Representation axiom for data with multiple representations
+type RepresentationAxiom<T> = Axiom<{
+  $basis: T;
+  toCanonical: (value: T) => unknown;
+  fromCanonical: (value: unknown) => T;
 }, {
   key: string;
 }>;
