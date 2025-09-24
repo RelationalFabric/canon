@@ -18,18 +18,6 @@ type JsonLdEntity = {
   'references'?: string | string[];
 };
 
-type JsonLdPerson = JsonLdEntity & {
-  '@type': 'Person';
-  name?: string;
-  email?: string;
-};
-
-type JsonLdOrganization = JsonLdEntity & {
-  '@type': 'Organization';
-  name?: string;
-  url?: string;
-};
-
 // Define the canon type using the API we created
 export type JsonLdCanon = Canon<{
   Id: {
