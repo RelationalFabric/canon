@@ -20,14 +20,14 @@ type JsonLdEntity = {
 
 type JsonLdPerson = JsonLdEntity & {
   '@type': 'Person';
-  'name'?: string;
-  'email'?: string;
+  name?: string;
+  email?: string;
 };
 
 type JsonLdOrganization = JsonLdEntity & {
   '@type': 'Organization';
-  'name'?: string;
-  'url'?: string;
+  name?: string;
+  url?: string;
 };
 
 // Define the canon type using the API we created
