@@ -35,7 +35,7 @@ function transformToReport<T extends Satisfies<'Id' | 'Type' | 'Timestamps'>>(en
     reportId: `report-${id}`,
     reportType: `report-${entityType}`,
     reportTimestamp: timestamp,
-    source: getSourceFromId(id),
+    source: sourceOf(id),
     // Additional fields extracted using the same universal approach
     name: extractName(entity),
     status: extractStatus(entity)
@@ -70,19 +70,56 @@ function processPipeline<T extends Satisfies<'Id' | 'Type' | 'Timestamp'>>(entit
 }
 
 // Works with database entities
-const dbEntities = await getDatabaseEntities();
+const dbEntities = await databaseEntitiesOf();
 const reportDb = processPipeline(dbEntities);
 
 // Works with REST API responses
-const apiEntities = await getRestApiEntities();
+const apiEntities = await restApiEntitiesOf();
 const reportApi = processPipeline(apiEntities);
 
 // Works with GraphQL responses
-const graphqlEntities = await getGraphQLEntities();
+const graphqlEntities = await graphQLEntitiesOf();
 const reportGraphQL = processPipeline(graphqlEntities);
 
 // Combine all reports
 const allReports = [...reportDb, ...reportApi, ...reportGraphQL];
+```
+
+## Implementation Functions
+
+```typescript
+// Helper function to determine source from ID pattern
+function sourceOf(id: string): string {
+  if (id.startsWith('db-')) return 'database';
+  if (id.startsWith('api-')) return 'rest-api';
+  if (id.startsWith('gql-')) return 'graphql';
+  return 'unknown';
+}
+
+// Data source functions following *Of naming convention
+async function databaseEntitiesOf() {
+  // Simulate database query
+  return [
+    { id: 'db-user-1', type: 'user', createdAt: new Date('2022-01-01'), name: 'John Doe', status: 'active' },
+    { id: 'db-user-2', type: 'user', createdAt: new Date('2022-01-02'), name: 'Jane Smith', status: 'inactive' }
+  ];
+}
+
+async function restApiEntitiesOf() {
+  // Simulate REST API call
+  return [
+    { id: 'api-user-1', type: 'user', createdAt: '2022-01-01T00:00:00Z', name: 'API User 1', status: 'pending' },
+    { id: 'api-user-2', type: 'user', createdAt: '2022-01-02T00:00:00Z', name: 'API User 2', status: 'approved' }
+  ];
+}
+
+async function graphQLEntitiesOf() {
+  // Simulate GraphQL query
+  return [
+    { id: 'gql-user-1', type: 'user', createdAt: 1640995200, name: 'GraphQL User 1', status: 'verified' },
+    { id: 'gql-user-2', type: 'user', createdAt: 1641081600, name: 'GraphQL User 2', status: 'unverified' }
+  ];
+}
 ```
 
 ## The Magic
