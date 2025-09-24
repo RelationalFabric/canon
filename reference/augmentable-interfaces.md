@@ -27,3 +27,21 @@ declare module '@relational-fabric/canon' {
   }
 }
 ```
+
+### `NativeTypes`
+**Purpose**: Define native type mappings for different data sources, mapping source labels to their internal type unions.
+
+**Usage Example**:
+```typescript
+declare module '@relational-fabric/canon' {
+  interface NativeTypes {
+    'string': string;
+    'number': number;
+    'boolean': boolean;
+    'object': object;
+    'function': Function;
+    'symbol': symbol;
+    'bigint': bigint;
+  }
+}
+```
