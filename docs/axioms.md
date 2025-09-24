@@ -50,9 +50,7 @@ type RepresentationAxiom<T> = Axiom<{
   $basis: T;
   toCanonical: (value: T) => unknown;
   fromCanonical: (value: unknown) => T;
-}, {
-  key: string;
-}>;
+}, {}>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
