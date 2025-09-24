@@ -46,11 +46,11 @@ type KeyNameAxiom = Axiom<{
 }>;
 
 // Representation axiom for data with multiple representations
-type RepresentationAxiom<T> = {
+type RepresentationAxiom<T> = Axiom<{
   $basis: T;
   toCanonical: (value: T) => unknown;
   fromCanonical: (value: unknown) => T;
-};
+}, {}>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
