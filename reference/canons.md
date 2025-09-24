@@ -35,27 +35,22 @@ export type JsonLdCanon = Canon<{
   Id: {
     $basis: JsonLdEntity;
     key: '@id';
-    $meta: { required: true; format: 'uri' };
   };
   Type: {
     $basis: JsonLdEntity;
     key: '@type';
-    $meta: { required: true; discriminator: true };
   };
   Version: {
     $basis: JsonLdEntity;
     key: '@version';
-    $meta: { required: false };
   };
   Timestamps: {
     $basis: JsonLdEntity;
     key: 'dateCreated';
-    $meta: { required: false; format: 'iso8601' };
   };
   References: {
     $basis: JsonLdEntity;
     key: 'references';
-    $meta: { required: false };
   };
 }>;
 
@@ -65,35 +60,30 @@ export default defineCanon<JsonLdCanon>({
     Id: {
       $basis: (value: unknown): value is JsonLdEntity => 
         isPojo(value) && '@id' in value && typeof value['@id'] === 'string',
-      key: '@id',
-      $meta: { required: true, format: 'uri' }
+      key: '@id'
     },
     Type: {
       $basis: (value: unknown): value is JsonLdEntity => 
         isPojo(value) && '@type' in value && typeof value['@type'] === 'string',
-      key: '@type',
-      $meta: { required: true, discriminator: true }
+      key: '@type'
     },
     Version: {
       $basis: (value: unknown): value is JsonLdEntity => 
         isPojo(value) && '@version' in value && 
         (typeof value['@version'] === 'string' || typeof value['@version'] === 'number'),
-      key: '@version',
-      $meta: { required: false }
+      key: '@version'
     },
     Timestamps: {
       $basis: (value: unknown): value is JsonLdEntity => 
         isPojo(value) && 'dateCreated' in value && 
         (typeof value['dateCreated'] === 'string' || value['dateCreated'] instanceof Date),
-      key: 'dateCreated',
-      $meta: { required: false, format: 'iso8601' }
+      key: 'dateCreated'
     },
     References: {
       $basis: (value: unknown): value is JsonLdEntity => 
         isPojo(value) && 'references' in value && 
         (typeof value['references'] === 'string' || Array.isArray(value['references'])),
-      key: 'references',
-      $meta: { required: false }
+      key: 'references'
     }
   }
 });
