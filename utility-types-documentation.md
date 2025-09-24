@@ -11,10 +11,6 @@ type ObjectKey = string | number | symbol;
 
 A union type representing all valid JavaScript object key types. This serves as the foundation for other utility types that work with object keys.
 
-**Use Cases:**
-- Generic constraints for object key operations
-- Type-safe key validation
-- Consistent key type handling across utilities
 
 ---
 
@@ -35,14 +31,7 @@ A type alias for Plain Old JavaScript Objects. Represents objects with string ke
 
 ### `isPojo`
 ```typescript
-const isPojo: TypeGuard<Pojo> = (value: unknown): value is Pojo => {
-  return value !== null && 
-         typeof value === 'object' && 
-         !Array.isArray(value) && 
-         !(value instanceof Date) && 
-         !(value instanceof RegExp) &&
-         value.constructor === Object;
-};
+const isPojo: TypeGuard<Pojo>;
 ```
 
 A type guard function that determines whether a given value is a Plain Old JavaScript Object, implemented using the `TypeGuard<Pojo>` pattern.
@@ -52,12 +41,6 @@ A type guard function that determines whether a given value is a Plain Old JavaS
 **Type Safety:** When this function returns `true`, TypeScript will narrow the type to `Pojo`. The `TypeGuard<Pojo>` pattern allows for:
 - Generic type narrowing: `isPojo<SpecificPojo>(value)` preserves specific POJO types
 - Base type narrowing: `isPojo(value)` narrows to `Pojo`
-
-**Use Cases:**
-- Runtime validation of object types
-- Type narrowing in conditional blocks
-- Input validation in functions that expect POJOs
-- Discriminating union type handling
 
 ---
 
@@ -73,11 +56,6 @@ A generic type that creates a POJO with specific key types. Allows for more flex
 **Generic Parameters:**
 - `K`: The key type(s) for the object (must extend `ObjectKey`)
 
-**Use Cases:**
-- Objects with numeric keys
-- Objects with symbol keys
-- Mixed key type objects
-- Type-safe object creation with specific key constraints
 
 ### `PojoOf<O extends Pojo>`
 ```typescript
@@ -89,10 +67,6 @@ A utility type that extracts the POJO structure from a given object type. Useful
 **Generic Parameters:**
 - `O`: The object type to extract POJO structure from (must extend `Pojo`)
 
-**Use Cases:**
-- Type transformations that preserve POJO structure
-- Ensuring type compatibility between different object types
-- Generic functions that work with any POJO structure
 
 ---
 
@@ -122,11 +96,7 @@ A sophisticated type guard pattern that provides both generic and specific type 
 ```typescript
 const pojoHas = <T extends PojoWith<K>, K extends ObjectKey>(
   key: K
-): TypeGuard<T> => {
-  return <U extends T>(obj: U | unknown): obj is U => {
-    return isPojo(obj) && key in obj;
-  } as TypeGuard<T>;
-};
+): TypeGuard<T>;
 ```
 
 A sophisticated type guard factory that creates a type guard for checking if an object has a specific key. The returned function conforms to the `TypeGuard<T>` pattern for optimal type discrimination.
@@ -143,30 +113,6 @@ A sophisticated type guard factory that creates a type guard for checking if an 
 - **Extends Safety**: Preserves specific types when working with subtypes
 - **Flexible Usage**: Works with both specific and general type scenarios
 - **Better IntelliSense**: More accurate type information in IDEs
-
-**Usage Examples:**
-```typescript
-// Create type guards for specific keys
-const hasName = pojoHas<{ name: string }, "name">("name");
-const hasEmail = pojoHas<{ email: string }, "email">("email");
-
-// Generic usage - narrows to base type
-if (hasName(data)) {
-  // data is { name: string }
-}
-
-// Specific usage - preserves specific type
-if (hasName<UserData>(data)) {
-  // data is UserData (if UserData extends { name: string })
-}
-```
-
-**Use Cases:**
-- Safe property access with type narrowing
-- Runtime validation of object structure
-- Conditional logic based on object properties
-- API response validation
-- Discriminating union type handling
 
 
 ---
