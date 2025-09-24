@@ -168,7 +168,11 @@ type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<un
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
+    Timestamps: {
+      $basis: number | string | Date | TypeGuard<unknown>;
+      toCanonical: typeof timestampsToCanonical;
+      fromCanonical: typeof timestampsFromCanonical;
+    };
   }
 }
 ```
@@ -185,6 +189,22 @@ function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Time
   const config = inferAxiom('Timestamps', x);
   return config.toCanonical(x);
 }
+```
+
+**Implementation**:
+```typescript
+// Timestamp conversion functions
+const timestampsToCanonical = (value: number | string | Date | TypeGuard<unknown>): Date => {
+  if (value instanceof Date) return value;
+  if (typeof value === 'number') return new Date(value);
+  if (typeof value === 'string') return new Date(value);
+  // For TypeGuard<unknown>, assume it's a timestamp and try to convert
+  return new Date(value as any);
+};
+
+const timestampsFromCanonical = (value: Date): number | string | Date | TypeGuard<unknown> => {
+  return value; // Return as Date by default, can be customized per use case
+};
 ```
 
 **Usage Example**:
@@ -212,7 +232,11 @@ type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuar
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
+    References: {
+      $basis: string | object | string[] | TypeGuard<unknown>;
+      toCanonical: typeof referencesToCanonical;
+      fromCanonical: typeof referencesFromCanonical;
+    };
   }
 }
 ```
@@ -229,6 +253,30 @@ function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'Refe
   const config = inferAxiom('References', x);
   return config.toCanonical(x);
 }
+```
+
+**Implementation**:
+```typescript
+// Reference conversion functions
+const referencesToCanonical = (value: string | object | string[] | TypeGuard<unknown>): string[] => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') return [value];
+  if (typeof value === 'object' && value !== null) {
+    // Extract ID from object reference
+    const obj = value as any;
+    if (obj.id) return [obj.id];
+    if (obj._id) return [obj._id];
+    if (obj['@id']) return [obj['@id']];
+    // If no ID field found, stringify the object
+    return [JSON.stringify(value)];
+  }
+  // For TypeGuard<unknown>, try to convert to string array
+  return [String(value)];
+};
+
+const referencesFromCanonical = (value: string[]): string | object | string[] | TypeGuard<unknown> => {
+  return value; // Return as string array by default, can be customized per use case
+};
 ```
 
 **Usage Example**:
