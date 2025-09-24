@@ -75,7 +75,7 @@ export default defineCanon<JsonLdCanon>({
       key: '@version'
     },
     Timestamps: {
-      $basis: (value: unknown): value is JsonLdDate => 
+      $basis: <U extends JsonLdDate>(value: U | unknown): value is U => 
         typeof value === 'object' && value !== null && 
         '@value' in value && '@type' in value &&
         typeof (value as any)['@value'] === 'string' &&
@@ -87,7 +87,7 @@ export default defineCanon<JsonLdCanon>({
       })
     },
     References: {
-      $basis: (value: unknown): value is string | string[] => 
+      $basis: <U extends string | string[]>(value: U | unknown): value is U => 
         typeof value === 'string' || Array.isArray(value),
       toCanonical: (value: string | string[]) => {
         if (Array.isArray(value)) return value;
