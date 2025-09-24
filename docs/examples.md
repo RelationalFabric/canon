@@ -50,8 +50,8 @@ declare module '@relational-fabric/canon' {
     Id: KeyNameAxiom;
     Type: KeyNameAxiom;
     Version: KeyNameAxiom;
-    Timestamps: TimestampsAxiom;
-    References: ReferencesAxiom;
+    Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
+    References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
     Parent: ParentAxiom;
     Children: ChildrenAxiom;
   }

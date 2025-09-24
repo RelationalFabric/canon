@@ -285,7 +285,7 @@ declare function inferAxiom<T extends keyof Axioms>(
 
 All core axioms follow the same registration pattern:
 
-1. **Type Definition**: Define the axiom type using the appropriate base type (`KeyNameAxiom` or `Axiom<{...}, {...}>`)
+1. **Type Definition**: Define the axiom type using the appropriate base type (`KeyNameAxiom`, `RepresentationAxiom<T>`, or `Axiom<{...}, {...}>`)
 2. **Module Augmentation**: Register the axiom in the `@relational-fabric/canon` module
 3. **API Functions**: Provide utility functions for working with the axiom
 

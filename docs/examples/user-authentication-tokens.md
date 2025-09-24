@@ -20,12 +20,12 @@ Use the existing core axioms (`Id`, `Type`, `Timestamp`) that are already define
 The core axioms are already registered in the global `Axioms` interface:
 - `Id: KeyNameAxiom` - for entity identification
 - `Type: KeyNameAxiom` - for entity typing
-- `Timestamp: TimestampAxiom` - for timestamps
+- `Timestamps: TimestampsAxiom` - for timestamps
 
 **Step 2: Write universal transformation logic using existing APIs**
 ```typescript
 // Transform any entity into a unified report format
-function transformToReport<T extends Satisfies<'Id' | 'Type' | 'Timestamp'>>(entity: T): ReportEntity {
+function transformToReport<T extends Satisfies<'Id' | 'Type' | 'Timestamps'>>(entity: T): ReportEntity {
   const id = idOf(entity);
   const entityType = typeOf(entity);
   const timestamp = timestampsOf(entity);
