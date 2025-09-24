@@ -38,7 +38,7 @@ export type JsonLdCanon = Canon<{
     key: '@version';
   };
   Timestamps: {
-    $basis: JsonLdDate;
+    $basis: TypeGuard<JsonLdDate>;
     toCanonical: (value: JsonLdDate) => Date;
     fromCanonical: (value: Date) => JsonLdDate;
   } & {
