@@ -26,11 +26,11 @@ type KeyNameAxiom = Axiom<{
 }>;
 
 // Representation axiom for data with multiple representations
-type RepresentationAxiom<T> = Axiom<{
+type RepresentationAxiom<T> = {
   $basis: T;
   toCanonical: (value: T) => unknown;
   fromCanonical: (value: unknown) => T;
-}, {}>;
+};
 ```
 
 ## Axiom Definitions
@@ -168,11 +168,7 @@ type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<un
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Timestamps: {
-      $basis: number | string | Date | TypeGuard<unknown>;
-      toCanonical: typeof timestampsToCanonical;
-      fromCanonical: typeof timestampsFromCanonical;
-    };
+    Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
   }
 }
 ```
@@ -232,11 +228,7 @@ type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuar
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    References: {
-      $basis: string | object | string[] | TypeGuard<unknown>;
-      toCanonical: typeof referencesToCanonical;
-      fromCanonical: typeof referencesFromCanonical;
-    };
+    References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
   }
 }
 ```
