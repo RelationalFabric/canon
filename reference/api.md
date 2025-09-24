@@ -81,3 +81,29 @@ Type-safe version of `Object.entries()` that preserves key-value pair types.
 const objectValues = <T extends Pojo>(obj: T): T[keyof T][];
 ```
 Type-safe version of `Object.values()` that preserves value types.
+
+### `inferAxiom<T extends keyof Axioms>`
+```typescript
+declare function inferAxiom<T extends keyof Axioms>(
+  axiom: T, 
+  value: Satisfies<T>
+): Axioms[T];
+```
+Runtime axiom inference function that determines the axiom configuration for a given value.
+
+### `declareCanon`
+```typescript
+declare function declareCanon(
+  name: string,
+  config: CanonConfig
+): void;
+```
+Declarative function that registers both type and runtime configuration for a canon in one step.
+
+### `registerCanons`
+```typescript
+declare function registerCanons(
+  canons: Record<string, CanonConfig>
+): void;
+```
+Registers multiple canons with their runtime configurations.
