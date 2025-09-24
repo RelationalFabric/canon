@@ -48,6 +48,8 @@ type KeyNameAxiom = Axiom<{
 // Representation axiom for data with multiple representations
 type RepresentationAxiom<T> = Axiom<{
   $basis: T;
+  toCanonical: (value: T) => unknown;
+  fromCanonical: (value: unknown) => T;
 }, {
   toCanonical: (value: T) => unknown;
   fromCanonical: (value: unknown) => T;
