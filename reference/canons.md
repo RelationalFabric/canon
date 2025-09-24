@@ -46,11 +46,19 @@ export type JsonLdCanon = Canon<{
   };
   Timestamps: {
     $basis: JsonLdEntity;
-    key: 'dateCreated';
+    toCanonical: (value: JsonLdEntity) => Date;
+    fromCanonical: (value: Date) => JsonLdEntity;
+  } & {
+    toCanonical: (value: JsonLdEntity) => Date;
+    fromCanonical: (value: Date) => JsonLdEntity;
   };
   References: {
     $basis: JsonLdEntity;
-    key: 'references';
+    toCanonical: (value: JsonLdEntity) => string[];
+    fromCanonical: (value: string[]) => JsonLdEntity;
+  } & {
+    toCanonical: (value: JsonLdEntity) => string[];
+    fromCanonical: (value: string[]) => JsonLdEntity;
   };
 }>;
 
@@ -77,13 +85,25 @@ export default defineCanon<JsonLdCanon>({
       $basis: (value: unknown): value is JsonLdEntity => 
         isPojo(value) && 'dateCreated' in value && 
         (typeof value['dateCreated'] === 'string' || value['dateCreated'] instanceof Date),
-      key: 'dateCreated'
+      toCanonical: (value: JsonLdEntity) => {
+        const timestamp = value['dateCreated'];
+        if (timestamp instanceof Date) return timestamp;
+        if (typeof timestamp === 'string') return new Date(timestamp);
+        return new Date();
+      },
+      fromCanonical: (value: Date) => ({ 'dateCreated': value } as JsonLdEntity)
     },
     References: {
       $basis: (value: unknown): value is JsonLdEntity => 
         isPojo(value) && 'references' in value && 
         (typeof value['references'] === 'string' || Array.isArray(value['references'])),
-      key: 'references'
+      toCanonical: (value: JsonLdEntity) => {
+        const refs = value['references'];
+        if (Array.isArray(refs)) return refs;
+        if (typeof refs === 'string') return [refs];
+        return [];
+      },
+      fromCanonical: (value: string[]) => ({ 'references': value } as JsonLdEntity)
     }
   }
 });
