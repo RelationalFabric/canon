@@ -9,25 +9,10 @@ This document describes the augmentable interfaces that can be extended by users
 
 **Usage Example**:
 ```typescript
-// User-defined custom axiom
-type CustomAxiom = Axiom<{
-  $basis: Record<string, unknown>;
-  key: string;
-}, {
-  key: string;
-}>;
-
-// Registration
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Custom: CustomAxiom;
+    MyAxiom: Axiom</* definition */>;
   }
-}
-
-// Usage with custom axiom
-function customOf<T extends Satisfies<'Custom'>>(x: T): AxiomValue<'Custom'> {
-  const config = inferAxiom('Custom', x);
-  return x[config.key] as AxiomValue<'Custom'>;
 }
 ```
 
@@ -36,27 +21,9 @@ function customOf<T extends Satisfies<'Custom'>>(x: T): AxiomValue<'Custom'> {
 
 **Usage Example**:
 ```typescript
-// User-defined custom canon
-type MyCustomCanon = Canon<{
-  Id: {
-    $basis: { id: string };
-    key: 'id';
-    $meta: { type: string; required: string };
-  };
-  Type: {
-    $basis: { type: string };
-    key: 'type';
-    $meta: { enum: string; discriminator: string };
-  };
-}>;
-
-// Registration
 declare module '@relational-fabric/canon' {
   interface Canons {
-    MyCustom: MyCustomCanon;
+    MyCanon: Canon</* definition */>;
   }
 }
-
-// Runtime registration
-registerCanons({ MyCustom: myCustomCanonConfig });
 ```
