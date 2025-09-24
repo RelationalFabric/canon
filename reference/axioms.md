@@ -14,6 +14,27 @@ The core axiom set consists of five essential axioms that cover the fundamental 
 4. **Timestamps** - Time-based data with format conversion
 5. **References** - Entity relationships and references
 
+## Axiom Types
+
+```typescript
+// Key-name axiom for simple field-based concepts
+type KeyNameAxiom = Axiom<{
+  $basis: Record<string, unknown>;
+  key: string;
+}, {
+  key: string;
+}>;
+
+// Representation axiom for data with multiple representations
+type RepresentationAxiom<T> = Axiom<{
+  $basis: T;
+  toCanonical: (value: T) => unknown;
+  fromCanonical: (value: unknown) => T;
+}, {
+  key: string;
+}>;
+```
+
 ## Axiom Definitions
 
 ### 1. Id Axiom
@@ -243,23 +264,6 @@ type Axiom<TBasis, TMeta> = {
   $basis: TBasis;
   $meta: TMeta;
 };
-
-// Key-name axiom for simple field-based concepts
-type KeyNameAxiom = Axiom<{
-  $basis: Record<string, unknown>;
-  key: string;
-}, {
-  key: string;
-}>;
-
-// Representation axiom for data with multiple representations
-type RepresentationAxiom<T> = Axiom<{
-  $basis: T;
-  toCanonical: (value: T) => unknown;
-  fromCanonical: (value: unknown) => T;
-}, {
-  key: string;
-}>;
 
 // Utility types for working with axioms
 type Satisfies<T extends keyof Axioms> = {
