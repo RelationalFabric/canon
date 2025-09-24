@@ -41,15 +41,9 @@ export type JsonLdCanon = Canon<{
     $basis: TypeGuard<JsonLdDate>;
     toCanonical: (value: JsonLdDate) => Date;
     fromCanonical: (value: Date) => JsonLdDate;
-  } & {
-    toCanonical: (value: JsonLdDate) => Date;
-    fromCanonical: (value: Date) => JsonLdDate;
   };
   References: {
-    $basis: string | string[];
-    toCanonical: (value: string | string[]) => string[];
-    fromCanonical: (value: string[]) => string | string[];
-  } & {
+    $basis: TypeGuard<string | string[]>;
     toCanonical: (value: string | string[]) => string[];
     fromCanonical: (value: string[]) => string | string[];
   };
