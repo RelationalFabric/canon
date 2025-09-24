@@ -9,68 +9,89 @@ This document describes the shared canons available in the Canon system.
 
 **Definition and Export**:
 ```typescript
-// Define the canon type
+// Define well-named types that communicate the JSON-LD structure
+type JsonLdEntity = {
+  '@id': string;
+  '@type': string;
+  '@version'?: string | number;
+  'dateCreated'?: string | Date;
+  'references'?: string | string[];
+};
+
+type JsonLdPerson = JsonLdEntity & {
+  '@type': 'Person';
+  'name'?: string;
+  'email'?: string;
+};
+
+type JsonLdOrganization = JsonLdEntity & {
+  '@type': 'Organization';
+  'name'?: string;
+  'url'?: string;
+};
+
+// Define the canon type using the API we created
 export type JsonLdCanon = Canon<{
   Id: {
-    $basis: { '@id': string };
+    $basis: JsonLdEntity;
     key: '@id';
     $meta: { type: 'uri'; required: 'true' };
   };
   Type: {
-    $basis: { '@type': string };
+    $basis: JsonLdEntity;
     key: '@type';
-    $meta: { enum: 'string'; discriminator: 'true' };
+    $meta: { enum: 'Person,Organization,Event,Place'; discriminator: 'true' };
   };
   Version: {
-    $basis: { '@version': string | number };
+    $basis: JsonLdEntity;
     key: '@version';
     $meta: { type: 'string|number'; required: 'false' };
   };
   Timestamps: {
-    $basis: { 'dateCreated': string | Date };
+    $basis: JsonLdEntity;
     key: 'dateCreated';
     $meta: { format: 'iso8601'; required: 'false' };
   };
   References: {
-    $basis: { 'references': string | string[] };
+    $basis: JsonLdEntity;
     key: 'references';
     $meta: { type: 'uri|array'; required: 'false' };
   };
 }>;
 
-// Export the canon configuration
+// Export the canon configuration using proper TypeGuard patterns
 export default defineCanon<JsonLdCanon>({
   axioms: {
     Id: {
-      $basis: (value: unknown): value is { '@id': string } => 
-        typeof value === 'object' && value !== null && '@id' in value && typeof (value as any)['@id'] === 'string',
+      $basis: (value: unknown): value is JsonLdEntity => 
+        isPojo(value) && '@id' in value && typeof value['@id'] === 'string',
       key: '@id',
       $meta: { type: 'uri', required: 'true' }
     },
     Type: {
-      $basis: (value: unknown): value is { '@type': string } => 
-        typeof value === 'object' && value !== null && '@type' in value && typeof (value as any)['@type'] === 'string',
+      $basis: (value: unknown): value is JsonLdEntity => 
+        isPojo(value) && '@type' in value && typeof value['@type'] === 'string',
       key: '@type',
       $meta: { enum: 'Person,Organization,Event,Place', discriminator: 'true' }
     },
     Version: {
-      $basis: (value: unknown): value is { '@version': string | number } => 
-        typeof value === 'object' && value !== null && '@version' in value && 
-        (typeof (value as any)['@version'] === 'string' || typeof (value as any)['@version'] === 'number'),
+      $basis: (value: unknown): value is JsonLdEntity => 
+        isPojo(value) && '@version' in value && 
+        (typeof value['@version'] === 'string' || typeof value['@version'] === 'number'),
       key: '@version',
       $meta: { type: 'string|number', required: 'false' }
     },
     Timestamps: {
-      $basis: (value: unknown): value is { 'dateCreated': string | Date } => 
-        typeof value === 'object' && value !== null && 'dateCreated' in value && 
-        (typeof (value as any).dateCreated === 'string' || (value as any).dateCreated instanceof Date),
+      $basis: (value: unknown): value is JsonLdEntity => 
+        isPojo(value) && 'dateCreated' in value && 
+        (typeof value['dateCreated'] === 'string' || value['dateCreated'] instanceof Date),
       key: 'dateCreated',
       $meta: { format: 'iso8601', required: 'false' }
     },
     References: {
-      $basis: (value: unknown): value is { 'references': string | string[] } => 
-        typeof value === 'object' && value !== null && 'references' in value && 
-        (typeof (value as any).references === 'string' || Array.isArray((value as any).references)),
+      $basis: (value: unknown): value is JsonLdEntity => 
+        isPojo(value) && 'references' in value && 
+        (typeof value['references'] === 'string' || Array.isArray(value['references'])),
       key: 'references',
       $meta: { type: 'uri|array', required: 'false' }
     }
@@ -80,25 +101,37 @@ export default defineCanon<JsonLdCanon>({
 
 **Usage**:
 ```typescript
-import jsonLdCanon, { type JsonLdCanon } from '@relational-fabric/canon/jsonld';
-import { registerCanons } from '@relational-fabric/canon';
+import jsonLdCanon, { type JsonLdCanon, type JsonLdPerson, type JsonLdOrganization } from '@relational-fabric/canon/jsonld';
+import { registerCanons, idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon';
 
 // Register the canon
 registerCanons({ JsonLd: jsonLdCanon });
 
-// Use with JSON-LD data
-const jsonLdData = {
+// Use with well-named JSON-LD types
+const person: JsonLdPerson = {
   '@id': 'https://example.com/person/123',
   '@type': 'Person',
   '@version': 1,
   'dateCreated': '2022-01-01T00:00:00Z',
-  'references': ['https://example.com/org/456']
+  'references': ['https://example.com/org/456'],
+  'name': 'John Doe',
+  'email': 'john@example.com'
 };
 
-// Works with universal functions
-const id = idOf(jsonLdData); // 'https://example.com/person/123'
-const type = typeOf(jsonLdData); // 'Person'
-const version = versionOf(jsonLdData); // 1
-const timestamp = timestampsOf(jsonLdData); // Converted to canonical format
-const references = referencesOf(jsonLdData); // Converted to canonical format
+const organization: JsonLdOrganization = {
+  '@id': 'https://example.com/org/456',
+  '@type': 'Organization',
+  'name': 'Acme Corp',
+  'url': 'https://acme.com'
+};
+
+// Works with universal functions - same API across all data formats
+const personId = idOf(person); // 'https://example.com/person/123'
+const personType = typeOf(person); // 'Person'
+const orgId = idOf(organization); // 'https://example.com/org/456'
+const orgType = typeOf(organization); // 'Organization'
+
+// Type-safe access to JSON-LD specific properties
+console.log(person.name); // 'John Doe' - type-safe access
+console.log(organization.url); // 'https://acme.com' - type-safe access
 ```
