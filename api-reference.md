@@ -63,20 +63,37 @@ Type guard pattern providing both generic and specific type narrowing capabiliti
 ### `pojoHas<T extends PojoWith<K>, K extends ObjectKey>`
 ```typescript
 const pojoHas = <T extends PojoWith<K>, K extends ObjectKey>(
+  obj: T | unknown,
   key: K
-): TypeGuard<T>;
+): obj is T;
 ```
-Type guard factory that creates a type guard for checking if an object has a specific key.
+Type guard that checks if an object has a specific key.
+
+**Parameters:**
+- `obj`: The object to check (can be the expected type or unknown)
+- `key`: The key to check for (must be a valid `ObjectKey`)
+
+**Returns:** `true` if the object has the specified key, `false` otherwise
+
+**Type Safety:** When this function returns `true`, TypeScript narrows the type to the specific POJO type `T`
+
+### `pojoWith<K extends ObjectKey>`
+```typescript
+const pojoWith = <K extends ObjectKey>(
+  key: K
+): TypeGuard<PojoWith<K>>;
+```
+Higher-order function that creates a type guard for checking if an object has a specific key.
 
 **Parameters:**
 - `key`: The key to check for (must be a valid `ObjectKey`)
 
-**Returns:** A `TypeGuard<T>` function that:
-- When called with a specific type `U extends T`, narrows to that specific type `U`
-- When called with the base type `T`, narrows to `T`
+**Returns:** A `TypeGuard<PojoWith<K>>` function that:
+- When called with a specific type `U extends PojoWith<K>`, narrows to that specific type `U`
+- When called with the base type `PojoWith<K>`, narrows to `PojoWith<K>`
 - Returns `true` if the object has the specified key, `false` otherwise
 
-**Type Safety:** The `TypeGuard<T>` pattern provides:
+**Type Safety:** The `TypeGuard<PojoWith<K>>` pattern provides:
 - **Extends Safety**: Preserves specific types when working with subtypes
 - **Flexible Usage**: Works with both specific and general type scenarios
 - **Better IntelliSense**: More accurate type information in IDEs
