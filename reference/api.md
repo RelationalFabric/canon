@@ -59,3 +59,21 @@ const pojoWith = <K extends ObjectKey>(
 ): TypeGuard<PojoWith<K>>;
 ```
 Creates a type guard for checking if an object has a specific key.
+
+### `objectKeys<T extends Pojo>`
+```typescript
+const objectKeys = <T extends Pojo>(obj: T): (keyof T)[];
+```
+Type-safe version of `Object.keys()` that preserves key types.
+
+### `objectEntries<T extends Pojo>`
+```typescript
+const objectEntries = <T extends Pojo>(obj: T): [keyof T, T[keyof T]][];
+```
+Type-safe version of `Object.entries()` that preserves key-value pair types.
+
+### `objectValues<T extends Pojo>`
+```typescript
+const objectValues = <T extends Pojo>(obj: T): T[keyof T][];
+```
+Type-safe version of `Object.values()` that preserves value types.

@@ -189,60 +189,57 @@ function processCanonEntity<T extends Pojo>(entity: T) {
 }
 ```
 
-## Missing API Functions
+## Improved Standard Object Methods
 
-Based on the examples and Canon integration, the following functions should be added to the API:
+The API provides improved implementations of standard Object methods with better type safety:
 
-### `pojoKeys<T extends Pojo>`
+### `objectKeys<T extends Pojo>`
 ```typescript
-const pojoKeys = <T extends Pojo>(obj: T): (keyof T)[];
+const objectKeys = <T extends Pojo>(obj: T): (keyof T)[];
 ```
-Extracts all keys from a POJO.
+Type-safe version of `Object.keys()` that preserves key types.
 
-### `pojoValues<T extends Pojo>`
+### `objectEntries<T extends Pojo>`
 ```typescript
-const pojoValues = <T extends Pojo>(obj: T): T[keyof T][];
+const objectEntries = <T extends Pojo>(obj: T): [keyof T, T[keyof T]][];
 ```
-Extracts all values from a POJO.
+Type-safe version of `Object.entries()` that preserves key-value pair types.
 
-### `pojoEntries<T extends Pojo>`
+### `objectValues<T extends Pojo>`
 ```typescript
-const pojoEntries = <T extends Pojo>(obj: T): [keyof T, T[keyof T]][];
+const objectValues = <T extends Pojo>(obj: T): T[keyof T][];
 ```
-Extracts all key-value pairs from a POJO.
+Type-safe version of `Object.values()` that preserves value types.
 
-### `pojoMerge<T extends Pojo, U extends Pojo>`
-```typescript
-const pojoMerge = <T extends Pojo, U extends Pojo>(target: T, source: U): T & U;
-```
-Merges two POJOs while preserving types.
+## Lodash Integration
 
-### `pojoPick<T extends Pojo, K extends keyof T>`
-```typescript
-const pojoPick = <T extends Pojo, K extends keyof T>(obj: T, keys: K[]): Pick<T, K>;
-```
-Picks specific keys from a POJO.
+For advanced object manipulation, use lodash (bundled with the package) with proper type safety:
 
-### `pojoOmit<T extends Pojo, K extends keyof T>`
 ```typescript
-const pojoOmit = <T extends Pojo, K extends keyof T>(obj: T, keys: K[]): Omit<T, K>;
-```
-Omits specific keys from a POJO.
+import _ from 'lodash';
 
-### `pojoDeepClone<T extends Pojo>`
-```typescript
-const pojoDeepClone = <T extends Pojo>(obj: T): T;
+// Use lodash for complex operations with type safety
+function processComplexData<T extends Pojo>(data: T) {
+  // Deep clone with lodash
+  const cloned = _.cloneDeep(data);
+  
+  // Merge with type safety
+  const merged = _.merge({}, data, { timestamp: Date.now() });
+  
+  // Pick specific keys
+  const picked = _.pick(data, ['id', 'name', 'type']);
+  
+  // Omit specific keys
+  const omitted = _.omit(data, ['internal', 'debug']);
+  
+  return { cloned, merged, picked, omitted };
+}
 ```
-Creates a deep clone of a POJO.
 
-### `pojoIsEmpty<T extends Pojo>`
-```typescript
-const pojoIsEmpty = <T extends Pojo>(obj: T): boolean;
-```
-Checks if a POJO is empty.
+## Philosophy
 
-### `pojoSize<T extends Pojo>`
-```typescript
-const pojoSize = <T extends Pojo>(obj: T): number;
-```
-Returns the number of keys in a POJO.
+The utility library focuses on:
+1. **Core type safety** - Essential type guards and POJO validation
+2. **Standard method improvements** - Better typed versions of Object methods
+3. **Lodash integration** - Complex operations handled by proven library
+4. **Minimal abstraction** - Avoid over-engineering simple operations
