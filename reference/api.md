@@ -107,3 +107,38 @@ declare function registerCanons(
 ): void;
 ```
 Registers multiple canons with their runtime configurations.
+
+## Canon Types
+
+### `Canon<T extends CanonDefinition>`
+```typescript
+type Canon<T extends CanonDefinition> = T;
+```
+Canon type that represents a universal type blueprint.
+
+### `CanonDefinition`
+```typescript
+type CanonDefinition = // TBD
+```
+Type definition for canon structure.
+
+### `Axiom<T extends AxiomDefinition, C extends AxiomConfig>`
+```typescript
+type Axiom<T extends AxiomDefinition, C extends AxiomConfig> = { 
+  axiom: T, 
+  config: C 
+};
+```
+Axiom type that pairs axiom definition with configuration.
+
+### `AxiomDefinition`
+```typescript
+type AxiomDefinition = // TBD
+```
+Type definition for axiom structure.
+
+### `AxiomConfig`
+```typescript
+type AxiomConfig = // TBD
+```
+Configuration type for axiom runtime behavior.
