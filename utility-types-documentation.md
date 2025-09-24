@@ -86,7 +86,27 @@ A utility type that extracts the POJO structure from a given object type. Useful
 
 ---
 
-## Type Guard Functions
+## Type Guard System
+
+### `TypeGuard<T>`
+```typescript
+type TypeGuard<T> = {
+  <U extends T>(obj: U | unknown): obj is U;
+  (obj: T | unknown): obj is T;
+};
+```
+
+A sophisticated type guard pattern that provides both generic and specific type narrowing capabilities. This pattern allows for:
+
+1. **Generic Type Narrowing**: When called with a more specific type `U` that extends `T`, it narrows to that specific type
+2. **Base Type Narrowing**: When called with the base type `T`, it narrows to that type
+3. **Discriminating Union Support**: Enables proper type discrimination in complex scenarios
+
+**Key Benefits:**
+- **Extends Safety**: Preserves the specific type when working with subtypes
+- **Flexible Usage**: Works with both specific and general type scenarios
+- **Better IntelliSense**: Provides more accurate type information in IDEs
+- **Composable**: Can be used as a building block for more complex type guards
 
 ### `pojoHas<T extends PojoWith<K>, K extends ObjectKey>`
 ```typescript
@@ -96,7 +116,7 @@ function pojoHas<T extends PojoWith<K>, K extends ObjectKey>(
 ): obj is T;
 ```
 
-A sophisticated type guard that checks if an object has a specific key and narrows the type accordingly.
+A sophisticated type guard that checks if an object has a specific key and narrows the type accordingly. This function can be enhanced to use the `TypeGuard<T>` pattern for better type discrimination.
 
 **Parameters:**
 - `obj`: The object to check (can be the expected type or unknown)
@@ -106,11 +126,25 @@ A sophisticated type guard that checks if an object has a specific key and narro
 
 **Type Safety:** When this function returns `true`, TypeScript will narrow the type to the specific POJO type `T`
 
+**Enhanced TypeGuard Pattern:**
+```typescript
+const pojoHas: <T extends PojoWith<K>, K extends ObjectKey>(
+  key: K
+) => TypeGuard<T> = <T extends PojoWith<K>, K extends ObjectKey>(
+  key: K
+) => {
+  return ((obj: T | unknown): obj is T => {
+    return isPojo(obj) && key in obj;
+  }) as TypeGuard<T>;
+};
+```
+
 **Use Cases:**
 - Safe property access with type narrowing
 - Runtime validation of object structure
 - Conditional logic based on object properties
 - API response validation
+- Discriminating union type handling
 
 ---
 
@@ -150,6 +184,61 @@ function processUserData(data: unknown) {
     // data is now typed as UserData
     console.log(data.name); // Type-safe access
     console.log(data.email); // Also available due to type narrowing
+  }
+}
+```
+
+### Discriminating Type Guard Usage
+```typescript
+// Base type
+interface BaseUser extends Pojo {
+  id: string;
+}
+
+// Extended type
+interface AdminUser extends BaseUser {
+  permissions: string[];
+  role: "admin";
+}
+
+// Regular user type
+interface RegularUser extends BaseUser {
+  role: "user";
+  lastLogin: Date;
+}
+
+// Using TypeGuard pattern for discriminating unions
+const userTypeGuard: TypeGuard<BaseUser> = (obj): obj is BaseUser => {
+  return isPojo(obj) && "id" in obj;
+};
+
+function processUser(user: unknown) {
+  if (userTypeGuard(user)) {
+    // user is BaseUser
+    console.log(user.id);
+    
+    // Type narrowing with extends safety
+    if (userTypeGuard<AdminUser>(user)) {
+      // user is now AdminUser - preserves the specific type
+      console.log(user.permissions); // Type-safe access to AdminUser properties
+      console.log(user.role); // "admin"
+    }
+  }
+}
+
+// Enhanced pojoHas with TypeGuard pattern
+const hasName = pojoHas<{ name: string }, "name">("name");
+const hasEmail = pojoHas<{ email: string }, "email">("email");
+
+function validateUserData(data: unknown) {
+  if (hasName(data)) {
+    // data is { name: string }
+    console.log(data.name);
+    
+    if (hasEmail(data)) {
+      // data is now { name: string; email: string }
+      console.log(data.email);
+    }
   }
 }
 ```
