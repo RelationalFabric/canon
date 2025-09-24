@@ -14,8 +14,13 @@ type JsonLdEntity = {
   '@id': string;
   '@type': string;
   '@version'?: string | number;
-  'dateCreated'?: string | Date;
+  'dateCreated'?: JsonLdDate;
   'references'?: string | string[];
+};
+
+type JsonLdDate = {
+  '@value': string;
+  '@type': 'xsd:dateTime' | 'xsd:date' | 'xsd:time';
 };
 
 // Define the canon type using the API we created
@@ -33,12 +38,12 @@ export type JsonLdCanon = Canon<{
     key: '@version';
   };
   Timestamps: {
-    $basis: string | Date;
-    toCanonical: (value: string | Date) => Date;
-    fromCanonical: (value: Date) => string | Date;
+    $basis: JsonLdDate;
+    toCanonical: (value: JsonLdDate) => Date;
+    fromCanonical: (value: Date) => JsonLdDate;
   } & {
-    toCanonical: (value: string | Date) => Date;
-    fromCanonical: (value: Date) => string | Date;
+    toCanonical: (value: JsonLdDate) => Date;
+    fromCanonical: (value: Date) => JsonLdDate;
   };
   References: {
     $basis: string | string[];
@@ -70,13 +75,16 @@ export default defineCanon<JsonLdCanon>({
       key: '@version'
     },
     Timestamps: {
-      $basis: (value: unknown): value is string | Date => 
-        typeof value === 'string' || value instanceof Date,
-      toCanonical: (value: string | Date) => {
-        if (value instanceof Date) return value;
-        return new Date(value);
-      },
-      fromCanonical: (value: Date) => value.toISOString()
+      $basis: (value: unknown): value is JsonLdDate => 
+        typeof value === 'object' && value !== null && 
+        '@value' in value && '@type' in value &&
+        typeof (value as any)['@value'] === 'string' &&
+        ['xsd:dateTime', 'xsd:date', 'xsd:time'].includes((value as any)['@type']),
+      toCanonical: (value: JsonLdDate) => new Date(value['@value']),
+      fromCanonical: (value: Date) => ({
+        '@value': value.toISOString(),
+        '@type': 'xsd:dateTime' as const
+      })
     },
     References: {
       $basis: (value: unknown): value is string | string[] => 
