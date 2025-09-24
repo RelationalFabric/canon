@@ -46,7 +46,7 @@ registerCanons({
 **Step 4: The usage**
 ```typescript
 // One function works with all entity types using just core axioms
-function findDuplicates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[][] {
+function findDuplicates<T extends Pojo>(entities: T[]): T[][] {
   const groups = new Map<string, T[]>();
   entities.forEach(entity => {
     const id = idOf(entity);

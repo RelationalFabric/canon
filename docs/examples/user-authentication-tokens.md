@@ -38,7 +38,7 @@ type ReportEntity = {
 };
 
 // Transform any entity into a unified report format
-function transformToReport<T extends Satisfies<'Id' | 'Type' | 'Timestamps'>>(entity: T): ReportEntity {
+function transformToReport<T extends Pojo>(entity: T): ReportEntity {
   const id = idOf(entity);
   const entityType = typeOf(entity);
   const timestamp = timestampsOf(entity);
@@ -76,7 +76,7 @@ function extractStatus<T extends Record<string, unknown>>(entity: T): string {
 **Step 3: Use across multiple canons**
 ```typescript
 // Transform entities from any source using any canon
-function processPipeline<T extends Satisfies<'Id' | 'Type' | 'Timestamp'>>(entities: T[]): ReportEntity[] {
+function processPipeline<T extends Pojo>(entities: T[]): ReportEntity[] {
   return entities
     .filter(entity => idOf(entity) && typeOf(entity))
     .map(transformToReport);
