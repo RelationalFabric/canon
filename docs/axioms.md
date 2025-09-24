@@ -28,7 +28,7 @@ This enables utilities to work with the concept of "ID" without knowing whether 
 All axioms share two universal distinguished keys that have special meaning to Canon:
 
 - **`$basis`** - The underlying TypeScript type/object structure that contains the concept
-- **`$meta`** - Additional metadata for validation, documentation, and behavior
+- **`$meta`** - Additional metadata for documentation and behavior
 
 These keys are available to all axioms through the `Axiom` utility type, providing a consistent interface across different axiom types.
 
@@ -46,7 +46,7 @@ type KeyNameAxiom = Axiom<{
 }>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
-type TimestampAxiom = Axiom<{
+type TimestampsAxiom = Axiom<{
   // The timestamp type - could be number, string, Date, or custom type
   $basis: number | string | Date | TypeGuard<unknown>;
   // Way to convert from this timestamp to standard value
@@ -57,7 +57,7 @@ type TimestampAxiom = Axiom<{
   key: string;
 }>;
 
-type ReferenceAxiom = Axiom<{
+type ReferencesAxiom = Axiom<{
   // The reference type - could be string, object, array, or custom type
   $basis: string | object | string[] | TypeGuard<unknown>;
   // Way to convert from this reference to standard value
@@ -78,8 +78,8 @@ declare module '@relational-fabric/canon' {
     Id: KeyNameAxiom;        // Id concept - might be 'id', '@id', '_id', etc.
     Type: KeyNameAxiom;      // Type concept - might be 'type', '@type', '_type', etc.
     Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
-    Timestamp: TimestampAxiom; // Timestamp concept - might be number, string, Date, etc.
-    Reference: ReferenceAxiom; // Reference concept - might be string, object, array, etc.
+    Timestamps: TimestampsAxiom; // Timestamps concept - might be number, string, Date, etc.
+    References: ReferencesAxiom; // References concept - might be string, object, array, etc.
   }
 }
 ```
@@ -106,13 +106,58 @@ function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
   return x[config.key] as AxiomValue<'Id'>;
 }
 
-function timestampOf<T extends Satisfies<'Timestamp'>>(x: T): AxiomValue<'Timestamp'> {
-  const config = inferAxiom('Timestamp', x);
+function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
+  const config = inferAxiom('Timestamps', x);
   return config.toCanonical(x[config.key]);
 }
 ```
 
 This enables **lazy typing** - libraries work with semantic concepts through the axiom interface, automatically converting between different formats.
+
+## Understanding $basis Runtime Representation
+
+The `$basis` field in runtime configurations uses a **TypeGuard pattern** to ensure type safety at runtime. This is implemented as `TypeGuard<Satisfies<AxiomLabel, CanonLabel>>` where:
+
+- **`AxiomLabel`** - The specific axiom being configured (e.g., 'Id', 'Type', 'Version')
+- **`CanonLabel`** - The specific canon being configured (e.g., 'Internal', 'JsonLd', 'Mongo')
+- **`Satisfies`** - Ensures the configuration matches the expected axiom structure
+
+### How $basis TypeGuard Works
+
+The runtime representation of `$basis` is not just a simple object - it's a **TypeGuard predicate** that:
+
+1. **Validates Structure**: Ensures the runtime configuration matches the expected axiom type structure
+2. **Provides Type Safety**: TypeScript can infer the correct types at compile time
+3. **Enables Runtime Inference**: The system can automatically determine field names and conversion logic
+
+### Example: $basis TypeGuard in Action
+
+```typescript
+// Type-level definition specifies the structure
+type IdAxiom = {
+  $basis: { id: string };
+  key: 'id';
+  $meta: { type: string; required: string };
+}
+
+// Runtime configuration with TypeGuard
+const runtimeConfig = {
+  Id: {
+    $basis: { id: 'string' },  // TypeGuard<Satisfies<'Id', 'Internal'>>
+    key: 'id',
+    $meta: { type: 'uuid'; required: 'true' },
+  }
+};
+```
+
+**What happens at runtime:**
+1. The TypeGuard validates that the runtime configuration structure matches the expected axiom type
+2. The string literals (`'string'`, `'number'`) represent the actual runtime type information
+3. The `inferAxiom()` function uses this information to extract values with the correct types
+
+### Why This Matters
+
+This TypeGuard approach enables **lazy typing** - your code can work with semantic concepts without knowing the specific field names or conversion logic at compile time, while maintaining full type safety.
 
 ## Complete Example: The Id Axiom
 

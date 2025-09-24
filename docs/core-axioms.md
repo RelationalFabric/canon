@@ -80,6 +80,18 @@ function typeOf<T extends Satisfies<'Type'>>(x: T): AxiomValue<'Type'> {
 }
 ```
 
+**Usage Example**:
+```typescript
+// Works with different data formats
+const restData = { type: "user" };
+const mongoData = { _type: "User" };
+const jsonLdData = { "@type": "Person" };
+
+console.log(typeOf(restData));    // "user"
+console.log(typeOf(mongoData));   // "User" 
+console.log(typeOf(jsonLdData));  // "Person"
+```
+
 ### 3. Version Axiom
 
 **Purpose**: Represents version information for data entities, enabling optimistic concurrency control and change tracking.
@@ -110,6 +122,18 @@ function versionOf<T extends Satisfies<'Version'>>(x: T): AxiomValue<'Version'> 
   const config = inferAxiom('Version', x);
   return x[config.key] as AxiomValue<'Version'>;
 }
+```
+
+**Usage Example**:
+```typescript
+// Works with different data formats
+const restData = { version: 5 };
+const mongoData = { _version: 3 };
+const jsonLdData = { "@version": "2.1" };
+
+console.log(versionOf(restData));    // 5
+console.log(versionOf(mongoData));   // 3
+console.log(versionOf(jsonLdData));  // "2.1"
 ```
 
 ### 4. Timestamps Axiom
@@ -150,6 +174,18 @@ function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Time
 }
 ```
 
+**Usage Example**:
+```typescript
+// Works with different timestamp formats
+const unixData = { createdAt: 1640995200000 };
+const isoData = { createdAt: "2022-01-01T00:00:00Z" };
+const dateData = { createdAt: new Date("2022-01-01") };
+
+console.log(timestampsOf(unixData));  // Converted to canonical format
+console.log(timestampsOf(isoData));   // Converted to canonical format
+console.log(timestampsOf(dateData));  // Converted to canonical format
+```
+
 ### 5. References Axiom
 
 **Purpose**: Represents relationships between entities with automatic conversion between different reference formats.
@@ -186,6 +222,18 @@ function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'Refe
   const config = inferAxiom('References', x);
   return config.toCanonical(x[config.key]);
 }
+```
+
+**Usage Example**:
+```typescript
+// Works with different reference formats
+const stringRef = { userId: "user-123" };
+const objectRef = { user: { id: "user-123", name: "John" } };
+const arrayRef = { tags: ["tag1", "tag2", "tag3"] };
+
+console.log(referencesOf(stringRef));  // Converted to canonical format
+console.log(referencesOf(objectRef));  // Converted to canonical format
+console.log(referencesOf(arrayRef));   // Converted to canonical format
 ```
 
 ## Conversion Types
@@ -270,7 +318,7 @@ This enables seamless interoperability between different data sources while main
 
 While the core axioms cover the most common use cases, applications may need additional axioms for specific domains:
 
-- **Email**: For email address validation and formatting
+- **Email**: For email address formatting and processing
 - **URL**: For web resource references
 - **Currency**: For monetary values with locale support
 - **GeoLocation**: For geographic coordinates

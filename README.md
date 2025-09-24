@@ -14,10 +14,11 @@ Canon provides a framework for treating types as a shared, foundational resource
     - **Identity**: `uuid`, `nano id`
     - **Hashing**: `object-hash`
     - **Immutability**: `immutable.js`
-- **Axiomatic Primitives**: A `Canon` is a type that defines its data model using a predefined set of universal axioms. Each axiom has a rich configuration that includes:
-    - `$basis`: The underlying TypeScript type.
-    - `key`: The canonical name for the most important field.
-    - `$meta`: An extensible type that defines the metadata for the axiom.
+- **Distinguished Keys**: Canon uses special keys that have specific meaning to the system:
+    - `$basis`: The underlying TypeScript type that defines the structure of the axiom
+    - `$meta`: An extensible type that defines additional metadata for the axiom
+    
+    For more information about how distinguished keys work, see the [Canons documentation](./docs/canons.md).
 - **Lazy Types**: A `Canon` is a type blueprint that can be defined once and be universally understood, regardless of where or when it is consumed. This enables a form of "lazy typing," where the full details of a type can be deferred, yet its canonical identity remains constant. The `canon` key serves as the type system's **discriminator**, allowing it to correctly identify and apply the correct type to a given configuration.
 
 ### Usage
@@ -52,17 +53,20 @@ declare module '@relational-fabric/canon' {
 declareCanon('myProject', {
   axioms: {
     Id: {
-      $basis: { id: 'string' },
+      $basis: (value: unknown): value is { id: string } => 
+        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
       key: 'id',
       $meta: { type: 'uuid' },
     },
     type: {
-      $basis: { type: 'string' },
+      $basis: (value: unknown): value is { type: string } => 
+        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
       key: 'type',
-      $meta: { description: '...' },
+      $meta: { description: 'Entity type classification' },
     },
     version: {
-      $basis: { version: 'number' },
+      $basis: (value: unknown): value is { version: number } => 
+        typeof value === 'object' && value !== null && 'version' in value && typeof (value as any).version === 'number',
       key: 'version',
     },
   },
@@ -92,7 +96,8 @@ To facilitate this, the library provides a simple pattern for exporting and regi
     export default defineCanon<MyCanon>({
       axioms: {
         Id: {
-          $basis: { id: 'string' },
+          $basis: (value: unknown): value is { id: string } => 
+            typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
           key: 'id',
         },
       },
@@ -125,6 +130,17 @@ This pattern ensures that a canon's definition remains a single source of truth,
 ## Documentation
 
 For comprehensive guides and detailed information about using Canon, see the [Documentation](./docs/README.md) directory.
+
+### Quick Start Guides
+
+- **[Axioms](./docs/axioms.md)** - Learn about the fundamental building blocks that enable lazy typing
+- **[Core Axioms](./docs/core-axioms.md)** - Explore the essential axiom set (Id, Type, Version, Timestamps, References)
+- **[Canons](./docs/canons.md)** - Understand how to create universal type blueprints for different data formats, including registration patterns
+
+### Advanced Topics
+
+- **[Examples](./docs/examples.md)** - See real-world usage patterns and integration examples
+- **[Contributing](./CONTRIBUTING.md)** - Learn about naming conventions and development guidelines
 
 ## Contributing
 

@@ -7,17 +7,17 @@ Thank you for your interest in contributing to Canon! This document outlines the
 ### Naming Conventions
 
 #### Axiom Keys
-- Use **PascalCase** for axiom keys: `Id`, `Type`, `Version`, `Timestamps`, `Reference`
-- Use **plural form** for general concepts: `Timestamps` (not `Timestamp`), `References` (not `Reference`)
-- Use **singular form** for specific concepts: `Id`, `Type`, `Version`
+- Use **PascalCase** for axiom keys: `Id`, `Type`, `Version`, `Timestamps`, `References`
+- Use **plural form** for general concepts that can contain multiple values: `Timestamps` (not `Timestamp`), `References` (not `Reference`)
+- Use **singular form** for specific concepts that represent a single value: `Id`, `Type`, `Version`
 
 #### Function Names
-- Use **relational `*Of` pattern** for axiom functions: `idOf()`, `typeOf()`, `timestampOf()`, `referenceOf()`
+- Use **relational `*Of` pattern** for axiom functions: `idOf()`, `typeOf()`, `timestampsOf()`, `referencesOf()`
 - Avoid imperative `get*` patterns: use `idOf()` not `getId()`
 - Use **camelCase** for utility functions: `inferAxiom()`, `declareCanon()`
 
 #### Type Names
-- Use **PascalCase** for type definitions: `KeyNameAxiom`, `TimestampAxiom`, `ReferenceAxiom`
+- Use **PascalCase** for type definitions: `KeyNameAxiom`, `TimestampsAxiom`, `ReferencesAxiom`
 - Use **PascalCase** for canon types: `InternalCanon`, `JsonLdCanon`, `MongoCanon`
 - Use **PascalCase** for utility types: `Satisfies`, `AxiomValue`, `CanonDefinition`
 
