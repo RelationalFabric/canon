@@ -35,19 +35,29 @@ A type alias for Plain Old JavaScript Objects. Represents objects with string ke
 
 ### `isPojo`
 ```typescript
-function isPojo(value: unknown): value is Pojo;
+const isPojo: TypeGuard<Pojo> = (value: unknown): value is Pojo => {
+  return value !== null && 
+         typeof value === 'object' && 
+         !Array.isArray(value) && 
+         !(value instanceof Date) && 
+         !(value instanceof RegExp) &&
+         value.constructor === Object;
+};
 ```
 
-A type guard function that determines whether a given value is a Plain Old JavaScript Object.
+A type guard function that determines whether a given value is a Plain Old JavaScript Object, implemented using the `TypeGuard<Pojo>` pattern.
 
 **Returns:** `true` if the value is a POJO, `false` otherwise
 
-**Type Safety:** When this function returns `true`, TypeScript will narrow the type to `Pojo`
+**Type Safety:** When this function returns `true`, TypeScript will narrow the type to `Pojo`. The `TypeGuard<Pojo>` pattern allows for:
+- Generic type narrowing: `isPojo<SpecificPojo>(value)` preserves specific POJO types
+- Base type narrowing: `isPojo(value)` narrows to `Pojo`
 
 **Use Cases:**
 - Runtime validation of object types
 - Type narrowing in conditional blocks
 - Input validation in functions that expect POJOs
+- Discriminating union type handling
 
 ---
 
@@ -110,33 +120,45 @@ A sophisticated type guard pattern that provides both generic and specific type 
 
 ### `pojoHas<T extends PojoWith<K>, K extends ObjectKey>`
 ```typescript
-function pojoHas<T extends PojoWith<K>, K extends ObjectKey>(
-  obj: T | unknown, 
+const pojoHas = <T extends PojoWith<K>, K extends ObjectKey>(
   key: K
-): obj is T;
+): TypeGuard<T> => {
+  return <U extends T>(obj: U | unknown): obj is U => {
+    return isPojo(obj) && key in obj;
+  } as TypeGuard<T>;
+};
 ```
 
-A sophisticated type guard that checks if an object has a specific key and narrows the type accordingly. This function can be enhanced to use the `TypeGuard<T>` pattern for better type discrimination.
+A sophisticated type guard factory that creates a type guard for checking if an object has a specific key. The returned function conforms to the `TypeGuard<T>` pattern for optimal type discrimination.
 
 **Parameters:**
-- `obj`: The object to check (can be the expected type or unknown)
 - `key`: The key to check for (must be a valid `ObjectKey`)
 
-**Returns:** `true` if the object has the specified key, `false` otherwise
+**Returns:** A `TypeGuard<T>` function that:
+- When called with a specific type `U extends T`, narrows to that specific type `U`
+- When called with the base type `T`, narrows to `T`
+- Returns `true` if the object has the specified key, `false` otherwise
 
-**Type Safety:** When this function returns `true`, TypeScript will narrow the type to the specific POJO type `T`
+**Type Safety:** The `TypeGuard<T>` pattern provides:
+- **Extends Safety**: Preserves specific types when working with subtypes
+- **Flexible Usage**: Works with both specific and general type scenarios
+- **Better IntelliSense**: More accurate type information in IDEs
 
-**Enhanced TypeGuard Pattern:**
+**Usage Examples:**
 ```typescript
-const pojoHas: <T extends PojoWith<K>, K extends ObjectKey>(
-  key: K
-) => TypeGuard<T> = <T extends PojoWith<K>, K extends ObjectKey>(
-  key: K
-) => {
-  return ((obj: T | unknown): obj is T => {
-    return isPojo(obj) && key in obj;
-  }) as TypeGuard<T>;
-};
+// Create type guards for specific keys
+const hasName = pojoHas<{ name: string }, "name">("name");
+const hasEmail = pojoHas<{ email: string }, "email">("email");
+
+// Generic usage - narrows to base type
+if (hasName(data)) {
+  // data is { name: string }
+}
+
+// Specific usage - preserves specific type
+if (hasName<UserData>(data)) {
+  // data is UserData (if UserData extends { name: string })
+}
 ```
 
 **Use Cases:**
@@ -157,6 +179,21 @@ const data: unknown = { name: "John", age: 30 };
 if (isPojo(data)) {
   // data is now typed as Pojo
   console.log(data.name); // TypeScript knows this is a POJO
+}
+
+// With specific type preservation
+interface UserData extends Pojo {
+  name: string;
+  age: number;
+}
+
+const userData: unknown = { name: "John", age: 30, email: "john@example.com" };
+
+if (isPojo<UserData>(userData)) {
+  // userData is now typed as UserData (preserves the specific type)
+  console.log(userData.name); // string
+  console.log(userData.age);  // number
+  console.log(userData.email); // string
 }
 ```
 
