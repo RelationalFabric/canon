@@ -53,7 +53,7 @@ declare module '@relational-fabric/canon' {
 interface NativeTypes {
   'ES5': Date | RegExp;
   'ES2015': Map<unknown, unknown> | Set<unknown> | WeakMap<object, unknown> | WeakSet<object> | ArrayBuffer | DataView;
-  'ES2017': Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array;
+  'ES2017': TypedArray;
   'ES2020': BigInt64Array | BigUint64Array;
 }
 ```
