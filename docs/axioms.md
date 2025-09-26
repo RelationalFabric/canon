@@ -47,18 +47,18 @@ type KeyNameAxiom = Axiom<{
 
 // Representation axiom for data with multiple representations
 type RepresentationAxiom<T, C = unknown> = Axiom<{
-  $basis: T;
-  toCanonical: (value: T) => C;
-  fromCanonical: (value: C) => T;
+  $basis: T | TypeGuard<unknown>;
+  toCanonical: (value: T | TypeGuard<unknown>) => C;
+  fromCanonical: (value: C) => T | TypeGuard<unknown>;
 }, {
-  toCanonical: (value: T) => C;
-  fromCanonical: (value: C) => T;
+  toCanonical: (value: T | TypeGuard<unknown>) => C;
+  fromCanonical: (value: C) => T | TypeGuard<unknown>;
 }>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
-type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<unknown>, Date>;
+type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>;
 
-type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuard<unknown>, EntityReference<string, unknown>>;
+type ReferencesAxiom = RepresentationAxiom<string | object | string[], EntityReference<string, unknown>>;
 ```
 
 #### Axiom Registration
