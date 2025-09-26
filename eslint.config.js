@@ -1,10 +1,3 @@
-import antfu from '@antfu/eslint-config'
+import createEslintConfig from './eslint.js'
 
-export default antfu({
-  typescript: true,
-  node: true,
-  ignores: [
-    'dist',
-    'node_modules',
-  ],
-})
+export default createEslintConfig()

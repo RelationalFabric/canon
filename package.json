@@ -14,12 +14,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./tsconfig": "./tsconfig.base.json"
+    "./tsconfig": "./tsconfig.base.json",
+    "./eslint": "./eslint.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
+    "eslint.js",
     "tsconfig.base.json"
   ],
   "engines": {
@@ -32,6 +34,9 @@
     "lint:fix": "eslint . --fix",
     "check": "tsc --noEmit && eslint .",
     "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "defu": "^6.1.4"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.0.0",
