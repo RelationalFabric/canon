@@ -164,7 +164,7 @@ console.log(versionOf(jsonLdData));  // "2.1"
 
 **Type Definition**:
 ```typescript
-type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
+type TimestampsAxiom = RepresentationAxiom<Date>;
 ```
 
 **Registration**:
@@ -172,22 +172,16 @@ type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<un
 declare module '@relational-fabric/canon' {
   interface Axioms {
     Timestamps: {
-      $basis: number | string | Date | TypeGuard<unknown>;
-      toCanonical: (value: number | string | Date | TypeGuard<unknown>) => Date;
-      fromCanonical: (value: Date) => number | string | Date | TypeGuard<unknown>;
-    } & {
-      toCanonical: (value: number | string | Date | TypeGuard<unknown>) => Date;
-      fromCanonical: (value: Date) => number | string | Date | TypeGuard<unknown>;
+      $basis: Date;
+      toCanonical: (value: Date) => Date;
+      fromCanonical: (value: Date) => Date;
     };
   }
 }
 ```
 
 **Common Value Types**:
-- Unix timestamps: `number` (milliseconds since epoch)
-- ISO strings: `string` (ISO 8601 format)
 - Date objects: `Date` (JavaScript Date instances)
-- Custom formats: `string` (various timestamp formats)
 
 **API Functions**:
 ```typescript
@@ -200,29 +194,21 @@ function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Time
 **Implementation**:
 ```typescript
 // Timestamp conversion functions
-const timestampsToCanonical = (value: number | string | Date | TypeGuard<unknown>): Date => {
-  if (value instanceof Date) return value;
-  if (typeof value === 'number') return new Date(value);
-  if (typeof value === 'string') return new Date(value);
-  // For TypeGuard<unknown>, assume it's a timestamp and try to convert
-  return new Date(value as any);
+const timestampsToCanonical = (value: Date): Date => {
+  return value; // Date is already canonical
 };
 
-const timestampsFromCanonical = (value: Date): number | string | Date | TypeGuard<unknown> => {
-  return value; // Return as Date by default, can be customized per use case
+const timestampsFromCanonical = (value: Date): Date => {
+  return value; // Date is already canonical
 };
 ```
 
 **Usage Example**:
 ```typescript
-// Works with different timestamp value types
-const unixTimestamp = 1640995200000;
-const isoTimestamp = "2022-01-01T00:00:00Z";
+// Works with Date objects
 const dateTimestamp = new Date("2022-01-01");
 
-console.log(timestampsOf(unixTimestamp));  // Converted to canonical format
-console.log(timestampsOf(isoTimestamp));   // Converted to canonical format
-console.log(timestampsOf(dateTimestamp));  // Converted to canonical format
+console.log(timestampsOf(dateTimestamp));  // Date object
 ```
 
 ### 5. References Axiom
@@ -231,7 +217,7 @@ console.log(timestampsOf(dateTimestamp));  // Converted to canonical format
 
 **Type Definition**:
 ```typescript
-type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
+type ReferencesAxiom = RepresentationAxiom<string[]>;
 ```
 
 **Registration**:
@@ -239,22 +225,16 @@ type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuar
 declare module '@relational-fabric/canon' {
   interface Axioms {
     References: {
-      $basis: string | object | string[] | TypeGuard<unknown>;
-      toCanonical: (value: string | object | string[] | TypeGuard<unknown>) => string[];
-      fromCanonical: (value: string[]) => string | object | string[] | TypeGuard<unknown>;
-    } & {
-      toCanonical: (value: string | object | string[] | TypeGuard<unknown>) => string[];
-      fromCanonical: (value: string[]) => string | object | string[] | TypeGuard<unknown>;
+      $basis: string[];
+      toCanonical: (value: string[]) => string[];
+      fromCanonical: (value: string[]) => string[];
     };
   }
 }
 ```
 
 **Common Value Types**:
-- String IDs: `string` (single identifier)
-- Object references: `object` (reference objects with metadata)
 - Array references: `string[]` (arrays of identifiers)
-- URI references: `string` (URI-formatted references)
 
 **API Functions**:
 ```typescript
@@ -267,37 +247,21 @@ function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'Refe
 **Implementation**:
 ```typescript
 // Reference conversion functions
-const referencesToCanonical = (value: string | object | string[] | TypeGuard<unknown>): string[] => {
-  if (Array.isArray(value)) return value;
-  if (typeof value === 'string') return [value];
-  if (typeof value === 'object' && value !== null) {
-    // Extract ID from object reference
-    const obj = value as any;
-    if (obj.id) return [obj.id];
-    if (obj._id) return [obj._id];
-    if (obj['@id']) return [obj['@id']];
-    // If no ID field found, stringify the object
-    return [JSON.stringify(value)];
-  }
-  // For TypeGuard<unknown>, try to convert to string array
-  return [String(value)];
+const referencesToCanonical = (value: string[]): string[] => {
+  return value; // string[] is already canonical
 };
 
-const referencesFromCanonical = (value: string[]): string | object | string[] | TypeGuard<unknown> => {
-  return value; // Return as string array by default, can be customized per use case
+const referencesFromCanonical = (value: string[]): string[] => {
+  return value; // string[] is already canonical
 };
 ```
 
 **Usage Example**:
 ```typescript
-// Works with different reference value types
-const stringRef = "user-123";
-const objectRef = { id: "user-123", name: "John" };
+// Works with string arrays
 const arrayRef = ["tag1", "tag2", "tag3"];
 
-console.log(referencesOf(stringRef));  // Converted to canonical format
-console.log(referencesOf(objectRef));  // Converted to canonical format
-console.log(referencesOf(arrayRef));   // Converted to canonical format
+console.log(referencesOf(arrayRef));   // string[] array
 ```
 
 ## Conversion Types
