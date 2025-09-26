@@ -1,17 +1,8 @@
 {
-  "extends": "@tsconfig/node-lts/tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "resolveJsonModule": true,
-    "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "./dist",
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "outDir": "./dist"
   },
   "include": [
     "src/**/*"

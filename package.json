@@ -9,10 +9,18 @@
     "typescript",
     "package"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tsconfig": "./tsconfig.base.json"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "tsconfig.base.json"
   ],
   "engines": {
     "node": ">=18.0.0"
