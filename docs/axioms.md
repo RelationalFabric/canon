@@ -58,7 +58,7 @@ type RepresentationAxiom<T, C = unknown> = Axiom<{
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>;
 
-type ReferencesAxiom = RepresentationAxiom<string | object | string[], EntityReference<string, unknown>>;
+type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>;
 ```
 
 #### Axiom Registration

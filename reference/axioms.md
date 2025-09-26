@@ -235,7 +235,7 @@ console.log(timestampsOf(dateTimestamp));  // Converted to canonical Date
 
 **Type Definition**:
 ```typescript
-type ReferencesAxiom = RepresentationAxiom<string | object | string[], EntityReference<string, unknown>>;
+type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>;
 ```
 
 **Registration**:
@@ -243,9 +243,9 @@ type ReferencesAxiom = RepresentationAxiom<string | object | string[], EntityRef
 declare module '@relational-fabric/canon' {
   interface Axioms {
     References: {
-      $basis: string | object | string[] | TypeGuard<unknown>;
-      toCanonical: (value: string | object | string[] | TypeGuard<unknown>) => EntityReference<string, unknown>;
-      fromCanonical: (value: EntityReference<string, unknown>) => string | object | string[] | TypeGuard<unknown>;
+      $basis: string | object | TypeGuard<unknown>;
+      toCanonical: (value: string | object | TypeGuard<unknown>) => EntityReference<string, unknown>;
+      fromCanonical: (value: EntityReference<string, unknown>) => string | object | TypeGuard<unknown>;
     };
   }
 }
@@ -254,7 +254,6 @@ declare module '@relational-fabric/canon' {
 **Common Value Types**:
 - String IDs: `string` (single identifier)
 - Object references: `object` (reference objects with metadata)
-- Array references: `string[]` (arrays of identifiers)
 - URI references: `string` (URI-formatted references)
 
 **API Functions**:
@@ -268,13 +267,7 @@ function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'Refe
 **Implementation**:
 ```typescript
 // Reference conversion functions
-const referencesToCanonical = (value: string | object | string[] | TypeGuard<unknown>): EntityReference<string, unknown> => {
-  if (Array.isArray(value)) {
-    return {
-      ref: value[0] || '',
-      resolved: false
-    };
-  }
+const referencesToCanonical = (value: string | object | TypeGuard<unknown>): EntityReference<string, unknown> => {
   if (typeof value === 'string') {
     return {
       ref: value,
@@ -294,7 +287,7 @@ const referencesToCanonical = (value: string | object | string[] | TypeGuard<unk
   return { ref: String(value), resolved: false };
 };
 
-const referencesFromCanonical = (value: EntityReference<string, unknown>): string | object | string[] | TypeGuard<unknown> => {
+const referencesFromCanonical = (value: EntityReference<string, unknown>): string | object | TypeGuard<unknown> => {
   return value.resolved && value.value ? value.value : value.ref;
 };
 ```
@@ -304,11 +297,9 @@ const referencesFromCanonical = (value: EntityReference<string, unknown>): strin
 // Works with different reference value types
 const stringRef = "user-123";
 const objectRef = { id: "user-123", name: "John" };
-const arrayRef = ["tag1", "tag2", "tag3"];
 
 console.log(referencesOf(stringRef));  // Converted to EntityReference
 console.log(referencesOf(objectRef));  // Converted to EntityReference
-console.log(referencesOf(arrayRef));   // Converted to EntityReference
 ```
 
 ## Conversion Types
