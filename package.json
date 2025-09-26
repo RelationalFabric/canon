@@ -2,12 +2,22 @@
   "name": "@relational-fabric/canon",
   "type": "module",
   "version": "1.0.0",
-  "description": "A modern TypeScript package",
-  "author": "",
+  "description": "A modern TypeScript package template with ESLint and TypeScript configurations for starting new projects",
+  "author": "Relational Fabric",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/relational-fabric/canon.git"
+  },
   "keywords": [
     "typescript",
-    "package"
+    "eslint",
+    "template",
+    "starter",
+    "configuration",
+    "package",
+    "node",
+    "lts"
   ],
   "exports": {
     ".": {
@@ -38,12 +48,24 @@
     "adr:list": "cd docs/adrs && npx adr list",
     "adr:index": "cd docs/adrs && npx adr generate toc"
   },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "eslint": {
+      "optional": false
+    },
+    "typescript": {
+      "optional": false
+    }
+  },
   "dependencies": {
+    "@antfu/eslint-config": "^3.0.0",
+    "@tsconfig/node-lts": "^20.0.0",
     "defu": "^6.1.4"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^3.0.0",
-    "@tsconfig/node-lts": "^20.0.0",
     "adr-tools": "^2.0.4",
     "eslint": "^9.10.0",
     "typescript": "^5.4.0"

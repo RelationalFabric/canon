@@ -1,147 +1,100 @@
-# Canon
-The foundational library for a useful type ecosystem. It is a canonical source of truth that solves common design problems and enables seamless composition for any project.
+# @relational-fabric/canon
 
-## What is Canon
+A modern TypeScript package template with ESLint and TypeScript configurations for starting new projects.
 
-Canon is a universal type library designed to solve the fundamental **empty room problem**: how to establish a consistent set of initial design decisions across any project without unnecessary friction. Our philosophy is that a strong, canonical type system is the most useful tool for building robust, data-centric applications.
+## Features
 
-### The Philosophy
+- **Modern TypeScript configuration** based on Node.js LTS
+- **ESLint configuration** with @antfu/eslint-config
+- **Reusable configurations** that can be extended by other projects
+- **ES modules** with proper type declarations
+- **Development tools** for linting, building, and ADR management
 
-Canon provides a framework for treating types as a shared, foundational resource. By formalising a common core, it ensures that your project starts with a consistent set of high-quality, battle-tested type primitives, letting you focus on your unique business logic.
+## Quick Start
 
-- **Composition as a Core Principle**: Canon is a universal adapter. We deliberately compose and re-export a curated set of high-quality type primitives from the broader TypeScript ecosystem, in their entirety. You get a single, authoritative source for common types without having to manage a "laundry list" of dependencies. This is what makes Canon truly useful; it provides a coherent toolkit assembled from the best available parts. The libraries we plan to compose include:
-    - **Utility Types**: As well as our ow, we'll include`type-fest`, `ts-essentials`
-    - **Identity**: `uuid`, `nano id`
-    - **Hashing**: `object-hash`
-    - **Immutability**: `immutable.js`
-- **Distinguished Keys**: Canon uses special keys that have specific meaning to the system:
-    - `$basis`: The underlying TypeScript type that defines the structure of the axiom
-    - `$meta`: An extensible type that defines additional metadata for the axiom
+### Install
 
-    For more information about how distinguished keys work, see the [Canons documentation](./docs/canons.md).
-- **Lazy Types**: A `Canon` is a type blueprint that can be defined once and be universally understood, regardless of where or when it is consumed. This enables a form of "lazy typing," where the full details of a type can be deferred, yet its canonical identity remains constant. The `canon` key serves as the type system's **discriminator**, allowing it to correctly identify and apply the correct type to a given configuration.
+```bash
+npm install @relational-fabric/canon
+```
 
-### Usage
+### Use TypeScript Configuration
 
-Using Canon is a two-step, declarative process. You define a type that extends `Canon`, providing your axioms directly in the generic type parameter. This syntax enables IDE IntelliSense to work its magic, allowing you to intuitively compose your data model from a common set of primitives.
-
-```typescript
-// 1. Define your Canon's type and augment the global registry.
-// This is a type-level declaration with no runtime side effects.
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    myProject: Canon<{
-      Id: {
-        $basis: { id: string }
-        key: 'id'
-        $meta: { type: 'uuid' }
-      }
-      type: {
-        $basis: { type: string }
-        key: 'type'
-        $meta: { description: string }
-      }
-      version: {
-        $basis: { version: number }
-        key: 'version'
-      }
-    }>
-  }
+```json
+{
+  "extends": "@relational-fabric/canon/tsconfig"
 }
+```
 
-// 2. Register the runtime configuration for your Canon.
-declareCanon('myProject', {
-  axioms: {
-    Id: {
-      $basis: (value: unknown): value is { id: string } =>
-        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
-      key: 'id',
-      $meta: { type: 'uuid' },
-    },
-    type: {
-      $basis: (value: unknown): value is { type: string } =>
-        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
-      key: 'type',
-      $meta: { description: 'Entity type classification' },
-    },
-    version: {
-      $basis: (value: unknown): value is { version: number } =>
-        typeof value === 'object' && value !== null && 'version' in value && typeof (value as any).version === 'number',
-      key: 'version',
-    },
-  },
+### Use ESLint Configuration
+
+```javascript
+// eslint.config.js
+import createEslintConfig from '@relational-fabric/canon/eslint'
+
+export default createEslintConfig()
+```
+
+### Use ESLint Configuration with Custom Options
+
+```javascript
+// eslint.config.js
+import createEslintConfig from '@relational-fabric/canon/eslint'
+
+export default createEslintConfig({
+  ignores: ['custom-ignore'],
+  rules: {
+    'no-console': 'warn'
+  }
 })
 ```
 
-### Sharing Canons
+## Requirements
 
-A core purpose of the Canon library is to enable a truly interconnected ecosystem where **type systems** are not siloed but shared and composed. A single project's canon can become a foundational building block for other applications, libraries, or services. This process is about sharing type definitions, not data.
+This package requires the following peer dependencies:
 
-To facilitate this, the library provides a simple pattern for exporting and registering canonical type configurations. This approach cleanly separates the definition of a canon from its consumption, ensuring that each module remains self-contained and reusable.
+- **Node.js**: 18.0.0 or higher
+- **TypeScript**: 5.0.0 or higher
+- **ESLint**: 9.0.0 or higher
 
-1.  **Define and Export**: In your module, define your canon's type and its corresponding runtime configuration. The `defineCanon` helper returns the configuration, which is then exported as a default.
+## Package Exports
 
-    ```typescript
-    // my-module/canon.ts
+- **Main package**: `@relational-fabric/canon` - The main package (currently empty)
+- **TypeScript config**: `@relational-fabric/canon/tsconfig` - Base TypeScript configuration
+- **ESLint config**: `@relational-fabric/canon/eslint` - ESLint configuration function
 
-    import { type Canon, defineCanon } from '@relationalfabric/canon'
+## Development
 
-    export type MyCanon = Canon<{
-      Id: {
-        $basis: { id: string }
-        key: 'id'
-      }
-    }>
+### Prerequisites
 
-    export default defineCanon<MyCanon>({
-      axioms: {
-        Id: {
-          $basis: (value: unknown): value is { id: string } =>
-            typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
-          key: 'id',
-        },
-      },
-    })
-    ```
+- Node.js 18+
+- npm or yarn
 
-2.  **Import and Register**: In your main application or a shared configuration file, import the types and values of the canons you need. You then augment the global `Canons` interface with their types and register their runtime values.
+### Setup
 
-    ```typescript
-    // main.ts
+```bash
+git clone <repository-url>
+cd canon
+npm install
+```
 
-    import { registerCanons } from '@relationalfabric/canon'
-    import myCanon, { type MyCanon } from 'my-module/canon'
-    import otherCanon, { type OtherCanon } from 'other-module/canon'
+### Available Scripts
 
-    // Augment the global Canons interface to unify the types
-    declare module '@relationalfabric/canon' {
-      interface Canons {
-        myCanon: MyCanon
-        otherCanon: OtherCanon
-      }
-    }
+- `npm run build` - Build the package
+- `npm run dev` - Build in watch mode
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues automatically
+- `npm run check` - Run TypeScript check and ESLint
+- `npm run clean` - Clean build output
 
-    // Register the runtime values for the system to use
-    registerCanons({ myCanon, otherCanon })
-    ```
+### ADR Management
 
-This pattern ensures that a canon's definition remains a single source of truth, but its identity is globally recognized, enabling seamless interoperability and semantic-level communication across different parts of your ecosystem.
+This project uses Architecture Decision Records (ADRs) to document architectural decisions:
 
-## Documentation
+- `npm run adr:list` - List all ADRs
+- `npm run adr:new "Title"` - Create a new ADR
+- `npm run adr:index` - Generate table of contents
 
-For comprehensive guides and detailed information about using Canon, see the [Documentation](./docs/README.md) directory.
+## License
 
-### Quick Start Guides
-
-- **[Axioms](./docs/axioms.md)** - Learn about the fundamental building blocks that enable lazy typing
-- **[Core Axioms](./docs/core-axioms.md)** - Explore the essential axiom set (Id, Type, Version, Timestamps, References)
-- **[Canons](./docs/canons.md)** - Understand how to create universal type blueprints for different data formats, including registration patterns
-
-### Advanced Topics
-
-- **[Examples](./docs/examples/)** - See real-world usage patterns and integration examples
-- **[Contributing](./CONTRIBUTING.md)** - Learn about naming conventions and development guidelines
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details on how to get involved.
+MIT
