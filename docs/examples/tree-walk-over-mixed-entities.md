@@ -26,8 +26,9 @@ Without Canon, you'd need separate tree-walking logic for each data source. With
 We'll start by importing the core axioms and defining our custom axioms for parent/child relationships.
 
 ```typescript
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, isPojo } from '@relational-fabric/canon';
+import { idOf, typeOf, versionOf, timestampsOf, referencesOf, isPojo, objectKeys, objectEntries, objectValues, pojoHas } from '@relational-fabric/canon';
 import type { Axiom, Pojo } from '@relational-fabric/canon';
+import _ from 'lodash';
 
 // Type definitions for this example
 type CanonDefinition = Record<string, unknown>;
@@ -197,27 +198,18 @@ class TreeService {
 
   // Get tree statistics - universal across all sources
   async getTreeStats(): Promise<TreeStats> {
+    const nodes = Array.from(this.nodes.values());
+    
     const stats: TreeStats = {
       totalNodes: this.nodes.size,
-      totalSize: 0,
+      totalSize: _.sumBy(nodes, 'size') || 0,
       maxDepth: 0,
-      sourceCounts: {}
+      sourceCounts: _.countBy(nodes, node => this.getNodeSource(node))
     };
 
-    for (const node of this.nodes.values()) {
-      // Count by source
-      const source = this.getNodeSource(node);
-      stats.sourceCounts[source] = (stats.sourceCounts[source] || 0) + 1;
-
-      // Sum sizes
-      if (node.size) {
-        stats.totalSize += node.size;
-      }
-    }
-
-    // Calculate max depth
+    // Calculate max depth using lodash
     const walkResults = await this.walkTree();
-    stats.maxDepth = Math.max(...walkResults.map(r => r.depth));
+    stats.maxDepth = _.maxBy(walkResults, 'depth')?.depth || 0;
 
     return stats;
   }
@@ -227,10 +219,10 @@ class TreeService {
     type: string,
     since?: Date
   ): Promise<TreeNode[]> {
-    let nodes = Array.from(this.nodes.values()).filter(n => n.type === type);
+    let nodes = _.filter(Array.from(this.nodes.values()), { type });
 
     if (since) {
-      nodes = nodes.filter(n => n.createdAt > since);
+      nodes = _.filter(nodes, n => n.createdAt > since);
     }
 
     return nodes;
@@ -254,21 +246,15 @@ class TreeService {
   }
 
   private getParentKey(nodeData: Pojo): string | undefined {
-    // Try different common parent field names
+    // Use lodash to find the first matching key
     const possibleKeys = ['parentId', 'parent_id', 'parent', 'folderId', 'folder_id'];
-    for (const key of possibleKeys) {
-      if (key in nodeData) return key;
-    }
-    return undefined;
+    return _.find(possibleKeys, key => pojoHas(nodeData, key));
   }
 
   private getChildrenKey(nodeData: Pojo): string | undefined {
-    // Try different common children field names
+    // Use lodash to find the first matching key
     const possibleKeys = ['children', 'childIds', 'child_ids', 'files', 'subfolders'];
-    for (const key of possibleKeys) {
-      if (key in nodeData) return key;
-    }
-    return undefined;
+    return _.find(possibleKeys, key => pojoHas(nodeData, key));
   }
 
   private getNodeSource(node: TreeNode): string {

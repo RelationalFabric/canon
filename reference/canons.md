@@ -56,26 +56,26 @@ export default defineCanon<JsonLdCanon>({
   axioms: {
     Id: {
       $basis: (value: unknown): value is JsonLdEntity => 
-        isPojo(value) && '@id' in value && typeof value['@id'] === 'string',
+        isPojo(value) && pojoHas(value, '@id') && typeof value['@id'] === 'string',
       key: '@id'
     },
     Type: {
       $basis: (value: unknown): value is JsonLdEntity => 
-        isPojo(value) && '@type' in value && typeof value['@type'] === 'string',
+        isPojo(value) && pojoHas(value, '@type') && typeof value['@type'] === 'string',
       key: '@type'
     },
     Version: {
       $basis: (value: unknown): value is JsonLdEntity => 
-        isPojo(value) && '@version' in value && 
+        isPojo(value) && pojoHas(value, '@version') && 
         (typeof value['@version'] === 'string' || typeof value['@version'] === 'number'),
       key: '@version'
     },
     Timestamps: {
       $basis: <U extends JsonLdDate>(value: U | unknown): value is U => 
-        typeof value === 'object' && value !== null && 
-        '@value' in value && '@type' in value &&
-        typeof (value as any)['@value'] === 'string' &&
-        ['xsd:dateTime', 'xsd:date', 'xsd:time'].includes((value as any)['@type']),
+        isPojo(value) && 
+        pojoHas(value, '@value') && pojoHas(value, '@type') &&
+        typeof value['@value'] === 'string' &&
+        ['xsd:dateTime', 'xsd:date', 'xsd:time'].includes(value['@type']),
       toCanonical: (value: JsonLdDate) => new Date(value['@value']),
       fromCanonical: (value: Date) => ({
         '@value': value.toISOString(),
@@ -84,7 +84,7 @@ export default defineCanon<JsonLdCanon>({
     },
     References: {
       $basis: <U extends JsonLdReference>(value: U | unknown): value is U => 
-        typeof value === 'object' && value !== null && '@id' in value && typeof (value as any)['@id'] === 'string',
+        isPojo(value) && pojoHas(value, '@id') && typeof value['@id'] === 'string',
       toCanonical: (value: JsonLdReference) => {
         return {
           ref: value['@id'],

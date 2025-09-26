@@ -45,18 +45,17 @@ registerCanons({
 
 **Step 4: The usage**
 ```typescript
+import _ from 'lodash';
+
 // One function works with all entity types using just core axioms
 function findDuplicates<T extends Pojo>(entities: T[]): T[][] {
-  const groups = new Map<string, T[]>();
-  entities.forEach(entity => {
+  const groups = _.groupBy(entities, entity => {
     const id = idOf(entity);
     const entityType = typeOf(entity);
-    const groupKey = `${entityType}-${id}`;
-    
-    if (!groups.has(groupKey)) groups.set(groupKey, []);
-    groups.get(groupKey)!.push(entity);
+    return `${entityType}-${id}`;
   });
-  return Array.from(groups.values()).filter(group => group.length > 1);
+  
+  return _.filter(_.values(groups), group => group.length > 1);
 }
 ```
 

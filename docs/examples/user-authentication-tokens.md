@@ -37,6 +37,9 @@ type ReportEntity = {
   status: string;
 };
 
+import { isPojo, pojoHas } from '@relational-fabric/canon';
+import _ from 'lodash';
+
 // Transform any entity into a unified report format
 function transformToReport<T extends Pojo>(entity: T): ReportEntity {
   const id = idOf(entity);
@@ -56,20 +59,16 @@ function transformToReport<T extends Pojo>(entity: T): ReportEntity {
 }
 
 // Helper functions that work with any entity structure
-function extractName<T extends Record<string, unknown>>(entity: T): string {
+function extractName<T extends Pojo>(entity: T): string {
   const possibleKeys = ['name', 'title', 'label', 'displayName'];
-  for (const key of possibleKeys) {
-    if (key in entity) return entity[key] as string;
-  }
-  return 'Unknown';
+  const foundKey = _.find(possibleKeys, key => pojoHas(entity, key));
+  return foundKey ? (entity[foundKey] as string) : 'Unknown';
 }
 
-function extractStatus<T extends Record<string, unknown>>(entity: T): string {
+function extractStatus<T extends Pojo>(entity: T): string {
   const possibleKeys = ['status', 'state', 'phase', 'condition'];
-  for (const key of possibleKeys) {
-    if (key in entity) return entity[key] as string;
-  }
-  return 'Unknown';
+  const foundKey = _.find(possibleKeys, key => pojoHas(entity, key));
+  return foundKey ? (entity[foundKey] as string) : 'Unknown';
 }
 ```
 
@@ -77,9 +76,10 @@ function extractStatus<T extends Record<string, unknown>>(entity: T): string {
 ```typescript
 // Transform entities from any source using any canon
 function processPipeline<T extends Pojo>(entities: T[]): ReportEntity[] {
-  return entities
+  return _(entities)
     .filter(entity => idOf(entity) && typeOf(entity))
-    .map(transformToReport);
+    .map(transformToReport)
+    .value();
 }
 
 // Works with database entities
