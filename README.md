@@ -17,7 +17,7 @@ Canon provides a framework for treating types as a shared, foundational resource
 - **Distinguished Keys**: Canon uses special keys that have specific meaning to the system:
     - `$basis`: The underlying TypeScript type that defines the structure of the axiom
     - `$meta`: An extensible type that defines additional metadata for the axiom
-    
+
     For more information about how distinguished keys work, see the [Canons documentation](./docs/canons.md).
 - **Lazy Types**: A `Canon` is a type blueprint that can be defined once and be universally understood, regardless of where or when it is consumed. This enables a form of "lazy typing," where the full details of a type can be deferred, yet its canonical identity remains constant. The `canon` key serves as the type system's **discriminator**, allowing it to correctly identify and apply the correct type to a given configuration.
 
@@ -32,20 +32,20 @@ declare module '@relational-fabric/canon' {
   interface Canons {
     myProject: Canon<{
       Id: {
-        $basis: { id: string };
-        key: 'id';
-        $meta: { type: 'uuid' };
-      };
+        $basis: { id: string }
+        key: 'id'
+        $meta: { type: 'uuid' }
+      }
       type: {
-        $basis: { type: string };
-        key: 'type';
-        $meta: { description: string };
-      };
+        $basis: { type: string }
+        key: 'type'
+        $meta: { description: string }
+      }
       version: {
-        $basis: { version: number };
-        key: 'version';
-      };
-    }>;
+        $basis: { version: number }
+        key: 'version'
+      }
+    }>
   }
 }
 
@@ -53,24 +53,24 @@ declare module '@relational-fabric/canon' {
 declareCanon('myProject', {
   axioms: {
     Id: {
-      $basis: (value: unknown): value is { id: string } => 
+      $basis: (value: unknown): value is { id: string } =>
         typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
       key: 'id',
       $meta: { type: 'uuid' },
     },
     type: {
-      $basis: (value: unknown): value is { type: string } => 
+      $basis: (value: unknown): value is { type: string } =>
         typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
       key: 'type',
       $meta: { description: 'Entity type classification' },
     },
     version: {
-      $basis: (value: unknown): value is { version: number } => 
+      $basis: (value: unknown): value is { version: number } =>
         typeof value === 'object' && value !== null && 'version' in value && typeof (value as any).version === 'number',
       key: 'version',
     },
   },
-});
+})
 ```
 
 ### Sharing Canons
@@ -84,24 +84,24 @@ To facilitate this, the library provides a simple pattern for exporting and regi
     ```typescript
     // my-module/canon.ts
 
-    import { type Canon, defineCanon } from '@relationalfabric/canon';
+    import { type Canon, defineCanon } from '@relationalfabric/canon'
 
     export type MyCanon = Canon<{
       Id: {
-        $basis: { id: string };
-        key: 'id';
-      };
-    }>;
+        $basis: { id: string }
+        key: 'id'
+      }
+    }>
 
     export default defineCanon<MyCanon>({
       axioms: {
         Id: {
-          $basis: (value: unknown): value is { id: string } => 
+          $basis: (value: unknown): value is { id: string } =>
             typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
           key: 'id',
         },
       },
-    });
+    })
     ```
 
 2.  **Import and Register**: In your main application or a shared configuration file, import the types and values of the canons you need. You then augment the global `Canons` interface with their types and register their runtime values.
@@ -109,20 +109,20 @@ To facilitate this, the library provides a simple pattern for exporting and regi
     ```typescript
     // main.ts
 
-    import myCanon, { type MyCanon } from 'my-module/canon';
-    import otherCanon, { type OtherCanon } from 'other-module/canon';
-    import { registerCanons } from '@relationalfabric/canon';
+    import { registerCanons } from '@relationalfabric/canon'
+    import myCanon, { type MyCanon } from 'my-module/canon'
+    import otherCanon, { type OtherCanon } from 'other-module/canon'
 
     // Augment the global Canons interface to unify the types
     declare module '@relationalfabric/canon' {
       interface Canons {
-        myCanon: MyCanon;
-        otherCanon: OtherCanon;
+        myCanon: MyCanon
+        otherCanon: OtherCanon
       }
     }
 
     // Register the runtime values for the system to use
-    registerCanons({ myCanon, otherCanon });
+    registerCanons({ myCanon, otherCanon })
     ```
 
 This pattern ensures that a canon's definition remains a single source of truth, but its identity is globally recognized, enabling seamless interoperability and semantic-level communication across different parts of your ecosystem.

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-**Before reading this document, please read the [Axioms documentation](./axioms.md).** 
+**Before reading this document, please read the [Axioms documentation](./axioms.md).**
 
 Canons build directly on the foundation of axioms. Understanding how axioms work is essential to understanding canons. The axioms document covers:
 
@@ -41,7 +41,7 @@ Canons require both **type-level** and **runtime** configurations because they s
 - **Benefits**: Provides type safety, IntelliSense, and compile-time type checking
 - **When**: Used during development to catch errors before runtime
 
-#### Runtime Configuration  
+#### Runtime Configuration
 - **Purpose**: Provides actual values and behavior at execution time
 - **Benefits**: Enables dynamic behavior, format conversion, and runtime flexibility
 - **When**: Used during execution to determine how axioms behave with real data
@@ -79,19 +79,19 @@ The **Declarative Style** is ideal for canons that are defined and used within a
 declareCanon('myProject', {
   axioms: {
     Id: {
-      $basis: (value: unknown): value is { id: string } => 
+      $basis: (value: unknown): value is { id: string } =>
         typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
       key: 'id',
       $meta: { type: 'uuid' },
     },
     Type: {
-      $basis: (value: unknown): value is { type: string } => 
+      $basis: (value: unknown): value is { type: string } =>
         typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
       key: 'type',
       $meta: { description: 'Entity type' },
     },
   },
-});
+})
 ```
 
 ### Module Style (Shareable Canons)
@@ -108,38 +108,38 @@ The **Module Style** is designed for canons that will be shared across multiple 
 ```typescript
 // my-module/canon.ts - Define and export
 export type MyCanon = Canon<{
-  Id: { $basis: { id: string }; key: 'id' };
-  Type: { $basis: { type: string }; key: 'type' };
-}>;
+  Id: { $basis: { id: string }, key: 'id' }
+  Type: { $basis: { type: string }, key: 'type' }
+}>
 
 export default defineCanon<MyCanon>({
   axioms: {
-    Id: { 
-      $basis: (value: unknown): value is { id: string } => 
+    Id: {
+      $basis: (value: unknown): value is { id: string } =>
         typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
-      key: 'id' 
+      key: 'id'
     },
-    Type: { 
-      $basis: (value: unknown): value is { type: string } => 
+    Type: {
+      $basis: (value: unknown): value is { type: string } =>
         typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
-      key: 'type' 
+      key: 'type'
     },
   },
-});
+})
 ```
 
 ```typescript
+import { registerCanons } from '@relationalfabric/canon'
 // main.ts - Import and register
-import myCanon, { type MyCanon } from 'my-module/canon';
-import { registerCanons } from '@relationalfabric/canon';
+import myCanon, { type MyCanon } from 'my-module/canon'
 
 declare module '@relationalfabric/canon' {
   interface Canons {
-    myCanon: MyCanon;
+    myCanon: MyCanon
   }
 }
 
-registerCanons({ myCanon });
+registerCanons({ myCanon })
 ```
 
 ### Choosing the Right Pattern
@@ -158,32 +158,32 @@ A complete canon requires both **type-level definitions** and **runtime configur
 The type-level definition provides **compile-time safety** and **IntelliSense support**:
 
 ```typescript
-import type { Canon } from '@relational-fabric/canon';
+import type { Canon } from '@relational-fabric/canon'
 
 // Define the canon type for your internal data format
 type InternalCanon = Canon<{
   Id: {
-    $basis: { id: string };
-    key: 'id';
-    $meta: { type: string; required: string };
-  };
+    $basis: { id: string }
+    key: 'id'
+    $meta: { type: string, required: string }
+  }
   Type: {
-    $basis: { type: string };
-    key: 'type';
-    $meta: { enum: string; discriminator: string };
-  };
+    $basis: { type: string }
+    key: 'type'
+    $meta: { enum: string, discriminator: string }
+  }
   Timestamps: {
-    $basis: Date;
-    toCanonical: (value: Date) => Date;
-    fromCanonical: (value: Date) => Date;
-    $meta: { format: string };
-  };
-}>;
+    $basis: Date
+    toCanonical: (value: Date) => Date
+    fromCanonical: (value: Date) => Date
+    $meta: { format: string }
+  }
+}>
 
 // Register the canon type globally
 declare module '@relational-fabric/canon' {
   interface Canons {
-    Internal: InternalCanon;
+    Internal: InternalCanon
   }
 }
 ```
@@ -195,22 +195,22 @@ declare module '@relational-fabric/canon' {
 The runtime configuration provides **actual behavior** and **format conversion logic**:
 
 ```typescript
-import { declareCanon } from '@relational-fabric/canon';
+import { declareCanon } from '@relational-fabric/canon'
 
 // Register the runtime configuration for your internal format
 declareCanon('Internal', {
   axioms: {
     Id: {
-      $basis: (value: unknown): value is { id: string } => 
+      $basis: (value: unknown): value is { id: string } =>
         typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
       key: 'id',
-      $meta: { type: 'uuid'; required: 'true' },
+      $meta: { type: 'uuid', required: 'true' },
     },
     Type: {
-      $basis: (value: unknown): value is { type: string } => 
+      $basis: (value: unknown): value is { type: string } =>
         typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
       key: 'type',
-      $meta: { enum: 'user,admin,guest'; discriminator: 'true' },
+      $meta: { enum: 'user,admin,guest', discriminator: 'true' },
     },
     Timestamps: {
       $basis: (value: unknown): value is Date => value instanceof Date,
@@ -219,7 +219,7 @@ declareCanon('Internal', {
       $meta: { format: 'iso8601' },
     },
   },
-});
+})
 ```
 
 **Why this matters**: The runtime system needs to know how to actually extract values and perform conversions when your code runs. Note that the `$meta` values here are the **actual metadata values**, while the type definition above specifies the **types** of those metadata fields.
@@ -234,21 +234,21 @@ The `$basis` field defines the underlying TypeScript type structure for an axiom
 
 **Type-level definition:**
 ```typescript
-Id: {
-  $basis: { id: string };
-  key: 'id';
-  $meta: { type: string; required: string };
+interface IdAxiom {
+  $basis: { id: string }
+  key: 'id'
+  $meta: { type: string, required: string }
 }
 ```
 
 **Runtime configuration:**
 ```typescript
-Id: {
-  $basis: (value: unknown): value is { id: string } => 
-    typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string';
+const Id = {
+  $basis: (value: unknown): value is { id: string } =>
+    typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
   key: 'id',
-  $meta: { type: 'uuid'; required: 'true' },
-}
+  $meta: { type: 'uuid', required: 'true' },
+} as const
 ```
 
 #### $meta Key
@@ -257,11 +257,11 @@ The `$meta` field provides additional metadata about the axiom. This can include
 
 **Example:**
 ```typescript
-$meta: { 
-  type: 'uuid'; 
-  required: 'true';
-  format: 'iso8601';
-  description: 'Unique identifier for the entity';
+$meta: {
+  type: 'uuid'
+  required: 'true'
+  format: 'iso8601'
+  description: 'Unique identifier for the entity'
 }
 ```
 
@@ -272,18 +272,18 @@ This approach enables **lazy typing** - your code can work with semantic concept
 The universal functions (provided by the axiom implementer) use **both** configurations:
 
 ```typescript
-import { idOf, typeOf, timestampsOf } from '@relational-fabric/canon';
+import { idOf, timestampsOf, typeOf } from '@relational-fabric/canon'
 
 // Usage with your internal data format
 const internalData = {
-  id: "user-123",
-  type: "user", 
-  createdAt: new Date("2022-01-01")
-};
+  id: 'user-123',
+  type: 'user',
+  createdAt: new Date('2022-01-01')
+}
 
-console.log(idOf(internalData));    // "user-123" - runtime finds 'id' key
-console.log(typeOf(internalData));  // "user" - runtime finds 'type' key
-console.log(timestampsOf(internalData.createdAt));  // Date object - converts to canonical format
+console.log(idOf(internalData)) // "user-123" - runtime finds 'id' key
+console.log(typeOf(internalData)) // "user" - runtime finds 'type' key
+console.log(timestampsOf(internalData.createdAt)) // Date object - converts to canonical format
 ```
 
 **The magic**: TypeScript ensures type safety at compile time, while the runtime system provides the actual field names and conversion logic at execution time.
@@ -297,19 +297,19 @@ The power of Canon lies in **universal data operations** - writing code that wor
 Most codebases have **one internal data format** and only need additional canons when receiving **external data** that looks different. Without Canon, you need format-specific code for each external source. With Canon, you use universal functions that work across all formats:
 
 ```typescript
-import { idOf } from '@relational-fabric/canon';
+import { idOf } from '@relational-fabric/canon'
 
 // Your internal data format
-const internalData = { id: "user-123", type: "user" };
+const internalData = { id: 'user-123', type: 'user' }
 
 // External data from different sources
-const jsonLdData = { "@id": "user-123", "@type": "Person" };
-const mongoData = { "_id": "user-123", "_type": "User" };
+const jsonLdData = { '@id': 'user-123', '@type': 'Person' }
+const mongoData = { _id: 'user-123', _type: 'User' }
 
 // All formats work with the same universal function
-idOf(internalData);  // "user-123" using 'id'
-idOf(jsonLdData);    // "user-123" using '@id'
-idOf(mongoData);     // "user-123" using '_id'
+idOf(internalData) // "user-123" using 'id'
+idOf(jsonLdData) // "user-123" using '@id'
+idOf(mongoData) // "user-123" using '_id'
 ```
 
 ### Real-World Benefits

@@ -25,27 +25,27 @@ The core axioms are already registered in the global `Axioms` interface:
 **Step 2: Write universal transformation logic using existing APIs**
 ```typescript
 // Type definitions for this example
-type CanonDefinition = Record<string, unknown>;
-type AxiomDefinition = Record<string, unknown>;
-type AxiomConfig = Record<string, unknown>;
-type ReportEntity = {
-  reportId: string;
-  reportType: string;
-  reportTimestamp: unknown;
-  source: string;
-  name: string;
-  status: string;
-};
+import { isPojo, pojoHas } from '@relational-fabric/canon'
+import _ from 'lodash'
 
-import { isPojo, pojoHas } from '@relational-fabric/canon';
-import _ from 'lodash';
+type CanonDefinition = Record<string, unknown>
+type AxiomDefinition = Record<string, unknown>
+type AxiomConfig = Record<string, unknown>
+interface ReportEntity {
+  reportId: string
+  reportType: string
+  reportTimestamp: unknown
+  source: string
+  name: string
+  status: string
+}
 
 // Transform any entity into a unified report format
 function transformToReport<T extends Pojo>(entity: T): ReportEntity {
-  const id = idOf(entity);
-  const entityType = typeOf(entity);
-  const timestamp = timestampsOf(entity);
-  
+  const id = idOf(entity)
+  const entityType = typeOf(entity)
+  const timestamp = timestampsOf(entity)
+
   // Universal transformation using existing axiom APIs
   return {
     reportId: `report-${id}`,
@@ -55,20 +55,20 @@ function transformToReport<T extends Pojo>(entity: T): ReportEntity {
     // Additional fields extracted using the same universal approach
     name: extractName(entity),
     status: extractStatus(entity)
-  };
+  }
 }
 
 // Helper functions that work with any entity structure
 function extractName<T extends Pojo>(entity: T): string {
-  const possibleKeys = ['name', 'title', 'label', 'displayName'];
-  const foundKey = _.find(possibleKeys, key => pojoHas(entity, key));
-  return foundKey ? (entity[foundKey] as string) : 'Unknown';
+  const possibleKeys = ['name', 'title', 'label', 'displayName']
+  const foundKey = _.find(possibleKeys, key => pojoHas(entity, key))
+  return foundKey ? (entity[foundKey] as string) : 'Unknown'
 }
 
 function extractStatus<T extends Pojo>(entity: T): string {
-  const possibleKeys = ['status', 'state', 'phase', 'condition'];
-  const foundKey = _.find(possibleKeys, key => pojoHas(entity, key));
-  return foundKey ? (entity[foundKey] as string) : 'Unknown';
+  const possibleKeys = ['status', 'state', 'phase', 'condition']
+  const foundKey = _.find(possibleKeys, key => pojoHas(entity, key))
+  return foundKey ? (entity[foundKey] as string) : 'Unknown'
 }
 ```
 
@@ -79,23 +79,23 @@ function processPipeline<T extends Pojo>(entities: T[]): ReportEntity[] {
   return _(entities)
     .filter(entity => idOf(entity) && typeOf(entity))
     .map(transformToReport)
-    .value();
+    .value()
 }
 
 // Works with database entities
-const dbEntities = await databaseEntitiesOf();
-const reportDb = processPipeline(dbEntities);
+const dbEntities = await databaseEntitiesOf()
+const reportDb = processPipeline(dbEntities)
 
 // Works with REST API responses
-const apiEntities = await restApiEntitiesOf();
-const reportApi = processPipeline(apiEntities);
+const apiEntities = await restApiEntitiesOf()
+const reportApi = processPipeline(apiEntities)
 
 // Works with GraphQL responses
-const graphqlEntities = await graphQLEntitiesOf();
-const reportGraphQL = processPipeline(graphqlEntities);
+const graphqlEntities = await graphQLEntitiesOf()
+const reportGraphQL = processPipeline(graphqlEntities)
 
 // Combine all reports
-const allReports = [...reportDb, ...reportApi, ...reportGraphQL];
+const allReports = [...reportDb, ...reportApi, ...reportGraphQL]
 ```
 
 ## Implementation Functions
@@ -103,10 +103,13 @@ const allReports = [...reportDb, ...reportApi, ...reportGraphQL];
 ```typescript
 // Helper function to determine source from ID pattern
 function sourceOf(id: string): string {
-  if (id.startsWith('db-')) return 'database';
-  if (id.startsWith('api-')) return 'rest-api';
-  if (id.startsWith('gql-')) return 'graphql';
-  return 'unknown';
+  if (id.startsWith('db-'))
+    return 'database'
+  if (id.startsWith('api-'))
+    return 'rest-api'
+  if (id.startsWith('gql-'))
+    return 'graphql'
+  return 'unknown'
 }
 
 // Data source functions following *Of naming convention
@@ -115,7 +118,7 @@ async function databaseEntitiesOf() {
   return [
     { id: 'db-user-1', type: 'user', createdAt: new Date('2022-01-01'), name: 'John Doe', status: 'active' },
     { id: 'db-user-2', type: 'user', createdAt: new Date('2022-01-02'), name: 'Jane Smith', status: 'inactive' }
-  ];
+  ]
 }
 
 async function restApiEntitiesOf() {
@@ -123,7 +126,7 @@ async function restApiEntitiesOf() {
   return [
     { id: 'api-user-1', type: 'user', createdAt: '2022-01-01T00:00:00Z', name: 'API User 1', status: 'pending' },
     { id: 'api-user-2', type: 'user', createdAt: '2022-01-02T00:00:00Z', name: 'API User 2', status: 'approved' }
-  ];
+  ]
 }
 
 async function graphQLEntitiesOf() {
@@ -131,7 +134,7 @@ async function graphQLEntitiesOf() {
   return [
     { id: 'gql-user-1', type: 'user', createdAt: 1640995200, name: 'GraphQL User 1', status: 'verified' },
     { id: 'gql-user-2', type: 'user', createdAt: 1641081600, name: 'GraphQL User 2', status: 'unverified' }
-  ];
+  ]
 }
 ```
 

@@ -33,7 +33,6 @@ Thank you for your interest in contributing to Canon! This document outlines the
 - Examples: `$basis`, `$meta` - these are reserved and have defined behaviors
 - **Never use `$` prefix for user-defined keys** - this is reserved for Canon's internal use
 
-
 ### Documentation Conventions
 
 #### Document Structure
