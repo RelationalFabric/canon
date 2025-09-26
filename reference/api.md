@@ -118,9 +118,9 @@ Canon type that represents a universal type blueprint.
 
 ### `Axiom<T extends AxiomDefinition, C extends AxiomConfig>`
 ```typescript
-type Axiom<T extends AxiomDefinition, C extends AxiomConfig> = { 
+interface Axiom<T extends AxiomDefinition, C extends AxiomConfig> { 
   axiom: T, 
   config: C 
-};
+}
 ```
 Axiom type that pairs axiom definition with configuration.

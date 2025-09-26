@@ -326,10 +326,10 @@ The core axioms are built on top of the fundamental axiom utility types:
 
 ```typescript
 // Base axiom type with universal distinguished keys
-type Axiom<TBasis, TMeta> = {
+interface Axiom<TBasis, TMeta> {
   $basis: TBasis;
   $meta: TMeta;
-};
+}
 
 // Utility types for working with axioms
 type Satisfies<T extends keyof Axioms> = {

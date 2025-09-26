@@ -9,23 +9,21 @@ This document describes the shared canons available in the Canon system.
 
 **Definition and Export**:
 ```typescript
-// Define well-named types that communicate the JSON-LD structure
-type JsonLdEntity = {
+// Define well-named interfaces that communicate the JSON-LD structure
+interface JsonLdEntity {
   '@id': string;
   '@type': string;
   '@version'?: string | number;
-  'dateCreated'?: JsonLdDate;
-  'references'?: JsonLdReference | JsonLdReference[];
-};
+}
 
-type JsonLdReference = {
+interface JsonLdReference {
   '@id': string;
-};
+}
 
-type JsonLdDate = {
+interface JsonLdDate {
   '@value': string;
   '@type': 'xsd:dateTime' | 'xsd:date' | 'xsd:time';
-};
+}
 
 // Define the canon type using the API we created
 export type JsonLdCanon = Canon<{
