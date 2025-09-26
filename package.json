@@ -1,13 +1,22 @@
 {
-  "name": "typescript-package",
+  "name": "@relational-fabric/canon",
+  "type": "module",
   "version": "1.0.0",
   "description": "A modern TypeScript package",
-  "type": "module",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "package"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -16,19 +25,10 @@
     "check": "tsc --noEmit && eslint .",
     "clean": "rm -rf dist"
   },
-  "keywords": [
-    "typescript",
-    "package"
-  ],
-  "author": "",
-  "license": "MIT",
   "devDependencies": {
     "@antfu/eslint-config": "^3.0.0",
     "@tsconfig/node-lts": "^20.0.0",
     "eslint": "^9.10.0",
     "typescript": "^5.4.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

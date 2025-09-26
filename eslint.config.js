@@ -6,5 +6,9 @@ export default antfu({
   ignores: [
     'dist',
     'node_modules',
+    'docs/**',
+    'reference/**',
+    '*.md',
+    'CONTRIBUTING.md',
   ],
 })
