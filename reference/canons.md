@@ -43,9 +43,9 @@ export type JsonLdCanon = Canon<{
     fromCanonical: (value: Date) => JsonLdDate;
   };
   References: {
-    $basis: TypeGuard<string | string[]>;
-    toCanonical: (value: string | string[]) => string[];
-    fromCanonical: (value: string[]) => string | string[];
+    $basis: TypeGuard<EntityReference<string, unknown>>;
+    toCanonical: (value: EntityReference<string, unknown>) => EntityReference<string, unknown>;
+    fromCanonical: (value: EntityReference<string, unknown>) => EntityReference<string, unknown>;
   };
 }>;
 
@@ -81,13 +81,13 @@ export default defineCanon<JsonLdCanon>({
       })
     },
     References: {
-      $basis: <U extends string | string[]>(value: U | unknown): value is U => 
-        typeof value === 'string' || Array.isArray(value),
-      toCanonical: (value: string | string[]) => {
-        if (Array.isArray(value)) return value;
-        return [value];
-      },
-      fromCanonical: (value: string[]) => value.length === 1 ? value[0] : value
+      $basis: <U extends EntityReference<string, unknown>>(value: U | unknown): value is U => 
+        typeof value === 'object' && value !== null && 
+        'ref' in value && 'resolved' in value &&
+        typeof (value as any).ref === 'string' &&
+        typeof (value as any).resolved === 'boolean',
+      toCanonical: (value: EntityReference<string, unknown>) => value,
+      fromCanonical: (value: EntityReference<string, unknown>) => value
     }
   }
 });

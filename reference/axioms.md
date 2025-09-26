@@ -34,6 +34,13 @@ type RepresentationAxiom<T> = Axiom<{
   toCanonical: (value: T) => unknown;
   fromCanonical: (value: unknown) => T;
 }>;
+
+// Canonical reference type for entity relationships
+interface EntityReference<R, T = unknown> {
+  ref: R;
+  value?: T;
+  resolved: boolean;
+}
 ```
 
 ## Axiom Definitions
@@ -217,7 +224,7 @@ console.log(timestampsOf(dateTimestamp));  // Date object
 
 **Type Definition**:
 ```typescript
-type ReferencesAxiom = RepresentationAxiom<string[]>;
+type ReferencesAxiom = RepresentationAxiom<EntityReference<string, unknown>>;
 ```
 
 **Registration**:
@@ -225,16 +232,16 @@ type ReferencesAxiom = RepresentationAxiom<string[]>;
 declare module '@relational-fabric/canon' {
   interface Axioms {
     References: {
-      $basis: string[];
-      toCanonical: (value: string[]) => string[];
-      fromCanonical: (value: string[]) => string[];
+      $basis: EntityReference<string, unknown>;
+      toCanonical: (value: EntityReference<string, unknown>) => EntityReference<string, unknown>;
+      fromCanonical: (value: EntityReference<string, unknown>) => EntityReference<string, unknown>;
     };
   }
 }
 ```
 
 **Common Value Types**:
-- Array references: `string[]` (arrays of identifiers)
+- Entity references: `EntityReference<string, unknown>` (canonical reference format)
 
 **API Functions**:
 ```typescript
@@ -247,21 +254,25 @@ function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'Refe
 **Implementation**:
 ```typescript
 // Reference conversion functions
-const referencesToCanonical = (value: string[]): string[] => {
-  return value; // string[] is already canonical
+const referencesToCanonical = (value: EntityReference<string, unknown>): EntityReference<string, unknown> => {
+  return value; // EntityReference is already canonical
 };
 
-const referencesFromCanonical = (value: string[]): string[] => {
-  return value; // string[] is already canonical
+const referencesFromCanonical = (value: EntityReference<string, unknown>): EntityReference<string, unknown> => {
+  return value; // EntityReference is already canonical
 };
 ```
 
 **Usage Example**:
 ```typescript
-// Works with string arrays
-const arrayRef = ["tag1", "tag2", "tag3"];
+// Works with entity references
+const entityRef: EntityReference<string, unknown> = {
+  ref: "user-123",
+  value: { name: "John Doe", email: "john@example.com" },
+  resolved: true
+};
 
-console.log(referencesOf(arrayRef));   // string[] array
+console.log(referencesOf(entityRef));   // EntityReference object
 ```
 
 ## Conversion Types
