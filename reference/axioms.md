@@ -28,11 +28,9 @@ type KeyNameAxiom = Axiom<{
 // Representation axiom for data with multiple representations
 type RepresentationAxiom<T, C = unknown> = Axiom<{
   $basis: T | TypeGuard<unknown>;
-  toCanonical: (value: T | TypeGuard<unknown>) => C;
-  fromCanonical: (value: C) => T | TypeGuard<unknown>;
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
 }, {
-  toCanonical: (value: T | TypeGuard<unknown>) => C;
-  fromCanonical: (value: C) => T | TypeGuard<unknown>;
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
 }>;
 
 // Canonical reference type for entity relationships
@@ -180,8 +178,7 @@ declare module '@relational-fabric/canon' {
   interface Axioms {
     Timestamps: {
       $basis: number | string | Date | TypeGuard<unknown>;
-      toCanonical: (value: number | string | Date | TypeGuard<unknown>) => Date;
-      fromCanonical: (value: Date) => number | string | Date | TypeGuard<unknown>;
+      isCanonical: (value: number | string | Date | TypeGuard<unknown>) => value is Date;
     };
   }
 }
@@ -197,23 +194,15 @@ declare module '@relational-fabric/canon' {
 ```typescript
 function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
   const config = inferAxiom('Timestamps', x);
-  return config.toCanonical(x);
+  return config.isCanonical(x) ? x : new Date(x as any);
 }
 ```
 
 **Implementation**:
 ```typescript
-// Timestamp conversion functions
-const timestampsToCanonical = (value: number | string | Date | TypeGuard<unknown>): Date => {
-  if (value instanceof Date) return value;
-  if (typeof value === 'number') return new Date(value);
-  if (typeof value === 'string') return new Date(value);
-  // For TypeGuard<unknown>, assume it's a timestamp and try to convert
-  return new Date(value as any);
-};
-
-const timestampsFromCanonical = (value: Date): number | string | Date | TypeGuard<unknown> => {
-  return value; // Return as Date by default, can be customized per use case
+// Timestamp canonical type guard
+const timestampsIsCanonical = (value: number | string | Date | TypeGuard<unknown>): value is Date => {
+  return value instanceof Date;
 };
 ```
 

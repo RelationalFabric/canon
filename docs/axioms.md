@@ -48,11 +48,9 @@ type KeyNameAxiom = Axiom<{
 // Representation axiom for data with multiple representations
 type RepresentationAxiom<T, C = unknown> = Axiom<{
   $basis: T | TypeGuard<unknown>;
-  toCanonical: (value: T | TypeGuard<unknown>) => C;
-  fromCanonical: (value: C) => T | TypeGuard<unknown>;
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
 }, {
-  toCanonical: (value: T | TypeGuard<unknown>) => C;
-  fromCanonical: (value: C) => T | TypeGuard<unknown>;
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
 }>;
 
 // Other axiom types for meta-type level concepts that might vary between codebases
