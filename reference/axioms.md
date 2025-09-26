@@ -14,6 +14,27 @@ The core axiom set consists of five essential axioms that cover the fundamental 
 4. **Timestamps** - Time-based data with format conversion
 5. **References** - Entity relationships and references
 
+## Axiom Types
+
+```typescript
+// Key-name axiom for simple field-based concepts
+type KeyNameAxiom = Axiom<{
+  $basis: Record<string, unknown>;
+  key: string;
+}, {
+  key: string;
+}>;
+
+// Representation axiom for data with multiple representations
+type RepresentationAxiom<T, C = unknown> = Axiom<{
+  $basis: T | TypeGuard<unknown>;
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
+}, {
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
+}>;
+
+```
+
 ## Axiom Definitions
 
 ### 1. Id Axiom
@@ -142,48 +163,53 @@ console.log(versionOf(jsonLdData));  // "2.1"
 
 **Type Definition**:
 ```typescript
-type TimestampsAxiom = Axiom<{
-  $basis: number | string | Date | TypeGuard<unknown>;
-  toCanonical: (value: this['$basis']) => unknown;
-  fromCanonical: (value: unknown) => this['$basis'];
-}, {
-  key: string;
-}>;
+type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>;
 ```
 
 **Registration**:
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Timestamps: TimestampsAxiom;
+    Timestamps: {
+      $basis: number | string | Date | TypeGuard<unknown>;
+      isCanonicalTimestamp: (value: number | string | Date | TypeGuard<unknown>) => value is Date;
+    };
   }
 }
 ```
 
-**Common Field Names**:
-- Unix timestamps: `createdAt`, `updatedAt`
-- ISO strings: `createdAt`, `updatedAt`
-- Date objects: `createdAt`, `updatedAt`
-- Custom formats: `created_at`, `updated_at`
+**Common Value Types**:
+- Unix timestamps: `number` (milliseconds since epoch)
+- ISO strings: `string` (ISO 8601 format)
+- Date objects: `Date` (JavaScript Date instances)
+- Custom formats: `string` (various timestamp formats)
 
 **API Functions**:
 ```typescript
 function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
   const config = inferAxiom('Timestamps', x);
-  return config.toCanonical(x[config.key]);
+  return config.isCanonicalTimestamp(x) ? x : new Date(x as any);
 }
+```
+
+**Implementation**:
+```typescript
+// Timestamp canonical type guard
+const isCanonicalTimestamp = (value: number | string | Date | TypeGuard<unknown>): value is Date => {
+  return value instanceof Date;
+};
 ```
 
 **Usage Example**:
 ```typescript
-// Works with different timestamp formats
-const unixData = { createdAt: 1640995200000 };
-const isoData = { createdAt: "2022-01-01T00:00:00Z" };
-const dateData = { createdAt: new Date("2022-01-01") };
+// Works with different timestamp value types
+const unixTimestamp = 1640995200000;
+const isoTimestamp = "2022-01-01T00:00:00Z";
+const dateTimestamp = new Date("2022-01-01");
 
-console.log(timestampsOf(unixData));  // Converted to canonical format
-console.log(timestampsOf(isoData));   // Converted to canonical format
-console.log(timestampsOf(dateData));  // Converted to canonical format
+console.log(timestampsOf(unixTimestamp));  // Converted to canonical Date
+console.log(timestampsOf(isoTimestamp));   // Converted to canonical Date
+console.log(timestampsOf(dateTimestamp));  // Converted to canonical Date
 ```
 
 ### 5. References Axiom
@@ -192,48 +218,57 @@ console.log(timestampsOf(dateData));  // Converted to canonical format
 
 **Type Definition**:
 ```typescript
-type ReferencesAxiom = Axiom<{
-  $basis: string | object | string[] | TypeGuard<unknown>;
-  toCanonical: (value: this['$basis']) => unknown;
-  fromCanonical: (value: unknown) => this['$basis'];
-}, {
-  key: string;
-}>;
+// Canonical reference type for entity relationships
+interface EntityReference<R, T = unknown> {
+  ref: R;
+  value?: T;
+  resolved: boolean;
+}
+
+type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>;
 ```
 
 **Registration**:
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    References: ReferencesAxiom;
+    References: {
+      $basis: string | object | TypeGuard<unknown>;
+      isCanonicalReference: (value: string | object | TypeGuard<unknown>) => value is EntityReference<string, unknown>;
+    };
   }
 }
 ```
 
-**Common Field Names**:
-- String IDs: `userId`, `productId`, `orderId`
-- Object references: `user`, `product`, `order`
-- Array references: `tags`, `categories`
-- URI references: `user`, `product`
+**Common Value Types**:
+- String IDs: `string` (single identifier)
+- Object references: `object` (reference objects with metadata)
+- URI references: `string` (URI-formatted references)
 
 **API Functions**:
 ```typescript
 function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'References'> {
   const config = inferAxiom('References', x);
-  return config.toCanonical(x[config.key]);
+  return config.isCanonicalReference(x) ? x : { ref: x as string, resolved: false };
 }
+```
+
+**Implementation**:
+```typescript
+// Reference canonical type guard
+const isCanonicalReference = (value: string | object | TypeGuard<unknown>): value is EntityReference<string, unknown> => {
+  return typeof value === 'object' && value !== null && 'ref' in value && 'resolved' in value;
+};
 ```
 
 **Usage Example**:
 ```typescript
-// Works with different reference formats
-const stringRef = { userId: "user-123" };
-const objectRef = { user: { id: "user-123", name: "John" } };
-const arrayRef = { tags: ["tag1", "tag2", "tag3"] };
+// Works with different reference value types
+const stringRef = "user-123";
+const entityRef = { ref: "user-123", resolved: false };
 
-console.log(referencesOf(stringRef));  // Converted to canonical format
-console.log(referencesOf(objectRef));  // Converted to canonical format
-console.log(referencesOf(arrayRef));   // Converted to canonical format
+console.log(referencesOf(stringRef));  // Converted to EntityReference
+console.log(referencesOf(entityRef));  // Already canonical EntityReference
 ```
 
 ## Conversion Types
@@ -251,18 +286,10 @@ The core axioms are built on top of the fundamental axiom utility types:
 
 ```typescript
 // Base axiom type with universal distinguished keys
-type Axiom<TBasis, TMeta> = {
+interface Axiom<TBasis, TMeta> {
   $basis: TBasis;
   $meta: TMeta;
-};
-
-// Key-name axiom for simple field-based concepts
-type KeyNameAxiom = Axiom<{
-  $basis: Record<string, unknown>;
-  key: string;
-}, {
-  key: string;
-}>;
+}
 
 // Utility types for working with axioms
 type Satisfies<T extends keyof Axioms> = {
@@ -284,7 +311,7 @@ declare function inferAxiom<T extends keyof Axioms>(
 
 All core axioms follow the same registration pattern:
 
-1. **Type Definition**: Define the axiom type using the appropriate base type (`KeyNameAxiom` or `Axiom<{...}, {...}>`)
+1. **Type Definition**: Define the axiom type using the appropriate base type (`KeyNameAxiom`, `RepresentationAxiom<T>`, or `Axiom<{...}, {...}>`)
 2. **Module Augmentation**: Register the axiom in the `@relational-fabric/canon` module
 3. **API Functions**: Provide utility functions for working with the axiom
 

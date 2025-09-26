@@ -1,6 +1,6 @@
 # Deduplicating Entities in Heterogeneous Collections
 
-> **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](../examples.md). Make sure you understand the basic Canon concepts before proceeding.
+> **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
 
 ## The Story
 
@@ -20,38 +20,10 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 - `Id` and `Type` from core axioms (already provided)
 - No new axioms needed!
 
-**Step 2: Define the Canon**
+**Step 2: Use the existing core axioms**
 ```typescript
-// Define the canon for your information model
-type EntityCanon = Canon<{
-  Id: { $basis: { id: string }; key: 'id'; $meta: { type: string; required: string } };
-  Type: { $basis: { type: string }; key: 'type'; $meta: { enum: string; discriminator: string } };
-}>;
-
-// Register the canon globally
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    MyProject: EntityCanon;
-  }
-}
-
-// Register the runtime configuration
-declareCanon('MyProject', {
-  axioms: {
-    Id: { 
-      $basis: (value: unknown): value is { id: string } => 
-        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
-      key: 'id', 
-      $meta: { type: 'uuid', required: 'true' } 
-    },
-    Type: { 
-      $basis: (value: unknown): value is { type: string } => 
-        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
-      key: 'type', 
-      $meta: { enum: 'product,user,order', discriminator: 'true' } 
-    },
-  },
-});
+// The core axioms (Id, Type) are already defined and registered
+// No need to redefine them - just use them directly in your business logic
 ```
 
 **Step 3: Import and register external canons**
@@ -59,6 +31,11 @@ declareCanon('MyProject', {
 // Import JSON-LD canon from Canon
 import jsonLdCanon, { type JsonLdCanon } from '@relational-fabric/canon/jsonld';
 import { registerCanons } from '@relational-fabric/canon';
+
+// Type definitions for this example
+type CanonDefinition = Record<string, unknown>;
+type AxiomDefinition = Record<string, unknown>;
+type AxiomConfig = Record<string, unknown>;
 
 // Register external canon using registerCanons
 registerCanons({ 
@@ -68,18 +45,17 @@ registerCanons({
 
 **Step 4: The usage**
 ```typescript
+import _ from 'lodash';
+
 // One function works with all entity types using just core axioms
-function findDuplicates<T extends Satisfies<'Id' | 'Type'>>(entities: T[]): T[][] {
-  const groups = new Map<string, T[]>();
-  entities.forEach(entity => {
+function findDuplicates<T extends Pojo>(entities: T[]): T[][] {
+  const groups = _.groupBy(entities, entity => {
     const id = idOf(entity);
     const entityType = typeOf(entity);
-    const groupKey = `${entityType}-${id}`;
-    
-    if (!groups.has(groupKey)) groups.set(groupKey, []);
-    groups.get(groupKey)!.push(entity);
+    return `${entityType}-${id}`;
   });
-  return Array.from(groups.values()).filter(group => group.length > 1);
+  
+  return _.filter(_.values(groups), group => group.length > 1);
 }
 ```
 

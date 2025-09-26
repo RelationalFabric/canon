@@ -45,28 +45,25 @@ type KeyNameAxiom = Axiom<{
   key: string;
 }>;
 
-// Other axiom types for meta-type level concepts that might vary between codebases
-type TimestampsAxiom = Axiom<{
-  // The timestamp type - could be number, string, Date, or custom type
-  $basis: number | string | Date | TypeGuard<unknown>;
-  // Way to convert from this timestamp to standard value
-  toCanonical: (value: this['$basis']) => unknown;
-  // Way to convert from standard value to this timestamp
-  fromCanonical: (value: unknown) => this['$basis'];
+// Representation axiom for data with multiple representations
+type RepresentationAxiom<T, C = unknown> = Axiom<{
+  $basis: T | TypeGuard<unknown>;
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
 }, {
-  key: string;
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
 }>;
 
-type ReferencesAxiom = Axiom<{
-  // The reference type - could be string, object, array, or custom type
-  $basis: string | object | string[] | TypeGuard<unknown>;
-  // Way to convert from this reference to standard value
-  toCanonical: (value: this['$basis']) => unknown;
-  // Way to convert from standard value to this reference
-  fromCanonical: (value: unknown) => this['$basis'];
-}, {
-  key: string;
-}>;
+// Other axiom types for meta-type level concepts that might vary between codebases
+type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>;
+
+// Canonical reference type for entity relationships
+interface EntityReference<R, T = unknown> {
+  ref: R;
+  value?: T;
+  resolved: boolean;
+}
+
+type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>;
 ```
 
 #### Axiom Registration
