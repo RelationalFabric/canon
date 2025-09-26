@@ -33,7 +33,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "tsc --noEmit && eslint .",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "adr:new": "cd docs/adrs && npx adr new",
+    "adr:list": "cd docs/adrs && npx adr list",
+    "adr:index": "cd docs/adrs && npx adr generate toc"
   },
   "dependencies": {
     "defu": "^6.1.4"
@@ -41,6 +44,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^3.0.0",
     "@tsconfig/node-lts": "^20.0.0",
+    "adr-tools": "^2.0.4",
     "eslint": "^9.10.0",
     "typescript": "^5.4.0"
   }

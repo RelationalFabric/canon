@@ -80,10 +80,23 @@ Before making significant changes to the project architecture, please read the e
 When making architectural decisions that affect the project structure, configuration, or major features:
 
 1. **Read existing ADRs** to understand current decisions and context
-2. **Create a new ADR** using the template in `docs/adrs/template.md`
-3. **Follow the ADR format** with clear context, decision drivers, and consequences
-4. **Update the ADR index** in `docs/adrs/README.md`
+2. **Use adr-tools to create a new ADR:**
+   ```bash
+   npm run adr:new "Descriptive Title of Your Decision"
+   ```
+3. **Edit the generated ADR file** with your decision details
+4. **Follow the ADR format** with clear context, decision drivers, and consequences
 5. **Reference related ADRs** when applicable
+
+#### ADR Management Commands
+
+- **List all ADRs:** `npm run adr:list`
+- **Create new ADR:** `npm run adr:new "Title"`
+- **Generate index:** `npm run adr:index`
+- **Link ADRs:** `cd docs/adrs && npx adr link <from> <to> <relationship>`
+- **Help:** `cd docs/adrs && npx adr help`
+
+For more details, see the [ADR README](./docs/adrs/README.md).
 
 ### ADR Lifecycle
 

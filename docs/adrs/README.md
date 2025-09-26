@@ -26,7 +26,48 @@ Each ADR follows the format defined by [Michael Nygard](https://cognitect.com/bl
 
 ## Creating New ADRs
 
-When making significant architectural decisions, create a new ADR:
+We use [adr-tools](https://github.com/npryce/adr-tools) to manage ADRs. This ensures consistency and provides helpful commands for ADR management.
+
+### Prerequisites
+
+Install adr-tools (already included as a dev dependency):
+```bash
+npm install
+```
+
+### Creating a New ADR
+
+1. **Navigate to the ADR directory:**
+   ```bash
+   cd docs/adrs
+   ```
+
+2. **Create a new ADR:**
+   ```bash
+   npx adr new "Descriptive Title of Your Decision"
+   ```
+
+3. **Edit the generated ADR file** with your decision details
+
+4. **Update the status** as the decision progresses through the lifecycle
+
+### ADR Management Commands
+
+#### Using npm scripts (recommended):
+- **List all ADRs:** `npm run adr:list`
+- **Create new ADR:** `npm run adr:new "Title"`
+- **Generate table of contents:** `npm run adr:index`
+
+#### Direct adr-tools commands:
+- **List all ADRs:** `npx adr list`
+- **Create new ADR:** `npx adr new "Title"`
+- **Link ADRs:** `npx adr link <from> <to> <relationship>`
+- **Generate table of contents:** `npx adr generate toc`
+- **Help:** `npx adr help`
+
+### Manual Process (if adr-tools unavailable)
+
+If adr-tools is not available, you can create ADRs manually:
 
 1. Copy the template from `template.md`
 2. Rename it to `XXXX-descriptive-title.md` where XXXX is the next sequential number
