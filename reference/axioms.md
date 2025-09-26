@@ -172,7 +172,7 @@ declare module '@relational-fabric/canon' {
   interface Axioms {
     Timestamps: {
       $basis: number | string | Date | TypeGuard<unknown>;
-      isCanonical: (value: number | string | Date | TypeGuard<unknown>) => value is Date;
+      isCanonicalTimestamp: (value: number | string | Date | TypeGuard<unknown>) => value is Date;
     };
   }
 }
@@ -188,14 +188,14 @@ declare module '@relational-fabric/canon' {
 ```typescript
 function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
   const config = inferAxiom('Timestamps', x);
-  return config.isCanonical(x) ? x : new Date(x as any);
+  return config.isCanonicalTimestamp(x) ? x : new Date(x as any);
 }
 ```
 
 **Implementation**:
 ```typescript
 // Timestamp canonical type guard
-const timestampsIsCanonical = (value: number | string | Date | TypeGuard<unknown>): value is Date => {
+const isCanonicalTimestamp = (value: number | string | Date | TypeGuard<unknown>): value is Date => {
   return value instanceof Date;
 };
 ```
@@ -234,7 +234,7 @@ declare module '@relational-fabric/canon' {
   interface Axioms {
     References: {
       $basis: string | object | TypeGuard<unknown>;
-      isCanonical: (value: string | object | TypeGuard<unknown>) => value is EntityReference<string, unknown>;
+      isCanonicalReference: (value: string | object | TypeGuard<unknown>) => value is EntityReference<string, unknown>;
     };
   }
 }
@@ -249,14 +249,14 @@ declare module '@relational-fabric/canon' {
 ```typescript
 function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'References'> {
   const config = inferAxiom('References', x);
-  return config.isCanonical(x) ? x : { ref: x as string, resolved: false };
+  return config.isCanonicalReference(x) ? x : { ref: x as string, resolved: false };
 }
 ```
 
 **Implementation**:
 ```typescript
 // Reference canonical type guard
-const referencesIsCanonical = (value: string | object | TypeGuard<unknown>): value is EntityReference<string, unknown> => {
+const isCanonicalReference = (value: string | object | TypeGuard<unknown>): value is EntityReference<string, unknown> => {
   return typeof value === 'object' && value !== null && 'ref' in value && 'resolved' in value;
 };
 ```
