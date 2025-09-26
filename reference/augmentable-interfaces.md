@@ -10,11 +10,11 @@ This document describes the augmentable interfaces that can be extended by users
 **Default**:
 ```typescript
 interface Axioms {
-  Id: KeyNameAxiom;
-  Type: KeyNameAxiom;
-  Version: KeyNameAxiom;
-  Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>;
-  References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>;
+  Id: KeyNameAxiom
+  Type: KeyNameAxiom
+  Version: KeyNameAxiom
+  Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>
+  References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>
 }
 ```
 
@@ -22,7 +22,7 @@ interface Axioms {
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    MyAxiom: Axiom</* definition */>;
+    MyAxiom: Axiom<{ id: string }>
   }
 }
 ```
@@ -40,7 +40,7 @@ interface Canons {
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Canons {
-    MyCanon: Canon</* definition */>;
+    MyCanon: Canon<{ id: string }>
   }
 }
 ```
@@ -51,10 +51,10 @@ declare module '@relational-fabric/canon' {
 **Default**:
 ```typescript
 interface NativeTypes {
-  'ES5': Date | RegExp;
-  'ES2015': Map<unknown, unknown> | Set<unknown> | WeakMap<object, unknown> | WeakSet<object> | ArrayBuffer | DataView;
-  'ES2017': Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array;
-  'ES2020': BigInt64Array | BigUint64Array;
+  ES5: Date | RegExp
+  ES2015: Map<unknown, unknown> | Set<unknown> | WeakMap<object, unknown> | WeakSet<object> | ArrayBuffer | DataView
+  ES2017: Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array
+  ES2020: BigInt64Array | BigUint64Array
 }
 ```
 
@@ -62,7 +62,7 @@ interface NativeTypes {
 ```typescript
 declare module '@relational-fabric/canon' {
   interface NativeTypes {
-    'Node.js': Buffer | URL | URLSearchParams;
+    'Node.js': import('buffer').Buffer | URL | URLSearchParams
   }
 }
 ```

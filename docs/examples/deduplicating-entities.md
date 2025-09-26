@@ -28,34 +28,34 @@ Use the existing core axioms (`Id` and `Type`) to identify entities. No new axio
 
 **Step 3: Import and register external canons**
 ```typescript
+import { registerCanons } from '@relational-fabric/canon'
 // Import JSON-LD canon from Canon
-import jsonLdCanon, { type JsonLdCanon } from '@relational-fabric/canon/jsonld';
-import { registerCanons } from '@relational-fabric/canon';
+import jsonLdCanon, { type JsonLdCanon } from '@relational-fabric/canon/jsonld'
 
 // Type definitions for this example
-type CanonDefinition = Record<string, unknown>;
-type AxiomDefinition = Record<string, unknown>;
-type AxiomConfig = Record<string, unknown>;
+type CanonDefinition = Record<string, unknown>
+type AxiomDefinition = Record<string, unknown>
+type AxiomConfig = Record<string, unknown>
 
 // Register external canon using registerCanons
-registerCanons({ 
-  JsonLd: jsonLdCanon 
-});
+registerCanons({
+  JsonLd: jsonLdCanon
+})
 ```
 
 **Step 4: The usage**
 ```typescript
-import _ from 'lodash';
+import _ from 'lodash'
 
 // One function works with all entity types using just core axioms
 function findDuplicates<T extends Pojo>(entities: T[]): T[][] {
-  const groups = _.groupBy(entities, entity => {
-    const id = idOf(entity);
-    const entityType = typeOf(entity);
-    return `${entityType}-${id}`;
-  });
-  
-  return _.filter(_.values(groups), group => group.length > 1);
+  const groups = _.groupBy(entities, (entity) => {
+    const id = idOf(entity)
+    const entityType = typeOf(entity)
+    return `${entityType}-${id}`
+  })
+
+  return _.filter(_.values(groups), group => group.length > 1)
 }
 ```
 

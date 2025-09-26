@@ -33,7 +33,6 @@ Thank you for your interest in contributing to Canon! This document outlines the
 - Examples: `$basis`, `$meta` - these are reserved and have defined behaviors
 - **Never use `$` prefix for user-defined keys** - this is reserved for Canon's internal use
 
-
 ### Documentation Conventions
 
 #### Document Structure
@@ -72,9 +71,60 @@ Thank you for your interest in contributing to Canon! This document outlines the
 - Use TypeScript's type system to catch errors at compile time
 - Document expected behavior and error conditions
 
+## Architecture Decision Records (ADRs)
+
+Before making significant changes to the project architecture, please read the existing [Architecture Decision Records (ADRs)](./docs/adrs/README.md). ADRs document important architectural decisions and provide context for why certain choices were made.
+
+### Creating New ADRs
+
+When making architectural decisions that affect the project structure, configuration, or major features:
+
+1. **Read existing ADRs** to understand current decisions and context
+2. **Use adr-tools to create a new ADR:**
+   ```bash
+   npm run adr:new "Descriptive Title of Your Decision"
+   ```
+3. **Edit the generated ADR file** with your decision details
+4. **Follow the ADR format** with clear context, decision drivers, and consequences
+5. **Reference related ADRs** when applicable
+
+#### ADR Management Commands
+
+- **List all ADRs:** `npm run adr:list`
+- **Create new ADR:** `npm run adr:new "Title"`
+- **Generate index:** `npm run adr:index`
+- **Link ADRs:** `cd docs/adrs && npx adr link <from> <to> <relationship>`
+- **Help:** `cd docs/adrs && npx adr help`
+
+For more details, see the [ADR README](./docs/adrs/README.md).
+
+### ADR Lifecycle
+
+- **Proposed** - Decision is under consideration
+- **Accepted** - Decision has been made and implemented
+- **Deprecated** - Decision is no longer recommended
+- **Superseded** - Decision has been replaced by a newer ADR
+
 ## Development Workflow
 
-<!-- TODO: Add development workflow information -->
+### Prerequisites
+
+- Node.js 18+ (see [ADR-001](./docs/adrs/0001-typescript-package-setup.md))
+- TypeScript 5.4+
+- ESLint 9+ (see [ADR-002](./docs/adrs/0002-eslint-configuration-with-antfu.md))
+
+### Setup
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Run checks: `npm run check`
+4. Build the package: `npm run build`
+
+### Code Quality
+
+- All code must pass ESLint checks: `npm run lint`
+- TypeScript compilation must succeed: `npm run check`
+- Documentation code examples must be properly formatted (see [ADR-003](./docs/adrs/0003-documentation-linting-inclusion.md))
 
 ## Testing
 
@@ -82,7 +132,14 @@ Thank you for your interest in contributing to Canon! This document outlines the
 
 ## Code Review
 
-<!-- TODO: Add code review guidelines -->
+### Review Checklist
+
+- [ ] Code follows established conventions
+- [ ] TypeScript types are properly defined
+- [ ] ESLint passes without errors
+- [ ] Documentation is updated if needed
+- [ ] ADRs are created for architectural changes
+- [ ] Code examples in documentation are valid and formatted
 
 ## Release Process
 

@@ -1,0 +1,73 @@
+{
+  "name": "@relational-fabric/canon",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A modern TypeScript package template with ESLint and TypeScript configurations for starting new projects",
+  "author": "Relational Fabric",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/relational-fabric/canon.git"
+  },
+  "keywords": [
+    "typescript",
+    "eslint",
+    "template",
+    "starter",
+    "configuration",
+    "package",
+    "node",
+    "lts"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tsconfig": "./tsconfig.base.json",
+    "./eslint": "./eslint.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "eslint.js",
+    "tsconfig.base.json"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "check": "tsc --noEmit && eslint .",
+    "clean": "rm -rf dist",
+    "adr:new": "cd docs/adrs && npx adr new",
+    "adr:list": "cd docs/adrs && npx adr list",
+    "adr:index": "cd docs/adrs && npx adr generate toc"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "eslint": {
+      "optional": false
+    },
+    "typescript": {
+      "optional": false
+    }
+  },
+  "dependencies": {
+    "@antfu/eslint-config": "^3.0.0",
+    "@tsconfig/node-lts": "^20.0.0",
+    "defu": "^6.1.4"
+  },
+  "devDependencies": {
+    "adr-tools": "^2.0.4",
+    "eslint": "^9.10.0",
+    "typescript": "^5.4.0"
+  }
+}

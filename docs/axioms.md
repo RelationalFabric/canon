@@ -39,31 +39,31 @@ Axioms are type definitions that can be reused for multiple specific axiom types
 #### Key-Name Axiom Type
 ```typescript
 type KeyNameAxiom = Axiom<{
-  $basis: Record<string, unknown>;  // Object with at least 1 string key
-  key: string;                      // The field name that contains the concept
+  $basis: Record<string, unknown> // Object with at least 1 string key
+  key: string // The field name that contains the concept
 }, {
-  key: string;
-}>;
+    key: string
+  }>
 
 // Representation axiom for data with multiple representations
 type RepresentationAxiom<T, C = unknown> = Axiom<{
-  $basis: T | TypeGuard<unknown>;
-  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
+  $basis: T | TypeGuard<unknown>
+  isCanonical: (value: T | TypeGuard<unknown>) => value is C
 }, {
-  isCanonical: (value: T | TypeGuard<unknown>) => value is C;
-}>;
+    isCanonical: (value: T | TypeGuard<unknown>) => value is C
+  }>
 
 // Other axiom types for meta-type level concepts that might vary between codebases
-type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>;
+type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>
 
 // Canonical reference type for entity relationships
 interface EntityReference<R, T = unknown> {
-  ref: R;
-  value?: T;
-  resolved: boolean;
+  ref: R
+  value?: T
+  resolved: boolean
 }
 
-type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>;
+type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>
 ```
 
 #### Axiom Registration
@@ -72,11 +72,11 @@ Axioms are registered in the global `Axioms` interface using these type definiti
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Id: KeyNameAxiom;        // Id concept - might be 'id', '@id', '_id', etc.
-    Type: KeyNameAxiom;      // Type concept - might be 'type', '@type', '_type', etc.
-    Version: KeyNameAxiom;   // Version concept - might be 'version', 'v', 'rev', etc.
-    Timestamps: TimestampsAxiom; // Timestamps concept - might be number, string, Date, etc.
-    References: ReferencesAxiom; // References concept - might be string, object, array, etc.
+    Id: KeyNameAxiom // Id concept - might be 'id', '@id', '_id', etc.
+    Type: KeyNameAxiom // Type concept - might be 'type', '@type', '_type', etc.
+    Version: KeyNameAxiom // Version concept - might be 'version', 'v', 'rev', etc.
+    Timestamps: TimestampsAxiom // Timestamps concept - might be number, string, Date, etc.
+    References: ReferencesAxiom // References concept - might be string, object, array, etc.
   }
 }
 ```
@@ -88,7 +88,7 @@ The key is that each axiom represents a **semantic concept** that might vary in 
 Axioms define what utilities expect, canons provide specific implementations. For example:
 
 - **JSON-LD Canon**: Uses `@id`, `@type`, ISO8601 strings, and URI references
-- **Standard Canon**: Uses `id`, `type`, Date objects, and UUID strings  
+- **Standard Canon**: Uses `id`, `type`, Date objects, and UUID strings
 - **MongoDB Canon**: Uses `_id`, `_type`, Unix timestamps, and ObjectId strings
 
 Each canon provides specific implementations of the same semantic concepts, while utilities work with the axiom interface.
@@ -99,13 +99,13 @@ A complete axiom description includes its definition, registration, and API spec
 
 ```typescript
 function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
-  const config = inferAxiom('Id', x);
-  return x[config.key] as AxiomValue<'Id'>;
+  const config = inferAxiom('Id', x)
+  return x[config.key] as AxiomValue<'Id'>
 }
 
 function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Timestamps'> {
-  const config = inferAxiom('Timestamps', x);
-  return config.toCanonical(x[config.key]);
+  const config = inferAxiom('Timestamps', x)
+  return config.toCanonical(x[config.key])
 }
 ```
 
@@ -131,20 +131,20 @@ The runtime representation of `$basis` is not just a simple object - it's a **Ty
 
 ```typescript
 // Type-level definition specifies the structure
-type IdAxiom = {
-  $basis: { id: string };
-  key: 'id';
-  $meta: { type: string; required: string };
+interface IdAxiom {
+  $basis: { id: string }
+  key: 'id'
+  $meta: { type: string, required: string }
 }
 
 // Runtime configuration with TypeGuard
 const runtimeConfig = {
   Id: {
-    $basis: { id: 'string' },  // TypeGuard<Satisfies<'Id', 'Internal'>>
+    $basis: { id: 'string' }, // TypeGuard<Satisfies<'Id', 'Internal'>>
     key: 'id',
-    $meta: { type: 'uuid'; required: 'true' },
+    $meta: { type: 'uuid', required: 'true' },
   }
-};
+}
 ```
 
 **What happens at runtime:**
@@ -164,14 +164,14 @@ Here's a complete working example showing all three parts of an axiom descriptio
 // 1. Registration - Register the axiom in the global interface
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    Id: KeyNameAxiom;  // Id concept - might be 'id', '@id', '_id', etc.
+    Id: KeyNameAxiom // Id concept - might be 'id', '@id', '_id', etc.
   }
 }
 
 // 2. API Specification - Functions that libraries can use
 function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
-  const config = inferAxiom('Id', x);
-  return x[config.key] as AxiomValue<'Id'>;
+  const config = inferAxiom('Id', x)
+  return x[config.key] as AxiomValue<'Id'>
 }
 ```
 

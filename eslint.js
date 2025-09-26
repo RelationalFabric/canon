@@ -1,0 +1,22 @@
+import antfu from '@antfu/eslint-config'
+import { defu } from 'defu'
+
+/**
+ * Create an ESLint configuration using antfu's config with optional custom overrides
+ * @param {object} [options] - Optional configuration to merge with the default antfu config
+ * @returns {object} ESLint configuration object
+ */
+export default function createEslintConfig(options = {}) {
+  const defaultConfig = {
+    typescript: true,
+    node: true,
+    ignores: [
+      'dist',
+      'node_modules',
+    ],
+  }
+
+  const mergedConfig = defu(options, defaultConfig)
+
+  return antfu(mergedConfig)
+}
