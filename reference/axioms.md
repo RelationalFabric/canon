@@ -171,7 +171,7 @@ console.log(versionOf(jsonLdData));  // "2.1"
 
 **Type Definition**:
 ```typescript
-type TimestampsAxiom = RepresentationAxiom<Date>;
+type TimestampsAxiom = RepresentationAxiom<number | string | Date | TypeGuard<unknown>, Date>;
 ```
 
 **Registration**:
@@ -179,16 +179,19 @@ type TimestampsAxiom = RepresentationAxiom<Date>;
 declare module '@relational-fabric/canon' {
   interface Axioms {
     Timestamps: {
-      $basis: Date;
-      toCanonical: (value: Date) => Date;
-      fromCanonical: (value: Date) => Date;
+      $basis: number | string | Date | TypeGuard<unknown>;
+      toCanonical: (value: number | string | Date | TypeGuard<unknown>) => Date;
+      fromCanonical: (value: Date) => number | string | Date | TypeGuard<unknown>;
     };
   }
 }
 ```
 
 **Common Value Types**:
+- Unix timestamps: `number` (milliseconds since epoch)
+- ISO strings: `string` (ISO 8601 format)
 - Date objects: `Date` (JavaScript Date instances)
+- Custom formats: `string` (various timestamp formats)
 
 **API Functions**:
 ```typescript
@@ -201,21 +204,29 @@ function timestampsOf<T extends Satisfies<'Timestamps'>>(x: T): AxiomValue<'Time
 **Implementation**:
 ```typescript
 // Timestamp conversion functions
-const timestampsToCanonical = (value: Date): Date => {
-  return value; // Date is already canonical
+const timestampsToCanonical = (value: number | string | Date | TypeGuard<unknown>): Date => {
+  if (value instanceof Date) return value;
+  if (typeof value === 'number') return new Date(value);
+  if (typeof value === 'string') return new Date(value);
+  // For TypeGuard<unknown>, assume it's a timestamp and try to convert
+  return new Date(value as any);
 };
 
-const timestampsFromCanonical = (value: Date): Date => {
-  return value; // Date is already canonical
+const timestampsFromCanonical = (value: Date): number | string | Date | TypeGuard<unknown> => {
+  return value; // Return as Date by default, can be customized per use case
 };
 ```
 
 **Usage Example**:
 ```typescript
-// Works with Date objects
+// Works with different timestamp value types
+const unixTimestamp = 1640995200000;
+const isoTimestamp = "2022-01-01T00:00:00Z";
 const dateTimestamp = new Date("2022-01-01");
 
-console.log(timestampsOf(dateTimestamp));  // Date object
+console.log(timestampsOf(unixTimestamp));  // Converted to canonical Date
+console.log(timestampsOf(isoTimestamp));   // Converted to canonical Date
+console.log(timestampsOf(dateTimestamp));  // Converted to canonical Date
 ```
 
 ### 5. References Axiom
@@ -224,7 +235,7 @@ console.log(timestampsOf(dateTimestamp));  // Date object
 
 **Type Definition**:
 ```typescript
-type ReferencesAxiom = RepresentationAxiom<EntityReference<string, unknown>>;
+type ReferencesAxiom = RepresentationAxiom<string | object | string[] | TypeGuard<unknown>, EntityReference<string, unknown>>;
 ```
 
 **Registration**:
@@ -232,16 +243,19 @@ type ReferencesAxiom = RepresentationAxiom<EntityReference<string, unknown>>;
 declare module '@relational-fabric/canon' {
   interface Axioms {
     References: {
-      $basis: EntityReference<string, unknown>;
-      toCanonical: (value: EntityReference<string, unknown>) => EntityReference<string, unknown>;
-      fromCanonical: (value: EntityReference<string, unknown>) => EntityReference<string, unknown>;
+      $basis: string | object | string[] | TypeGuard<unknown>;
+      toCanonical: (value: string | object | string[] | TypeGuard<unknown>) => EntityReference<string, unknown>;
+      fromCanonical: (value: EntityReference<string, unknown>) => string | object | string[] | TypeGuard<unknown>;
     };
   }
 }
 ```
 
 **Common Value Types**:
-- Entity references: `EntityReference<string, unknown>` (canonical reference format)
+- String IDs: `string` (single identifier)
+- Object references: `object` (reference objects with metadata)
+- Array references: `string[]` (arrays of identifiers)
+- URI references: `string` (URI-formatted references)
 
 **API Functions**:
 ```typescript
@@ -254,25 +268,47 @@ function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'Refe
 **Implementation**:
 ```typescript
 // Reference conversion functions
-const referencesToCanonical = (value: EntityReference<string, unknown>): EntityReference<string, unknown> => {
-  return value; // EntityReference is already canonical
+const referencesToCanonical = (value: string | object | string[] | TypeGuard<unknown>): EntityReference<string, unknown> => {
+  if (Array.isArray(value)) {
+    return {
+      ref: value[0] || '',
+      resolved: false
+    };
+  }
+  if (typeof value === 'string') {
+    return {
+      ref: value,
+      resolved: false
+    };
+  }
+  if (typeof value === 'object' && value !== null) {
+    // Extract ID from object reference
+    const obj = value as any;
+    if (obj.id) return { ref: obj.id, value: obj, resolved: true };
+    if (obj._id) return { ref: obj._id, value: obj, resolved: true };
+    if (obj['@id']) return { ref: obj['@id'], value: obj, resolved: true };
+    // If no ID field found, stringify the object
+    return { ref: JSON.stringify(value), resolved: false };
+  }
+  // For TypeGuard<unknown>, try to convert to string
+  return { ref: String(value), resolved: false };
 };
 
-const referencesFromCanonical = (value: EntityReference<string, unknown>): EntityReference<string, unknown> => {
-  return value; // EntityReference is already canonical
+const referencesFromCanonical = (value: EntityReference<string, unknown>): string | object | string[] | TypeGuard<unknown> => {
+  return value.resolved && value.value ? value.value : value.ref;
 };
 ```
 
 **Usage Example**:
 ```typescript
-// Works with entity references
-const entityRef: EntityReference<string, unknown> = {
-  ref: "user-123",
-  value: { name: "John Doe", email: "john@example.com" },
-  resolved: true
-};
+// Works with different reference value types
+const stringRef = "user-123";
+const objectRef = { id: "user-123", name: "John" };
+const arrayRef = ["tag1", "tag2", "tag3"];
 
-console.log(referencesOf(entityRef));   // EntityReference object
+console.log(referencesOf(stringRef));  // Converted to EntityReference
+console.log(referencesOf(objectRef));  // Converted to EntityReference
+console.log(referencesOf(arrayRef));   // Converted to EntityReference
 ```
 
 ## Conversion Types
