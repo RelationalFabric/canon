@@ -26,13 +26,13 @@ type KeyNameAxiom = Axiom<{
 }>;
 
 // Representation axiom for data with multiple representations
-type RepresentationAxiom<T> = Axiom<{
+type RepresentationAxiom<T, C = unknown> = Axiom<{
   $basis: T;
-  toCanonical: (value: T) => unknown;
-  fromCanonical: (value: unknown) => T;
+  toCanonical: (value: T) => C;
+  fromCanonical: (value: C) => T;
 }, {
-  toCanonical: (value: T) => unknown;
-  fromCanonical: (value: unknown) => T;
+  toCanonical: (value: T) => C;
+  fromCanonical: (value: C) => T;
 }>;
 
 // Canonical reference type for entity relationships
