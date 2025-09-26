@@ -33,12 +33,6 @@ type RepresentationAxiom<T, C = unknown> = Axiom<{
   isCanonical: (value: T | TypeGuard<unknown>) => value is C;
 }>;
 
-// Canonical reference type for entity relationships
-interface EntityReference<R, T = unknown> {
-  ref: R;
-  value?: T;
-  resolved: boolean;
-}
 ```
 
 ## Axiom Definitions
@@ -224,6 +218,13 @@ console.log(timestampsOf(dateTimestamp));  // Converted to canonical Date
 
 **Type Definition**:
 ```typescript
+// Canonical reference type for entity relationships
+interface EntityReference<R, T = unknown> {
+  ref: R;
+  value?: T;
+  resolved: boolean;
+}
+
 type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>;
 ```
 
@@ -233,8 +234,7 @@ declare module '@relational-fabric/canon' {
   interface Axioms {
     References: {
       $basis: string | object | TypeGuard<unknown>;
-      toCanonical: (value: string | object | TypeGuard<unknown>) => EntityReference<string, unknown>;
-      fromCanonical: (value: EntityReference<string, unknown>) => string | object | TypeGuard<unknown>;
+      isCanonical: (value: string | object | TypeGuard<unknown>) => value is EntityReference<string, unknown>;
     };
   }
 }
@@ -249,35 +249,15 @@ declare module '@relational-fabric/canon' {
 ```typescript
 function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'References'> {
   const config = inferAxiom('References', x);
-  return config.toCanonical(x);
+  return config.isCanonical(x) ? x : { ref: x as string, resolved: false };
 }
 ```
 
 **Implementation**:
 ```typescript
-// Reference conversion functions
-const referencesToCanonical = (value: string | object | TypeGuard<unknown>): EntityReference<string, unknown> => {
-  if (typeof value === 'string') {
-    return {
-      ref: value,
-      resolved: false
-    };
-  }
-  if (typeof value === 'object' && value !== null) {
-    // Extract ID from object reference
-    const obj = value as any;
-    if (obj.id) return { ref: obj.id, value: obj, resolved: true };
-    if (obj._id) return { ref: obj._id, value: obj, resolved: true };
-    if (obj['@id']) return { ref: obj['@id'], value: obj, resolved: true };
-    // If no ID field found, stringify the object
-    return { ref: JSON.stringify(value), resolved: false };
-  }
-  // For TypeGuard<unknown>, try to convert to string
-  return { ref: String(value), resolved: false };
-};
-
-const referencesFromCanonical = (value: EntityReference<string, unknown>): string | object | TypeGuard<unknown> => {
-  return value.resolved && value.value ? value.value : value.ref;
+// Reference canonical type guard
+const referencesIsCanonical = (value: string | object | TypeGuard<unknown>): value is EntityReference<string, unknown> => {
+  return typeof value === 'object' && value !== null && 'ref' in value && 'resolved' in value;
 };
 ```
 
@@ -285,10 +265,10 @@ const referencesFromCanonical = (value: EntityReference<string, unknown>): strin
 ```typescript
 // Works with different reference value types
 const stringRef = "user-123";
-const objectRef = { id: "user-123", name: "John" };
+const entityRef = { ref: "user-123", resolved: false };
 
 console.log(referencesOf(stringRef));  // Converted to EntityReference
-console.log(referencesOf(objectRef));  // Converted to EntityReference
+console.log(referencesOf(entityRef));  // Already canonical EntityReference
 ```
 
 ## Conversion Types
