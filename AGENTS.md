@@ -12,6 +12,8 @@ Canon is a modern TypeScript package that provides universal type primitives and
 - Axiomatic system for rich configuration
 - Lazy typing with canonical identity preservation
 - Support for multiple data formats (JSON-LD, MongoDB, REST APIs)
+- **Curated library ecosystem** - Provides a known good set of libraries and modules as a canonical starting point
+- **Canonical data structures** - Standardized types and data structures that serve as the foundation for robust applications
 
 ## Essential Reading Order
 
@@ -32,6 +34,13 @@ Canons are universal type blueprints that implement axioms for specific data for
 
 ### Core Axioms
 The system includes five essential axioms: Id, Type, Version, Timestamps, and References. See [reference/axioms.md](./reference/axioms.md) for detailed specifications.
+
+### Canonical Data Structures
+Canon provides standardized types and data structures that serve as the foundation for robust applications:
+- **Universal type primitives** - Battle-tested types from the TypeScript ecosystem
+- **Consistent data models** - Standardized approaches to common data patterns
+- **Type-safe operations** - Proven patterns for data manipulation and validation
+- **Cross-format compatibility** - Structures that work across different data sources
 
 ## Development Guidelines
 
@@ -148,11 +157,22 @@ declare module '@relational-fabric/canon' {
 
 ## Integration Points
 
-Canon is designed to compose with existing TypeScript libraries:
+Canon is designed to compose with existing TypeScript libraries and provides a curated ecosystem of known good libraries:
+
+### Core Library Ecosystem
 - **type-fest** & **ts-essentials** - For utility types
 - **uuid** & **nanoid** - For identity generation
 - **object-hash** - For content-based hashing
 - **immutable.js** - For immutable data structures
+
+### Canonical Starting Point
+Canon serves as a **canonical starting point** by providing:
+- **Pre-configured TypeScript setup** - Base configurations that work out of the box
+- **Curated dependency set** - Known good versions of essential libraries
+- **Standardized patterns** - Consistent approaches to common problems
+- **Best practice implementations** - Proven solutions for type safety and data handling
+
+This curated approach ensures that developers have a solid foundation to build upon, reducing decision fatigue and providing confidence in the chosen technology stack.
 
 ## Testing and Quality Assurance
 
