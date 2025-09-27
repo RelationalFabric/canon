@@ -78,13 +78,13 @@ src/
 
 **Opinionated (kit.ts):**
 ```typescript
-import { mergeConfigs, createEslintConfig } from '@relational-fabric/canon'
+import { createEslintConfig, mergeConfigs } from '@relational-fabric/canon'
 ```
 
 **Transparent (_/):**
 ```typescript
-import { defu } from '@relational-fabric/canon/_/defu'
 import antfu from '@relational-fabric/canon/_/antfu'
+import { defu } from '@relational-fabric/canon/_/defu'
 ```
 
 ## Naming Rationale

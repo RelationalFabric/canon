@@ -58,14 +58,14 @@ The package provides utility libraries through a dual export strategy, offering 
 
 ### Opinionated Access (Recommended)
 ```typescript
-import { mergeConfigs, createEslintConfig } from '@relational-fabric/canon'
+import { createEslintConfig, mergeConfigs } from '@relational-fabric/canon'
 // Curated, opinionated selection with our preferred naming and API shape
 ```
 
 ### Transparent Access (Advanced)
 ```typescript
-import { defu } from '@relational-fabric/canon/_/defu'
 import antfu from '@relational-fabric/canon/_/antfu'
+import { defu } from '@relational-fabric/canon/_/defu'
 // Direct access to third-party libraries with original API contracts preserved
 ```
 
