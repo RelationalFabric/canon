@@ -54,7 +54,7 @@ export default createEslintConfig({
 
 ## Available Utilities
 
-The package re-exports utility libraries used internally:
+The package re-exports utility libraries used internally. These are provided as both direct dependencies and optional dependencies to ensure version consistency:
 
 ### Object Merging
 ```typescript
@@ -62,6 +62,8 @@ import { defu } from '@relational-fabric/canon'
 // Same utility used internally for configuration merging
 const merged = defu(userOptions, defaultOptions)
 ```
+
+**Version Management**: The package uses both `dependencies` and `optionalDependencies` to ensure consumers get the exact same version used internally, preventing version conflicts and ensuring predictable behavior.
 
 ## System Requirements
 

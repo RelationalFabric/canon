@@ -62,6 +62,9 @@
     "@tsconfig/node-lts": "^20.0.0",
     "defu": "^6.1.4"
   },
+  "optionalDependencies": {
+    "defu": "^6.1.4"
+  },
   "devDependencies": {
     "adr-tools": "^2.0.4",
     "eslint": "^9.10.0",
