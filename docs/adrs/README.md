@@ -46,18 +46,6 @@ Node.js 18 reached End-of-Life in April 2025.
 All packages must specify `>=22.0.0` in engines field.
 ```
 
-## ADR Index
-
-- [ADR-001: TypeScript Package Setup](./0001-typescript-package-setup.md)
-- [ADR-002: ESLint Configuration with Antfu](./0002-eslint-configuration-with-antfu.md)
-- [ADR-003: Documentation Linting Inclusion](./0003-documentation-linting-inclusion.md)
-- [ADR-004: TypeScript Configuration Separation](./0004-typescript-configuration-separation.md)
-- [ADR-005: ESLint Configuration Abstraction](./0005-eslint-configuration-abstraction.md)
-- [ADR-006: Unbuilt TypeScript Library](./0006-unbuilt-typescript-library.md)
-- [ADR-007: Y-Statement Format for ADRs](./0007-y-statement-format.md) *(Y-Statement)*
-- [ADR-008: Dual Export Strategy](./0008-dual-export-strategy.md)
-- [ADR-009: Node.js Version Requirement](./0009-node-js-version-requirement.md) *(Y-Statement)*
-
 ## Creating New ADRs
 
 We use [adr-tools](https://github.com/npryce/adr-tools) to manage ADRs. This ensures consistency and provides helpful commands for ADR management.
@@ -90,7 +78,7 @@ npm install
 #### Using npm scripts (recommended):
 - **List all ADRs:** `npm run adr:list`
 - **Create new ADR:** `npm run adr:new "Title"`
-- **Generate table of contents:** `npm run adr:index`
+- **Generate table of contents:** `npm run adr:index` (generates index in ADR directory)
 
 #### Direct adr-tools commands:
 - **List all ADRs:** `npx adr list`
@@ -106,7 +94,7 @@ If adr-tools is not available, you can create ADRs manually:
 1. Copy the template from `template.md`
 2. Rename it to `XXXX-descriptive-title.md` where XXXX is the next sequential number
 3. Fill in the template with your decision
-4. Update this README to include the new ADR in the index
+4. Use `npm run adr:index` to generate an updated table of contents
 5. Update the status as the decision progresses through the lifecycle
 
 ## ADR Lifecycle

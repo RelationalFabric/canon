@@ -91,7 +91,7 @@ This project uses Architecture Decision Records (ADRs) to document architectural
 
 - `npm run adr:list` - List all ADRs
 - `npm run adr:new "Title"` - Create a new ADR
-- `npm run adr:index` - Generate table of contents
+- `npm run adr:index` - Generate table of contents (in ADR directory)
 
 ## License
 

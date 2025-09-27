@@ -92,7 +92,7 @@ When making architectural decisions that affect the project structure, configura
 
 - **List all ADRs:** `npm run adr:list`
 - **Create new ADR:** `npm run adr:new "Title"`
-- **Generate index:** `npm run adr:index`
+- **Generate index:** `npm run adr:index` (generates index in ADR directory)
 - **Link ADRs:** `cd docs/adrs && npx adr link <from> <to> <relationship>`
 - **Help:** `cd docs/adrs && npx adr help`
 

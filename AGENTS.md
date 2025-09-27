@@ -93,7 +93,7 @@ Use these npm scripts for development tasks:
 - `npm run lint:fix` - Fix ESLint issues automatically
 - `npm run adr:new "Title"` - Create a new ADR
 - `npm run adr:list` - List all ADRs
-- `npm run adr:index` - Generate ADR table of contents
+- `npm run adr:index` - Generate ADR table of contents (in ADR directory)
 
 ## Key Patterns to Follow
 
@@ -185,7 +185,7 @@ This curated approach ensures that developers have a solid foundation to build u
 ## Getting Help
 
 - Review existing [examples](./docs/examples/) for implementation patterns
-- Check [ADR index](./docs/adrs/README.md) for architectural context
+- Check ADR directory for architectural context
 - Follow the established conventions in [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Use the provided npm scripts for development tasks
 
