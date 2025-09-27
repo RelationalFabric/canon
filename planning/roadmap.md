@@ -181,7 +181,7 @@ Simple roadmap for building Canon's core features.
 
 ## Success Criteria
 
-- <50KB bundle size
+- Actually works (has working code)
 - Zero runtime type errors
 - Works across all data formats
 - Good developer experience

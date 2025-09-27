@@ -45,7 +45,6 @@ Canon is the foundational library for a useful type ecosystem. It serves as a ca
 
 ## Success Metrics
 
-- npm downloads and GitHub stars
+- Actually works (has working code)
 - Zero runtime type errors
-- Minimal bundle size impact
 - Developer feedback
