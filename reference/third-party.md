@@ -54,14 +54,30 @@ export default createEslintConfig({
 
 ## Available Utilities
 
-The package re-exports utility libraries used internally. These are provided as both direct dependencies and optional dependencies to ensure version consistency:
+The package provides utility libraries through a dual export strategy, offering both opinionated and transparent access patterns.
 
-### Object Merging
+### Opinionated Access (Recommended)
 ```typescript
-import { defu } from '@relational-fabric/canon'
-// Same utility used internally for configuration merging
-const merged = defu(userOptions, defaultOptions)
+import { mergeConfigs, createEslintConfig } from '@relational-fabric/canon'
+// Curated, opinionated selection with our preferred naming and API shape
 ```
+
+### Transparent Access (Advanced)
+```typescript
+import { defu } from '@relational-fabric/canon/_/defu'
+import antfu from '@relational-fabric/canon/_/antfu'
+// Direct access to third-party libraries with original API contracts preserved
+```
+
+### Available Utilities
+
+**Object Merging:**
+- **Opinionated**: `mergeConfigs` (wrapper function)
+- **Transparent**: `defu` (direct re-export)
+
+**ESLint Configuration:**
+- **Opinionated**: `createEslintConfig` (wrapper function)
+- **Transparent**: `antfu` (direct re-export)
 
 **Version Management**: The package uses both `dependencies` and `optionalDependencies` to ensure consumers get the exact same version used internally, preventing version conflicts and ensuring predictable behavior.
 
