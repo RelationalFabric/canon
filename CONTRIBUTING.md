@@ -127,7 +127,7 @@ Before submitting any changes, ensure the following criteria are met:
 1. **Code Quality**
    - All code passes ESLint checks: `npm run lint`
    - TypeScript compilation succeeds: `npm run check`
-   - All linting issues are automatically fixable: `npm run lint:fix` runs cleanly
+   - All linting issues are automatically fixable: `npm run lint:fix` runs cleanly (presupposes `npm run lint` passes)
 
 2. **Commit Standards**
    - Commit messages follow [Conventional Commits](#conventional-commits) format
@@ -153,7 +153,7 @@ Before submitting any changes, ensure the following criteria are met:
 - All code must pass ESLint checks: `npm run lint`
 - TypeScript compilation must succeed: `npm run check`
 - Documentation code examples must be properly formatted (see [ADR-003](./docs/adrs/0003-documentation-linting-inclusion.md))
-- **Clean lint:fix required** - All linting issues must be automatically fixable and resolved before submission
+- **Clean lint:fix required** - All linting issues must be automatically fixable and resolved before submission (presupposes `npm run lint` passes)
 
 ## Testing
 
