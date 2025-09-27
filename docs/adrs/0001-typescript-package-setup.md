@@ -38,7 +38,7 @@ Chosen option: "Use @tsconfig/node-lts as base configuration with ES modules", b
 
 ### Negative Consequences
 
-* Requires Node.js 22+ (Active LTS, Node 18 reached EOL in April 2025)
+* Requires Node.js 18+ (acceptable for modern packages)
 * ES module syntax requires .js extensions in imports (handled properly)
 
 ## Implementation Details
