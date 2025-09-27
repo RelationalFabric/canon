@@ -41,6 +41,8 @@ Canon is the foundational library for a useful type ecosystem. It serves as a ca
 **Phase 3**: Advanced features
 **Phase 4**: Ecosystem leadership
 
+*No timeline - work happens when possible*
+
 ## Success Metrics
 
 - npm downloads and GitHub stars

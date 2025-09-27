@@ -2,7 +2,7 @@
 
 Simple roadmap for building Canon's core features.
 
-## Phase 1: Foundation (Current - Q1 2025)
+## Phase 1: Foundation
 
 ### ✅ Completed
 - **Configuration Package**: TypeScript and ESLint configuration setup
@@ -23,7 +23,7 @@ Simple roadmap for building Canon's core features.
 - **Utility Library Integration**: type-fest, radash, jsonpath-plus
 - **Dual Export Strategy**: Opinionated + transparent access patterns
 
-## Phase 2: Ecosystem Integration (Q2 2025)
+## Phase 2: Ecosystem Integration
 
 ### Core Library Integration
 **Priority: High**
@@ -68,7 +68,7 @@ Simple roadmap for building Canon's core features.
 - Testing utilities and best practices
 - Development workflow optimization
 
-## Phase 3: Advanced Features (Q3 2025)
+## Phase 3: Advanced Features
 
 ### Advanced Type System
 **Priority: High**
@@ -112,7 +112,7 @@ Simple roadmap for building Canon's core features.
 - Enterprise support processes
 - Advanced monitoring and observability
 
-## Phase 4: Ecosystem Leadership (Q4 2025+)
+## Phase 4: Ecosystem Leadership
 
 ### Community and Ecosystem
 **Priority: High**
@@ -176,6 +176,8 @@ Simple roadmap for building Canon's core features.
 - [ ] Advanced axiom types
 - [ ] Performance optimization
 - [ ] Enterprise features
+
+**When?** No set timeline - work happens as time allows
 
 ## Success Criteria
 
