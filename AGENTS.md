@@ -144,7 +144,7 @@ declare module '@relational-fabric/canon' {
 ## Dependencies and Requirements
 
 ### Peer Dependencies
-- Node.js: 18.0.0 or higher
+- Node.js: 22.0.0 or higher
 - TypeScript: 5.0.0 or higher
 - ESLint: 9.0.0 or higher
 

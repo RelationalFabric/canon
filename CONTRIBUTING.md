@@ -109,7 +109,7 @@ For more details, see the [ADR README](./docs/adrs/README.md).
 
 ### Prerequisites
 
-- Node.js 18+ (see [ADR-001](./docs/adrs/0001-typescript-package-setup.md))
+- Node.js 22+ (see [ADR-001](./docs/adrs/0001-typescript-package-setup.md))
 - TypeScript 5.4+
 - ESLint 9+ (see [ADR-002](./docs/adrs/0002-eslint-configuration-with-antfu.md))
 

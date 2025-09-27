@@ -53,7 +53,7 @@ export default createEslintConfig({
 
 This package requires the following peer dependencies:
 
-- **Node.js**: 18.0.0 or higher
+- **Node.js**: 22.0.0 or higher
 - **TypeScript**: 5.0.0 or higher
 - **ESLint**: 9.0.0 or higher
 
@@ -67,7 +67,7 @@ This package requires the following peer dependencies:
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - npm or yarn
 
 ### Setup

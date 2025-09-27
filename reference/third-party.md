@@ -83,7 +83,7 @@ import antfu from '@relational-fabric/canon/_/antfu'
 
 ## System Requirements
 
-- **Node.js**: >=18.0.0 (LTS)
+- **Node.js**: >=22.0.0 (Active LTS)
 - **ESLint**: ^9.0.0 (peer dependency)
 - **TypeScript**: ^5.0.0 (peer dependency)
 
