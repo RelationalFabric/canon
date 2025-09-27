@@ -118,7 +118,6 @@ For more details, see the [ADR README](./docs/adrs/README.md).
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Run checks: `npm run check`
-4. Build the package: `npm run build`
 
 ### Definition of Done
 
@@ -143,9 +142,9 @@ Before submitting any changes, ensure the following criteria are met:
    - All existing tests pass
    - New functionality includes appropriate tests (when testing framework is available)
 
-5. **Build Verification**
-   - Package builds successfully: `npm run build`
-   - No build warnings or errors
+5. **Type Verification**
+   - TypeScript compilation succeeds: `npm run check`
+   - No type errors or warnings
    - All exports are properly typed
 
 ### Code Quality

@@ -87,12 +87,9 @@ Before making significant changes, review the [Architecture Decision Records (AD
 
 Use these npm scripts for development tasks:
 
-- `npm run build` - Build the package
-- `npm run dev` - Build in watch mode
+- `npm run check` - Type check and lint the package
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run check` - Run TypeScript check and ESLint
-- `npm run clean` - Clean build output
 - `npm run adr:new "Title"` - Create a new ADR
 - `npm run adr:list` - List all ADRs
 - `npm run adr:index` - Generate ADR table of contents

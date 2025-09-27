@@ -7,8 +7,8 @@ A modern TypeScript package template with ESLint and TypeScript configurations f
 - **Modern TypeScript configuration** based on Node.js LTS
 - **ESLint configuration** with @antfu/eslint-config
 - **Reusable configurations** that can be extended by other projects
-- **ES modules** with proper type declarations
-- **Development tools** for linting, building, and ADR management
+- **ES modules** with TypeScript source
+- **Development tools** for linting and ADR management
 
 ## Quick Start
 
@@ -80,12 +80,9 @@ npm install
 
 ### Available Scripts
 
-- `npm run build` - Build the package
-- `npm run dev` - Build in watch mode
+- `npm run check` - Type check and lint the package
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run check` - Run TypeScript check and ESLint
-- `npm run clean` - Clean build output
 
 ### ADR Management
 
