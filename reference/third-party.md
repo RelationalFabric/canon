@@ -29,7 +29,7 @@ The package provides the following configurations for consumers:
 }
 ```
 - Extends `@tsconfig/node-lts` with additional modern TypeScript settings
-- Includes strict mode, declaration generation, and source maps
+- Includes strict mode and modern TypeScript features
 - Optimized for Node.js LTS environments
 
 ### ESLint Configuration
@@ -50,6 +50,17 @@ export default createEslintConfig({
     'no-console': 'warn'
   }
 })
+```
+
+## Available Utilities
+
+The package re-exports utility libraries used internally:
+
+### Object Merging
+```typescript
+import { defu } from '@relational-fabric/canon'
+// Same utility used internally for configuration merging
+const merged = defu(userOptions, defaultOptions)
 ```
 
 ## System Requirements
