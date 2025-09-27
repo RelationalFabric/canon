@@ -81,6 +81,7 @@ npm install
 ### Available Scripts
 
 - `npm run check` - Type check and lint the package
+- `npm run dev` - Run TypeScript in watch mode
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
 

@@ -75,6 +75,23 @@ src/
 tsconfig.base.json
 ```
 
+## Dependency Management
+
+The package uses both `dependencies` and `optionalDependencies` for utility libraries to ensure version consistency:
+
+```json
+{
+  "dependencies": {
+    "defu": "^6.1.4"
+  },
+  "optionalDependencies": {
+    "defu": "^6.1.4"
+  }
+}
+```
+
+This modern approach ensures consumers get the exact same version used internally, preventing version conflicts and ensuring predictable behavior.
+
 ## Package.json Changes
 
 **Exports:**

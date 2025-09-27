@@ -41,6 +41,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "tsc --noEmit && eslint .",
+    "dev": "tsx --watch src/index.ts",
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
     "adr:index": "cd docs/adrs && npx adr generate toc"
@@ -68,6 +69,7 @@
   "devDependencies": {
     "adr-tools": "^2.0.4",
     "eslint": "^9.10.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.4.0"
   }
 }
