@@ -126,7 +126,7 @@ techniques-patterns:
     - name: "Universal Adapter Pattern"
       description: "Multi-format data handling through common interfaces"
       isNew: true
-      justification: "Core to Canon's vision of supporting multiple data formats (JSON-LD, MongoDB, REST)"
+      justification: "Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first"
     
     - name: "Lazy Typing"
       description: "Deferred type resolution for flexible type definitions"
@@ -136,7 +136,7 @@ techniques-patterns:
     - name: "Canon Pattern"
       description: "Axiomatic type definitions with basis, key, and meta properties"
       isNew: true
-      justification: "Core pattern for defining universal semantic concepts across formats"
+      justification: "Core pattern but NOT YET IMPLEMENTED - needs core axiom system first"
     
     - name: "Tree-shaking Support"
       description: "Optimized bundling with unused code elimination"
@@ -175,7 +175,7 @@ features-capabilities:
     - name: "Multi-format Data Support"
       description: "Support for JSON-LD, MongoDB, REST APIs through unified interfaces"
       isNew: false
-      justification: "Core to Canon's universal adapter vision"
+      justification: "Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first"
     
     - name: "Type Checking"
       description: "Compile-time type safety and validation"
