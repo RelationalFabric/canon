@@ -87,15 +87,13 @@ Before making significant changes, review the [Architecture Decision Records (AD
 
 Use these npm scripts for development tasks:
 
-- `npm run build` - Build the package
-- `npm run dev` - Build in watch mode
+- `npm run check` - Type check and lint the package
+- `npm run dev` - Run TypeScript in watch mode
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run check` - Run TypeScript check and ESLint
-- `npm run clean` - Clean build output
 - `npm run adr:new "Title"` - Create a new ADR
 - `npm run adr:list` - List all ADRs
-- `npm run adr:index` - Generate ADR table of contents
+- `npm run adr:index` - Generate ADR table of contents (in ADR directory)
 
 ## Key Patterns to Follow
 
@@ -146,7 +144,7 @@ declare module '@relational-fabric/canon' {
 ## Dependencies and Requirements
 
 ### Peer Dependencies
-- Node.js: 18.0.0 or higher
+- Node.js: 22.0.0 or higher
 - TypeScript: 5.0.0 or higher
 - ESLint: 9.0.0 or higher
 
@@ -187,7 +185,7 @@ This curated approach ensures that developers have a solid foundation to build u
 ## Getting Help
 
 - Review existing [examples](./docs/examples/) for implementation patterns
-- Check [ADR index](./docs/adrs/README.md) for architectural context
+- Check ADR directory for architectural context
 - Follow the established conventions in [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Use the provided npm scripts for development tasks
 

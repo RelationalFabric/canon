@@ -7,8 +7,8 @@ A modern TypeScript package template with ESLint and TypeScript configurations f
 - **Modern TypeScript configuration** based on Node.js LTS
 - **ESLint configuration** with @antfu/eslint-config
 - **Reusable configurations** that can be extended by other projects
-- **ES modules** with proper type declarations
-- **Development tools** for linting, building, and ADR management
+- **ES modules** with TypeScript source
+- **Development tools** for linting and ADR management
 
 ## Quick Start
 
@@ -53,7 +53,7 @@ export default createEslintConfig({
 
 This package requires the following peer dependencies:
 
-- **Node.js**: 18.0.0 or higher
+- **Node.js**: 22.0.0 or higher
 - **TypeScript**: 5.0.0 or higher
 - **ESLint**: 9.0.0 or higher
 
@@ -67,7 +67,7 @@ This package requires the following peer dependencies:
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - npm or yarn
 
 ### Setup
@@ -80,12 +80,10 @@ npm install
 
 ### Available Scripts
 
-- `npm run build` - Build the package
-- `npm run dev` - Build in watch mode
+- `npm run check` - Type check and lint the package
+- `npm run dev` - Run TypeScript in watch mode
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run check` - Run TypeScript check and ESLint
-- `npm run clean` - Clean build output
 
 ### ADR Management
 
@@ -93,7 +91,7 @@ This project uses Architecture Decision Records (ADRs) to document architectural
 
 - `npm run adr:list` - List all ADRs
 - `npm run adr:new "Title"` - Create a new ADR
-- `npm run adr:index` - Generate table of contents
+- `npm run adr:index` - Generate table of contents (in ADR directory)
 
 ## License
 
