@@ -1,8 +1,6 @@
 # Canon Development Roadmap
 
-## Overview
-
-This roadmap outlines the planned development of Canon over the next 12+ months, organized by phases and priorities. The roadmap is aligned with our [Strategic Vision](./strategy.md) and reflects community feedback and market needs.
+Simple roadmap for building Canon's core features.
 
 ## Phase 1: Foundation (Current - Q1 2025)
 
@@ -160,80 +158,28 @@ This roadmap outlines the planned development of Canon over the next 12+ months,
 
 ## Detailed Milestones
 
-### Q1 2025 Milestones
-- [ ] **IMPLEMENT**: Core axiom system (Id, Type, Version, Timestamps, References)
-- [ ] **IMPLEMENT**: Basic canon patterns (Internal, JSON-LD, MongoDB)
-- [ ] **IMPLEMENT**: Dual export strategy (opinionated + transparent access)
-- [ ] **IMPLEMENT**: Core utility library integration (type-fest, radash, jsonpath-plus)
-- [ ] **IMPLEMENT**: Working examples and documentation
-- [ ] **COMPLETE**: Phase 1 foundation - actual working Canon package
+## Next Steps
 
-### Q2 2025 Milestones
-- [ ] GraphQL and REST API canon implementations
-- [ ] Runtime validation with Zod integration
-- [ ] Enhanced developer tooling and IDE support
-- [ ] Comprehensive testing utilities and best practices
-- [ ] Migration guides and upgrade paths
+**Phase 1 - Core Implementation:**
+- [ ] Core axiom system (Id, Type, Version, Timestamps, References)
+- [ ] Basic canon patterns (Internal, JSON-LD, MongoDB)
+- [ ] Dual export strategy 
+- [ ] Utility library integration (type-fest, radash, jsonpath-plus)
+- [ ] Working examples
 
-### Q3 2025 Milestones
-- [ ] Advanced axiom type system
-- [ ] Schema evolution and migration tools
-- [ ] Performance optimization and monitoring
-- [ ] Enterprise feature set and documentation
-- [ ] Security and compliance features
+**Phase 2 - Ecosystem:**
+- [ ] GraphQL/REST canon implementations
+- [ ] Runtime validation (Zod)
+- [ ] Enhanced tooling
 
-### Q4 2025 Milestones
-- [ ] Community canon registry and marketplace
-- [ ] Educational content and certification programs
-- [ ] Industry partnerships and integrations
-- [ ] Research initiatives and academic partnerships
-- [ ] Global community building and adoption
+**Phase 3 - Advanced:**
+- [ ] Advanced axiom types
+- [ ] Performance optimization
+- [ ] Enterprise features
 
 ## Success Criteria
 
-### Technical Success
-- **Performance**: <50KB bundle size impact for core features
-- **Compatibility**: 100% compatibility across supported data formats
-- **Type Safety**: Zero runtime type errors in production usage
-- **Developer Experience**: <5 minute setup time for new projects
-
-### Community Success
-- **Adoption**: 10,000+ monthly npm downloads
-- **Contributors**: 20+ active community contributors
-- **Documentation**: 95%+ positive feedback on documentation quality
-- **Support**: <24 hour response time for community issues
-
-### Strategic Success
-- **Recognition**: Industry recognition as leading TypeScript type system
-- **Ecosystem**: 50+ third-party integrations and partnerships
-- **Education**: 5+ conference talks and educational content pieces
-- **Research**: 2+ academic publications or research collaborations
-
-## Risk Mitigation
-
-### Technical Risks
-- **TypeScript Compatibility**: Regular testing with TypeScript beta releases
-- **Performance Degradation**: Continuous performance monitoring and optimization
-- **Breaking Changes**: Comprehensive migration guides and version compatibility
-
-### Market Risks
-- **Competition**: Focus on unique value proposition and community building
-- **Adoption Challenges**: Invest heavily in developer experience and documentation
-- **Technology Shifts**: Regular technology radar updates and trend analysis
-
-### Resource Risks
-- **Team Capacity**: Community contribution programs and partnerships
-- **Funding**: Diversified funding strategy with enterprise and community support
-- **Timeline Delays**: Agile development with regular milestone reviews
-
-## Feedback and Updates
-
-This roadmap is a living document that will be updated quarterly based on:
-- Community feedback and requests
-- Market trends and technology evolution
-- Technical discoveries and innovations
-- Strategic partnerships and opportunities
-
-**Next Review**: End of Q1 2025
-**Responsible**: Canon maintainers and community contributors
-**Process**: Public review and feedback period before updates
+- <50KB bundle size
+- Zero runtime type errors
+- Works across all data formats
+- Good developer experience
