@@ -1,4 +1,4 @@
-# ADR-007: Dual Export Strategy
+# ADR-008: Dual Export Strategy
 
 * Status: accepted
 * Date: 2025-01-26

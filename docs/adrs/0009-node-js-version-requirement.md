@@ -2,7 +2,7 @@
 format: y-statement
 ---
 
-# ADR-008: Node.js Version Requirement
+# ADR-009: Node.js Version Requirement
 
 * Status: accepted
 * Date: 2025-01-26
@@ -30,3 +30,4 @@ We require Node.js 22+ as the minimum supported version for all packages in the 
 
 - [Node.js Release Schedule](https://nodejs.org/en/about/releases/)
 - [ADR-001: TypeScript Package Setup](./0001-typescript-package-setup.md) - Original Node.js requirement
+- [ADR-007: Y-Statement Format for ADRs](./0007-y-statement-format.md) - Format decision
