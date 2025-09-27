@@ -63,6 +63,14 @@ This package requires the following peer dependencies:
 - **TypeScript config**: `@relational-fabric/canon/tsconfig` - Base TypeScript configuration
 - **ESLint config**: `@relational-fabric/canon/eslint` - ESLint configuration function
 
+## Technology Radar
+
+Canon maintains a comprehensive [Technology Radar](radar/) that tracks our recommendations for tools, techniques, features, and data formats. The radar helps consumers understand what technologies to adopt, trial, assess, or avoid when building with Canon.
+
+- **View Radar Data**: [radar/data.yaml](radar/data.yaml) - Human-readable YAML format
+- **Radar Methodology**: [docs/radar-methodology.md](docs/radar-methodology.md) - How we maintain the radar
+- **Update Radar**: `npm run radar:convert` - Convert YAML to CSV for visualization
+
 ## Development
 
 ### Prerequisites
