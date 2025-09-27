@@ -120,15 +120,82 @@ For more details, see the [ADR README](./docs/adrs/README.md).
 3. Run checks: `npm run check`
 4. Build the package: `npm run build`
 
+### Definition of Done
+
+Before submitting any changes, ensure the following criteria are met:
+
+1. **Code Quality**
+   - All code passes ESLint checks: `npm run lint`
+   - TypeScript compilation succeeds: `npm run check`
+   - All linting issues are automatically fixable: `npm run lint:fix` runs cleanly
+
+2. **Commit Standards**
+   - Commit messages follow [Conventional Commits](#conventional-commits) format
+   - Each commit represents a logical, atomic change
+   - Commit messages are clear and descriptive
+
+3. **Documentation**
+   - Code examples in documentation are valid and properly formatted
+   - New features include appropriate documentation updates
+   - ADRs are created for architectural changes
+
+4. **Testing**
+   - All existing tests pass
+   - New functionality includes appropriate tests (when testing framework is available)
+
+5. **Build Verification**
+   - Package builds successfully: `npm run build`
+   - No build warnings or errors
+   - All exports are properly typed
+
 ### Code Quality
 
 - All code must pass ESLint checks: `npm run lint`
 - TypeScript compilation must succeed: `npm run check`
 - Documentation code examples must be properly formatted (see [ADR-003](./docs/adrs/0003-documentation-linting-inclusion.md))
+- **Clean lint:fix required** - All linting issues must be automatically fixable and resolved before submission
 
 ## Testing
 
 <!-- TODO: Add testing guidelines -->
+
+## Commit Messages
+
+### Conventional Commits
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for commit message formatting. This ensures consistent, machine-readable commit messages that enable automated tooling.
+
+#### Format
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### Types
+- **feat**: A new feature
+- **fix**: A bug fix
+- **docs**: Documentation only changes
+- **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **perf**: A code change that improves performance
+- **test**: Adding missing tests or correcting existing tests
+- **chore**: Changes to the build process or auxiliary tools and libraries
+
+#### Examples
+```
+feat(axioms): add new Timestamps axiom for date handling
+fix(canons): resolve type inference issue in JsonLdCanon
+docs(api): update function signatures in reference documentation
+refactor(types): simplify axiom type definitions
+```
+
+#### Scope Guidelines
+- Use the area of codebase affected (e.g., `axioms`, `canons`, `types`, `docs`)
+- Keep scope names short and descriptive
+- Use lowercase with hyphens if needed
 
 ## Code Review
 
@@ -140,6 +207,8 @@ For more details, see the [ADR README](./docs/adrs/README.md).
 - [ ] Documentation is updated if needed
 - [ ] ADRs are created for architectural changes
 - [ ] Code examples in documentation are valid and formatted
+- [ ] **Commit messages follow conventional commits format**
+- [ ] **All linting issues are automatically fixable and resolved**
 
 ## Release Process
 
