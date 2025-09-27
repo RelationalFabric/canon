@@ -13,7 +13,7 @@ Canon is a modern TypeScript package that provides universal type primitives and
 - Lazy typing with canonical identity preservation
 - Support for multiple data formats (JSON-LD, MongoDB, REST APIs)
 - **Curated library ecosystem** - Provides a known good set of libraries and modules as a canonical starting point
-- **Canonical data structures** - Standardized types and data structures that serve as the foundation for robust applications
+- **Canonical APIs** - Standardized interfaces for categories of data structures with sensible defaults when choice is available
 
 ## Essential Reading Order
 
@@ -36,11 +36,12 @@ Canons are universal type blueprints that implement axioms for specific data for
 The system includes five essential axioms: Id, Type, Version, Timestamps, and References. See [reference/axioms.md](./reference/axioms.md) for detailed specifications.
 
 ### Canonical Data Structures
-Canon provides standardized types and data structures that serve as the foundation for robust applications:
+Canon provides standardized types and APIs for working with data structures, recognizing that in many cases you won't have the opportunity to choose the underlying data structures:
 - **Universal type primitives** - Battle-tested types from the TypeScript ecosystem
-- **Consistent data models** - Standardized approaches to common data patterns
+- **Canonical APIs** - Standardized interfaces for categories of data structures
+- **Sensible defaults** - Recommended choices when you do have the opportunity to select data structures
 - **Type-safe operations** - Proven patterns for data manipulation and validation
-- **Cross-format compatibility** - Structures that work across different data sources
+- **Cross-format compatibility** - APIs that work across different data sources and structures
 
 ## Development Guidelines
 
@@ -171,8 +172,10 @@ Canon serves as a **canonical starting point** by providing:
 - **Curated dependency set** - Known good versions of essential libraries
 - **Standardized patterns** - Consistent approaches to common problems
 - **Best practice implementations** - Proven solutions for type safety and data handling
+- **Canonical APIs** - Standardized interfaces that work across different data structures
+- **Sensible defaults** - Recommended choices when you have the opportunity to select data structures
 
-This curated approach ensures that developers have a solid foundation to build upon, reducing decision fatigue and providing confidence in the chosen technology stack.
+This curated approach ensures that developers have a solid foundation to build upon, reducing decision fatigue and providing confidence in the chosen technology stack, while recognizing that in many real-world scenarios you must work with existing data structures rather than choosing new ones.
 
 ## Testing and Quality Assurance
 
