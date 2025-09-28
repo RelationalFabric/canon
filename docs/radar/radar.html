@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Canon Technology Radar</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://zalando.github.io/tech-radar/release/radar-0.6.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #fff;
+        }
+        .radar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .radar-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .radar-title h1 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        .radar-title p {
+            color: #666;
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .radar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        .adopt { background-color: #93c47d; }
+        .trial { background-color: #f9cb9c; }
+        .assess { background-color: #a4c2f4; }
+        .hold { background-color: #ea9999; }
+    </style>
+</head>
+<body>
+    <div class="radar-container">
+        <div class="radar-title">
+            <h1>Canon Technology Radar</h1>
+            <p>Relational Fabric's technology recommendations and assessments</p>
+        </div>
+        
+        <div class="radar-legend">
+            <div class="legend-item">
+                <div class="legend-color adopt"></div>
+                <span>Adopt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color trial"></div>
+                <span>Trial</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color assess"></div>
+                <span>Assess</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color hold"></div>
+                <span>Hold</span>
+            </div>
+        </div>
+        
+        <svg id="radar"></svg>
+    </div>
+
+    <script>
+        const radarData = {
+            entries: [
+                // Tools & Libraries - Adopt
+                { label: "@antfu/eslint-config", quadrant: 0, ring: 0, moved: 0 },
+                { label: "@tsconfig/node-lts", quadrant: 0, ring: 0, moved: 0 },
+                { label: "defu", quadrant: 0, ring: 0, moved: 0 },
+                { label: "typescript", quadrant: 0, ring: 0, moved: 0 },
+                { label: "eslint", quadrant: 0, ring: 0, moved: 0 },
+                
+                // Tools & Libraries - Trial
+                { label: "type-fest", quadrant: 0, ring: 1, moved: 1 },
+                { label: "radash", quadrant: 0, ring: 1, moved: 1 },
+                { label: "jsonpath-plus", quadrant: 0, ring: 1, moved: 1 },
+                { label: "json-stable-stringify", quadrant: 0, ring: 1, moved: 1 },
+                { label: "zod", quadrant: 0, ring: 1, moved: 1 },
+                
+                // Tools & Libraries - Assess
+                { label: "uuid", quadrant: 0, ring: 2, moved: 1 },
+                { label: "nanoid", quadrant: 0, ring: 2, moved: 1 },
+                { label: "object-hash", quadrant: 0, ring: 2, moved: 1 },
+                { label: "immutable", quadrant: 0, ring: 2, moved: 1 },
+                { label: "date-fns", quadrant: 0, ring: 2, moved: 1 },
+                
+                // Tools & Libraries - Hold
+                { label: "lodash", quadrant: 0, ring: 3, moved: -1 },
+                { label: "ts-essentials", quadrant: 0, ring: 3, moved: -1 },
+                
+                // Techniques & Patterns - Adopt
+                { label: "Dual Export Strategy", quadrant: 1, ring: 0, moved: 0 },
+                { label: "ADR Methodology", quadrant: 1, ring: 0, moved: 0 },
+                { label: "Configuration Composition", quadrant: 1, ring: 0, moved: 0 },
+                { label: "ES Modules", quadrant: 1, ring: 0, moved: 0 },
+                
+                // Techniques & Patterns - Trial
+                { label: "Universal Adapter Pattern", quadrant: 1, ring: 1, moved: 1 },
+                { label: "Lazy Typing", quadrant: 1, ring: 1, moved: 1 },
+                { label: "Canon Pattern", quadrant: 1, ring: 1, moved: 1 },
+                { label: "Tree-shaking Support", quadrant: 1, ring: 1, moved: 1 },
+                
+                // Features & Capabilities - Adopt
+                { label: "TypeScript Configuration Sharing", quadrant: 2, ring: 0, moved: 0 },
+                { label: "ESLint Configuration Composition", quadrant: 2, ring: 0, moved: 0 },
+                { label: "Multi-format Data Support", quadrant: 2, ring: 0, moved: 0 },
+                { label: "Type Checking", quadrant: 2, ring: 0, moved: 0 },
+                
+                // Data Structures & Formats - Adopt
+                { label: "JSON", quadrant: 3, ring: 0, moved: 0 },
+                { label: "JSON-LD", quadrant: 3, ring: 0, moved: 0 },
+                { label: "TypeScript Types", quadrant: 3, ring: 0, moved: 0 },
+                { label: "RFC4122 UUIDs", quadrant: 3, ring: 0, moved: 0 },
+                { label: "ISO8601 Dates", quadrant: 3, ring: 0, moved: 0 },
+                { label: "REST APIs", quadrant: 3, ring: 0, moved: 0 }
+            ]
+        };
+
+        const radarConfig = {
+            svg_id: "radar",
+            width: 1450,
+            height: 1000,
+            colors: {
+                background: "#fff",
+                grid: "#bbb",
+                inactive: "#ddd"
+            },
+            title: "Canon Technology Radar",
+            date: "2025-01-26",
+            quadrants: [
+                { name: "Tools & Libraries" },
+                { name: "Techniques & Patterns" },
+                { name: "Features & Capabilities" },
+                { name: "Data Structures, Formats & Standards" }
+            ],
+            rings: [
+                { name: "Adopt", color: "#93c47d" },
+                { name: "Trial", color: "#f9cb9c" },
+                { name: "Assess", color: "#a4c2f4" },
+                { name: "Hold", color: "#ea9999" }
+            ],
+            print_layout: true,
+            links_in_new_tabs: true,
+            sort_order: "asc"
+        };
+
+        radar_visualization(radarData, radarConfig);
+    </script>
+</body>
+</html>
