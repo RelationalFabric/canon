@@ -41,7 +41,7 @@ jobs:
 
       - name: Build tech radar data
         run: |
-          cd planning/technology-radar
+          cd docs/planning/technology-radar
           npm run convert
 
       - name: Build with VitePress

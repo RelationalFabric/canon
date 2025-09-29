@@ -12,8 +12,7 @@ export default {
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/docs/' },
       { text: 'ADRs', link: '/adrs/' },
-      { text: 'Planning', link: '/planning/' },
-      { text: 'Tech Radar', link: '/radar/' }
+      { text: 'Planning', link: '/planning/' }
     ],
     
     // Sidebar configuration

@@ -45,8 +45,8 @@
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
     "adr:index": "cd docs/adrs && npx adr generate toc",
-    "radar:convert": "cd planning/technology-radar/scripts && npm run convert",
-    "radar:watch": "cd planning/technology-radar/scripts && npm run watch",
+    "radar:convert": "cd docs/planning/technology-radar/scripts && npm run convert",
+    "radar:watch": "cd docs/planning/technology-radar/scripts && npm run watch",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"

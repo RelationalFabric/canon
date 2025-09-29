@@ -4,13 +4,13 @@ This section contains strategic planning and direction for the Canon project, se
 
 ## Contents
 
-### [Strategy](../planning/strategy)
+### [Strategy](./strategy)
 Strategic vision, positioning, and long-term direction for Canon as the foundational library for the TypeScript type ecosystem.
 
-### [Roadmap](../planning/roadmap)
+### [Roadmap](./roadmap)
 Detailed development roadmap with phases, milestones, and success criteria for Canon's evolution over the next 12+ months.
 
-### [Technology Radar](../planning/technology-radar/)
+### [Technology Radar](./technology-radar/)
 Our comprehensive technology radar tracking recommendations for tools, techniques, features, and data formats used with Canon.
 
 ## Philosophy
@@ -33,4 +33,4 @@ This information is intended for:
 
 ## Contributing
 
-See the main [Contributing Guidelines](../../CONTRIBUTING.md) for how to contribute to Canon, including strategic planning and roadmap discussions.
+See the main [Contributing Guidelines](../CONTRIBUTING.md) for how to contribute to Canon, including strategic planning and roadmap discussions.

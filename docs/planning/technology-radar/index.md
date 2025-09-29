@@ -16,7 +16,7 @@ The Canon Technology Radar provides a comprehensive view of tools, techniques, f
 
 ## About This Radar
 
-This technology radar is built using [build-your-own-radar](https://github.com/zalando/tech-radar) and tracks recommendations across four quadrants:
+This technology radar tracks recommendations across four quadrants:
 
 - **Tools & Libraries** - Third-party libraries, build tools, and development utilities
 - **Techniques & Patterns** - Architectural patterns, development practices, and type system techniques  
@@ -32,16 +32,16 @@ This technology radar is built using [build-your-own-radar](https://github.com/z
 
 ## Methodology
 
-For detailed information about our radar methodology, see [Radar Methodology](../docs/radar-methodology).
+For detailed information about our radar methodology, see [Radar Methodology](../../radar-methodology).
 
 ## Data Source
 
-The radar data is maintained in [planning/technology-radar/data.yaml](../../planning/technology-radar/data.yaml) and converted to CSV format for visualization.
+The radar data is maintained in [data.yaml](./data.yaml) and converted to CSV format for visualization.
 
 ## Contributing
 
 To suggest changes to the technology radar:
 
-1. Edit the [data.yaml](../../planning/technology-radar/data.yaml) file
+1. Edit the [data.yaml](./data.yaml) file
 2. Submit a pull request with your changes
 3. The radar will be automatically updated when the PR is merged
