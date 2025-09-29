@@ -69,7 +69,7 @@ export default {
               items: [
                 { text: 'Overview', link: '/planning/radar/' },
                 { text: 'Interactive Radar', link: '/planning/radar/radar.html' },
-                { text: 'Methodology', link: '/docs/radar-methodology' }
+                { text: 'Methodology', link: '/radar-methodology' }
               ]
             }
           ]
