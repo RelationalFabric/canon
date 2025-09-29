@@ -8,8 +8,8 @@ This document demonstrates a real-world scenario where we need to walk a tree of
 
 For more practical examples of Canon in action, see:
 
-- [Deduplicating Entities](./examples/deduplicating-entities.md) - How to identify and merge duplicate entities across different data sources
-- [User Authentication Tokens](./examples/user-authentication-tokens.md) - Cross-source data transformation for authentication systems
+- [Deduplicating Entities](./deduplicating-entities.md) - How to identify and merge duplicate entities across different data sources
+- [User Authentication Tokens](./user-authentication-tokens.md) - Cross-source data transformation for authentication systems
 
 ## The Scenario
 

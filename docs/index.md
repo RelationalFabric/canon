@@ -11,7 +11,7 @@ hero:
       link: /docs/
     - theme: alt
       text: View on GitHub
-      link: https://github.com/relational-fabric/canon
+      link: https://github.com/RelationalFabric/canon
 
 features:
   - icon: 🚀

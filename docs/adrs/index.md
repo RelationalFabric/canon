@@ -21,7 +21,7 @@ Architecture Decision Records are documents that capture important architectural
 
 ## ADR Process
 
-For detailed information about creating and managing ADRs, see the [ADR Documentation](../adrs).
+For detailed information about creating and managing ADRs, see the [ADR Documentation](./adrs.md).
 
 ## ADR Status Legend
 
