@@ -9,7 +9,7 @@ Architecture Decision Records are documents that capture important architectural
 ## ADR Formats
 
 ### Traditional ADR Format
-For architectural decisions, each ADR follows the format defined by [Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions):
+For architectural decisions, each ADR follows the format defined by [Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions): 
 
 1. **Title** - A descriptive title
 2. **Status** - Proposed, Accepted, Deprecated, or Superseded

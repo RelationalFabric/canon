@@ -45,8 +45,11 @@
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
     "adr:index": "cd docs/adrs && npx adr generate toc",
-    "radar:convert": "cd radar/scripts && npm run convert",
-    "radar:watch": "cd radar/scripts && npm run watch"
+    "radar:convert": "cd docs/planning/technology-radar/scripts && npm run convert",
+    "radar:watch": "cd docs/planning/technology-radar/scripts && npm run watch",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
@@ -72,6 +75,7 @@
     "adr-tools": "^2.0.4",
     "eslint": "^9.10.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitepress": "^1.0.0"
   }
 }
