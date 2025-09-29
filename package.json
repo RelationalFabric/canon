@@ -24,6 +24,10 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
+    "./radar": {
+      "types": "./src/radar/index.ts",
+      "import": "./src/radar/index.ts"
+    },
     "./tsconfig": "./tsconfig.base.json",
     "./eslint": "./eslint.js"
   },
@@ -45,8 +49,9 @@
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
     "adr:index": "cd docs/adrs && npx adr generate toc",
-    "radar:convert": "cd docs/planning/technology-radar/scripts && npm run convert",
-    "radar:watch": "cd docs/planning/technology-radar/scripts && npm run watch",
+    "radar:convert": "tsx scripts/convert-radar.ts",
+    "radar:validate": "tsx scripts/validate-radar.ts",
+    "radar:watch": "chokidar './docs/radar/data.yaml' -c 'npm run radar:convert'",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -66,13 +71,15 @@
   "dependencies": {
     "@antfu/eslint-config": "^3.0.0",
     "@tsconfig/node-lts": "^20.0.0",
-    "defu": "^6.1.4"
+    "defu": "^6.1.4",
+    "yaml": "^2.4.1"
   },
   "optionalDependencies": {
     "defu": "^6.1.4"
   },
   "devDependencies": {
     "adr-tools": "^2.0.4",
+    "chokidar-cli": "^3.0.0",
     "eslint": "^9.10.0",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0",
