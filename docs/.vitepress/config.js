@@ -79,7 +79,7 @@ export default {
     
     // Social links
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/relational-fabric/canon' }
+      { icon: 'github', link: 'https://github.com/RelationalFabric/canon' }
     ],
     
     // Footer
@@ -95,7 +95,7 @@ export default {
     
     // Edit link
     editLink: {
-      pattern: 'https://github.com/relational-fabric/canon/edit/main/docs/:path',
+      pattern: 'https://github.com/RelationalFabric/canon/edit/main/docs/:path',
       text: 'Edit this page on GitHub'
     },
     
