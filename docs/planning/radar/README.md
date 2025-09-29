@@ -2,20 +2,16 @@
 
 This directory contains the Canon Technology Radar data and related files.
 
-## 📊 Interactive Radar
-
-**View the interactive radar**: [https://relationalfabric.github.io/canon/planning/radar/](https://relationalfabric.github.io/canon/planning/radar/)
-
-## 📁 Structure
+## Structure
 
 - `data.yaml` - Main radar data in YAML format (human-editable)
 - `data.csv` - Generated CSV format for build-your-own-radar tool
 - `config.yaml` - Radar configuration and metadata
 - `radar.html` - Generated radar visualization
 
-## 🚀 Usage
+## Usage
 
-The radar functionality is part of the main Canon package. You can use it programmatically or via npm scripts:
+The radar functionality is now part of the main Canon package. You can use it programmatically or via npm scripts:
 
 ### Programmatic Usage
 
@@ -40,15 +36,6 @@ if (!result.isValid) {
 4. **Watch for changes**: Run `npm run radar:watch` to auto-convert on changes
 5. **Visualize**: Use build-your-own-radar tool with generated CSV
 
-## 📋 Methodology
+## Radar Methodology
 
-See the [Radar Methodology](https://relationalfabric.github.io/canon/radar-methodology) for detailed information about how we maintain and update the radar.
-
-## 🔗 Related Documentation
-
-- [Planning Overview](https://relationalfabric.github.io/canon/planning/) - Strategic planning and direction
-- [Full Documentation](https://relationalfabric.github.io/canon/) - Complete Canon documentation
-
----
-
-**Note**: This README is for GitHub navigation. For the complete interactive documentation, visit the [official documentation site](https://relationalfabric.github.io/canon/planning/radar/).
+See [../../radar-methodology.md](../../radar-methodology.md) for detailed information about how we maintain and update the radar.
