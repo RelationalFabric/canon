@@ -10,7 +10,7 @@ Strategic vision, positioning, and long-term direction for Canon as the foundati
 ### [Roadmap](./roadmap)
 Detailed development roadmap with phases, milestones, and success criteria for Canon's evolution over the next 12+ months.
 
-### [Technology Radar](./technology-radar/)
+### [Technology Radar](./radar/)
 Our comprehensive technology radar tracking recommendations for tools, techniques, features, and data formats used with Canon.
 
 ## Philosophy

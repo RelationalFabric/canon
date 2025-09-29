@@ -33,7 +33,7 @@ export default {
                 { text: 'User Authentication Tokens', link: '/docs/examples/user-authentication-tokens' }
               ]
             },
-            { text: 'Radar Methodology', link: '/docs/radar-methodology' }
+            { text: 'Radar Methodology', link: '/radar-methodology' }
           ]
         }
       ],
@@ -69,8 +69,8 @@ export default {
             {
               text: 'Technology Radar',
               items: [
-                { text: 'Overview', link: '/planning/technology-radar/' },
-                { text: 'Interactive Radar', link: '/planning/technology-radar/radar.html' },
+                { text: 'Overview', link: '/planning/radar/' },
+                { text: 'Interactive Radar', link: '/planning/radar/radar.html' },
                 { text: 'Methodology', link: '/radar-methodology' }
               ]
             }
