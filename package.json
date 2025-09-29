@@ -51,7 +51,7 @@
     "adr:index": "cd docs/adrs && npx adr generate toc",
     "radar:convert": "tsx scripts/convert-radar.ts",
     "radar:validate": "tsx scripts/validate-radar.ts",
-    "radar:watch": "chokidar './docs/radar/data.yaml' -c 'npm run radar:convert'",
+    "radar:watch": "chokidar './docs/planning/radar/data.yaml' -c 'npm run radar:convert'",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"

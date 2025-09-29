@@ -19,10 +19,10 @@ The radar functionality is now part of the main Canon package. You can use it pr
 import { convertYamlFileToCsv, validateRadarFile } from '@relational-fabric/canon'
 
 // Convert YAML to CSV
-convertYamlFileToCsv('./docs/radar/data.yaml', './docs/radar/data.csv')
+convertYamlFileToCsv('./docs/planning/radar/data.yaml', './docs/planning/radar/data.csv')
 
 // Validate radar data
-const result = await validateRadarFile('./docs/radar/data.yaml')
+const result = await validateRadarFile('./docs/planning/radar/data.yaml')
 if (!result.isValid) {
   console.error('Validation errors:', result.errors)
 }
@@ -38,4 +38,4 @@ if (!result.isValid) {
 
 ## Radar Methodology
 
-See [docs/radar-methodology.md](../radar-methodology.md) for detailed information about how we maintain and update the radar.
+See [../../radar-methodology.md](../../radar-methodology.md) for detailed information about how we maintain and update the radar.
