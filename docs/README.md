@@ -1,55 +1,25 @@
 # Canon Documentation
 
-This directory contains the comprehensive documentation for the Canon project.
+Welcome to the Canon documentation. This directory contains comprehensive guides for understanding and using the Canon type system.
 
-## 📚 Documentation
+## Table of Contents
 
-The full documentation is available at: **https://relationalfabric.github.io/canon/**
+- [Canons](./canons.md) - Understanding Canon types and their implementation
+- [Axioms](./axioms.md) - Deep dive into axiomatic primitives and their role in the type system
+- [Reference Axioms](../reference/axioms.md) - The essential set of axioms that form the foundation of Canon
+- [Examples](./examples/) - Comprehensive examples of core axioms in practice
 
-### Quick Navigation
+## Quick Start
 
-- **[Getting Started](https://relationalfabric.github.io/canon/)** - Overview and quick start guide
-- **[Canons](https://relationalfabric.github.io/canon/canons)** - Understanding Canon types and their implementation
-- **[Axioms](https://relationalfabric.github.io/canon/axioms)** - Deep dive into axiomatic primitives
-- **[Examples](https://relationalfabric.github.io/canon/examples/)** - Comprehensive examples of core axioms
-- **[ADRs](https://relationalfabric.github.io/canon/adrs/)** - Architecture Decision Records
-- **[Planning](https://relationalfabric.github.io/canon/planning/)** - Strategic planning and technology radar
+Canon is a foundational library for building robust type ecosystems. It provides:
 
-## 🚀 Quick Start
+1. **Universal Type Primitives** - A curated set of battle-tested types from the TypeScript ecosystem
+2. **Canonical Type Definitions** - Consistent, reusable type blueprints
+3. **Axiomatic System** - Rich configuration system for defining data models
+4. **Lazy Typing** - Deferred type resolution with canonical identity preservation
 
-```bash
-npm install @relational-fabric/canon
-```
+For detailed usage examples and implementation guides, explore the individual documentation files above.
 
-### TypeScript Configuration
+## Contributing
 
-```json
-{
-  "extends": "@relational-fabric/canon/tsconfig"
-}
-```
-
-### ESLint Configuration
-
-```javascript
-// eslint.config.js
-import createEslintConfig from '@relational-fabric/canon/eslint'
-
-export default createEslintConfig()
-```
-
-## 📖 Local Development
-
-To run the documentation locally:
-
-```bash
-npm run docs:dev
-```
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for development guidelines and how to contribute to Canon.
-
----
-
-**Note**: This README is for GitHub navigation. For the complete interactive documentation, visit the [official documentation site](https://relationalfabric.github.io/canon/).
+Interested in contributing to Canon? Check out our [Contributing Guidelines](../CONTRIBUTING.md) for conventions, development workflow, and how to get involved.
