@@ -205,5 +205,5 @@ Each major radar decision should be documented as an ADR, including:
 
 - [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar)
 - [Build Your Own Radar](https://github.com/thoughtworks/build-your-own-radar)
-- [ADR Template](../adrs/template.md)
+- [ADR Documentation](./adrs.md)
 - [Canon Philosophy](../axioms.md)

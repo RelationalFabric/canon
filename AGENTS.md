@@ -60,7 +60,7 @@ Follow the conventions outlined in [CONTRIBUTING.md](./CONTRIBUTING.md):
 - Follow the established patterns in [src/](./src/) directory
 
 ### Architecture Decisions
-Before making significant changes, review the [Architecture Decision Records (ADRs)](./docs/adrs/README.md). These documents capture important architectural decisions and provide context for current design choices.
+Before making significant changes, review the [Architecture Decision Records (ADRs)](./docs/adrs.md). These documents capture important architectural decisions and provide context for current design choices.
 
 ## File Structure Reference
 

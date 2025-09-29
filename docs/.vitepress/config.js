@@ -33,7 +33,7 @@ export default {
                 { text: 'User Authentication Tokens', link: '/docs/examples/user-authentication-tokens' }
               ]
             },
-            { text: 'Radar Methodology', link: '/radar-methodology' }
+            { text: 'Radar Methodology', link: '/docs/radar-methodology' }
           ]
         }
       ],
@@ -64,14 +64,12 @@ export default {
           text: 'Planning & Strategy',
           items: [
             { text: 'Overview', link: '/planning/' },
-            { text: 'Strategy', link: '/planning/strategy' },
-            { text: 'Roadmap', link: '/planning/roadmap' },
             {
               text: 'Technology Radar',
               items: [
                 { text: 'Overview', link: '/planning/radar/' },
                 { text: 'Interactive Radar', link: '/planning/radar/radar.html' },
-                { text: 'Methodology', link: '/radar-methodology' }
+                { text: 'Methodology', link: '/docs/radar-methodology' }
               ]
             }
           ]

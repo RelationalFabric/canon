@@ -91,7 +91,7 @@ npm install
 
 If adr-tools is not available, you can create ADRs manually:
 
-1. Copy the template from `template.md`
+1. Copy the template from an existing ADR file
 2. Rename it to `XXXX-descriptive-title.md` where XXXX is the next sequential number
 3. Fill in the template with your decision
 4. Use `npm run adr:index` to generate an updated table of contents

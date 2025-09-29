@@ -73,7 +73,7 @@ Thank you for your interest in contributing to Canon! This document outlines the
 
 ## Architecture Decision Records (ADRs)
 
-Before making significant changes to the project architecture, please read the existing [Architecture Decision Records (ADRs)](./docs/adrs/README.md). ADRs document important architectural decisions and provide context for why certain choices were made.
+Before making significant changes to the project architecture, please read the existing [Architecture Decision Records (ADRs)](./docs/adrs.md). ADRs document important architectural decisions and provide context for why certain choices were made.
 
 ### Creating New ADRs
 
@@ -96,7 +96,7 @@ When making architectural decisions that affect the project structure, configura
 - **Link ADRs:** `cd docs/adrs && npx adr link <from> <to> <relationship>`
 - **Help:** `cd docs/adrs && npx adr help`
 
-For more details, see the [ADR README](./docs/adrs/README.md).
+For more details, see the [ADR Documentation](./docs/adrs.md).
 
 ### ADR Lifecycle
 
