@@ -95,6 +95,26 @@ Use these npm scripts for development tasks:
 - `npm run adr:list` - List all ADRs
 - `npm run adr:index` - Generate ADR table of contents (in ADR directory)
 
+## Build Process and File Naming
+
+### CRITICAL: ADR Documentation Build Process
+
+**NEVER commit `docs/adrs/index.md` to the repository.**
+
+The ADR documentation follows a specific build process:
+
+1. **Repository contains**: `docs/adrs/README.md` - This is the source file that should be committed
+2. **Build process renames**: `README.md` → `index.md` during documentation build
+3. **Generated file**: `docs/adrs/index.md` is created during build and should be ignored by git
+
+### File Naming Rules
+
+- ✅ **Commit**: `docs/adrs/README.md` (source file with ADR list template)
+- ❌ **Never commit**: `docs/adrs/index.md` (generated file)
+- ✅ **Build generates**: `docs/adrs/index.md` from `docs/adrs/README.md`
+
+The build script (`scripts/generate-adr-index.js`) reads from `README.md` and generates the `index.md` file with the populated ADR table. The `index.md` file is only used during the documentation build process and should never be committed to version control.
+
 ## Key Patterns to Follow
 
 ### Module Augmentation
