@@ -52,9 +52,11 @@
     "radar:convert": "tsx scripts/convert-radar.ts",
     "radar:validate": "tsx scripts/validate-radar.ts",
     "radar:watch": "chokidar './docs/planning/radar/data.yaml' -c 'npm run radar:convert'",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:prepare": "node scripts/prepare-vitepress.js",
+    "docs:restore": "node scripts/restore-readme.js",
+    "docs:dev": "npm run docs:prepare && npx vitepress dev docs",
+    "docs:build": "npm run docs:prepare && npx vitepress build docs && npm run docs:restore",
+    "docs:preview": "npx vitepress preview docs"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
