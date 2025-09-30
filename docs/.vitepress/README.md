@@ -1,96 +1,58 @@
-# VitePress Documentation Implementation
+# VitePress Documentation Setup
 
-This directory contains the VitePress configuration and theme files for the Canon documentation site.
+This directory contains the VitePress configuration and theme files for the Canon documentation.
 
-## Implementation Summary
+## README File Strategy
 
-Following ADR-0010, we've implemented a VitePress-based documentation solution with the following features:
+This project uses `README.md` files consistently for all directory entry points:
 
-### ✅ Completed Features
+### File Structure
+- **`README.md`** - Standard directory entry point for both GitHub and VitePress
 
-1. **VitePress Setup**
-   - Complete VitePress configuration in `.vitepress/config.js`
-   - Custom theme with radar component support
-   - GitHub Pages deployment configuration
+### Why README Files?
 
-2. **Navigation Structure**
-   - Home page with hero section and features
-   - Documentation section (primary content)
-   - ADRs section (architectural decisions)
-   - Planning section (strategy and roadmap)
-   - Tech Radar section (interactive visualization)
+1. **GitHub Compatibility**: GitHub displays `README.md` files by default when browsing directories
+2. **Consistency**: Single file naming convention across the entire project
+3. **Industry Standard**: README files are the de facto standard for project documentation
 
-3. **Technology Radar Integration**
-   - Static HTML radar using build-your-own-radar
-   - Vue component wrapper for embedding
-   - Data sourced from `planning/technology-radar/data.yaml`
+### How VitePress Handles README Files
 
-4. **GitHub Actions Workflow**
-   - Automated deployment to GitHub Pages
-   - Builds tech radar data and VitePress site
-   - Deploys on push to main branch
+VitePress generates `README.html` files from `README.md` source files. The navigation is configured to link directly to these README files:
 
-5. **Package Scripts**
-   - `npm run docs:dev` - Development server
-   - `npm run docs:build` - Production build
-   - `npm run docs:preview` - Preview production build
+- `/docs/README` → `/docs/README.html`
+- `/adrs/README` → `/adrs/README.html`
+- `/planning/README` → `/planning/README.html`
+- `/planning/radar/README` → `/planning/radar/README.html`
 
-### 📁 Directory Structure
+## Configuration
 
-```
-docs/
-├── .vitepress/
-│   ├── config.js          # VitePress configuration
-│   ├── theme/
-│   │   ├── index.js       # Theme configuration
-│   │   └── radar.vue      # Tech radar component
-│   └── README.md          # This file
-├── adrs/                  # ADR files (existing)
-├── planning/              # Planning docs (existing)
-├── radar/
-│   ├── index.md           # Radar landing page
-│   └── radar.html         # Static radar visualization
-├── index.md               # Home page
-└── [existing docs]        # All existing documentation
-```
+The VitePress configuration in `config.js` handles:
+- Navigation structure (all links point to README files)
+- Sidebar configuration
+- Theme settings
+- Search functionality
 
-### 🚀 Deployment
-
-The documentation is automatically deployed to GitHub Pages via the `.github/workflows/docs.yml` workflow:
-
-1. Triggers on push to `main` branch
-2. Installs dependencies and builds tech radar data
-3. Builds VitePress site
-4. Deploys to GitHub Pages
-
-### 🔧 Development
-
-To work on the documentation locally:
+## Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
+# Start dev server
 npm run docs:dev
 
-# Build for production
+# Build documentation
 npm run docs:build
 
-# Preview production build
+# Preview built docs
 npm run docs:preview
 ```
 
-### 📝 Notes
+## Publishing
 
-- Dead links are currently ignored (`ignoreDeadLinks: true`)
-- Tech radar uses static HTML with build-your-own-radar
-- All existing documentation structure is preserved
-- Minimal impact on existing codebase
+The documentation is published to GitHub Pages at:
+https://relationalfabric.github.io/canon/
 
-## Next Steps
+## Maintenance
 
-1. Fix dead links incrementally
-2. Enhance tech radar with dynamic data loading
-3. Add more interactive components as needed
-4. Optimize build performance
+When adding new folders with documentation:
+1. Create `README.md` as the directory entry point
+2. Update navigation in `config.js` to link to `/path/README`
+3. Test both GitHub and VitePress rendering
