@@ -1,48 +1,16 @@
----
-layout: home
+# Documentation
 
-hero:
-  name: "@relational-fabric/canon"
-  text: "Modern TypeScript Package Template"
-  tagline: "ESLint and TypeScript configurations for starting new projects"
-  actions:
-    - theme: brand
-      text: Get Started
-      link: /docs/
-    - theme: alt
-      text: View on GitHub
-      link: https://github.com/RelationalFabric/canon
+Welcome to the @relational-fabric/canon documentation. This package provides modern TypeScript and ESLint configurations for starting new projects.
 
-features:
-  - icon: 🚀
-    title: Modern TypeScript
-    details: Based on Node.js LTS with latest TypeScript features and ES modules support
-  - icon: 🔧
-    title: ESLint Configuration
-    details: Powered by @antfu/eslint-config with automatic fixing capabilities
-  - icon: 📦
-    title: Reusable Configurations
-    details: Extendable configurations that can be shared across projects
-  - icon: 📚
-    title: Comprehensive Documentation
-    details: Complete documentation with examples, ADRs, and planning materials
-  - icon: 🎯
-    title: Technology Radar
-    details: Transparent technology recommendations and assessments
-  - icon: 🏗️
-    title: Architecture Decisions
-    details: Documented ADRs for all major architectural decisions
----
+## Getting Started
 
-## Quick Start
-
-### Install
+### Installation
 
 ```bash
 npm install @relational-fabric/canon
 ```
 
-### Use TypeScript Configuration
+### TypeScript Configuration
 
 ```json
 {
@@ -50,7 +18,7 @@ npm install @relational-fabric/canon
 }
 ```
 
-### Use ESLint Configuration
+### ESLint Configuration
 
 ```javascript
 // eslint.config.js
@@ -59,16 +27,27 @@ import createEslintConfig from '@relational-fabric/canon/eslint'
 export default createEslintConfig()
 ```
 
-## Requirements
+## Documentation Sections
 
-This package requires the following peer dependencies:
+- **[Canons](/docs/canons)** - Core principles and guidelines
+- **[Axioms](/docs/axioms)** - Fundamental assumptions and rules
+- **[Examples](/docs/examples/)** - Practical usage examples
+- **[Radar Methodology](/docs/radar-methodology)** - Technology assessment approach
 
-- **Node.js**: 22.0.0 or higher
-- **TypeScript**: 5.0.0 or higher  
-- **ESLint**: 9.0.0 or higher
+## Architecture Decisions
 
-## Package Exports
+- **[ADRs](/adrs/)** - Architecture Decision Records documenting key decisions
 
-- **Main package**: `@relational-fabric/canon` - The main package (currently empty)
-- **TypeScript config**: `@relational-fabric/canon/tsconfig` - Base TypeScript configuration
-- **ESLint config**: `@relational-fabric/canon/eslint` - ESLint configuration function
+## Planning & Strategy
+
+- **[Technology Radar](/planning/radar/)** - Technology recommendations and assessments
+- **[Planning Overview](/planning/)** - Strategic direction and roadmap
+
+## Development Notes
+
+**Build Process**: The documentation build process automatically renames all `README.md` files to `index.md` within the docs directory to work with VitePress routing. This is handled by the build scripts in `package.json`:
+
+- `npm run docs:dev` and `npm run docs:build` rename README.md → index.md
+- `npm run docs:restore` renames index.md → README.md for editing
+
+When editing documentation, use `npm run docs:restore` first to convert index.md files back to README.md, make your changes, then run the build commands.

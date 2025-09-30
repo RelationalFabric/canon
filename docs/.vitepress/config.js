@@ -69,8 +69,8 @@ export default {
               text: 'Technology Radar',
               items: [
                 { text: 'Overview', link: '/planning/radar/' },
-                { text: 'Interactive Radar', link: '/planning/radar/radar.html' },
-                { text: 'Methodology', link: '/radar-methodology' }
+                { text: 'Interactive Radar', link: '/planning/radar/' },
+                { text: 'Methodology', link: '/docs/radar-methodology' }
               ]
             }
           ]
