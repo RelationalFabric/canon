@@ -109,11 +109,20 @@ The documentation system follows a specific process to maintain GitHub compatibi
 
 ### File Naming Rules for Documentation
 
+**Repository State (GitHub-Compatible):**
 - ✅ **Always edit**: `README.md` files in the repository (GitHub-first approach)
-- ✅ **Build process**: Automatically renames `README.md` → `index.md` during VitePress build
-- ✅ **Post-build**: Automatically renames `index.md` → `README.md` after build completes
+- ✅ **Main entry**: `docs/index.md` - VitePress entry point (never renamed)
+- ✅ **Subdirectories**: Use `README.md` for all subdirectory documentation
+
+**Build State (VitePress-Compatible):**
+- ✅ **During build**: `README.md` → `index.md` in subdirectories only
+- ✅ **VitePress routing**: `/adrs/` maps to `docs/adrs/index.md` (after rename)
+- ✅ **Main entry**: `docs/index.md` remains unchanged
+
+**Post-Build State (GitHub-Compatible):**
+- ✅ **After build**: `index.md` → `README.md` in subdirectories (restored)
 - ❌ **Never manually rename**: Let the build scripts handle file renaming
-- ❌ **Never commit**: `index.md` files (except `docs/index.md` which is the main entry point)
+- ❌ **Never commit**: `index.md` files in subdirectories (except `docs/index.md`)
 
 ### Documentation Build Scripts
 
