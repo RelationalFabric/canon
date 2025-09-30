@@ -5,14 +5,15 @@ export default {
   // Base URL for GitHub Pages
   base: '/canon/',
   
+  
   // Theme configuration
   themeConfig: {
     // Navigation bar
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Documentation', link: '/docs/' },
-      { text: 'ADRs', link: '/adrs/' },
-      { text: 'Planning', link: '/planning/' }
+      { text: 'Documentation', link: '/docs/README' },
+      { text: 'ADRs', link: '/adrs/README' },
+      { text: 'Planning', link: '/planning/README' }
     ],
     
     // Sidebar configuration
@@ -22,7 +23,7 @@ export default {
         {
           text: 'Documentation',
           items: [
-            { text: 'Introduction', link: '/docs/' },
+            { text: 'Introduction', link: '/docs/README' },
             { text: 'Canons', link: '/docs/canons' },
             { text: 'Axioms', link: '/docs/axioms' },
             {
@@ -43,7 +44,7 @@ export default {
         {
           text: 'Architecture Decision Records',
           items: [
-            { text: 'About ADRs', link: '/adrs' },
+            { text: 'About ADRs', link: '/adrs/README' },
             { text: '1. TypeScript Package Setup', link: '/adrs/0001-typescript-package-setup' },
             { text: '2. ESLint Configuration with Antfu', link: '/adrs/0002-eslint-configuration-with-antfu' },
             { text: '3. Documentation Linting Inclusion', link: '/adrs/0003-documentation-linting-inclusion' },
@@ -63,11 +64,11 @@ export default {
         {
           text: 'Planning & Strategy',
           items: [
-            { text: 'Overview', link: '/planning/' },
+            { text: 'Overview', link: '/planning/README' },
             {
               text: 'Technology Radar',
               items: [
-                { text: 'Overview', link: '/planning/radar/' },
+                { text: 'Overview', link: '/planning/radar/README' },
                 { text: 'Interactive Radar', link: '/planning/radar/radar.html' },
                 { text: 'Methodology', link: '/radar-methodology' }
               ]

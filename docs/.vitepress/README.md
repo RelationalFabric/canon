@@ -2,35 +2,33 @@
 
 This directory contains the VitePress configuration and theme files for the Canon documentation.
 
-## Dual File Strategy
+## README File Strategy
 
-This project uses a dual-file approach to ensure compatibility with both GitHub and VitePress:
+This project uses `README.md` files consistently for all directory entry points:
 
 ### File Structure
-- **`index.md`** - VitePress entry point (becomes `index.html`)
-- **`README.md`** - GitHub folder documentation (becomes `README.html`)
+- **`README.md`** - Standard directory entry point for both GitHub and VitePress
 
-### Why Both Files?
+### Why README Files?
 
-1. **VitePress Routing**: VitePress treats `index.md` as directory entry points
-2. **GitHub Navigation**: GitHub displays `README.md` files for folder documentation
-3. **Best of Both Worlds**: Users get proper navigation in both contexts
+1. **GitHub Compatibility**: GitHub displays `README.md` files by default when browsing directories
+2. **Consistency**: Single file naming convention across the entire project
+3. **Industry Standard**: README files are the de facto standard for project documentation
 
-### Content Strategy
+### How VitePress Handles README Files
 
-- **`index.md`**: Full interactive documentation content with VitePress features
-- **`README.md`**: GitHub-optimized content with links to the full documentation
+VitePress generates `README.html` files from `README.md` source files. The navigation is configured to link directly to these README files:
 
-### Key Directories
-
-- `/docs/` - Main documentation (both `index.md` and `README.md`)
-- `/docs/planning/radar/` - Technology radar (both `index.md` and `README.md`)
+- `/docs/README` → `/docs/README.html`
+- `/adrs/README` → `/adrs/README.html`
+- `/planning/README` → `/planning/README.html`
+- `/planning/radar/README` → `/planning/radar/README.html`
 
 ## Configuration
 
 The VitePress configuration in `config.js` handles:
-- Navigation structure
-- Sidebar configuration  
+- Navigation structure (all links point to README files)
+- Sidebar configuration
 - Theme settings
 - Search functionality
 
@@ -55,7 +53,6 @@ https://relationalfabric.github.io/canon/
 ## Maintenance
 
 When adding new folders with documentation:
-1. Create `index.md` for VitePress routing
-2. Create `README.md` for GitHub navigation
-3. Update navigation in `config.js` if needed
-4. Test both GitHub and VitePress rendering
+1. Create `README.md` as the directory entry point
+2. Update navigation in `config.js` to link to `/path/README`
+3. Test both GitHub and VitePress rendering
