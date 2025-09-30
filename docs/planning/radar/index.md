@@ -7,7 +7,7 @@ This directory contains the Canon Technology Radar data and related files.
 - `data.yaml` - Main radar data in YAML format (human-editable)
 - `data.csv` - Generated CSV format for build-your-own-radar tool
 - `config.yaml` - Radar configuration and metadata
-- `radar.html` - Generated radar visualization
+- [radar.html](./radar.html) - Generated radar visualization
 
 ## Usage
 
