@@ -52,10 +52,8 @@
     "radar:convert": "tsx scripts/convert-radar.ts",
     "radar:validate": "tsx scripts/validate-radar.ts",
     "radar:watch": "chokidar './docs/planning/radar/data.yaml' -c 'npm run radar:convert'",
-    "docs:prepare": "node scripts/prepare-vitepress.js",
-    "docs:restore": "node scripts/restore-readme.js",
-    "docs:dev": "npm run docs:prepare && npx vitepress dev docs",
-    "docs:build": "npm run docs:prepare && npx vitepress build docs && npm run docs:restore",
+    "docs:dev": "find docs -name README.md -exec sh -c 'mv \"$1\" \"${1%README.md}index.md\"' _ {} \\; && npx vitepress dev docs",
+    "docs:build": "find docs -name README.md -exec sh -c 'mv \"$1\" \"${1%README.md}index.md\"' _ {} \\; && npx vitepress build docs",
     "docs:preview": "npx vitepress preview docs"
   },
   "peerDependencies": {
