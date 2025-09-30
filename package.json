@@ -49,6 +49,7 @@
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
     "adr:index": "cd docs/adrs && npx adr generate toc",
+    "adr:generate-index": "node scripts/generate-adr-index.js",
     "radar:convert": "tsx scripts/convert-radar.ts",
     "radar:validate": "tsx scripts/validate-radar.ts",
     "radar:watch": "chokidar './docs/planning/radar/data.yaml' -c 'npm run radar:convert'",
