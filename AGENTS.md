@@ -95,6 +95,28 @@ Use these npm scripts for development tasks:
 - `npm run adr:list` - List all ADRs
 - `npm run adr:index` - Generate ADR table of contents (in ADR directory)
 
+## Build Process and File Naming
+
+### CRITICAL: ADR README Update Process
+
+**The ADR README update is independent of publishing and documentation build.**
+
+The ADR documentation follows a specific process:
+
+1. **Repository contains**: `docs/adrs/README.md` - This is the source file that should be committed
+2. **Script updates**: The `scripts/generate-adr-index.js` script updates the ADR table in `README.md`
+3. **No index.md files**: There are no `index.md` files created or needed for ADRs
+
+### File Naming Rules (ADR Documentation Only)
+
+- ✅ **Commit**: `docs/adrs/README.md` (source file with ADR list that gets updated by script)
+- ❌ **Never create**: `docs/adrs/index.md` (does not exist and should not exist)
+- ✅ **Script updates**: `README.md` directly with populated ADR table
+
+### ADR Process
+
+The ADR README update process is completely separate from any documentation publishing or build process. The script only updates the `README.md` file with the current ADR table and never creates any `index.md` files.
+
 ## Key Patterns to Follow
 
 ### Module Augmentation
