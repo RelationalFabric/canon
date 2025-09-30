@@ -97,23 +97,29 @@ Use these npm scripts for development tasks:
 
 ## Build Process and File Naming
 
-### CRITICAL: ADR Documentation Build Process
+### CRITICAL: Documentation Build Process
 
-**NEVER commit `docs/adrs/index.md` to the repository.**
+**NEVER commit any `index.md` files to the repository.**
 
-The ADR documentation follows a specific build process:
+The entire documentation follows a specific build process:
 
-1. **Repository contains**: `docs/adrs/README.md` - This is the source file that should be committed
+1. **Repository contains**: `README.md` files - These are the source files that should be committed
 2. **Build process renames**: `README.md` → `index.md` during documentation build
-3. **Generated file**: `docs/adrs/index.md` is created during build and should be ignored by git
+3. **Generated files**: All `index.md` files are created during build and should be ignored by git
 
-### File Naming Rules
+### File Naming Rules (Applies to ALL Documentation)
 
-- ✅ **Commit**: `docs/adrs/README.md` (source file with ADR list template)
-- ❌ **Never commit**: `docs/adrs/index.md` (generated file)
-- ✅ **Build generates**: `docs/adrs/index.md` from `docs/adrs/README.md`
+- ✅ **Commit**: `README.md` files (source files with content)
+- ❌ **Never commit**: `index.md` files (generated files)
+- ✅ **Build generates**: `index.md` from `README.md` for all documentation
 
-The build script (`scripts/generate-adr-index.js`) reads from `README.md` and generates the `index.md` file with the populated ADR table. The `index.md` file is only used during the documentation build process and should never be committed to version control.
+### Examples
+
+- `docs/adrs/README.md` → `docs/adrs/index.md` (ADR index with generated table)
+- `docs/README.md` → `docs/index.md` (Main docs page)
+- `README.md` → `index.md` (Root documentation)
+
+The build process renames ALL `README.md` files to `index.md` during documentation build. The `index.md` files are only used during the documentation build process and should never be committed to version control.
 
 ## Key Patterns to Follow
 
