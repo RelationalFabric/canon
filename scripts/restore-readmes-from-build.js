@@ -32,7 +32,7 @@ async function restoreReadmeFiles(dir) {
         // Recursively process subdirectories
         const subRestored = await restoreReadmeFiles(fullPath)
         restoredFiles.push(...subRestored)
-      } else if (entry === 'index.md' && dir !== docsDir) {
+      } else if (entry === 'index.md' && dir !== docsDir && !dir.includes('.vitepress')) {
         // Rename index.md back to README.md (but not the main docs/index.md)
         const readmePath = join(dir, 'README.md')
         await rename(fullPath, readmePath)

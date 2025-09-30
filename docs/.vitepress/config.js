@@ -1,3 +1,5 @@
+import { copyRadarPlugin } from './plugins/copy-radar.js'
+
 export default {
   title: '@relational-fabric/canon',
   description: 'A modern TypeScript package template with ESLint and TypeScript configurations for starting new projects',
@@ -119,8 +121,8 @@ export default {
   // Ignore dead links for now - will fix them incrementally
   ignoreDeadLinks: true,
   
-  // Copy radar.html to the build output
+  // Vite configuration
   vite: {
-    publicDir: '../planning/radar'
+    plugins: [copyRadarPlugin()]
   }
 }
