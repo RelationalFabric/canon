@@ -94,6 +94,15 @@ npm install
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
 
+### Documentation Scripts
+
+- `npm run docs:dev` - Start VitePress development server
+- `npm run docs:build` - Build documentation for production
+- `npm run docs:preview` - Preview built documentation
+- `npm run docs:restore` - Restore README.md files from index.md
+
+**Note**: The documentation build process automatically renames all `README.md` files to `index.md` within the docs directory to work with VitePress routing. Use `npm run docs:restore` to convert them back to README.md files for editing.
+
 ### ADR Management
 
 This project uses Architecture Decision Records (ADRs) to document architectural decisions:
