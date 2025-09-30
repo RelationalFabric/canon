@@ -33,18 +33,12 @@ async function renameReadmeFiles(dir) {
         // Recursively process subdirectories
         const subRenamed = await renameReadmeFiles(fullPath)
         renamedFiles.push(...subRenamed)
-      } else if (entry === 'README.md') {
-        // Rename README.md to index.md (but skip if index.md already exists in this directory)
+      } else if (entry === 'README.md' && dir !== docsDir) {
+        // Rename README.md to index.md (but not in the main docs directory)
         const indexPath = join(dir, 'index.md')
-        try {
-          await stat(indexPath)
-          console.log(`Skipped: ${fullPath} (index.md already exists in ${dir})`)
-        } catch {
-          // index.md doesn't exist, safe to rename
-          await rename(fullPath, indexPath)
-          renamedFiles.push(fullPath)
-          console.log(`Renamed: ${fullPath} → ${indexPath}`)
-        }
+        await rename(fullPath, indexPath)
+        renamedFiles.push(fullPath)
+        console.log(`Renamed: ${fullPath} → ${indexPath}`)
       }
     }
   } catch (error) {
