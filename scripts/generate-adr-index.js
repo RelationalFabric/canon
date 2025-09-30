@@ -1,14 +1,10 @@
 #!/usr/bin/env node
 
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { join } from 'path'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-// Paths
-const adrsDir = join(__dirname, '..', 'docs', 'adrs')
+// Paths - use process.cwd() to get the current working directory (project root)
+const adrsDir = join(process.cwd(), 'docs', 'adrs')
 const readmePath = join(adrsDir, 'README.md')
 
 // Status color mapping
