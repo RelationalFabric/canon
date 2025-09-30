@@ -54,8 +54,9 @@
     "radar:validate": "tsx scripts/validate-radar.ts",
     "radar:watch": "chokidar './docs/planning/radar/data.yaml' -c 'npm run radar:convert'",
     "docs:dev": "npx vitepress dev docs",
-    "docs:build": "npx vitepress build docs",
-    "docs:preview": "npx vitepress preview docs"
+    "docs:build": "node scripts/rename-readmes-for-build.js && npx vitepress build docs && node scripts/restore-readmes-from-build.js",
+    "docs:preview": "npx vitepress preview docs",
+    "docs:restore": "node scripts/restore-readmes-from-build.js"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",

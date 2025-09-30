@@ -97,11 +97,11 @@ npm install
 ### Documentation Scripts
 
 - `npm run docs:dev` - Start VitePress development server
-- `npm run docs:build` - Build documentation for production
+- `npm run docs:build` - Build documentation for production (with automatic file renaming)
 - `npm run docs:preview` - Preview built documentation
-- `npm run docs:restore` - Restore README.md files from index.md
+- `npm run docs:restore` - Manually restore README.md files from index.md
 
-**Note**: The documentation build process automatically renames all `README.md` files to `index.md` within the docs directory to work with VitePress routing. Use `npm run docs:restore` to convert them back to README.md files for editing.
+**Note**: The documentation build process uses a GitHub-first approach. All files use `README.md` naming in the repository for GitHub compatibility. During build, files are temporarily renamed to `index.md` for VitePress routing, then automatically restored. Always edit `README.md` files directly.
 
 ### ADR Management
 
