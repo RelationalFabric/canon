@@ -97,29 +97,25 @@ Use these npm scripts for development tasks:
 
 ## Build Process and File Naming
 
-### CRITICAL: Documentation Build Process
+### CRITICAL: ADR README Update Process
 
-**NEVER commit any `index.md` files to the repository.**
+**The ADR README update is independent of publishing and documentation build.**
 
-The entire documentation follows a specific build process:
+The ADR documentation follows a specific process:
 
-1. **Repository contains**: `README.md` files - These are the source files that should be committed
-2. **Build process renames**: `README.md` → `index.md` during documentation build
-3. **Generated files**: All `index.md` files are created during build and should be ignored by git
+1. **Repository contains**: `docs/adrs/README.md` - This is the source file that should be committed
+2. **Script updates**: The `scripts/generate-adr-index.js` script updates the ADR table in `README.md`
+3. **No index.md files**: There are no `index.md` files created or needed for ADRs
 
-### File Naming Rules (Applies to ALL Documentation)
+### File Naming Rules (ADR Documentation Only)
 
-- ✅ **Commit**: `README.md` files (source files with content)
-- ❌ **Never commit**: `index.md` files (generated files)
-- ✅ **Build generates**: `index.md` from `README.md` for all documentation
+- ✅ **Commit**: `docs/adrs/README.md` (source file with ADR list that gets updated by script)
+- ❌ **Never create**: `docs/adrs/index.md` (does not exist and should not exist)
+- ✅ **Script updates**: `README.md` directly with populated ADR table
 
-### Examples
+### ADR Process
 
-- `docs/adrs/README.md` → `docs/adrs/index.md` (ADR index with generated table)
-- `docs/README.md` → `docs/index.md` (Main docs page)
-- `README.md` → `index.md` (Root documentation)
-
-The build process renames ALL `README.md` files to `index.md` during documentation build. The `index.md` files are only used during the documentation build process and should never be committed to version control.
+The ADR README update process is completely separate from any documentation publishing or build process. The script only updates the `README.md` file with the current ADR table and never creates any `index.md` files.
 
 ## Key Patterns to Follow
 
