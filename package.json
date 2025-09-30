@@ -54,7 +54,8 @@
     "radar:watch": "chokidar './docs/planning/radar/data.yaml' -c 'npm run radar:convert'",
     "docs:dev": "find docs -name README.md -exec sh -c 'mv \"$1\" \"${1%README.md}index.md\"' _ {} \\; && npx vitepress dev docs",
     "docs:build": "find docs -name README.md -exec sh -c 'mv \"$1\" \"${1%README.md}index.md\"' _ {} \\; && npx vitepress build docs",
-    "docs:preview": "npx vitepress preview docs"
+    "docs:preview": "npx vitepress preview docs",
+    "docs:restore": "node scripts/restore-readme.js"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
