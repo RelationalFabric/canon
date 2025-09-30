@@ -73,7 +73,6 @@
   "dependencies": {
     "@antfu/eslint-config": "^3.0.0",
     "@tsconfig/node-lts": "^20.0.0",
-    "defu": "^6.1.4",
     "yaml": "^2.4.1"
   },
   "optionalDependencies": {
@@ -85,6 +84,6 @@
     "eslint": "^9.10.0",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0",
-    "vitepress": "^1.0.0"
+    "vitepress": "^1.6.4"
   }
 }
