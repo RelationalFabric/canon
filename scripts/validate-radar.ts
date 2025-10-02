@@ -4,7 +4,7 @@ import { validateRadarFile } from '../src/radar/validator.js'
 
 async function main() {
   try {
-    const result = await validateRadarFile('./docs/planning/radar/data.yaml')
+    const result = await validateRadarFile('./planning/radar/data.yaml')
     
     if (result.isValid) {
       console.log('✅ Radar data is valid')
