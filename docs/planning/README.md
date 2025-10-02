@@ -27,4 +27,4 @@ This information is intended for:
 
 ## Contributing
 
-See the main [Contributing Guidelines](../CONTRIBUTING.md) for how to contribute to Canon, including strategic planning and roadmap discussions.
+See the main [Contributing Guidelines](../../CONTRIBUTING.md) for how to contribute to Canon, including strategic planning and roadmap discussions.
