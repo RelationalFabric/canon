@@ -97,25 +97,54 @@ Use these npm scripts for development tasks:
 
 ## Build Process and File Naming
 
-### CRITICAL: ADR README Update Process
+### CRITICAL: Documentation Build Process
 
-**The ADR README update is independent of publishing and documentation build.**
+**The documentation build process uses a GitHub-first approach with build-time file renaming.**
 
-The ADR documentation follows a specific process:
+The documentation system follows a specific process to maintain GitHub compatibility while enabling VitePress routing:
+
+1. **Source Repository**: All documentation files use `README.md` naming for GitHub compatibility
+2. **Build Process**: During build, `README.md` files are temporarily renamed to `index.md` for VitePress routing
+3. **Post-Build**: Files are automatically restored to `README.md` naming for GitHub editing
+
+### File Naming Rules for Documentation
+
+**Repository State (GitHub-Compatible):**
+- ✅ **Always edit**: `README.md` files in the repository (GitHub-first approach)
+- ✅ **Main entry**: `docs/index.md` - VitePress entry point (never renamed)
+- ✅ **Subdirectories**: Use `README.md` for all subdirectory documentation
+
+**Build State (VitePress-Compatible):**
+- ✅ **During build**: `README.md` → `index.md` in subdirectories only
+- ✅ **VitePress routing**: `/adrs/` maps to `docs/adrs/index.md` (after rename)
+- ✅ **Main entry**: `docs/index.md` remains unchanged
+
+**Post-Build State (GitHub-Compatible):**
+- ✅ **After build**: `index.md` → `README.md` in subdirectories (restored)
+- ❌ **Never manually rename**: Let the build scripts handle file renaming
+- ❌ **Never commit**: `index.md` files in subdirectories (except `docs/index.md`)
+
+### Documentation Build Scripts
+
+- `npm run docs:build` - Complete build process with automatic file renaming
+- `npm run docs:restore` - Manually restore files if needed after build
+- `npm run docs:dev` - Development server (no file renaming needed)
+
+### ADR Documentation Process
+
+**The ADR README update is independent of the main documentation build process.**
 
 1. **Repository contains**: `docs/adrs/README.md` - This is the source file that should be committed
 2. **Script updates**: The `scripts/generate-adr-index.js` script updates the ADR table in `README.md`
 3. **No index.md files**: There are no `index.md` files created or needed for ADRs
 
-### File Naming Rules (ADR Documentation Only)
+### Important Notes for AI Agents
 
-- ✅ **Commit**: `docs/adrs/README.md` (source file with ADR list that gets updated by script)
-- ❌ **Never create**: `docs/adrs/index.md` (does not exist and should not exist)
-- ✅ **Script updates**: `README.md` directly with populated ADR table
-
-### ADR Process
-
-The ADR README update process is completely separate from any documentation publishing or build process. The script only updates the `README.md` file with the current ADR table and never creates any `index.md` files.
+- **Always work with README.md files** in the source repository
+- **Never manually rename files** - the build process handles this automatically
+- **The repository structure must remain GitHub-compatible** at all times
+- **VitePress routing is handled at build time only**
+- **If you see index.md files, run `npm run docs:restore` before editing**
 
 ## Key Patterns to Follow
 
