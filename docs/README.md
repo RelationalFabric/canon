@@ -29,10 +29,10 @@ export default createEslintConfig()
 
 ## Documentation Sections
 
-- **[Canons](/docs/canons)** - Core principles and guidelines
-- **[Axioms](/docs/axioms)** - Fundamental assumptions and rules
-- **[Examples](/docs/examples/)** - Practical usage examples
-- **[Radar Methodology](/docs/radar-methodology)** - Technology assessment approach
+- **[Canons](/canons)** - Core principles and guidelines
+- **[Axioms](/axioms)** - Fundamental assumptions and rules
+- **[Examples](/examples/)** - Practical usage examples
+- **[Radar Methodology](/radar-methodology)** - Technology assessment approach
 
 ## Architecture Decisions
 
