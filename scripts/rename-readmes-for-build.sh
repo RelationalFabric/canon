@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Rename README.md files to index.md for VitePress build
-# Skip the main docs directory to avoid conflicts
+# Renames ALL README.md files in docs directory
 
 echo "Starting README.md → index.md rename for VitePress build..."
 
-# Find and rename README.md files in subdirectories only
-find docs -name "README.md" -not -path "docs/README.md" | while read file; do
+# Find and rename ALL README.md files in docs directory
+find docs -name "README.md" | while read file; do
     dir=$(dirname "$file")
     echo "Renamed: $file → $dir/index.md"
     mv "$file" "$dir/index.md"

@@ -11,9 +11,9 @@ export default {
     // Navigation bar
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Documentation', link: '/docs/README' },
-      { text: 'ADRs', link: '/adrs/README' },
-      { text: 'Planning', link: '/planning/README' }
+      { text: 'ADRs', link: '/adrs/' },
+      { text: 'Examples', link: '/docs/examples/' },
+      { text: 'Planning', link: '/planning/' }
     ],
     
     // Sidebar configuration
@@ -23,7 +23,7 @@ export default {
         {
           text: 'Documentation',
           items: [
-            { text: 'Introduction', link: '/docs/README' },
+            { text: 'Introduction', link: '/docs/' },
             { text: 'Canons', link: '/docs/canons' },
             { text: 'Axioms', link: '/docs/axioms' },
             {
@@ -44,7 +44,7 @@ export default {
         {
           text: 'Architecture Decision Records',
           items: [
-            { text: 'About ADRs', link: '/adrs/README' },
+            { text: 'About ADRs', link: '/adrs/' },
             { text: '1. TypeScript Package Setup', link: '/adrs/0001-typescript-package-setup' },
             { text: '2. ESLint Configuration with Antfu', link: '/adrs/0002-eslint-configuration-with-antfu' },
             { text: '3. Documentation Linting Inclusion', link: '/adrs/0003-documentation-linting-inclusion' },
@@ -55,6 +55,19 @@ export default {
             { text: '8. Dual Export Strategy', link: '/adrs/0008-dual-export-strategy' },
             { text: '9. Node.js Version Requirement', link: '/adrs/0009-node-js-version-requirement' },
             { text: '10. VitePress Documentation Solution', link: '/adrs/0010-vitepress-documentation-solution' }
+          ]
+        }
+      ],
+      
+      // Examples sidebar
+      '/docs/examples/': [
+        {
+          text: 'Examples',
+          items: [
+            { text: 'Overview', link: '/docs/examples/' },
+            { text: 'Deduplicating Entities', link: '/docs/examples/deduplicating-entities' },
+            { text: 'Tree Walk Over Mixed Entities', link: '/docs/examples/tree-walk-over-mixed-entities' },
+            { text: 'User Authentication Tokens', link: '/docs/examples/user-authentication-tokens' }
           ]
         }
       ],
