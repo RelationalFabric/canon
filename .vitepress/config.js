@@ -109,7 +109,7 @@ export default {
     
     // Edit link
     editLink: {
-      pattern: 'https://github.com/RelationalFabric/canon/edit/main/docs/:path',
+      pattern: 'https://github.com/RelationalFabric/canon/edit/main/:path',
       text: 'Edit this page on GitHub'
     },
     

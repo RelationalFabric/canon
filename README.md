@@ -67,9 +67,9 @@ This package requires the following peer dependencies:
 
 Canon maintains transparent planning and strategic direction separate from the published package:
 
-- **Technology Radar**: [docs/planning/radar/](docs/planning/radar/) - Technology recommendations and assessments
-- **Strategic Vision**: [docs/planning/](docs/planning/) - Long-term direction and positioning
-- **Development Roadmap**: [docs/planning/](docs/planning/) - Detailed development phases and milestones
+- **Technology Radar**: [planning/radar/](planning/radar/) - Technology recommendations and assessments
+- **Strategic Vision**: [planning/](planning/) - Long-term direction and positioning
+- **Development Roadmap**: [planning/](planning/) - Detailed development phases and milestones
 - **Update Radar**: `npm run radar:convert` - Convert YAML to CSV for visualization
 
 ## Development
