@@ -29,19 +29,19 @@ export default createEslintConfig()
 
 ## Documentation Sections
 
-- **[Canons](/canons)** - Core principles and guidelines
-- **[Axioms](/axioms)** - Fundamental assumptions and rules
-- **[Examples](/examples/)** - Practical usage examples
-- **[Radar Methodology](/radar-methodology)** - Technology assessment approach
+- **[Canons](./canons.md)** - Core principles and guidelines
+- **[Axioms](./axioms.md)** - Fundamental assumptions and rules
+- **[Examples](./examples/)** - Practical usage examples
+- **[Radar Methodology](./radar-methodology.md)** - Technology assessment approach
 
 ## Architecture Decisions
 
-- **[ADRs](/adrs/)** - Architecture Decision Records documenting key decisions
+- **[ADRs](./adrs/)** - Architecture Decision Records documenting key decisions
 
 ## Planning & Strategy
 
-- **[Technology Radar](/planning/radar/)** - Technology recommendations and assessments
-- **[Planning Overview](/planning/)** - Strategic direction and roadmap
+- **[Technology Radar](../planning/radar/)** - Technology recommendations and assessments
+- **[Planning Overview](../planning/)** - Strategic direction and roadmap
 
 ## Development Notes
 
