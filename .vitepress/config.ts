@@ -24,7 +24,16 @@ export default defineConfig({
             { text: 'Canons', link: '/docs/canons' },
             { text: 'Axioms', link: '/docs/axioms' },
             { text: 'Radar Methodology', link: '/docs/radar-methodology' },
-            { text: 'Examples', link: '/docs/examples/' },
+            {
+              text: 'Examples',
+              collapsed: true,
+              items: [
+                { text: 'Overview', link: '/docs/examples/' },
+                { text: 'Deduplicating Entities', link: '/docs/examples/deduplicating-entities' },
+                { text: 'Tree Walk Over Mixed Entities', link: '/docs/examples/tree-walk-over-mixed-entities' },
+                { text: 'User Authentication Tokens', link: '/docs/examples/user-authentication-tokens' }
+              ]
+            },
             { text: 'ADRs', link: '/docs/adrs/' }
           ]
         }
