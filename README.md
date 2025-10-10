@@ -40,8 +40,6 @@ features:
     details: Documented ADRs and transparent technology radar for strategic planning
 ---
 
-# Canon
-
 **Canon** solves the "empty room problem" by providing universal type primitives and axiomatic systems for building robust, data-centric applications. Instead of starting from scratch with each new project, Canon offers consistent design decisions and type blueprints that can be shared across projects and data formats.
 
 ## What is Canon?
