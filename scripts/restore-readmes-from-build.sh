@@ -12,4 +12,10 @@ find docs -name "index.md" | while read file; do
     mv "$file" "$dir/README.md"
 done
 
+find planning -name "index.md" | while read file; do
+    dir=$(dirname "$file")
+    echo "Restored: $file → $dir/README.md"
+    mv "$file" "$dir/README.md"
+done
+
 echo "Repository is now ready for GitHub editing."
