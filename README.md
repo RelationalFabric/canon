@@ -14,24 +14,24 @@ hero:
       link: https://github.com/RelationalFabric/canon
 
 features:
+  - icon: 🔄
+    title: Lazy Typing Pattern
+    details: Write type-safe code against semantic concepts while deferring specific implementations through axioms, canons, and universal APIs
+  - icon: 🧩
+    title: Axioms
+    details: Define semantic concepts independent of data format - the "what" of your type system
+  - icon: 📐
+    title: Canons
+    details: Provide format-specific implementations of axioms - the "how" for each data source
+  - icon: 🛠️
+    title: Universal APIs
+    details: Functions that work across all canons - the "interface" for your application code
   - icon: 🎯
     title: Universal Type Primitives
     details: Battle-tested types from the TypeScript ecosystem providing a solid foundation for data-centric applications
-  - icon: 🧩
-    title: Axiomatic Systems
-    details: Atomic building blocks (axioms) that enable lazy typing and adaptability across different data formats
-  - icon: 📐
-    title: Canonical Type Blueprints
-    details: Universal type definitions (canons) that implement axioms for JSON-LD, MongoDB, REST APIs, and more
-  - icon: 🔄
-    title: Lazy Typing with Identity
-    details: Preserve canonical identity while adapting to different data structures and formats
   - icon: 📚
     title: Curated Library Ecosystem
     details: Known good set of libraries and modules as a canonical starting point for your projects
-  - icon: 🛠️
-    title: Canonical APIs
-    details: Standardized interfaces for data structures with sensible defaults when choice is available
   - icon: 🏗️
     title: Modern TypeScript
     details: Based on Node.js 22+ with latest TypeScript features, ES modules, and comprehensive tooling
@@ -44,34 +44,41 @@ features:
 
 ## What is Canon?
 
-Canon is a modern TypeScript package that provides:
+Canon is a modern TypeScript package that enables **lazy typing** - writing type-safe code against semantic concepts while deferring specific implementations to runtime configuration. This is achieved through three complementary parts:
 
-### Universal Type Primitives
+### The Lazy Typing Triplet
+
+#### 1. Axioms - Define Semantic Concepts
+Axioms define **what** semantic concepts mean, independent of any specific data format:
+- Define the semantic concept (e.g., "unique identifier", "type classification", "temporal data")
+- Specify the type structure without implementation details
+- Enable compile-time type safety through TypeScript interfaces
+
+#### 2. Canons - Implement for Formats
+Canons provide **how** each axiom is implemented for specific data formats:
+- Provide format-specific field names and structures
+- Multiple canons can coexist for different data sources
+- Register both type-level and runtime configurations
+
+#### 3. Universal APIs - Work Across Formats
+Universal APIs provide **the interface** your application code uses:
+- Single API that works across all registered canons
+- Type-safe functions that adapt to different data formats
+- No format-specific code in your business logic
+
+### Additional Capabilities
+
+#### Universal Type Primitives
 - Battle-tested types from the TypeScript ecosystem
 - Foundation for building data-centric applications
 - Type-safe operations and proven patterns
 
-### Axiomatic Systems
-- **Axioms**: Atomic building blocks that define semantic concepts (ID, type, version, timestamps, references)
-- **Lazy typing**: Adapt types to different data structures while preserving canonical identity
-- **Cross-format compatibility**: Work seamlessly with JSON-LD, MongoDB, REST APIs, and more
-
-### Canonical Type Blueprints (Canons)
-- Universal type definitions that implement axioms for specific data formats
-- Multiple canons can coexist, each representing different formats
-- Consistent semantic concepts across all formats
-
-### Curated Library Ecosystem
+#### Curated Library Ecosystem
 Canon serves as a **canonical starting point** by providing:
 - **Pre-configured TypeScript setup** - Base configurations that work out of the box
-- **Curated dependency set** - Known good versions of essential libraries:
-  - **type-fest** & **ts-essentials** for utility types
-  - **uuid** & **nanoid** for identity generation
-  - **object-hash** for content-based hashing
-  - **immutable.js** for immutable data structures
+- **Curated dependency set** - Known good versions of essential libraries for common needs
 - **Standardized patterns** - Consistent approaches to common problems
 - **Best practice implementations** - Proven solutions for type safety and data handling
-- **Canonical APIs** - Standardized interfaces that work across different data structures
 - **Sensible defaults** - Recommended choices when selecting data structures
 
 This approach reduces decision fatigue and provides confidence in your technology stack while recognizing that in many real-world scenarios you must work with existing data structures.
@@ -125,26 +132,36 @@ This package requires the following peer dependencies:
 
 ## Core Concepts
 
-### Axioms
-Axioms are atomic building blocks that enable lazy typing and adaptability. They define semantic concepts that can be found in different data structures:
+### The Lazy Typing Pattern
 
-- **Id**: Unique identifiers across different systems
-- **Type**: Type information and classification
-- **Version**: Versioning and change tracking
-- **Timestamps**: Creation and modification times
-- **References**: Relationships between entities
+Canon implements **lazy typing** through three complementary components that work together:
+
+#### Axioms
+Axioms define semantic concepts independent of data format. They specify **what** concepts your code works with, such as:
+- Unique identifiers across different systems
+- Type information and classification
+- Versioning and change tracking
+- Temporal data with format conversion
+- Relationships between entities
 
 See [docs/axioms.md](docs/axioms.md) for the complete type system architecture.
 
-### Canons
-Canons are universal type blueprints that implement axioms for specific data formats. They provide:
-
+#### Canons
+Canons provide format-specific implementations of axioms. They specify **how** each semantic concept is represented in a particular data format:
 - **Declarative Style**: Local configurations for specific use cases
 - **Module Style**: Shareable configurations across projects
 - **Type Safety**: Full TypeScript support with compile-time checking
-- **Format Flexibility**: Support for JSON-LD, MongoDB, REST APIs, and more
+- **Multiple Formats**: Each canon handles one data format's implementation
 
 See [docs/canons.md](docs/canons.md) for implementation patterns.
+
+#### Universal APIs
+Universal APIs provide functions that work across all registered canons. They are **the interface** your application code uses:
+- Write code once that works with any registered canon
+- Automatic adaptation to different data formats
+- Full type safety maintained across all formats
+
+See [reference/api.md](reference/api.md) for available APIs.
 
 ## Package Exports
 
@@ -183,7 +200,7 @@ Canon is designed to compose with existing TypeScript libraries and provides:
 
 - **Type Safety**: Full TypeScript support with strict type checking
 - **Flexibility**: Work with existing data structures or define new ones
-- **Compatibility**: Support for JSON-LD, MongoDB, REST APIs, and custom formats
+- **Format Agnostic**: Support for diverse data formats through universal semantic interfaces
 - **Extensibility**: Add your own axioms and canons as needed
 
 ## Planning and Strategy
