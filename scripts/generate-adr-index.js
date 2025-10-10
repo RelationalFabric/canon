@@ -2,6 +2,7 @@
 
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import process from 'node:process'
 
 // Paths - use process.cwd() to get the current working directory (project root)
 const adrsDir = join(process.cwd(), 'docs', 'adrs')

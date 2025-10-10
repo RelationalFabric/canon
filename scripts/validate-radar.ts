@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 
+import process from 'node:process'
 import { validateRadarFile } from '../src/radar/validator.js'
 
 async function main() {

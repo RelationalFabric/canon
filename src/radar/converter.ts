@@ -3,7 +3,9 @@
  */
 
 import type { CsvRow, QuadrantKey, RadarData, RingKey } from '../types/radar.js'
+
 import { readFileSync, writeFileSync } from 'node:fs'
+import process from 'node:process'
 import { parse } from 'yaml'
 
 // Quadrant mapping for CSV output
