@@ -73,13 +73,13 @@
   "dependencies": {
     "@antfu/eslint-config": "^3.0.0",
     "@tsconfig/node-lts": "^20.0.0",
-    "defu": "^6.1.4",
     "yaml": "^2.4.1"
   },
   "optionalDependencies": {
     "defu": "^6.1.4"
   },
   "devDependencies": {
+    "@types/node": "^24.7.1",
     "adr-tools": "^2.0.4",
     "chokidar-cli": "^3.0.0",
     "eslint": "^9.10.0",

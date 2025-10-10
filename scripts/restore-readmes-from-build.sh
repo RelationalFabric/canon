@@ -6,13 +6,7 @@
 echo "Starting index.md → README.md restore after VitePress build..."
 
 # Find and restore index.md files, excluding .vitepress directory
-find docs -name "index.md" | while read file; do
-    dir=$(dirname "$file")
-    echo "Restored: $file → $dir/README.md"
-    mv "$file" "$dir/README.md"
-done
-
-find planning -name "index.md" | while read file; do
+find  -name "index.md" | while read file; do
     dir=$(dirname "$file")
     echo "Restored: $file → $dir/README.md"
     mv "$file" "$dir/README.md"

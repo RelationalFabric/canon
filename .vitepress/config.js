@@ -5,7 +5,6 @@ export default {
   // Base URL for GitHub Pages
   base: '/canon/',
 
-
   // Theme configuration
   themeConfig: {
     // Navigation bar
