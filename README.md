@@ -19,10 +19,10 @@ features:
     details: Write type-safe code against semantic concepts while deferring specific implementations through axioms, canons, and universal APIs
   - icon: 🧩
     title: Axioms
-    details: Define semantic concepts independent of data format - the "what" of your type system
+    details: Define semantic concepts independent of data shape - the "what" of your type system
   - icon: 📐
     title: Canons
-    details: Provide format-specific implementations of axioms - the "how" for each data source
+    details: Provide shape-specific implementations of axioms - the "how" for each data source
   - icon: 🛠️
     title: Universal APIs
     details: Functions that work across all canons - the "interface" for your application code
@@ -40,7 +40,7 @@ features:
     details: Documented ADRs and transparent technology radar for strategic planning
 ---
 
-**Canon** solves the "empty room problem" by providing universal type primitives and axiomatic systems for building robust, data-centric applications. Instead of starting from scratch with each new project, Canon offers consistent design decisions and type blueprints that can be shared across projects and data formats.
+**Canon** solves the "empty room problem" by providing universal type primitives and axiomatic systems for building robust, data-centric applications. Instead of starting from scratch with each new project, Canon offers consistent design decisions and type blueprints that can be shared across projects and data shapes.
 
 ## What is Canon?
 
@@ -49,22 +49,22 @@ Canon is a modern TypeScript package that enables **lazy typing** - writing type
 ### The Lazy Typing Triplet
 
 #### 1. Axioms - Define Semantic Concepts
-Axioms define **what** semantic concepts mean, independent of any specific data format:
+Axioms define **what** semantic concepts mean, independent of any specific data shape:
 - Define the semantic concept (e.g., "unique identifier", "type classification", "temporal data")
 - Specify the type structure without implementation details
 - Enable compile-time type safety through TypeScript interfaces
 
-#### 2. Canons - Implement for Formats
-Canons provide **how** each axiom is implemented for specific data formats:
-- Provide format-specific field names and structures
+#### 2. Canons - Implement for Shapes
+Canons provide **how** each axiom is implemented for specific data shapes:
+- Provide shape-specific field names and structures
 - Multiple canons can coexist for different data sources
 - Register both type-level and runtime configurations
 
-#### 3. Universal APIs - Work Across Formats
+#### 3. Universal APIs - Work Across Shapes
 Universal APIs provide **the interface** your application code uses:
 - Single API that works across all registered canons
-- Type-safe functions that adapt to different data formats
-- No format-specific code in your business logic
+- Type-safe functions that adapt to different data shapes
+- No shape-specific code in your business logic
 
 ### Additional Capabilities
 
@@ -137,29 +137,29 @@ This package requires the following peer dependencies:
 Canon implements **lazy typing** through three complementary components that work together:
 
 #### Axioms
-Axioms define semantic concepts independent of data format. They specify **what** concepts your code works with, such as:
+Axioms define semantic concepts independent of data shape. They specify **what** concepts your code works with, such as:
 - Unique identifiers across different systems
 - Type information and classification
 - Versioning and change tracking
-- Temporal data with format conversion
+- Temporal data with conversion between representations
 - Relationships between entities
 
 See [docs/axioms.md](docs/axioms.md) for the complete type system architecture.
 
 #### Canons
-Canons provide format-specific implementations of axioms. They specify **how** each semantic concept is represented in a particular data format:
+Canons provide shape-specific implementations of axioms. They specify **how** each semantic concept is represented in a particular data shape:
 - **Declarative Style**: Local configurations for specific use cases
 - **Module Style**: Shareable configurations across projects
 - **Type Safety**: Full TypeScript support with compile-time checking
-- **Multiple Formats**: Each canon handles one data format's implementation
+- **Multiple Shapes**: Each canon handles one data shape's implementation
 
 See [docs/canons.md](docs/canons.md) for implementation patterns.
 
 #### Universal APIs
 Universal APIs provide functions that work across all registered canons. They are **the interface** your application code uses:
 - Write code once that works with any registered canon
-- Automatic adaptation to different data formats
-- Full type safety maintained across all formats
+- Automatic adaptation to different data shapes
+- Full type safety maintained across all shapes
 
 See [reference/api.md](reference/api.md) for available APIs.
 
@@ -200,7 +200,7 @@ Canon is designed to compose with existing TypeScript libraries and provides:
 
 - **Type Safety**: Full TypeScript support with strict type checking
 - **Flexibility**: Work with existing data structures or define new ones
-- **Format Agnostic**: Support for diverse data formats through universal semantic interfaces
+- **Shape Agnostic**: Support for diverse data shapes through universal semantic interfaces
 - **Extensibility**: Add your own axioms and canons as needed
 
 ## Planning and Strategy
