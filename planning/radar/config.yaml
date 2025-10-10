@@ -1,53 +1,53 @@
 # Canon Technology Radar Configuration
 
 metadata:
-  title: "Canon Technology Radar"
+  title: Canon Technology Radar
   subtitle: "Relational Fabric's technology recommendations and assessments"
-  version: "1.0.0"
-  lastUpdated: "2025-01-26"
-  description: "A comprehensive view of tools, techniques, features, and data formats recommended for Canon and its consumers"
+  version: 1.0.0
+  lastUpdated: 2025-01-26
+  description: 'A comprehensive view of tools, techniques, features, and data formats recommended for Canon and its consumers'
 
 quadrants:
-  - id: "tools-libraries"
-    name: "Tools & Libraries"
-    description: "Third-party libraries, build tools, and development utilities"
-  
-  - id: "techniques-patterns"
-    name: "Techniques & Patterns"
-    description: "Architectural patterns, development practices, and type system techniques"
-  
-  - id: "features-capabilities"
-    name: "Features & Capabilities"
-    description: "Runtime features, development features, and integration capabilities"
-  
-  - id: "data-structures-formats"
-    name: "Data Structures, Formats & Standards"
-    description: "Data structures, serialization formats, identity standards, and schema standards"
+  - id: tools-libraries
+    name: 'Tools & Libraries'
+    description: 'Third-party libraries, build tools, and development utilities'
+
+  - id: techniques-patterns
+    name: 'Techniques & Patterns'
+    description: 'Architectural patterns, development practices, and type system techniques'
+
+  - id: features-capabilities
+    name: 'Features & Capabilities'
+    description: 'Runtime features, development features, and integration capabilities'
+
+  - id: data-structures-formats
+    name: 'Data Structures, Formats & Standards'
+    description: 'Data structures, serialization formats, identity standards, and schema standards'
 
 rings:
-  - id: "adopt"
-    name: "Adopt"
-    description: "Strong recommendation. Proven, stable, and recommended for use."
-    color: "#93c47d"
-  
-  - id: "trial"
-    name: "Trial"
-    description: "Evaluate for adoption. Worth exploring and evaluating for your context."
-    color: "#f9cb9c"
-  
-  - id: "assess"
-    name: "Assess"
-    description: "Investigate further. Keep under review and assess for potential future use."
-    color: "#a4c2f4"
-  
-  - id: "hold"
-    name: "Hold"
-    description: "Not recommended. Avoid or replace with better alternatives."
-    color: "#ea9999"
+  - id: adopt
+    name: Adopt
+    description: 'Strong recommendation. Proven, stable, and recommended for use.'
+    color: '#93c47d'
+
+  - id: trial
+    name: Trial
+    description: Evaluate for adoption. Worth exploring and evaluating for your context.
+    color: '#f9cb9c'
+
+  - id: assess
+    name: Assess
+    description: Investigate further. Keep under review and assess for potential future use.
+    color: '#a4c2f4'
+
+  - id: hold
+    name: Hold
+    description: Not recommended. Avoid or replace with better alternatives.
+    color: '#ea9999'
 
 # Configuration for build-your-own-radar tool
 buildConfig:
-  csvOutput: "data.csv"
-  yamlInput: "data.yaml"
+  csvOutput: data.csv
+  yamlInput: data.yaml
   includeMetadata: true
   sortByRing: true

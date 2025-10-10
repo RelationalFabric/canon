@@ -108,4 +108,3 @@ Chosen option: "VitePress", because it provides the best balance of simplicity, 
 * [VitePress Documentation](https://vitepress.dev/)
 * [Vue.js Documentation](https://vuejs.org/) - Built with VitePress
 * [Vite Documentation](https://vitejs.dev/) - Built with VitePress
-

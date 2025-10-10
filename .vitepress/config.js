@@ -11,7 +11,7 @@ export default {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/docs/' },
-      { text: 'Planning', link: '/planning/' }
+      { text: 'Planning', link: '/planning/' },
     ],
 
     // Sidebar configuration
@@ -29,16 +29,25 @@ export default {
               items: [
                 { text: 'Deduplicating Entities', link: '/docs/examples/deduplicating-entities' },
                 { text: 'Tree Walk Over Mixed Entities', link: '/docs/examples/tree-walk-over-mixed-entities' },
-                { text: 'User Authentication Tokens', link: '/docs/examples/user-authentication-tokens' }
-              ]
+                { text: 'User Authentication Tokens', link: '/docs/examples/user-authentication-tokens' },
+              ],
             },
-            { text: 'Radar Methodology', link: '/docs/radar-methodology' }
-          ]
-        }
+            { text: 'Radar Methodology', link: '/docs/radar-methodology' },
+          ],
+        },
       ],
 
       // ADR sidebar
       '/docs/adrs/': [
+        {
+          text: 'Documentation',
+          items: [
+            { text: 'Documentation', link: '/docs/' },
+            { text: 'Canons', link: '/docs/canons' },
+            { text: 'Axioms', link: '/docs/axioms' },
+            { text: 'Examples', link: '/docs/examples' },
+          ],
+        },
         {
           text: 'Architecture Decision Records',
           items: [
@@ -52,24 +61,10 @@ export default {
             { text: '7. Y-Statement Format', link: '/docs/adrs/0007-y-statement-format' },
             { text: '8. Dual Export Strategy', link: '/docs/adrs/0008-dual-export-strategy' },
             { text: '9. Node.js Version Requirement', link: '/docs/adrs/0009-node-js-version-requirement' },
-            { text: '10. VitePress Documentation Solution', link: '/docs/adrs/0010-vitepress-documentation-solution' }
-          ]
-        }
+            { text: '10. VitePress Documentation Solution', link: '/docs/adrs/0010-vitepress-documentation-solution' },
+          ],
+        },
       ],
-
-      // Examples sidebar
-      '/docs/examples/': [
-        {
-          text: 'Examples',
-          items: [
-            { text: 'Overview', link: '/docs/examples/' },
-            { text: 'Deduplicating Entities', link: '/docs/examples/deduplicating-entities' },
-            { text: 'Tree Walk Over Mixed Entities', link: '/docs/examples/tree-walk-over-mixed-entities' },
-            { text: 'User Authentication Tokens', link: '/docs/examples/user-authentication-tokens' }
-          ]
-        }
-      ],
-
       // Planning sidebar
       '/planning/': [
         {
@@ -81,34 +76,34 @@ export default {
               items: [
                 { text: 'Overview', link: '/planning/radar/' },
                 { text: 'Interactive Radar', link: '/planning/radar.html' },
-                { text: 'Methodology', link: '/docs/radar-methodology' }
-              ]
-            }
-          ]
-        }
-      ]
+                { text: 'Methodology', link: '/docs/radar-methodology' },
+              ],
+            },
+          ],
+        },
+      ],
     },
 
     // Social links
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/RelationalFabric/canon' }
+      { icon: 'github', link: 'https://github.com/RelationalFabric/canon' },
     ],
 
     // Footer
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2025 Relational Fabric'
+      copyright: 'Copyright © 2025 Relational Fabric',
     },
 
     // Search
     search: {
-      provider: 'local'
+      provider: 'local',
     },
 
     // Edit link
     editLink: {
       pattern: 'https://github.com/RelationalFabric/canon/edit/main/:path',
-      text: 'Edit this page on GitHub'
+      text: 'Edit this page on GitHub',
     },
 
     // Last updated
@@ -116,17 +111,17 @@ export default {
       text: 'Last updated',
       formatOptions: {
         dateStyle: 'short',
-        timeStyle: 'medium'
-      }
-    }
+        timeStyle: 'medium',
+      },
+    },
   },
 
   // Markdown configuration
   markdown: {
     lineNumbers: true,
-    theme: 'github-dark'
+    theme: 'github-dark',
   },
 
   // Ignore dead links for now - will fix them incrementally
-  ignoreDeadLinks: true
+  ignoreDeadLinks: true,
 }

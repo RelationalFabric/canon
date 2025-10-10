@@ -6,5 +6,5 @@ export default {
   enhanceApp({ app }) {
     // Register the radar component globally
     app.component('Radar', Radar)
-  }
+  },
 }

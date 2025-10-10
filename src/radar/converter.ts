@@ -2,24 +2,24 @@
  * Technology Radar data conversion utilities
  */
 
+import type { CsvRow, QuadrantKey, RadarData, RingKey } from '../types/radar.js'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { parse } from 'yaml'
-import { readFileSync, writeFileSync } from 'fs'
-import type { RadarData, CsvRow, QuadrantKey, RingKey } from '../types/radar.js'
 
 // Quadrant mapping for CSV output
 const QUADRANT_MAP: Record<QuadrantKey, string> = {
   'tools-libraries': 'Tools & Libraries',
   'techniques-patterns': 'Techniques & Patterns',
   'features-capabilities': 'Features & Capabilities',
-  'data-structures-formats': 'Data Structures, Formats & Standards'
+  'data-structures-formats': 'Data Structures, Formats & Standards',
 }
 
 // Ring mapping for CSV output
 const RING_MAP: Record<RingKey, string> = {
-  'adopt': 'Adopt',
-  'trial': 'Trial',
-  'assess': 'Assess',
-  'hold': 'Hold'
+  adopt: 'Adopt',
+  trial: 'Trial',
+  assess: 'Assess',
+  hold: 'Hold',
 }
 
 /**
@@ -27,35 +27,36 @@ const RING_MAP: Record<RingKey, string> = {
  */
 export function convertYamlToCsv(yamlContent: string): string {
   const data = parse(yamlContent) as RadarData
-  
+
   // Generate CSV content
   const csvRows: string[] = ['name,ring,quadrant,isNew,description']
-  
+
   // Process each quadrant
   Object.entries(data).forEach(([quadrantKey, quadrantData]) => {
-    if (quadrantKey === 'metadata') return // Skip metadata
-    
+    if (quadrantKey === 'metadata')
+      return // Skip metadata
+
     const quadrantName = QUADRANT_MAP[quadrantKey as QuadrantKey] || quadrantKey
-    
+
     // Process each ring in the quadrant
     Object.entries(quadrantData).forEach(([ringKey, items]) => {
       const ringName = RING_MAP[ringKey as RingKey] || ringKey
-      
+
       // Process each item in the ring
-      items.forEach(item => {
+      items.forEach((item) => {
         const row: CsvRow = {
           name: item.name,
           ring: ringName,
           quadrant: quadrantName,
           isNew: item.isNew,
-          description: item.description
+          description: item.description,
         }
-        
+
         csvRows.push(formatCsvRow(row))
       })
     })
   })
-  
+
   return csvRows.join('\n')
 }
 
@@ -67,16 +68,16 @@ export function convertYamlFileToCsv(yamlPath: string, csvPath: string): void {
     // Read and parse YAML file
     const yamlContent = readFileSync(yamlPath, 'utf8')
     const csvContent = convertYamlToCsv(yamlContent)
-    
+
     // Write CSV file
     writeFileSync(csvPath, csvContent)
     console.log(`✅ Converted ${yamlPath} to ${csvPath}`)
-    
+
     // Count entries
     const entryCount = csvContent.split('\n').length - 1
     console.log(`📊 Generated ${entryCount} radar entries`)
-    
-  } catch (error) {
+  }
+  catch (error) {
     console.error('❌ Error converting YAML to CSV:', error instanceof Error ? error.message : 'Unknown error')
     process.exit(1)
   }
@@ -91,7 +92,7 @@ function formatCsvRow(row: CsvRow): string {
     escapeCsvField(row.ring),
     escapeCsvField(row.quadrant),
     row.isNew ? 'true' : 'false',
-    escapeCsvField(row.description)
+    escapeCsvField(row.description),
   ].join(',')
 }
 
@@ -99,13 +100,14 @@ function formatCsvRow(row: CsvRow): string {
  * Escape CSV field values
  */
 function escapeCsvField(field: string): string {
-  if (typeof field !== 'string') return String(field)
-  
+  if (typeof field !== 'string')
+    return String(field)
+
   // Escape quotes and wrap in quotes if contains comma, quote, or newline
   if (field.includes('"') || field.includes(',') || field.includes('\n')) {
     return `"${field.replace(/"/g, '""')}"`
   }
-  
+
   return field
 }
 

@@ -11,7 +11,7 @@ The Canon Technology Radar is a living document that tracks our recommendations 
 ### Quadrants
 
 1. **Tools & Libraries** - Third-party libraries, build tools, and development utilities
-2. **Techniques & Patterns** - Architectural patterns, development practices, and type system techniques  
+2. **Techniques & Patterns** - Architectural patterns, development practices, and type system techniques
 3. **Features & Capabilities** - Runtime features, development features, and integration capabilities
 4. **Data Structures, Formats & Standards** - Data structures, serialization formats, identity standards, and schema standards
 

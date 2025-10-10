@@ -1,25 +1,25 @@
+<script setup>
+import { ref } from 'vue'
+
+const radarUrl = ref('./radar.html')
+
+function onIframeLoad() {
+  console.log('Technology radar loaded successfully')
+}
+</script>
+
 <template>
   <div class="tech-radar-container">
-    <iframe 
-      :src="radarUrl" 
-      width="100%" 
-      height="800" 
+    <iframe
+      :src="radarUrl"
+      width="100%"
+      height="800"
       frameborder="0"
       title="Canon Technology Radar"
       @load="onIframeLoad"
     />
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from 'vue'
-
-const radarUrl = ref('./radar.html')
-
-const onIframeLoad = () => {
-  console.log('Technology radar loaded successfully')
-}
-</script>
 
 <style scoped>
 .tech-radar-container {
