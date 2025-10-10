@@ -1,21 +1,20 @@
 export default {
   title: '@relational-fabric/canon',
   description: 'A modern TypeScript package template with ESLint and TypeScript configurations for starting new projects',
-  
+
   // Base URL for GitHub Pages
   base: '/canon/',
-  
-  
+
+
   // Theme configuration
   themeConfig: {
     // Navigation bar
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'ADRs', link: '/docs/adrs/' },
-      { text: 'Examples', link: '/docs/examples/' },
+      { text: 'Documentation', link: '/docs/' },
       { text: 'Planning', link: '/planning/' }
     ],
-    
+
     // Sidebar configuration
     sidebar: {
       // Documentation sidebar
@@ -38,7 +37,7 @@ export default {
           ]
         }
       ],
-      
+
       // ADR sidebar
       '/docs/adrs/': [
         {
@@ -58,7 +57,7 @@ export default {
           ]
         }
       ],
-      
+
       // Examples sidebar
       '/docs/examples/': [
         {
@@ -71,7 +70,7 @@ export default {
           ]
         }
       ],
-      
+
       // Planning sidebar
       '/planning/': [
         {
@@ -90,29 +89,29 @@ export default {
         }
       ]
     },
-    
+
     // Social links
     socialLinks: [
       { icon: 'github', link: 'https://github.com/RelationalFabric/canon' }
     ],
-    
+
     // Footer
     footer: {
       message: 'Released under the MIT License.',
       copyright: 'Copyright © 2025 Relational Fabric'
     },
-    
+
     // Search
     search: {
       provider: 'local'
     },
-    
+
     // Edit link
     editLink: {
       pattern: 'https://github.com/RelationalFabric/canon/edit/main/:path',
       text: 'Edit this page on GitHub'
     },
-    
+
     // Last updated
     lastUpdated: {
       text: 'Last updated',
@@ -122,13 +121,13 @@ export default {
       }
     }
   },
-  
+
   // Markdown configuration
   markdown: {
     lineNumbers: true,
     theme: 'github-dark'
   },
-  
+
   // Ignore dead links for now - will fix them incrementally
   ignoreDeadLinks: true
 }
