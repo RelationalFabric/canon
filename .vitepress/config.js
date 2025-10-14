@@ -75,7 +75,7 @@ export default {
               text: 'Technology Radar',
               items: [
                 { text: 'Overview', link: '/planning/radar/' },
-                { text: 'Interactive Radar', link: '/planning/radar.html' },
+                { text: 'Interactive Radar', link: '/planning/radar/interactive' },
                 { text: 'Methodology', link: '/docs/radar-methodology' },
               ],
             },
