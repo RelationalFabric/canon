@@ -33,11 +33,8 @@ export function convertYamlToCsv(yamlContent: string): string {
   // Generate CSV content
   const csvRows: string[] = ['name,ring,quadrant,isNew,description']
 
-  // Process each quadrant
-  Object.entries(data).forEach(([quadrantKey, quadrantData]) => {
-    if (quadrantKey === 'metadata')
-      return // Skip metadata
-
+  // Process each quadrant in the entries section
+  Object.entries(data.entries).forEach(([quadrantKey, quadrantData]) => {
     const quadrantName = QUADRANT_MAP[quadrantKey as QuadrantKey] || quadrantKey
 
     // Process each ring in the quadrant
