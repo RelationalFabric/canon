@@ -2,6 +2,37 @@
 
 This document provides instructions for AI agents working with the Canon project. It references specific files and summarizes their content rather than repeating information.
 
+## ⚠️ CRITICAL RULE: TypeScript `any` Type is BANNED
+
+**THE SINGLE MOST IMPORTANT RULE:**
+
+❌ **NEVER use the TypeScript `any` type under any circumstances.**
+
+This is an absolute prohibition. The `any` type defeats the entire purpose of TypeScript's type system and is fundamentally incompatible with Canon's type-safe architecture.
+
+**Exceptions (Extremely Rare):**
+- Only if there is absolutely NO other way to achieve correct typing
+- Must include an ESLint disable comment with detailed justification
+- Requires explicit approval in code review
+
+**Better Alternatives:**
+- Use `unknown` for truly unknown types (forces type checking)
+- Use generic type parameters (`<T>`)
+- Use union types or discriminated unions
+- Use type guards and type narrowing
+- Use `Record<string, unknown>` for object types
+- Use conditional types for complex scenarios
+
+**If you find yourself reaching for `any`:**
+1. Stop and reconsider the approach
+2. Explore type-safe alternatives listed above
+3. Ask for clarification if the type requirements are unclear
+4. Only proceed with `any` if all other options are exhausted AND document why
+
+This rule is non-negotiable and supersedes all other considerations.
+
+---
+
 ## Project Overview
 
 Canon is a modern TypeScript package that provides universal type primitives and axiomatic systems for building robust, data-centric applications. It solves the "empty room problem" by offering consistent design decisions and type blueprints that can be shared across projects.
@@ -55,8 +86,11 @@ Follow the conventions outlined in [CONTRIBUTING.md](./CONTRIBUTING.md):
 - **Distinguished Keys**: Use `$` prefix only for Canon's internal keys (`$basis`, `$meta`)
 
 ### Code Quality Standards
+- **❌ NEVER use the TypeScript `any` type** (see Critical Rule above)
 - All code must pass `npm run check` validation (type checking and linting)
 - Follow the established patterns in [src/](./src/) directory
+- Prefer `unknown` over `any` for truly unknown types
+- Use type guards and type narrowing for type safety
 
 ### Architecture Decisions
 Before making significant changes, review the [Architecture Decision Records (ADRs)](./docs/adrs.md). These documents capture important architectural decisions and provide context for current design choices.
@@ -173,9 +207,12 @@ declare module '@relational-fabric/canon' {
 ```
 
 ### Type Safety
+- **❌ NEVER use `any`** - This is the cardinal sin of TypeScript (see Critical Rule above)
 - Always use `Satisfies<T>` constraint for axiom functions
 - Use proper TypeScript types in `$basis` fields
 - Provide complete function signatures with return types
+- Prefer `unknown` and type guards over `any`
+- Use generic type parameters for flexible, type-safe code
 
 ### Error Handling
 - Provide clear error messages for invalid configurations
@@ -264,6 +301,7 @@ See [TESTING.md](./TESTING.md) for complete testing documentation.
 
 ## Important Notes
 
+- **❌ NEVER use the TypeScript `any` type** - This is the #1 most important rule (see Critical Rule section)
 - **Never use `$` prefix for user-defined keys** - this is reserved for Canon's internal use
 - **Always provide both type-level and runtime configurations** for canons
 - **Use the `Satisfies` constraint** to ensure compile-time type checking
