@@ -39,3 +39,14 @@ export function declareCanon<Label extends keyof Canons>(
 ): void {
   globalRegistry.register(label, defineCanon(config))
 }
+
+/**
+ * Register multiple canons at once (for module-style registration)
+ *
+ * @param canons - Object mapping canon labels to their configurations
+ */
+export function registerCanons(canons: Record<string, CanonConfig>): void {
+  for (const [label, config] of Object.entries(canons)) {
+    globalRegistry.register(label as keyof Canons, defineCanon(config))
+  }
+}
