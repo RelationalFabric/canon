@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { isPojo, objectEntries, objectKeys, objectValues, pojoHas, pojoHasString } from './objects.js'
+import { isPojo, objectEntries, objectKeys, objectValues, pojoHas, pojoHasOfType, pojoWithOfType } from './objects.js'
 
 describe('isPojo', () => {
   it('should return true for plain objects', () => {
@@ -54,24 +54,54 @@ describe('pojoHas', () => {
   })
 })
 
-describe('pojoHasString', () => {
+describe('pojoHasOfType', () => {
   it('should return true for object with string field', () => {
-    expect(pojoHasString({ id: '123' }, 'id')).toBe(true)
-    expect(pojoHasString({ '@id': 'uri' }, '@id')).toBe(true)
+    expect(pojoHasOfType({ id: '123' }, 'id', 'string')).toBe(true)
+    expect(pojoHasOfType({ '@id': 'uri' }, '@id', 'string')).toBe(true)
   })
 
-  it('should return false for non-string field', () => {
-    expect(pojoHasString({ id: 123 }, 'id')).toBe(false)
-    expect(pojoHasString({ id: null }, 'id')).toBe(false)
+  it('should return false for non-string field when checking for string', () => {
+    expect(pojoHasOfType({ id: 123 }, 'id', 'string')).toBe(false)
+    expect(pojoHasOfType({ id: null }, 'id', 'string')).toBe(false)
   })
 
   it('should return false for missing field', () => {
-    expect(pojoHasString({ name: 'test' }, 'id')).toBe(false)
+    expect(pojoHasOfType({ name: 'test' }, 'id', 'string')).toBe(false)
   })
 
   it('should return false for non-objects', () => {
-    expect(pojoHasString('string', 'id')).toBe(false)
-    expect(pojoHasString(null, 'id')).toBe(false)
+    expect(pojoHasOfType('string', 'id', 'string')).toBe(false)
+    expect(pojoHasOfType(null, 'id', 'string')).toBe(false)
+  })
+
+  it('should work with number type', () => {
+    expect(pojoHasOfType({ count: 123 }, 'count', 'number')).toBe(true)
+    expect(pojoHasOfType({ count: '123' }, 'count', 'number')).toBe(false)
+  })
+
+  it('should work with boolean type', () => {
+    expect(pojoHasOfType({ active: true }, 'active', 'boolean')).toBe(true)
+    expect(pojoHasOfType({ active: 'true' }, 'active', 'boolean')).toBe(false)
+  })
+
+  it('should work with object type', () => {
+    expect(pojoHasOfType({ meta: { nested: true } }, 'meta', 'object')).toBe(true)
+    expect(pojoHasOfType({ meta: 'string' }, 'meta', 'object')).toBe(false)
+  })
+})
+
+describe('pojoWithOfType', () => {
+  it('should create reusable type guard for string fields', () => {
+    const hasStringId = pojoWithOfType('id', 'string')
+    expect(hasStringId({ id: '123' })).toBe(true)
+    expect(hasStringId({ id: 123 })).toBe(false)
+    expect(hasStringId({ name: 'test' })).toBe(false)
+  })
+
+  it('should create reusable type guard for number fields', () => {
+    const hasNumberCount = pojoWithOfType('count', 'number')
+    expect(hasNumberCount({ count: 42 })).toBe(true)
+    expect(hasNumberCount({ count: '42' })).toBe(false)
   })
 })
 

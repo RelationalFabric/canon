@@ -7,7 +7,7 @@
  */
 
 import type { Canon } from '@relational-fabric/canon'
-import { declareCanon, idOf, pojoHasString } from '@relational-fabric/canon'
+import { declareCanon, idOf, pojoWithOfType } from '@relational-fabric/canon'
 
 // =============================================================================
 // STEP 1: Define Your Internal Data Format
@@ -36,8 +36,7 @@ declare module '@relational-fabric/canon' {
 declareCanon('Internal', {
   axioms: {
     Id: {
-      // Clean type guard using pojoHasString utility
-      $basis: (v: unknown): v is { id: string } => pojoHasString(v, 'id'),
+      $basis: pojoWithOfType('id', 'string'),
       key: 'id',
       $meta: { type: 'uuid' },
     },
@@ -90,7 +89,7 @@ declareCanon('JsonLd', {
   axioms: {
     Id: {
       // Clean type guard for JSON-LD '@id' field
-      $basis: (v: unknown): v is { '@id': string } => pojoHasString(v, '@id'),
+      $basis: pojoWithOfType('@id', 'string'),
       key: '@id',
       $meta: { type: 'uri', format: 'iri' },
     },

@@ -4,7 +4,7 @@
  * Helpers for working with plain JavaScript objects.
  */
 
-import type { Pojo, PojoWith, TypeGuard } from '../types/index.js'
+import type { JsType, JsTypeName, Pojo, PojoWith, TypeGuard } from '../types/index.js'
 import { typeGuard } from './guards.js'
 
 /**
@@ -72,6 +72,19 @@ export function pojoHas<T extends Pojo, K extends string>(
   return pojoWith(key)(obj)
 }
 
+export function pojoWithOfType<K extends string, V extends JsTypeName>(
+  key: K,
+  type: V,
+): TypeGuard<PojoWith<Pojo, K, JsType[V]>> {
+  return typeGuard((value: unknown) => {
+    if (!pojoHas(value, key)) {
+      return false
+    }
+    const valueType: JsTypeName = typeof value[key] // Needs to be seperate because we're not using a string literal
+    return valueType === type
+  })
+}
+
 /**
  * Convenience function to check if a value has a specific string field
  *
@@ -86,11 +99,12 @@ export function pojoHas<T extends Pojo, K extends string>(
  * pojoHasString('not object', 'id') // false
  * ```
  */
-export function pojoHasString<T extends Pojo, K extends string>(
+export function pojoHasOfType<T extends Pojo, K extends string, V extends JsTypeName>(
   value: T | unknown,
   key: K,
-): value is PojoWith<T, K, string> {
-  return isPojo(value) && key in value && typeof value[key] === 'string'
+  type: V,
+): value is PojoWith<T, K, JsType[V]> {
+  return pojoWithOfType(key, type)(value)
 }
 
 /**

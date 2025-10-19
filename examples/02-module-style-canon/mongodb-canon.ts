@@ -6,7 +6,7 @@
  */
 
 import type { Canon } from '@relational-fabric/canon'
-import { defineCanon, pojoHasString } from '@relational-fabric/canon'
+import { defineCanon, pojoWithOfType } from '@relational-fabric/canon'
 
 /**
  * Type-level configuration for MongoDB documents
@@ -30,7 +30,7 @@ export type MongoDbCanon = Canon<{
 export const mongoDbCanon = defineCanon({
   axioms: {
     Id: {
-      $basis: (v: unknown): v is { _id: string } => pojoHasString(v, '_id'),
+      $basis: pojoWithOfType('_id', 'string'),
       key: '_id',
       $meta: { type: 'objectid', format: 'hex' },
     },
