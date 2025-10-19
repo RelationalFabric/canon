@@ -45,7 +45,7 @@ export function convertYamlToCsv(yamlContent: string): string {
       const ringName = RING_MAP[ringKey as RingKey] || ringKey
 
       // Process each item in the ring
-      items.forEach((item) => {
+      ;(items as any[]).forEach((item: any) => {
         const row: CsvRow = {
           name: item.name,
           ring: ringName,

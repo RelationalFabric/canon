@@ -1,0 +1,41 @@
+/**
+ * Canon Shell
+ *
+ * Singleton registry instance with convenience API.
+ */
+
+import type { CanonConfig, Canons } from './types/index.js'
+import { createRegistry, type Registry } from './registry.js'
+import { defineCanon } from './types/index.js'
+
+/**
+ * Global singleton registry
+ */
+const globalRegistry: Registry = createRegistry()
+
+/**
+ * Get the current global registry
+ */
+export function getRegistry(): Registry {
+  return globalRegistry
+}
+
+/**
+ * Reset the global registry to empty
+ */
+export function resetRegistry(): void {
+  globalRegistry.clear()
+}
+
+/**
+ * Declare a canon in the global registry
+ *
+ * @param label - The canon label
+ * @param config - The canon configuration
+ */
+export function declareCanon<Label extends keyof Canons>(
+  label: Label,
+  config: CanonConfig,
+): void {
+  globalRegistry.register(label, defineCanon(config))
+}

@@ -1,18 +1,21 @@
 /**
  * Example: Basic Id Axiom Usage
  *
- * Demonstrates defining and using canons with the Id axiom across
- * different data formats (Internal and JSON-LD).
+ * This example demonstrates how Canon enables you to write universal code
+ * that works across different data formats. The same `idOf()` function
+ * extracts IDs regardless of whether your data uses 'id' or '@id' fields.
  */
 
 import type { Canon } from '@relational-fabric/canon'
-import process from 'node:process'
-import { declareCanon, idOf } from '@relational-fabric/canon'
+import { declareCanon, idOf, pojoHasString } from '@relational-fabric/canon'
+
+// =============================================================================
+// STEP 1: Define Your Internal Data Format
+// =============================================================================
 
 /**
- * Define Internal canon type-level configuration
- *
- * Uses standard 'id' field for identification
+ * Most applications have their own internal data format. Here we define
+ * a canon for data that uses the standard 'id' field.
  */
 type InternalCanon = Canon<{
   Id: {
@@ -22,10 +25,52 @@ type InternalCanon = Canon<{
   }
 }>
 
+// Register the type globally so TypeScript knows about it
+declare module '@relational-fabric/canon' {
+  interface Canons {
+    Internal: InternalCanon
+  }
+}
+
+// Register the runtime behavior - how to actually find and extract IDs
+declareCanon('Internal', {
+  axioms: {
+    Id: {
+      // Clean type guard using pojoHasString utility
+      $basis: (v: unknown): v is { id: string } => pojoHasString(v, 'id'),
+      key: 'id',
+      $meta: { type: 'uuid' },
+    },
+  },
+})
+
 /**
- * Define JsonLd canon type-level configuration
- *
- * Uses semantic '@id' field for identification (JSON-LD standard)
+ * Now we can use idOf() with our internal data format.
+ * The function automatically knows to look for the 'id' field.
+ */
+const user = {
+  id: 'user-123',
+  name: 'John Doe',
+  email: 'john@example.com',
+}
+
+const userId = idOf(user) // Returns: "user-123"
+
+// Let's verify this works as expected
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('extracts ID from internal format using standard "id" field', () => {
+    expect(userId).toBe('user-123')
+  })
+}
+
+// =============================================================================
+// STEP 2: Add Support for External Data (JSON-LD)
+// =============================================================================
+
+/**
+ * Often you'll receive data from external APIs that use different conventions.
+ * JSON-LD, for example, uses '@id' instead of 'id'. Let's add support for it.
  */
 type JsonLdCanon = Canon<{
   Id: {
@@ -35,44 +80,17 @@ type JsonLdCanon = Canon<{
   }
 }>
 
-/**
- * Register both canons in global Canons interface
- */
 declare module '@relational-fabric/canon' {
   interface Canons {
-    Internal: InternalCanon
     JsonLd: JsonLdCanon
   }
 }
 
-/**
- * Register Internal canon runtime configuration
- */
-declareCanon('Internal', {
-  axioms: {
-    Id: {
-      $basis: (v): v is { id: string } =>
-        typeof v === 'object'
-        && v !== null
-        && 'id' in v
-        && typeof (v as any).id === 'string',
-      key: 'id',
-      $meta: { type: 'uuid' },
-    },
-  },
-})
-
-/**
- * Register JsonLd canon runtime configuration
- */
 declareCanon('JsonLd', {
   axioms: {
     Id: {
-      $basis: (v): v is { '@id': string } =>
-        typeof v === 'object'
-        && v !== null
-        && '@id' in v
-        && typeof (v as any)['@id'] === 'string',
+      // Clean type guard for JSON-LD '@id' field
+      $basis: (v: unknown): v is { '@id': string } => pojoHasString(v, '@id'),
       key: '@id',
       $meta: { type: 'uri', format: 'iri' },
     },
@@ -80,82 +98,69 @@ declareCanon('JsonLd', {
 })
 
 /**
- * Example Usage: Internal Format
+ * The magic: the SAME idOf() function now works with JSON-LD data too!
+ * Canon automatically detects which format you're using and extracts
+ * the ID from the correct field.
  */
-function exampleInternalFormat() {
-  console.log('=== Internal Format Example ===\n')
+const jsonLdPerson = {
+  '@id': 'https://example.com/users/jane-456',
+  '@type': 'Person',
+  'name': 'Jane Smith',
+  'email': 'jane@example.com',
+}
 
-  const internalData = {
-    id: 'user-123',
-    name: 'John Doe',
-    email: 'john@example.com',
-  }
+const personId = idOf(jsonLdPerson) // Returns: "https://example.com/users/jane-456"
 
-  console.log('Data:', internalData)
-  console.log('Extracted ID:', idOf(internalData))
-  console.log()
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('extracts ID from JSON-LD format using "@id" field', () => {
+    expect(personId).toBe('https://example.com/users/jane-456')
+  })
+}
+
+// =============================================================================
+// STEP 3: Write Universal Code
+// =============================================================================
+
+/**
+ * The real power: write functions that work with ANY format.
+ * You don't need to check which format the data is in or write
+ * conditional logic. Canon handles it for you.
+ */
+
+function displayEntity(entity: any): string {
+  const id = idOf(entity)
+  return `Entity with ID: ${id}`
+}
+
+// Works with internal format
+const internalProduct = { id: 'product-789', name: 'Widget' }
+const internalDisplay = displayEntity(internalProduct)
+// Returns: "Entity with ID: product-789"
+
+// Works with JSON-LD format
+const jsonLdProduct = {
+  '@id': 'https://example.com/products/gadget-999',
+  '@type': 'Product',
+  'name': 'Gadget',
+}
+const jsonLdDisplay = displayEntity(jsonLdProduct)
+// Returns: "Entity with ID: https://example.com/products/gadget-999"
+
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('writes universal functions that work across both formats', () => {
+    expect(internalDisplay).toBe('Entity with ID: product-789')
+    expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
+  })
 }
 
 /**
- * Example Usage: JSON-LD Format
+ * Key Takeaways:
+ *
+ * 1. Define canons for each data format you work with (internal, JSON-LD, etc.)
+ * 2. Use universal functions like idOf() that work across all formats
+ * 3. Write your business logic once - it works with any registered canon
+ * 4. Add new formats anytime without changing existing code
+ * 5. Use Canon's utility functions (pojoHasString, isPojo) for clean type guards
  */
-function exampleJsonLdFormat() {
-  console.log('=== JSON-LD Format Example ===\n')
-
-  const jsonLdData = {
-    '@id': 'https://example.com/users/jane-456',
-    '@type': 'Person',
-    'name': 'Jane Smith',
-    'email': 'jane@example.com',
-  }
-
-  console.log('Data:', jsonLdData)
-  console.log('Extracted ID:', idOf(jsonLdData))
-  console.log()
-}
-
-/**
- * Example Usage: Universal Function
- */
-function exampleUniversalFunction() {
-  console.log('=== Universal Function Example ===\n')
-
-  // A function that works with any canon
-  function logEntityId(entity: any) {
-    console.log(`Entity ID: ${idOf(entity)}`)
-  }
-
-  const internal = { id: 'product-789', name: 'Widget' }
-  const jsonLd = { '@id': 'https://example.com/products/gadget-999', '@type': 'Product', 'name': 'Gadget' }
-
-  console.log('Processing internal format:')
-  logEntityId(internal)
-
-  console.log('\nProcessing JSON-LD format:')
-  logEntityId(jsonLd)
-  console.log()
-}
-
-/**
- * Run all examples
- */
-function main() {
-  console.log('Canon Framework: Basic Id Axiom Examples\n')
-  console.log('='.repeat(50))
-  console.log()
-
-  exampleInternalFormat()
-  exampleJsonLdFormat()
-  exampleUniversalFunction()
-
-  console.log('='.repeat(50))
-  console.log('\n✅ All examples completed successfully!')
-  console.log('✅ Interface augmentation working')
-  console.log('✅ Runtime configuration working')
-  console.log('✅ Universal API working across formats')
-}
-
-// Run examples if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main()
-}

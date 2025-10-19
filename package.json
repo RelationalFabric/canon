@@ -49,7 +49,6 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "example": "tsx examples/01-basic-id-axiom.ts && tsx examples/02-module-style-canon.ts",
     "dev": "tsx --watch src/index.ts",
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
@@ -61,7 +60,8 @@
     "docs:dev": "npx vitepress dev",
     "docs:build": "scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
     "docs:preview": "npx vitepress preview",
-    "docs:restore": "scripts/restore-readmes-from-build.sh"
+    "docs:restore": "scripts/restore-readmes-from-build.sh",
+    "checks": "npm-run-all lint check test"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
@@ -88,6 +88,7 @@
     "adr-tools": "^2.0.4",
     "chokidar-cli": "^3.0.0",
     "eslint": "^9.10.0",
+    "npm-run-all": "^4.1.5",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0",
     "vitepress": "^1.0.0",

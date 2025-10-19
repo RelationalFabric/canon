@@ -57,3 +57,15 @@ export type Satisfies<
       : never
     : never
 }[TCanonLabel]
+
+/**
+ * Define a canon runtime configuration (for module-style exports)
+ *
+ * Simply returns the config unchanged - useful for creating exportable canons.
+ *
+ * @param config - The runtime canon configuration
+ * @returns The same config object
+ */
+export function defineCanon(config: CanonConfig): CanonConfig {
+  return config
+}

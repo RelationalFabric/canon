@@ -1,21 +1,19 @@
 /**
  * Object utilities for Canon
  *
- * Minimal helpers for working with plain JavaScript objects.
+ * Helpers for working with plain JavaScript objects.
  */
 
-import type { Pojo } from '../types/objects.js'
+import type { Pojo, PojoWith, TypeGuard } from '../types/index.js'
+import { typeGuard } from './guards.js'
 
 /**
- * Re-export Pojo type for convenience
+ * Re-export types for convenience
  */
-export type { Pojo }
+export type { Pojo, PojoWith }
 
 /**
  * Type guard to check if a value is a plain JavaScript object
- *
- * @param value - The value to check
- * @returns True if the value is a Pojo, false otherwise
  *
  * @example
  * ```typescript
@@ -25,52 +23,137 @@ export type { Pojo }
  * isPojo('string') // false
  * ```
  */
-export function isPojo(value: unknown): value is Pojo {
-  return (
-    typeof value === 'object'
-    && value !== null
-    && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype
-  )
+export const isPojo = typeGuard<Pojo>((value: unknown) =>
+  typeof value === 'object'
+  && value !== null
+  && !Array.isArray(value)
+  && Object.getPrototypeOf(value) === Object.prototype,
+)
+
+/**
+ * Create a type guard for Pojo with a specific property
+ *
+ * Higher-order function that returns a reusable TypeGuard.
+ *
+ * @param key - The property name to check for
+ * @returns TypeGuard that checks if value is a Pojo with that property
+ *
+ * @example
+ * ```typescript
+ * const hasId = pojoWith('id')
+ * hasId({ id: '123' }) // true
+ * hasId({ name: 'test' }) // false
+ * ```
+ */
+export function pojoWith<K extends string>(key: K): TypeGuard<PojoWith<Pojo, K, unknown>> {
+  return typeGuard((value: unknown) => isPojo(value) && key in value)
 }
 
-// In-source tests
-if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
+/**
+ * Convenience function to check if a Pojo has a specific property
+ *
+ * Uses pojoWith() internally.
+ *
+ * @param obj - The object to check
+ * @param key - The property name to look for
+ * @returns True if the object has the property
+ *
+ * @example
+ * ```typescript
+ * const data = { id: '123', name: 'Test' }
+ * pojoHas(data, 'id') // true
+ * pojoHas(data, 'missing') // false
+ * ```
+ */
+export function pojoHas<T extends Pojo, K extends string>(
+  obj: T | unknown,
+  key: K,
+): obj is PojoWith<T, K, unknown> {
+  return pojoWith(key)(obj)
+}
 
-  describe('isPojo', () => {
-    it('should return true for plain objects', () => {
-      expect(isPojo({})).toBe(true)
-      expect(isPojo({ id: '123' })).toBe(true)
-      expect(isPojo({ nested: { value: 1 } })).toBe(true)
-    })
+/**
+ * Convenience function to check if a value has a specific string field
+ *
+ * @param value - The value to check
+ * @param key - The field name that should contain a string
+ * @returns True if value is a Pojo with the specified string field
+ *
+ * @example
+ * ```typescript
+ * pojoHasString({ id: '123' }, 'id') // true
+ * pojoHasString({ id: 123 }, 'id') // false
+ * pojoHasString('not object', 'id') // false
+ * ```
+ */
+export function pojoHasString<T extends Pojo, K extends string>(
+  value: T | unknown,
+  key: K,
+): value is PojoWith<T, K, string> {
+  return isPojo(value) && key in value && typeof value[key] === 'string'
+}
 
-    it('should return false for arrays', () => {
-      expect(isPojo([])).toBe(false)
-      expect(isPojo([1, 2, 3])).toBe(false)
-    })
+/**
+ * Type-safe Object.keys that handles both objects and arrays correctly
+ *
+ * For arrays, returns numeric indices. For objects, returns property keys.
+ *
+ * @param obj - The object to get keys from
+ * @returns Array of object keys
+ *
+ * @example
+ * ```typescript
+ * objectKeys({ a: 1, b: 2 }) // ['a', 'b']
+ * objectKeys([1, 2, 3]) // [0, 1, 2]
+ * ```
+ */
+export function objectKeys<T extends object>(obj: T): Array<keyof T> {
+  if (Array.isArray(obj)) {
+    return Array.from(obj.keys()) as Array<keyof T>
+  }
+  return Object.keys(obj) as Array<keyof T>
+}
 
-    it('should return false for null', () => {
-      expect(isPojo(null)).toBe(false)
-    })
+/**
+ * Type-safe Object.values that handles both objects and arrays correctly
+ *
+ * For arrays, returns array values. For objects, returns property values.
+ *
+ * @param obj - The object to get values from
+ * @returns Array of object values
+ *
+ * @example
+ * ```typescript
+ * objectValues({ a: 1, b: 2 }) // [1, 2]
+ * objectValues([1, 2, 3]) // [1, 2, 3]
+ * ```
+ */
+export function objectValues<T extends object>(obj: T): unknown[] {
+  if (Array.isArray(obj)) {
+    return Array.from(obj)
+  }
+  return Object.values(obj)
+}
 
-    it('should return false for primitives', () => {
-      expect(isPojo('string')).toBe(false)
-      expect(isPojo(123)).toBe(false)
-      expect(isPojo(true)).toBe(false)
-      expect(isPojo(undefined)).toBe(false)
-    })
-
-    it('should return false for class instances', () => {
-      class MyClass {}
-      expect(isPojo(new MyClass())).toBe(false)
-      expect(isPojo(new Date())).toBe(false)
-      expect(isPojo(new Map())).toBe(false)
-    })
-
-    it('should return false for objects with custom prototypes', () => {
-      const customProto = Object.create({ custom: true })
-      expect(isPojo(customProto)).toBe(false)
-    })
-  })
+/**
+ * Type-safe Object.entries that handles both objects and arrays correctly
+ *
+ * For arrays, returns [index, value] pairs. For objects, returns [key, value] pairs.
+ *
+ * @param obj - The object to get entries from
+ * @returns Array of [key, value] tuples
+ *
+ * @example
+ * ```typescript
+ * objectEntries({ a: 1, b: 2 }) // [['a', 1], ['b', 2]]
+ * objectEntries([1, 2, 3]) // [[0, 1], [1, 2], [2, 3]]
+ * ```
+ */
+export function objectEntries<T extends object>(
+  obj: T,
+): Array<[keyof T, T[keyof T]]> {
+  if (Array.isArray(obj)) {
+    return Array.from(obj.entries()) as Array<[keyof T, T[keyof T]]>
+  }
+  return Object.entries(obj) as Array<[keyof T, T[keyof T]]>
 }

@@ -55,8 +55,7 @@ Follow the conventions outlined in [CONTRIBUTING.md](./CONTRIBUTING.md):
 - **Distinguished Keys**: Use `$` prefix only for Canon's internal keys (`$basis`, `$meta`)
 
 ### Code Quality Standards
-- All code must pass ESLint checks (see [eslint.config.js](./eslint.config.js))
-- TypeScript compilation must succeed (see [tsconfig.json](./tsconfig.json))
+- All code must pass `npm run check` validation (type checking and linting)
 - Follow the established patterns in [src/](./src/) directory
 
 ### Architecture Decisions
@@ -90,10 +89,9 @@ Before making significant changes, review the [Architecture Decision Records (AD
 Use these npm scripts for development tasks:
 
 ### Development & Quality
-- `npm run check` - Type check and lint the package
+- `npm run check` - Run all validation checks (type checking and linting)
+- `npm run checks` - Run comprehensive validation (lint, type check, and tests)
 - `npm run dev` - Run TypeScript in watch mode
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues automatically
 
 ### Testing
 - `npm run test` - Run all unit tests (Vitest in-source tests)
@@ -253,9 +251,7 @@ Canon uses [Vitest's in-source testing](https://vitest.dev/guide/in-source) patt
 See [TESTING.md](./TESTING.md) for complete testing documentation.
 
 ### Quality Standards
-- All code must pass ESLint checks
-- TypeScript compilation must succeed
-- All tests must pass before merging PRs
+- All code must pass `npm run checks` before merging PRs (validates linting, type checking, and tests)
 - Examples must use package imports, not relative paths
 - Test across different data formats to ensure compatibility
 

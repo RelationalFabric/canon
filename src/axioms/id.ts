@@ -4,10 +4,8 @@
  * Provides universal access to entity identifiers across different data formats.
  */
 
-import type { KeyNameAxiom } from '../types/axioms.js'
-import type { Satisfies } from '../types/canons.js'
-import { extractAxiomValue } from '../runtime/core.js'
-import { inferAxiom } from '../runtime/registry.js'
+import type { KeyNameAxiom, Satisfies } from '../types/index.js'
+import { inferAxiom } from '../axiom.js'
 
 /**
  * Register Id axiom in global Axioms interface
@@ -40,11 +38,16 @@ export function idOf<T extends Satisfies<'Id'>>(x: T): string {
     throw new Error('No matching canon found for Id axiom')
   }
 
-  const value = extractAxiomValue('Id', x, config)
+  // For KeyNameAxiom, extract using the key field
+  if ('key' in config && typeof config.key === 'string') {
+    const value = (x as Record<string, unknown>)[config.key]
 
-  if (typeof value !== 'string') {
-    throw new TypeError(`Expected string ID, got ${typeof value}`)
+    if (typeof value !== 'string') {
+      throw new TypeError(`Expected string ID, got ${typeof value}`)
+    }
+
+    return value
   }
 
-  return value
+  throw new Error('Invalid Id axiom configuration')
 }
