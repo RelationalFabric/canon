@@ -73,4 +73,3 @@ When adding new examples:
 3. Demonstrate one key feature or pattern per file
 4. Include console output showing results
 5. Update this README with the new example
-

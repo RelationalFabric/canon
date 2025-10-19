@@ -6,4 +6,3 @@
  * Plain old JavaScript object type
  */
 export type Pojo = Record<string, unknown>
-

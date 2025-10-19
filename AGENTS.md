@@ -80,17 +80,29 @@ Before making significant changes, review the [Architecture Decision Records (AD
 - **[reference/](./reference/)** - API reference and core axiom specifications
 - **[docs/adrs/](./docs/adrs/)** - Architecture Decision Records
 
-### Examples
-- **[docs/examples/](./docs/examples/)** - Comprehensive examples of core axioms in practice
+### Examples & Tests
+- **[examples/](./examples/)** - Integration examples showing real-world usage patterns
+- **[docs/examples/](./docs/examples/)** - Documentation examples of core axioms in practice
+- **[TESTING.md](./TESTING.md)** - Complete testing strategy and guidelines
 
 ## Available Scripts
 
 Use these npm scripts for development tasks:
 
+### Development & Quality
 - `npm run check` - Type check and lint the package
 - `npm run dev` - Run TypeScript in watch mode
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
+
+### Testing
+- `npm run test` - Run all unit tests (Vitest in-source tests)
+- `npm run test:watch` - Watch mode for tests
+- `npm run test:ui` - Run tests with UI
+- `npm run test:coverage` - Generate coverage reports
+- `npm run example` - Run integration examples
+
+### Documentation
 - `npm run adr:new "Title"` - Create a new ADR
 - `npm run adr:list` - List all ADRs
 - `npm run adr:index` - Generate ADR table of contents (in ADR directory)
@@ -228,9 +240,23 @@ This curated approach ensures that developers have a solid foundation to build u
 
 ## Testing and Quality Assurance
 
+### Testing Strategy
+
+Canon uses [Vitest's in-source testing](https://vitest.dev/guide/in-source) pattern:
+
+**Critical Testing Rules:**
+- ❌ **Do NOT create separate `.test.ts` files** - Use in-source tests with `if (import.meta.vitest)`
+- ❌ **Do NOT use relative imports in examples** - Always use `@relational-fabric/canon`
+- ✅ **DO colocate tests** with source files using in-source pattern
+- ✅ **DO use package imports** in all example files to show real-world usage
+
+See [TESTING.md](./TESTING.md) for complete testing documentation.
+
+### Quality Standards
 - All code must pass ESLint checks
 - TypeScript compilation must succeed
-- Documentation code examples must be properly formatted
+- All tests must pass before merging PRs
+- Examples must use package imports, not relative paths
 - Test across different data formats to ensure compatibility
 
 ## Getting Help
@@ -247,5 +273,7 @@ This curated approach ensures that developers have a solid foundation to build u
 - **Use the `Satisfies` constraint** to ensure compile-time type checking
 - **Register axioms and canons early** in the application lifecycle
 - **Follow the established naming conventions** for consistency
+- **❌ Do NOT create summary files** (e.g., IMPLEMENTATION_SUMMARY.md, WORKFLOW_SUMMARY.md) - use the chat for feedback instead
+- **❌ Do NOT write extraneuos documentation files** unless explicitly requested by the user
 
 This project emphasizes type safety, consistency, and universal compatibility across different data formats. When in doubt, refer to the existing patterns and documentation rather than creating new approaches.

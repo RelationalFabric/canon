@@ -5,9 +5,9 @@
  * different data formats (Internal and JSON-LD).
  */
 
-import type { Canon } from '../src/types/canons.js'
-import { declareCanon } from '../src/runtime/registry.js'
-import { idOf } from '../src/axioms/id.js'
+import type { Canon } from '@relational-fabric/canon'
+import process from 'node:process'
+import { declareCanon, idOf } from '@relational-fabric/canon'
 
 /**
  * Define Internal canon type-level configuration
@@ -105,8 +105,8 @@ function exampleJsonLdFormat() {
   const jsonLdData = {
     '@id': 'https://example.com/users/jane-456',
     '@type': 'Person',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
+    'name': 'Jane Smith',
+    'email': 'jane@example.com',
   }
 
   console.log('Data:', jsonLdData)
@@ -126,7 +126,7 @@ function exampleUniversalFunction() {
   }
 
   const internal = { id: 'product-789', name: 'Widget' }
-  const jsonLd = { '@id': 'https://example.com/products/gadget-999', '@type': 'Product', name: 'Gadget' }
+  const jsonLd = { '@id': 'https://example.com/products/gadget-999', '@type': 'Product', 'name': 'Gadget' }
 
   console.log('Processing internal format:')
   logEntityId(internal)
@@ -159,4 +159,3 @@ function main() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   main()
 }
-

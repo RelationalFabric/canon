@@ -28,7 +28,7 @@ export function isPojo(value: unknown): value is Pojo {
 // In-source tests
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
-  
+
   describe('isPojo', () => {
     it('should return true for plain objects', () => {
       expect(isPojo({})).toBe(true)
@@ -130,7 +130,7 @@ Add tests at the end of source files:
 // In-source tests
 if (import.meta.vitest) {
   const { describe, it, expect, beforeEach, afterEach } = import.meta.vitest
-  
+
   describe('functionName', () => {
     it('should do something', () => {
       expect(result).toBe(expected)
@@ -259,4 +259,3 @@ npm run test:ui
 - [Vitest Documentation](https://vitest.dev/)
 - [In-Source Testing Guide](https://vitest.dev/guide/in-source)
 - [Vitest API Reference](https://vitest.dev/api/)
-

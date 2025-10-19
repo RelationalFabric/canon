@@ -49,7 +49,7 @@ export interface CanonConfig {
  */
 export type Satisfies<
   TAxiomLabel extends keyof Axioms,
-  TCanonLabel extends keyof Canons = keyof Canons
+  TCanonLabel extends keyof Canons = keyof Canons,
 > = {
   [K in keyof Canons]: TAxiomLabel extends keyof Canons[K]
     ? Canons[K][TAxiomLabel] extends { $basis: infer TBasis }
@@ -57,4 +57,3 @@ export type Satisfies<
       : never
     : never
 }[TCanonLabel]
-

@@ -21,7 +21,7 @@ export type Axiom<TConfig, TMeta> = TConfig & { $meta: TMeta }
  * This represents concepts that can be found by looking for a specific
  * key name within an object (e.g., 'id', '@id', '_id').
  */
-export type KeyNameAxiom = {
+export interface KeyNameAxiom {
   $basis: Record<string, unknown>
   key: string
   $meta: Record<string, unknown>
@@ -68,4 +68,3 @@ export interface AxiomConfig {
   $basis: TypeGuard<any>
   [key: string]: unknown
 }
-

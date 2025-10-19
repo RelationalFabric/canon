@@ -43,9 +43,8 @@ export function idOf<T extends Satisfies<'Id'>>(x: T): string {
   const value = extractAxiomValue('Id', x, config)
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected string ID, got ${typeof value}`)
+    throw new TypeError(`Expected string ID, got ${typeof value}`)
   }
 
   return value
 }
-

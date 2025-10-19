@@ -5,9 +5,9 @@
  * canons that can be shared across projects.
  */
 
-import type { Canon } from '../src/types/canons.js'
-import { defineCanon, registerCanons } from '../src/runtime/registry.js'
-import { idOf } from '../src/axioms/id.js'
+import type { Canon } from '@relational-fabric/canon'
+import process from 'node:process'
+import { defineCanon, idOf, registerCanons } from '@relational-fabric/canon'
 
 /**
  * Define MongoDB canon type-level configuration
@@ -83,4 +83,3 @@ function main() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   main()
 }
-
