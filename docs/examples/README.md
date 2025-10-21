@@ -29,6 +29,70 @@ Module-Style Canon Example
 - [mongodb-canon](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon/mongodb-canon.ts) - MongoDB Canon Module
 - [usage](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon/usage.ts) - Using the MongoDB Canon Module
 
+### [03-multi-axiom-canon](./03-multi-axiom-canon.ts)
+Example: Multi-Axiom Canon with All Core Axioms
+
+**Key Concepts:**
+- **Multi-Axiom Canons**: Define canons that implement multiple axioms for comprehensive data modeling
+- **Universal Functions**: Use idOf(), typeOf(), versionOf(), timestampsOf(), referencesOf() together
+- **Format Conversion**: Timestamps and References automatically convert between different formats
+- **Real-World Logic**: Write business logic that works with any entity format
+- **Error Handling**: Handle cases where entities don't match expected axioms
+- **Type Safety**: All functions maintain full TypeScript type safety
+- **Comprehensive Coverage**: Examples should demonstrate all available functionality
+
+**Pattern:** Declarative canon registration
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon.ts)
+
+### [04-format-conversion-examples](./04-format-conversion-examples.ts)
+Example: Format Conversion and Cross-Format Compatibility
+
+**Key Concepts:**
+- **Multi-Format Support**: Define canons for different data formats (REST, MongoDB, JSON-LD)
+- **Universal Functions**: Same business logic works across all formats
+- **Automatic Conversion**: Timestamps and references convert between formats automatically
+- **Format Conversion**: Convert entities between different data formats
+- **Error Handling**: Gracefully handle invalid or incomplete data
+- **Real-World Scenarios**: Examples show practical cross-format operations
+- **Type Safety**: Maintain full TypeScript type safety across all formats
+
+**Pattern:** Declarative canon registration
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples.ts)
+
+### [05-error-handling-and-edge-cases](./05-error-handling-and-edge-cases.ts)
+Example: Error Handling and Edge Cases
+
+**Key Concepts:**
+- **Safe Wrappers**: Create safe wrapper functions that return undefined instead of throwing
+- **Validation**: Always validate entities before processing
+- **Error Handling**: Handle errors gracefully and provide meaningful messages
+- **Edge Cases**: Test with null, undefined, wrong types, and missing fields
+- **Batch Processing**: Handle multiple entities with proper error isolation
+- **Logging**: Log warnings and errors for debugging
+- **Graceful Degradation**: Continue processing even when some entities fail
+
+**Pattern:** Declarative canon registration
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases.ts)
+
+### [06-real-world-business-scenarios](./06-real-world-business-scenarios.ts)
+Example: Real-World Business Scenarios
+
+**Key Concepts:**
+- **Domain Modeling**: Use canons to model business domains with semantic concepts
+- **Business Logic**: Write business logic that works with semantic concepts, not field names
+- **Cross-Entity Operations**: Process relationships between entities using universal functions
+- **Workflow Processing**: Build complex workflows that work across different data formats
+- **Error Handling**: Handle business logic errors gracefully
+- **Version Control**: Use version axioms for optimistic concurrency control
+- **Real-World Value**: Examples show practical business value of the universal type system
+
+**Pattern:** Declarative canon registration
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios.ts)
+
 ## Example Patterns
 
 The examples demonstrate two main patterns for working with Canon:
