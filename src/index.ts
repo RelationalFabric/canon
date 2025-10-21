@@ -2,6 +2,10 @@
 export * from './axiom.js'
 // Specific Axioms
 export * from './axioms/id.js'
+export * from './axioms/references.js'
+export * from './axioms/timestamps.js'
+export * from './axioms/type.js'
+export * from './axioms/version.js'
 
 export * from './canon.js'
 

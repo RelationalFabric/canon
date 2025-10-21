@@ -20,7 +20,8 @@ export default function createEslintConfig(options = {}, ...configs) {
 
   return antfu(mergedConfig, {
     rules: {
-      'no-console': 'warn',
+      'no-console': process.env.CI ? 'off' : 'warn',
+      'node/prefer-global/process': 'off',
     },
   }, ...configs)
 }

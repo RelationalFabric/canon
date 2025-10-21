@@ -1,0 +1,15 @@
+name: Queue
+
+on:
+  merge_group:
+
+jobs:
+  all-checks-passed:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    # This job runs but immediately succeeds, providing a placeholder status
+    # that can be overridden by the PR workflow when it runs
+
+    steps:
+      - name: Queue placeholder
+        run: echo "Queue placeholder - status will be overridden by PR workflow"

@@ -21,11 +21,28 @@ export type Axiom<TConfig, TMeta> = TConfig & { $meta: TMeta }
  * This represents concepts that can be found by looking for a specific
  * key name within an object (e.g., 'id', '@id', '_id').
  */
-export interface KeyNameAxiom {
+export type KeyNameAxiom = Axiom<{
   $basis: Record<string, unknown>
   key: string
-  $meta: Record<string, unknown>
-}
+}, {
+    [key: string]: unknown
+  }>
+
+/**
+ * Representation axiom for data with multiple representations
+ *
+ * This represents concepts that can be converted between different formats
+ * with a canonical representation (e.g., timestamps, references).
+ *
+ * @template T - The input type that can be converted
+ * @template C - The canonical type (defaults to unknown)
+ */
+export type RepresentationAxiom<T, C = unknown> = Axiom<{
+  $basis: T | TypeGuard<unknown>
+  isCanonical: (value: unknown) => value is C
+}, {
+    [key: string]: unknown
+  }>
 
 /**
  * Global registry of axioms available in Canon
@@ -47,6 +64,18 @@ export interface KeyNameAxiom {
 export interface Axioms {}
 
 /**
+ * Canonical reference type for entity relationships
+ *
+ * @template R - The reference type (usually string)
+ * @template T - The value type (defaults to unknown)
+ */
+export interface EntityReference<R, T = unknown> {
+  ref: R
+  value?: T
+  resolved: boolean
+}
+
+/**
  * Extract the value type from an axiom's $basis field
  *
  * @template TLabel - The axiom label (e.g., 'Id', 'Type')
@@ -65,6 +94,18 @@ export type AxiomValue<TLabel extends keyof Axioms> =
  * and metadata values.
  */
 export interface AxiomConfig {
-  $basis: TypeGuard<any>
+  $basis: TypeGuard<unknown>
   [key: string]: unknown
+}
+
+/**
+ * Define an axiom runtime configuration
+ *
+ * Simply returns the config unchanged - useful for creating exportable axioms.
+ *
+ * @param config - The runtime axiom configuration
+ * @returns The same config object
+ */
+export function defineAxiom(config: AxiomConfig): AxiomConfig {
+  return config
 }

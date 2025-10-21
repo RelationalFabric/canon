@@ -45,7 +45,8 @@ export function validateRadarData(data: any): ValidationResult {
       message: 'Missing entries section',
       path: 'entries',
     })
-  } else {
+  }
+  else {
     validateEntries(data.entries, errors, warnings)
   }
 
