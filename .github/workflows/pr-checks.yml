@@ -52,8 +52,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           eslint_flags: .
-          fail_on_error: true
+          fail_on_error: false
           filter_mode: nofilter
+
+      - name: Run full checks
+        run: npm run checks
 
   test:
     name: Run Tests
@@ -72,11 +75,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests
-        run: npm run test
-
-      - name: Run integration tests (examples)
-        run: npm run example
+      - name: Run full checks
+        run: npm run checks
 
   coverage:
     name: Test Coverage
@@ -97,6 +97,9 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
+
+      - name: Run full checks
+        run: npm run checks
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
