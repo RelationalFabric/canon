@@ -1,0 +1,15 @@
+name: Queue
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+
+jobs:
+  all-checks-passed:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: No-op placeholder
+        run: echo "This is a placeholder job for build queue management"
