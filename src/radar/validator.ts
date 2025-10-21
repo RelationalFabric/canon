@@ -2,10 +2,7 @@
  * Technology Radar data validation utilities
  */
 
-import type { QuadrantKey, RadarData, RingKey } from '../types/radar.js'
-
-const VALID_QUADRANTS: QuadrantKey[] = ['tools-libraries', 'techniques-patterns', 'features-capabilities', 'data-structures-formats']
-const VALID_RINGS: RingKey[] = ['adopt', 'trial', 'assess', 'hold']
+import type { RadarData } from '../types/radar.js'
 
 export interface ValidationError {
   type: 'missing_field' | 'invalid_value' | 'duplicate_entry' | 'invalid_structure'
@@ -38,15 +35,61 @@ export function validateRadarData(data: any): ValidationResult {
     validateMetadata(data.metadata, errors)
   }
 
-  // Validate the entries section
-  if (!data.entries) {
+  // Validate quadrants array
+  if (!data.quadrants) {
     errors.push({
       type: 'missing_field',
-      message: 'Missing entries section',
-      path: 'entries',
+      message: 'Missing quadrants section',
+      path: 'quadrants',
     })
-  } else {
-    validateEntries(data.entries, errors, warnings)
+  }
+  else if (!Array.isArray(data.quadrants)) {
+    errors.push({
+      type: 'invalid_structure',
+      message: 'Quadrants must be an array of strings',
+      path: 'quadrants',
+    })
+  }
+  else {
+    validateQuadrants(data.quadrants, errors)
+  }
+
+  // Validate rings array
+  if (!data.rings) {
+    errors.push({
+      type: 'missing_field',
+      message: 'Missing rings section',
+      path: 'rings',
+    })
+  }
+  else if (!Array.isArray(data.rings)) {
+    errors.push({
+      type: 'invalid_structure',
+      message: 'Rings must be an array of strings',
+      path: 'rings',
+    })
+  }
+  else {
+    validateRings(data.rings, errors)
+  }
+
+  // Validate items array
+  if (!data.items) {
+    errors.push({
+      type: 'missing_field',
+      message: 'Missing items section',
+      path: 'items',
+    })
+  }
+  else if (!Array.isArray(data.items)) {
+    errors.push({
+      type: 'invalid_structure',
+      message: 'Items must be an array',
+      path: 'items',
+    })
+  }
+  else {
+    validateItems(data.items, data.quadrants, data.rings, errors, warnings)
   }
 
   return {
@@ -95,41 +138,25 @@ function validateMetadata(metadata: any, errors: ValidationError[]): void {
  * Validate quadrants section
  */
 function validateQuadrants(quadrants: any[], errors: ValidationError[]): void {
-  const quadrantIds = new Set<string>()
+  const quadrantNames = new Set<string>()
 
   quadrants.forEach((quadrant, index) => {
-    if (!quadrant.id || typeof quadrant.id !== 'string') {
+    if (typeof quadrant !== 'string') {
       errors.push({
-        type: 'missing_field',
-        message: `Missing or invalid id in quadrant ${index}`,
-        path: `quadrants[${index}].id`,
+        type: 'invalid_value',
+        message: `Quadrant ${index} must be a string`,
+        path: `quadrants[${index}]`,
       })
     }
-    else if (quadrantIds.has(quadrant.id)) {
+    else if (quadrantNames.has(quadrant)) {
       errors.push({
         type: 'duplicate_entry',
-        message: `Duplicate quadrant id: ${quadrant.id}`,
-        path: `quadrants[${index}].id`,
+        message: `Duplicate quadrant: ${quadrant}`,
+        path: `quadrants[${index}]`,
       })
     }
     else {
-      quadrantIds.add(quadrant.id)
-    }
-
-    if (!quadrant.name || typeof quadrant.name !== 'string') {
-      errors.push({
-        type: 'missing_field',
-        message: `Missing or invalid name in quadrant ${index}`,
-        path: `quadrants[${index}].name`,
-      })
-    }
-
-    if (!quadrant.description || typeof quadrant.description !== 'string') {
-      errors.push({
-        type: 'missing_field',
-        message: `Missing or invalid description in quadrant ${index}`,
-        path: `quadrants[${index}].description`,
-      })
+      quadrantNames.add(quadrant)
     }
   })
 }
@@ -138,142 +165,107 @@ function validateQuadrants(quadrants: any[], errors: ValidationError[]): void {
  * Validate rings section
  */
 function validateRings(rings: any[], errors: ValidationError[]): void {
-  const ringIds = new Set<string>()
+  const ringNames = new Set<string>()
 
   rings.forEach((ring, index) => {
-    if (!ring.id || typeof ring.id !== 'string') {
+    if (typeof ring !== 'string') {
       errors.push({
-        type: 'missing_field',
-        message: `Missing or invalid id in ring ${index}`,
-        path: `rings[${index}].id`,
+        type: 'invalid_value',
+        message: `Ring ${index} must be a string`,
+        path: `rings[${index}]`,
       })
     }
-    else if (ringIds.has(ring.id)) {
+    else if (ringNames.has(ring)) {
       errors.push({
         type: 'duplicate_entry',
-        message: `Duplicate ring id: ${ring.id}`,
-        path: `rings[${index}].id`,
+        message: `Duplicate ring: ${ring}`,
+        path: `rings[${index}]`,
       })
     }
     else {
-      ringIds.add(ring.id)
-    }
-
-    if (!ring.name || typeof ring.name !== 'string') {
-      errors.push({
-        type: 'missing_field',
-        message: `Missing or invalid name in ring ${index}`,
-        path: `rings[${index}].name`,
-      })
-    }
-
-    if (!ring.description || typeof ring.description !== 'string') {
-      errors.push({
-        type: 'missing_field',
-        message: `Missing or invalid description in ring ${index}`,
-        path: `rings[${index}].description`,
-      })
-    }
-
-    if (!ring.color || typeof ring.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(ring.color)) {
-      errors.push({
-        type: 'invalid_value',
-        message: `Invalid color format in ring ${index}. Should be hex color (e.g., #93c47d)`,
-        path: `rings[${index}].color`,
-      })
+      ringNames.add(ring)
     }
   })
 }
 
 /**
- * Validate entries section
+ * Validate items section
  */
-function validateEntries(entries: any, errors: ValidationError[], warnings: string[]): void {
-  const entryNames = new Set<string>()
+function validateItems(items: any[], quadrants: string[], rings: string[], errors: ValidationError[], warnings: string[]): void {
+  const itemNames = new Set<string>()
 
-  Object.entries(entries).forEach(([quadrantKey, quadrantData]) => {
-    if (quadrantKey === 'metadata')
-      return // Skip metadata
+  items.forEach((item: any, index: number) => {
+    validateRadarItem(item, quadrants, rings, errors, warnings, `items[${index}]`)
 
-    if (!VALID_QUADRANTS.includes(quadrantKey as QuadrantKey)) {
-      warnings.push(`Unknown quadrant: ${quadrantKey}`)
-    }
-
-    if (typeof quadrantData !== 'object' || quadrantData === null) {
+    // Check for duplicate names
+    if (item.name && itemNames.has(item.name)) {
       errors.push({
-        type: 'invalid_structure',
-        message: `Invalid quadrant data for ${quadrantKey}`,
-        path: `entries.${quadrantKey}`,
+        type: 'duplicate_entry',
+        message: `Duplicate item name: ${item.name}`,
+        path: `items[${index}].name`,
       })
-      return
     }
-
-    Object.entries(quadrantData).forEach(([ringKey, items]) => {
-      if (!VALID_RINGS.includes(ringKey as RingKey)) {
-        warnings.push(`Unknown ring: ${ringKey} in quadrant ${quadrantKey}`)
-      }
-
-      if (!Array.isArray(items)) {
-        errors.push({
-          type: 'invalid_structure',
-          message: `Invalid ring data for ${ringKey} in quadrant ${quadrantKey}`,
-          path: `entries.${quadrantKey}.${ringKey}`,
-        })
-        return
-      }
-
-      items.forEach((item: any, index: number) => {
-        validateRadarEntry(item, errors, warnings, `${quadrantKey}.${ringKey}[${index}]`)
-
-        // Check for duplicate names
-        if (item.name && entryNames.has(item.name)) {
-          errors.push({
-            type: 'duplicate_entry',
-            message: `Duplicate entry name: ${item.name}`,
-            path: `entries.${quadrantKey}.${ringKey}[${index}].name`,
-          })
-        }
-        else if (item.name) {
-          entryNames.add(item.name)
-        }
-      })
-    })
+    else if (item.name) {
+      itemNames.add(item.name)
+    }
   })
 }
 
 /**
- * Validate individual radar entry
+ * Validate individual radar item
  */
-function validateRadarEntry(entry: any, errors: ValidationError[], warnings: string[], path: string): void {
-  if (!entry.name || typeof entry.name !== 'string') {
+function validateRadarItem(item: any, quadrants: string[], rings: string[], errors: ValidationError[], warnings: string[], path: string): void {
+  if (!item.name || typeof item.name !== 'string') {
     errors.push({
       type: 'missing_field',
       message: 'Missing or invalid name',
-      path: `entries.${path}.name`,
+      path: `${path}.name`,
     })
   }
 
-  if (!entry.description || typeof entry.description !== 'string') {
+  if (!item.description || typeof item.description !== 'string') {
     errors.push({
       type: 'missing_field',
       message: 'Missing or invalid description',
-      path: `entries.${path}.description`,
+      path: `${path}.description`,
     })
   }
 
-  if (typeof entry.isNew !== 'boolean') {
+  if (!item.quadrant || typeof item.quadrant !== 'string') {
+    errors.push({
+      type: 'missing_field',
+      message: 'Missing or invalid quadrant',
+      path: `${path}.quadrant`,
+    })
+  }
+  else if (!quadrants.includes(item.quadrant)) {
+    warnings.push(`Unknown quadrant: ${item.quadrant} in item ${item.name || 'unnamed'}`)
+  }
+
+  if (!item.ring || typeof item.ring !== 'string') {
+    errors.push({
+      type: 'missing_field',
+      message: 'Missing or invalid ring',
+      path: `${path}.ring`,
+    })
+  }
+  else if (!rings.includes(item.ring)) {
+    warnings.push(`Unknown ring: ${item.ring} in item ${item.name || 'unnamed'}`)
+  }
+
+  if (typeof item.isNew !== 'boolean') {
     errors.push({
       type: 'missing_field',
       message: 'Missing or invalid isNew field',
-      path: `entries.${path}.isNew`,
+      path: `${path}.isNew`,
     })
   }
 
-  if (entry.justification && typeof entry.justification !== 'string') {
+  if (item.justification && typeof item.justification !== 'string') {
     errors.push({
       type: 'invalid_value',
       message: 'Justification must be a string',
-      path: `entries.${path}.justification`,
+      path: `${path}.justification`,
     })
   }
 }

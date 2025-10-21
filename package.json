@@ -73,7 +73,7 @@
   "dependencies": {
     "@antfu/eslint-config": "^3.0.0",
     "@tsconfig/node-lts": "^20.0.0",
-    "yaml": "^2.4.1"
+    "yaml": "^2.8.1"
   },
   "optionalDependencies": {
     "defu": "^6.1.4"

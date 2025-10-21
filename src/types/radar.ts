@@ -2,6 +2,70 @@
  * Technology Radar data structures and types
  */
 
+export interface RadarItem {
+  /** The name of the technology or practice */
+  name: string
+  /** Description of the technology or practice */
+  description: string
+  /** Which quadrant this item belongs to */
+  quadrant: string
+  /** Which ring this item belongs to */
+  ring: string
+  /** Whether this is a new entry */
+  isNew: boolean
+  /** Optional justification for the placement */
+  justification?: string
+}
+
+export interface RadarMetadata {
+  /** Title of the radar */
+  title: string
+  /** Subtitle of the radar */
+  subtitle: string
+  /** Version of the radar data */
+  version: string
+  /** Last updated date */
+  lastUpdated: string
+  /** Optional description */
+  description?: string
+}
+
+export interface RadarData {
+  /** Metadata about the radar */
+  metadata: RadarMetadata
+  /** Quadrant names as simple strings */
+  quadrants: string[]
+  /** Ring names as simple strings */
+  rings: string[]
+  /** Radar items as a flat array */
+  items: RadarItem[]
+}
+
+export interface RadarConfig {
+  /** Configuration for the radar */
+  metadata: RadarMetadata
+  /** Quadrant names */
+  quadrants: string[]
+  /** Ring names */
+  rings: string[]
+  /** Build configuration */
+  buildConfig: {
+    csvOutput: string
+    yamlInput: string
+    includeMetadata: boolean
+    sortByRing: boolean
+  }
+}
+
+export interface CsvRow {
+  name: string
+  ring: string
+  quadrant: string
+  isNew: boolean
+  description: string
+}
+
+// Legacy types for backward compatibility during migration
 export interface RadarEntry {
   /** The name of the technology or practice */
   name: string
@@ -31,54 +95,6 @@ export interface Ring {
   description: string
   /** Color code for the ring (hex format) */
   color: string
-}
-
-export interface RadarMetadata {
-  /** Title of the radar */
-  title: string
-  /** Subtitle of the radar */
-  subtitle: string
-  /** Version of the radar data */
-  version: string
-  /** Last updated date */
-  lastUpdated: string
-  /** Optional description */
-  description?: string
-}
-
-export interface RadarData {
-  /** Metadata about the radar */
-  metadata: RadarMetadata
-  /** Quadrant definitions */
-  quadrants: Quadrant[]
-  /** Ring definitions */
-  rings: Ring[]
-  /** Radar entries organized by quadrant and ring */
-  entries: Record<string, Record<string, RadarEntry[]>>
-}
-
-export interface RadarConfig {
-  /** Configuration for the radar */
-  metadata: RadarMetadata
-  /** Quadrant configuration */
-  quadrants: Quadrant[]
-  /** Ring configuration */
-  rings: Ring[]
-  /** Build configuration */
-  buildConfig: {
-    csvOutput: string
-    yamlInput: string
-    includeMetadata: boolean
-    sortByRing: boolean
-  }
-}
-
-export interface CsvRow {
-  name: string
-  ring: string
-  quadrant: string
-  isNew: boolean
-  description: string
 }
 
 export type QuadrantKey = 'tools-libraries' | 'techniques-patterns' | 'features-capabilities' | 'data-structures-formats'

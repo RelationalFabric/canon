@@ -2,27 +2,11 @@
  * Technology Radar data conversion utilities
  */
 
-import type { CsvRow, QuadrantKey, RadarData, RingKey } from '../types/radar.js'
+import type { CsvRow, RadarData, RadarItem } from '../types/radar.js'
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import process from 'node:process'
 import { parse } from 'yaml'
-
-// Quadrant mapping for CSV output
-const QUADRANT_MAP: Record<QuadrantKey, string> = {
-  'tools-libraries': 'Tools & Libraries',
-  'techniques-patterns': 'Techniques & Patterns',
-  'features-capabilities': 'Features & Capabilities',
-  'data-structures-formats': 'Data Structures, Formats & Standards',
-}
-
-// Ring mapping for CSV output
-const RING_MAP: Record<RingKey, string> = {
-  adopt: 'Adopt',
-  trial: 'Trial',
-  assess: 'Assess',
-  hold: 'Hold',
-}
 
 /**
  * Convert YAML radar data to CSV format
@@ -33,27 +17,17 @@ export function convertYamlToCsv(yamlContent: string): string {
   // Generate CSV content
   const csvRows: string[] = ['name,ring,quadrant,isNew,description']
 
-  // Process each quadrant in the entries section
-  Object.entries(data.entries).forEach(([quadrantKey, quadrantData]) => {
-    const quadrantName = QUADRANT_MAP[quadrantKey as QuadrantKey] || quadrantKey
+  // Process each item in the flat items array
+  data.items.forEach((item: RadarItem) => {
+    const row: CsvRow = {
+      name: item.name,
+      ring: item.ring,
+      quadrant: item.quadrant,
+      isNew: item.isNew,
+      description: item.description,
+    }
 
-    // Process each ring in the quadrant
-    Object.entries(quadrantData).forEach(([ringKey, items]) => {
-      const ringName = RING_MAP[ringKey as RingKey] || ringKey
-
-      // Process each item in the ring
-      items.forEach((item) => {
-        const row: CsvRow = {
-          name: item.name,
-          ring: ringName,
-          quadrant: quadrantName,
-          isNew: item.isNew,
-          description: item.description,
-        }
-
-        csvRows.push(formatCsvRow(row))
-      })
-    })
+    csvRows.push(formatCsvRow(row))
   })
 
   return csvRows.join('\n')
