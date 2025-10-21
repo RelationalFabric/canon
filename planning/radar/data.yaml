@@ -8,324 +8,363 @@ metadata:
   version: 1.0.0
   lastUpdated: 2025-01-26
 
-# Tools & Libraries - Third-party libraries, build tools, and development utilities
-tools-libraries:
-  adopt:
-    - name: '@antfu/eslint-config'
-      description: 'Modern ESLint configuration with TypeScript support, automatic fixing capabilities'
-      isNew: false
-      justification: Proven configuration that reduces setup overhead while maintaining high code quality
+quadrants:
+  - id: tools-libraries
+    name: 'Tools & Libraries'
+    description: 'Third-party libraries, build tools, and development utilities'
 
-    - name: '@tsconfig/node-lts'
-      description: Official TypeScript configuration for Node.js LTS environments
-      isNew: false
-      justification: Ensures compatibility with current Node.js features and modern TypeScript settings
+  - id: techniques-patterns
+    name: 'Techniques & Patterns'
+    description: 'Architectural patterns, development practices, and type system techniques'
 
-    - name: defu
-      description: Lightweight object merging utility for configuration composition
-      isNew: false
-      justification: Enables flexible configuration merging without overwriting nested properties
+  - id: features-capabilities
+    name: 'Features & Capabilities'
+    description: 'Runtime features, development features, and integration capabilities'
 
-    - name: typescript
-      description: TypeScript compiler and type system
-      isNew: false
-      justification: Essential for type safety and modern TypeScript features
+  - id: data-structures-formats
+    name: 'Data Structures, Formats & Standards'
+    description: 'Data structures, serialization formats, identity standards, and schema standards'
 
-    - name: eslint
-      description: JavaScript/TypeScript linter for code quality enforcement
-      isNew: false
-      justification: Core linting functionality required for code quality and consistency
+rings:
+  - id: adopt
+    name: Adopt
+    description: 'Strong recommendation. Proven, stable, and recommended for use.'
+    color: '#93c47d'
 
-  trial:
-    - name: type-fest
-      description: Comprehensive collection of TypeScript utility types for advanced type manipulation
-      isNew: true
-      justification: Provides battle-tested utility types for complex TypeScript scenarios
+  - id: trial
+    name: Trial
+    description: Evaluate for adoption. Worth exploring and evaluating for your context.
+    color: '#f9cb9c'
 
-    - name: radash
-      description: Modern utility library designed specifically for TypeScript
-      isNew: true
-      justification: 'Better TypeScript support than lodash, smaller bundle size, tree-shakeable'
+  - id: assess
+    name: Assess
+    description: Investigate further. Keep under review and assess for potential future use.
+    color: '#a4c2f4'
 
-    - name: jsonpath-plus
-      description: Enhanced JSONPath implementation for querying JSON structures
-      isNew: true
-      justification: Essential for querying JSON-LD and complex nested structures in multi-format scenarios
+  - id: hold
+    name: Hold
+    description: Not recommended. Avoid or replace with better alternatives.
+    color: '#ea9999'
 
-    - name: json-stable-stringify
-      description: Deterministic JSON serialization for consistent hashing and comparison
-      isNew: true
-      justification: Ensures consistent serialization across different environments for object hashing
+entries:
+  # Tools & Libraries - Third-party libraries, build tools, and development utilities
+  tools-libraries:
+    adopt:
+      - name: '@antfu/eslint-config'
+        description: 'Modern ESLint configuration with TypeScript support, automatic fixing capabilities'
+        isNew: false
+        justification: Proven configuration that reduces setup overhead while maintaining high code quality
 
-    - name: zod
-      description: TypeScript-first schema validation library for runtime type safety
-      isNew: true
-      justification: "Complements TypeScript's compile-time checking with runtime validation"
+      - name: '@tsconfig/node-lts'
+        description: Official TypeScript configuration for Node.js LTS environments
+        isNew: false
+        justification: Ensures compatibility with current Node.js features and modern TypeScript settings
 
-  assess:
-    - name: uuid
-      description: RFC4122 compliant UUID generation for unique identifiers
-      isNew: true
-      justification: Industry standard for unique identifier generation across systems
+      - name: defu
+        description: Lightweight object merging utility for configuration composition
+        isNew: false
+        justification: Enables flexible configuration merging without overwriting nested properties
 
-    - name: nanoid
-      description: 'Tiny, secure, URL-friendly unique string ID generator'
-      isNew: true
-      justification: 'Smaller bundle size than UUID, perfect for frontend applications'
+      - name: typescript
+        description: TypeScript compiler and type system
+        isNew: false
+        justification: Essential for type safety and modern TypeScript features
 
-    - name: object-hash
-      description: JavaScript object hashing library for creating consistent hashes
-      isNew: true
-      justification: Enables object comparison and caching strategies
+      - name: eslint
+        description: JavaScript/TypeScript linter for code quality enforcement
+        isNew: false
+        justification: Core linting functionality required for code quality and consistency
 
-    - name: immutable
-      description: Immutable data structures library for functional programming
-      isNew: true
-      justification: Prevents accidental mutations and enables predictable state management
+    trial:
+      - name: type-fest
+        description: Comprehensive collection of TypeScript utility types for advanced type manipulation
+        isNew: true
+        justification: Provides battle-tested utility types for complex TypeScript scenarios
 
-    - name: date-fns
-      description: Modern JavaScript date utility library with tree-shaking support
-      isNew: true
-      justification: Functional approach to date handling with excellent performance
+      - name: radash
+        description: Modern utility library designed specifically for TypeScript
+        isNew: true
+        justification: 'Better TypeScript support than lodash, smaller bundle size, tree-shakeable'
 
-  hold:
-    - name: lodash
-      description: Comprehensive utility library for JavaScript
-      isNew: false
-      justification: Replaced by radash for better TypeScript support and smaller bundle size
+      - name: jsonpath-plus
+        description: Enhanced JSONPath implementation for querying JSON structures
+        isNew: true
+        justification: Essential for querying JSON-LD and complex nested structures in multi-format scenarios
 
-    - name: ts-essentials
-      description: Essential TypeScript utility types
-      isNew: false
-      justification: Redundant with type-fest and modern TypeScript built-in utilities
+      - name: json-stable-stringify
+        description: Deterministic JSON serialization for consistent hashing and comparison
+        isNew: true
+        justification: Ensures consistent serialization across different environments for object hashing
 
-# Techniques & Patterns - Architectural patterns, development practices, and type system techniques
-techniques-patterns:
-  adopt:
-    - name: Dual Export Strategy
-      description: 'Opinionated + transparent access patterns for library consumers'
-      isNew: false
-      justification: Provides both convenience and flexibility while preserving library contracts
+      - name: zod
+        description: TypeScript-first schema validation library for runtime type safety
+        isNew: true
+        justification: "Complements TypeScript's compile-time checking with runtime validation"
 
-    - name: ADR Methodology
-      description: Architecture Decision Records for documenting architectural decisions
-      isNew: false
-      justification: Proven documentation and decision tracking methodology
+    assess:
+      - name: uuid
+        description: RFC4122 compliant UUID generation for unique identifiers
+        isNew: true
+        justification: Industry standard for unique identifier generation across systems
 
-    - name: Configuration Composition
-      description: Merging configurations using utilities like defu for flexible setup
-      isNew: false
-      justification: Enables flexible configuration merging without overwriting nested properties
+      - name: nanoid
+        description: 'Tiny, secure, URL-friendly unique string ID generator'
+        isNew: true
+        justification: 'Smaller bundle size than UUID, perfect for frontend applications'
 
-    - name: ES Modules
-      description: Modern module system with TypeScript support
-      isNew: false
-      justification: Standard module system with excellent tooling and performance
+      - name: object-hash
+        description: JavaScript object hashing library for creating consistent hashes
+        isNew: true
+        justification: Enables object comparison and caching strategies
 
-  trial:
-    - name: Universal Adapter Pattern
-      description: Multi-format data handling through common interfaces
-      isNew: true
-      justification: "Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first"
+      - name: immutable
+        description: Immutable data structures library for functional programming
+        isNew: true
+        justification: Prevents accidental mutations and enables predictable state management
 
-    - name: Lazy Typing
-      description: Deferred type resolution for flexible type definitions
-      isNew: true
-      justification: Enables type blueprints that can be universally understood
+      - name: date-fns
+        description: Modern JavaScript date utility library with tree-shaking support
+        isNew: true
+        justification: Functional approach to date handling with excellent performance
 
-    - name: Canon Pattern
-      description: 'Axiomatic type definitions with basis, key, and meta properties'
-      isNew: true
-      justification: Core pattern but NOT YET IMPLEMENTED - needs core axiom system first
+    hold:
+      - name: lodash
+        description: Comprehensive utility library for JavaScript
+        isNew: false
+        justification: Replaced by radash for better TypeScript support and smaller bundle size
 
-    - name: Tree-shaking Support
-      description: Optimized bundling with unused code elimination
-      isNew: true
-      justification: Essential for modern bundling and consumer bundle optimization
+      - name: ts-essentials
+        description: Essential TypeScript utility types
+        isNew: false
+        justification: Redundant with type-fest and modern TypeScript built-in utilities
 
-  assess:
-    - name: Immutable Data Patterns
-      description: Functional programming approach to data management
-      isNew: true
-      justification: Prevents accidental mutations but may add complexity
+  # Techniques & Patterns - Architectural patterns, development practices, and type system techniques
+  techniques-patterns:
+    adopt:
+      - name: Dual Export Strategy
+        description: 'Opinionated + transparent access patterns for library consumers'
+        isNew: false
+        justification: Provides both convenience and flexibility while preserving library contracts
 
-    - name: Schema Evolution
-      description: Managing type changes over time across different systems
-      isNew: true
-      justification: Important for long-term maintenance but complex to implement
+      - name: ADR Methodology
+        description: Architecture Decision Records for documenting architectural decisions
+        isNew: false
+        justification: Proven documentation and decision tracking methodology
 
-    - name: Runtime Validation
-      description: Type safety enforcement at runtime using libraries like Zod
-      isNew: true
-      justification: Complements compile-time checking but adds runtime overhead
+      - name: Configuration Composition
+        description: Merging configurations using utilities like defu for flexible setup
+        isNew: false
+        justification: Enables flexible configuration merging without overwriting nested properties
 
-# Features & Capabilities - Runtime features, development features, and integration capabilities
-features-capabilities:
-  adopt:
-    - name: TypeScript Configuration Sharing
-      description: Extendable base configurations for TypeScript projects
-      isNew: false
-      justification: Reduces setup overhead and ensures consistent TypeScript settings
+      - name: ES Modules
+        description: Modern module system with TypeScript support
+        isNew: false
+        justification: Standard module system with excellent tooling and performance
 
-    - name: ESLint Configuration Composition
-      description: Flexible ESLint setup with customizable rules and options
-      isNew: false
-      justification: Enables consistent code quality across projects with customization
+    trial:
+      - name: Universal Adapter Pattern
+        description: Multi-format data handling through common interfaces
+        isNew: true
+        justification: "Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first"
 
-    - name: Multi-format Data Support
-      description: 'Support for JSON-LD, MongoDB, REST APIs through unified interfaces'
-      isNew: false
-      justification: "Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first"
+      - name: Lazy Typing
+        description: Deferred type resolution for flexible type definitions
+        isNew: true
+        justification: Enables type blueprints that can be universally understood
 
-    - name: Type Checking
-      description: Compile-time type safety and validation
-      isNew: false
-      justification: Essential for preventing runtime errors and improving developer experience
+      - name: Canon Pattern
+        description: 'Axiomatic type definitions with basis, key, and meta properties'
+        isNew: true
+        justification: Core pattern but NOT YET IMPLEMENTED - needs core axiom system first
 
-  trial:
-    - name: Runtime Type Validation
-      description: Type safety enforcement at runtime using schema validation
-      isNew: true
-      justification: Complements compile-time checking but requires careful implementation
+      - name: Tree-shaking Support
+        description: Optimized bundling with unused code elimination
+        isNew: true
+        justification: Essential for modern bundling and consumer bundle optimization
 
-    - name: Configuration Merging
-      description: Flexible configuration composition and override capabilities
-      isNew: true
-      justification: Enables sophisticated configuration patterns but adds complexity
+    assess:
+      - name: Immutable Data Patterns
+        description: Functional programming approach to data management
+        isNew: true
+        justification: Prevents accidental mutations but may add complexity
 
-    - name: Hot Reloading
-      description: Development experience with automatic reloading on changes
-      isNew: true
-      justification: Improves developer experience but may impact performance
+      - name: Schema Evolution
+        description: Managing type changes over time across different systems
+        isNew: true
+        justification: Important for long-term maintenance but complex to implement
 
-    - name: Automatic Fixing
-      description: ESLint auto-fix capabilities for code quality
-      isNew: true
-      justification: Reduces manual work but requires careful rule selection
+      - name: Runtime Validation
+        description: Type safety enforcement at runtime using libraries like Zod
+        isNew: true
+        justification: Complements compile-time checking but adds runtime overhead
 
-  assess:
-    - name: Advanced Type Manipulation
-      description: Complex type operations and transformations
-      isNew: true
-      justification: Powerful but may impact compilation performance and complexity
+  # Features & Capabilities - Runtime features, development features, and integration capabilities
+  features-capabilities:
+    adopt:
+      - name: TypeScript Configuration Sharing
+        description: Extendable base configurations for TypeScript projects
+        isNew: false
+        justification: Reduces setup overhead and ensures consistent TypeScript settings
 
-    - name: Data Transformation
-      description: Cross-format data conversion and mapping
-      isNew: true
-      justification: Essential for multi-format support but complex to implement
+      - name: ESLint Configuration Composition
+        description: Flexible ESLint setup with customizable rules and options
+        isNew: false
+        justification: Enables consistent code quality across projects with customization
 
-    - name: Caching Strategies
-      description: Object hashing and comparison for performance optimization
-      isNew: true
-      justification: Important for performance but requires careful cache invalidation
+      - name: Multi-format Data Support
+        description: 'Support for JSON-LD, MongoDB, REST APIs through unified interfaces'
+        isNew: false
+        justification: "Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first"
 
-# Data Structures, Formats & Standards - Data structures, serialization formats, identity standards, and schema standards
-data-structures-formats:
-  adopt:
-    - name: JSON
-      description: Universal web format for data exchange
-      isNew: false
-      justification: 'Universal support, native JavaScript integration, extensive tooling'
+      - name: Type Checking
+        description: Compile-time type safety and validation
+        isNew: false
+        justification: Essential for preventing runtime errors and improving developer experience
 
-    - name: JSON-LD
-      description: Semantic web standard for linked data
-      isNew: false
-      justification: "Core to Canon's semantic web vision and universal adapter concept"
+    trial:
+      - name: Runtime Type Validation
+        description: Type safety enforcement at runtime using schema validation
+        isNew: true
+        justification: Complements compile-time checking but requires careful implementation
 
-    - name: TypeScript Types
-      description: "Canon's primary type system and interface definitions"
-      isNew: false
-      justification: Provides compile-time type safety and excellent developer experience
+      - name: Configuration Merging
+        description: Flexible configuration composition and override capabilities
+        isNew: true
+        justification: Enables sophisticated configuration patterns but adds complexity
 
-    - name: RFC4122 UUIDs
-      description: Standard unique identifier format
-      isNew: false
-      justification: Industry standard for unique identifiers across systems
+      - name: Hot Reloading
+        description: Development experience with automatic reloading on changes
+        isNew: true
+        justification: Improves developer experience but may impact performance
 
-    - name: ISO8601 Dates
-      description: Standard temporal format for dates and times
-      isNew: false
-      justification: Universal standard for temporal data representation
+      - name: Automatic Fixing
+        description: ESLint auto-fix capabilities for code quality
+        isNew: true
+        justification: Reduces manual work but requires careful rule selection
 
-    - name: REST APIs
-      description: Universal HTTP integration pattern
-      isNew: false
-      justification: Standard web API pattern with broad support and tooling
+    assess:
+      - name: Advanced Type Manipulation
+        description: Complex type operations and transformations
+        isNew: true
+        justification: Powerful but may impact compilation performance and complexity
 
-  trial:
-    - name: MongoDB Documents
-      description: Document database format for flexible data storage
-      isNew: true
-      justification: 'Growing popularity, flexible schema, good TypeScript integration'
+      - name: Data Transformation
+        description: Cross-format data conversion and mapping
+        isNew: true
+        justification: Essential for multi-format support but complex to implement
 
-    - name: YAML
-      description: Human-readable configuration format
-      isNew: true
-      justification: 'Common in DevOps tooling, good for complex configurations'
+      - name: Caching Strategies
+        description: Object hashing and comparison for performance optimization
+        isNew: true
+        justification: Important for performance but requires careful cache invalidation
 
-    - name: NanoID
-      description: Lightweight alternative to UUIDs for unique identifiers
-      isNew: true
-      justification: 'Smaller than UUID, URL-safe, perfect for frontend use'
+  # Data Structures, Formats & Standards - Data structures, serialization formats, identity standards, and schema standards
+  data-structures-formats:
+    adopt:
+      - name: JSON
+        description: Universal web format for data exchange
+        isNew: false
+        justification: 'Universal support, native JavaScript integration, extensive tooling'
 
-    - name: GraphQL
-      description: Query language for APIs with strong typing
-      isNew: true
-      justification: 'Growing adoption, good TypeScript support, flexible querying'
+      - name: JSON-LD
+        description: Semantic web standard for linked data
+        isNew: false
+        justification: "Core to Canon's semantic web vision and universal adapter concept"
 
-    - name: JSON Schema
-      description: Standard for describing JSON data structure
-      isNew: true
-      justification: 'Runtime validation, API documentation, but adds complexity'
+      - name: TypeScript Types
+        description: "Canon's primary type system and interface definitions"
+        isNew: false
+        justification: Provides compile-time type safety and excellent developer experience
 
-    - name: Tree Structures
-      description: Hierarchical data organization patterns
-      isNew: true
-      justification: "Common in many domains, supports Canon's tree examples"
+      - name: RFC4122 UUIDs
+        description: Standard unique identifier format
+        isNew: false
+        justification: Industry standard for unique identifiers across systems
 
-  assess:
-    - name: Immutable Collections
-      description: Functional programming data structures
-      isNew: true
-      justification: Prevents mutations but may impact performance and memory usage
+      - name: ISO8601 Dates
+        description: Standard temporal format for dates and times
+        isNew: false
+        justification: Universal standard for temporal data representation
 
-    - name: MessagePack
-      description: Binary serialization format for performance
-      isNew: true
-      justification: Better performance than JSON but limited web adoption
+      - name: REST APIs
+        description: Universal HTTP integration pattern
+        isNew: false
+        justification: Standard web API pattern with broad support and tooling
 
-    - name: OpenAPI
-      description: API specification standard
-      isNew: true
-      justification: Good for API-first development but may be overkill for some use cases
+    trial:
+      - name: MongoDB Documents
+        description: Document database format for flexible data storage
+        isNew: true
+        justification: 'Growing popularity, flexible schema, good TypeScript integration'
 
-    - name: SQL Schemas
-      description: Relational database structure patterns
-      isNew: true
-      justification: Traditional but may conflict with document-based approaches
+      - name: YAML
+        description: Human-readable configuration format
+        isNew: true
+        justification: 'Common in DevOps tooling, good for complex configurations'
 
-    - name: WebSockets
-      description: Real-time bidirectional communication
-      isNew: true
-      justification: Useful for real-time features but adds complexity
+      - name: NanoID
+        description: Lightweight alternative to UUIDs for unique identifiers
+        isNew: true
+        justification: 'Smaller than UUID, URL-safe, perfect for frontend use'
 
-    - name: Graph Data Structures
-      description: Complex relationship modeling
-      isNew: true
-      justification: Powerful for complex relationships but may be overkill
+      - name: GraphQL
+        description: Query language for APIs with strong typing
+        isNew: true
+        justification: 'Growing adoption, good TypeScript support, flexible querying'
 
-  hold:
-    - name: Protocol Buffers
-      description: Binary serialization format
-      isNew: false
-      justification: "Complex setup, limited web adoption, not aligned with Canon's web focus"
+      - name: JSON Schema
+        description: Standard for describing JSON data structure
+        isNew: true
+        justification: 'Runtime validation, API documentation, but adds complexity'
 
-    - name: gRPC
-      description: High-performance RPC framework
-      isNew: false
-      justification: 'Binary protocol, limited web usage, not suitable for browser environments'
+      - name: Tree Structures
+        description: Hierarchical data organization patterns
+        isNew: true
+        justification: "Common in many domains, supports Canon's tree examples"
 
-    - name: XML
-      description: Extensible markup language format
-      isNew: false
-      justification: "Legacy format, not core to Canon's modern web focus"
+    assess:
+      - name: Immutable Collections
+        description: Functional programming data structures
+        isNew: true
+        justification: Prevents mutations but may impact performance and memory usage
+
+      - name: MessagePack
+        description: Binary serialization format for performance
+        isNew: true
+        justification: Better performance than JSON but limited web adoption
+
+      - name: OpenAPI
+        description: API specification standard
+        isNew: true
+        justification: Good for API-first development but may be overkill for some use cases
+
+      - name: SQL Schemas
+        description: Relational database structure patterns
+        isNew: true
+        justification: Traditional but may conflict with document-based approaches
+
+      - name: WebSockets
+        description: Real-time bidirectional communication
+        isNew: true
+        justification: Useful for real-time features but adds complexity
+
+      - name: Graph Data Structures
+        description: Complex relationship modeling
+        isNew: true
+        justification: Powerful for complex relationships but may be overkill
+
+    hold:
+      - name: Protocol Buffers
+        description: Binary serialization format
+        isNew: false
+        justification: "Complex setup, limited web adoption, not aligned with Canon's web focus"
+
+      - name: gRPC
+        description: High-performance RPC framework
+        isNew: false
+        justification: 'Binary protocol, limited web usage, not suitable for browser environments'
+
+      - name: XML
+        description: Extensible markup language format
+        isNew: false
+        justification: "Legacy format, not core to Canon's modern web focus"
