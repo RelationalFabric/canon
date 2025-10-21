@@ -103,15 +103,24 @@ function processExample(examplePath: string, relativePath: string): ExampleInfo 
   }
 
   if (isDirectory) {
-    // Process directory - look for README.md and sub-files
+    // Process directory - look for usage.ts or main entry point
+    const usagePath = join(fullPath, 'usage.ts')
     const readmePath = join(fullPath, 'README.md')
-    if (statSync(readmePath).isFile()) {
+    
+    // Try to get description from usage.ts first, then README.md
+    let description = ''
+    if (statSync(usagePath).isFile()) {
+      const metadata = extractMetadata(usagePath)
+      description = metadata.description || ''
+    } else if (statSync(readmePath).isFile()) {
       const readmeContent = readFileSync(readmePath, 'utf-8')
       const descriptionMatch = readmeContent.match(/^#\s+([^\n]+)/)
       if (descriptionMatch) {
-        exampleInfo.description = descriptionMatch[1].trim()
+        description = descriptionMatch[1].trim()
       }
     }
+    
+    exampleInfo.description = description
 
     // Process sub-files
     const subFiles = readdirSync(fullPath)
@@ -120,6 +129,12 @@ function processExample(examplePath: string, relativePath: string): ExampleInfo 
 
     if (subFiles.length > 0) {
       exampleInfo.subExamples = subFiles
+      // Merge key concepts from all sub-files
+      const allKeyConcepts = new Set<string>()
+      subFiles.forEach(sub => {
+        sub.keyConcepts.forEach(concept => allKeyConcepts.add(concept))
+      })
+      exampleInfo.keyConcepts = Array.from(allKeyConcepts)
     }
   }
   else {
@@ -167,10 +182,10 @@ This directory contains practical examples demonstrating how to use the @relatio
     }
 
     if (example.isDirectory) {
-      content += `**Pattern:** Module-style canon definition\n\n`
+      content += `**Pattern:** Multi-file example with modular structure\n\n`
     }
     else {
-      content += `**Pattern:** Declarative canon registration\n\n`
+      content += `**Pattern:** Single-file example\n\n`
     }
 
     content += `**Source:** [View on GitHub](${example.githubUrl})\n\n`
@@ -192,15 +207,34 @@ This directory contains practical examples demonstrating how to use the @relatio
 
   const footer = `## Example Patterns
 
-The examples demonstrate two main patterns for working with Canon:
+The examples demonstrate different patterns for working with Canon:
 
-### Declarative Style (01-basic-id-axiom)
+### Single-File Examples (01-basic-id-axiom)
+- **Use case**: Simple, self-contained examples
+- **Pattern**: All code in a single file with clear sections
+- **Benefits**: Easy to understand, quick to run, perfect for learning
+- **Example**: \`01-basic-id-axiom.ts\`
+
+### Multi-File Examples (02-module-style-canon, 03-multi-axiom-canon, etc.)
+- **Use case**: Complex examples with multiple concerns
+- **Pattern**: Organized into multiple files with clear separation of concerns
+- **Benefits**: Modular, maintainable, demonstrates real-world architecture
+- **Structure**: 
+  - \`usage.ts\` - Main entry point and examples
+  - \`canons.ts\` - Canon definitions
+  - \`utility-functions.ts\` - Helper functions
+  - \`domain-models.ts\` - Type definitions
+  - \`business-logic.ts\` - Business logic
+
+### Canon Definition Patterns
+
+#### Declarative Style
 - **Use case**: Internal, app-specific canons
 - **Pattern**: Define and register canons directly in your application
 - **Benefits**: Simple, direct, perfect for internal use
 - **Example**: \`declareCanon('Internal', { ... })\`
 
-### Module Style (02-module-style-canon)
+#### Module Style
 - **Use case**: Shared, reusable canons
 - **Pattern**: Define canons in separate modules, register when needed
 - **Benefits**: Reusable, testable, composable, versionable

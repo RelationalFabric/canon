@@ -14,14 +14,14 @@ Example: Basic Id Axiom Usage
 - Add new formats anytime without changing existing code
 - Use Canon's utility functions (pojoHasString, isPojo) for clean type guards
 
-**Pattern:** Declarative canon registration
+**Pattern:** Single-file example
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/01-basic-id-axiom.ts)
 
 ### [02-module-style-canon](./02-module-style-canon)
-Module-Style Canon Example
+Using the MongoDB Canon Module
 
-**Pattern:** Module-style canon definition
+**Pattern:** Multi-file example with modular structure
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon)
 
@@ -29,72 +29,104 @@ Module-Style Canon Example
 - [mongodb-canon](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon/mongodb-canon.ts) - MongoDB Canon Module
 - [usage](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon/usage.ts) - Using the MongoDB Canon Module
 
-### [03-multi-axiom-canon](./03-multi-axiom-canon.ts)
-Example: Multi-Axiom Canon with All Core Axioms
+### [03-multi-axiom-canon](./03-multi-axiom-canon)
+Multi-Axiom Canon Usage Examples
 
 **Key Concepts:**
-- **Multi-Axiom Canons**: Define canons that implement multiple axioms for comprehensive data modeling
-- **Universal Functions**: Use idOf(), typeOf(), versionOf(), timestampsOf(), referencesOf() together
-- **Format Conversion**: Timestamps and References automatically convert between different formats
-- **Real-World Logic**: Write business logic that works with any entity format
-- **Error Handling**: Handle cases where entities don't match expected axioms
-- **Type Safety**: All functions maintain full TypeScript type safety
-- **Comprehensive Coverage**: Examples should demonstrate all available functionality
+- **Comprehensive Canon**: A single canon can implement all five core axioms
+- **Universal Functions**: The same functions work across all axiom types
+- **Type Safety**: Full TypeScript type safety with multiple axioms
+- **Format Conversion**: Automatic conversion between different data formats
+- **Real-World Usage**: Practical examples with user and product entities
+- **Version Control**: Built-in optimistic concurrency control
+- **Timestamp Handling**: Flexible timestamp conversion and validation
+- **Reference Management**: Structured reference handling with resolution tracking
+- **Entity Analysis**: Comprehensive entity analysis across all axioms
+- **Business Logic**: Real-world business scenarios with multiple axioms
 
-**Pattern:** Declarative canon registration
+**Pattern:** Multi-file example with modular structure
 
-**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon.ts)
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon)
 
-### [04-format-conversion-examples](./04-format-conversion-examples.ts)
-Example: Format Conversion and Cross-Format Compatibility
+**Files:**
+- [comprehensive-canon](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon/comprehensive-canon.ts) - Comprehensive Canon Definition
+- [usage](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon/usage.ts) - Multi-Axiom Canon Usage Examples
+- [utility-functions](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon/utility-functions.ts) - Utility Functions for Multi-Axiom Canon
 
-**Key Concepts:**
-- **Multi-Format Support**: Define canons for different data formats (REST, MongoDB, JSON-LD)
-- **Universal Functions**: Same business logic works across all formats
-- **Automatic Conversion**: Timestamps and references convert between formats automatically
-- **Format Conversion**: Convert entities between different data formats
-- **Error Handling**: Gracefully handle invalid or incomplete data
-- **Real-World Scenarios**: Examples show practical cross-format operations
-- **Type Safety**: Maintain full TypeScript type safety across all formats
-
-**Pattern:** Declarative canon registration
-
-**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples.ts)
-
-### [05-error-handling-and-edge-cases](./05-error-handling-and-edge-cases.ts)
-Example: Error Handling and Edge Cases
+### [04-format-conversion-examples](./04-format-conversion-examples)
+Format Conversion Usage Examples
 
 **Key Concepts:**
-- **Safe Wrappers**: Create safe wrapper functions that return undefined instead of throwing
-- **Validation**: Always validate entities before processing
-- **Error Handling**: Handle errors gracefully and provide meaningful messages
-- **Edge Cases**: Test with null, undefined, wrong types, and missing fields
-- **Batch Processing**: Handle multiple entities with proper error isolation
-- **Logging**: Log warnings and errors for debugging
-- **Graceful Degradation**: Continue processing even when some entities fail
+- **Cross-Format Compatibility**: Same business logic works across different data formats
+- **Automatic Conversion**: Canon automatically converts between formats
+- **Type Safety**: Full TypeScript type safety across all formats
+- **Real-World Usage**: Practical examples with REST APIs, MongoDB, and JSON-LD
+- **Error Handling**: Graceful error handling for invalid or partial data
+- **Format Conversion**: Built-in utilities for converting between formats
+- **Universal Functions**: Same functions work regardless of data format
+- **Metadata Preservation**: Format-specific metadata is preserved and accessible
+- **Business Logic**: Complex business logic works seamlessly across formats
+- **Integration**: Easy integration with existing systems and data sources
 
-**Pattern:** Declarative canon registration
+**Pattern:** Multi-file example with modular structure
 
-**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases.ts)
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples)
 
-### [06-real-world-business-scenarios](./06-real-world-business-scenarios.ts)
-Example: Real-World Business Scenarios
+**Files:**
+- [canons](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples/canons.ts) - Format-Specific Canon Definitions
+- [conversion-utilities](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples/conversion-utilities.ts) - Format Conversion Utilities
+- [usage](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples/usage.ts) - Format Conversion Usage Examples
+
+### [05-error-handling-and-edge-cases](./05-error-handling-and-edge-cases)
+Error Handling and Edge Cases Usage Examples
 
 **Key Concepts:**
-- **Domain Modeling**: Use canons to model business domains with semantic concepts
-- **Business Logic**: Write business logic that works with semantic concepts, not field names
-- **Cross-Entity Operations**: Process relationships between entities using universal functions
-- **Workflow Processing**: Build complex workflows that work across different data formats
-- **Error Handling**: Handle business logic errors gracefully
-- **Version Control**: Use version axioms for optimistic concurrency control
-- **Real-World Value**: Examples show practical business value of the universal type system
+- **Safe Wrapper Functions**: Use safe functions that return undefined instead of throwing
+- **Comprehensive Validation**: Validate entities before processing
+- **Graceful Error Handling**: Handle errors gracefully with fallback values
+- **Batch Processing**: Process multiple entities with individual error handling
+- **Edge Case Coverage**: Handle null, undefined, wrong types, and missing fields
+- **Type Safety**: Maintain type safety even with error handling
+- **Logging**: Log errors for debugging while continuing execution
+- **Fallback Values**: Provide sensible defaults for missing data
+- **Validation Results**: Return detailed validation results with errors and warnings
+- **Robust Processing**: Build robust systems that handle real-world data variations
 
-**Pattern:** Declarative canon registration
+**Pattern:** Multi-file example with modular structure
 
-**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios.ts)
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases)
 
-### [07-custom-axioms-example](./07-custom-axioms-example.ts)
-Example: Custom Axioms - Defining Your Own Semantic Concepts
+**Files:**
+- [safe-functions](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/safe-functions.ts) - Safe Wrapper Functions
+- [usage](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/usage.ts) - Error Handling and Edge Cases Usage Examples
+- [validation-utilities](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/validation-utilities.ts) - Validation Utilities
+
+### [06-real-world-business-scenarios](./06-real-world-business-scenarios)
+Real-World Business Scenarios Usage Examples
+
+**Key Concepts:**
+- **Real-World Applications**: Canon enables complex business logic with type safety
+- **Domain Modeling**: Rich domain models with proper entity relationships
+- **Business Rules**: Encode business rules directly into the type system
+- **Workflow Management**: Complete business workflows with error handling
+- **Version Control**: Optimistic concurrency control for data consistency
+- **Validation**: Comprehensive validation with detailed error reporting
+- **Type Safety**: Full TypeScript type safety across complex business operations
+- **Error Handling**: Graceful error handling with detailed error messages
+- **Modularity**: Clean separation of concerns with focused modules
+- **Maintainability**: Easy to maintain and extend business logic
+
+**Pattern:** Multi-file example with modular structure
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios)
+
+**Files:**
+- [business-logic](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios/business-logic.ts) - Business Logic Functions
+- [domain-models](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios/domain-models.ts) - Domain Models for Business Scenarios
+- [usage](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios/usage.ts) - Real-World Business Scenarios Usage Examples
+
+### [07-custom-axioms-example](./07-custom-axioms-example)
+Custom Axioms Usage Examples
 
 **Key Concepts:**
 - **Custom Axiom Types**: Define your own axiom types using KeyNameAxiom, RepresentationAxiom, or custom Axiom types
@@ -108,21 +140,46 @@ Example: Custom Axioms - Defining Your Own Semantic Concepts
 - **Conversion**: Implement format conversion for your custom data types
 - **Business Rules**: Encode business rules directly into your axiom implementations
 
-**Pattern:** Declarative canon registration
+**Pattern:** Multi-file example with modular structure
 
-**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example.ts)
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example)
+
+**Files:**
+- [business-scenarios](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example/business-scenarios.ts) - Business Scenarios with Custom Axioms
+- [custom-axioms](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example/custom-axioms.ts) - Custom Axiom Definitions
+- [custom-functions](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example/custom-functions.ts) - Custom Axiom Functions
+- [usage](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example/usage.ts) - Custom Axioms Usage Examples
 
 ## Example Patterns
 
-The examples demonstrate two main patterns for working with Canon:
+The examples demonstrate different patterns for working with Canon:
 
-### Declarative Style (01-basic-id-axiom)
+### Single-File Examples (01-basic-id-axiom)
+- **Use case**: Simple, self-contained examples
+- **Pattern**: All code in a single file with clear sections
+- **Benefits**: Easy to understand, quick to run, perfect for learning
+- **Example**: `01-basic-id-axiom.ts`
+
+### Multi-File Examples (02-module-style-canon, 03-multi-axiom-canon, etc.)
+- **Use case**: Complex examples with multiple concerns
+- **Pattern**: Organized into multiple files with clear separation of concerns
+- **Benefits**: Modular, maintainable, demonstrates real-world architecture
+- **Structure**: 
+  - `usage.ts` - Main entry point and examples
+  - `canons.ts` - Canon definitions
+  - `utility-functions.ts` - Helper functions
+  - `domain-models.ts` - Type definitions
+  - `business-logic.ts` - Business logic
+
+### Canon Definition Patterns
+
+#### Declarative Style
 - **Use case**: Internal, app-specific canons
 - **Pattern**: Define and register canons directly in your application
 - **Benefits**: Simple, direct, perfect for internal use
 - **Example**: `declareCanon('Internal', { ... })`
 
-### Module Style (02-module-style-canon)
+#### Module Style
 - **Use case**: Shared, reusable canons
 - **Pattern**: Define canons in separate modules, register when needed
 - **Benefits**: Reusable, testable, composable, versionable
