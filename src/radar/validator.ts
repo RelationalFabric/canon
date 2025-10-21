@@ -38,9 +38,16 @@ export function validateRadarData(data: any): ValidationResult {
     validateMetadata(data.metadata, errors)
   }
 
-  // For the current YAML structure, we validate the entries directly
-  // since they're organized by quadrant and ring in the root object
-  validateEntries(data, errors, warnings)
+  // Validate the entries section
+  if (!data.entries) {
+    errors.push({
+      type: 'missing_field',
+      message: 'Missing entries section',
+      path: 'entries',
+    })
+  } else {
+    validateEntries(data.entries, errors, warnings)
+  }
 
   return {
     isValid: errors.length === 0,
