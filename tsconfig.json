@@ -1,10 +1,14 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "types": [
+      "vitest/importMeta"
+    ],
     "noEmit": true
   },
   "include": [
     "src/**/*",
+    "examples/**/*",
     "eslint.js"
   ],
   "exclude": [

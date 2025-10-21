@@ -45,7 +45,8 @@ export function validateRadarData(data: any): ValidationResult {
       message: 'Missing entries section',
       path: 'entries',
     })
-  } else {
+  }
+  else {
     validateEntries(data.entries, errors, warnings)
   }
 
@@ -94,7 +95,7 @@ function validateMetadata(metadata: any, errors: ValidationError[]): void {
 /**
  * Validate quadrants section
  */
-function validateQuadrants(quadrants: any[], errors: ValidationError[]): void {
+function _validateQuadrants(quadrants: any[], errors: ValidationError[]): void {
   const quadrantIds = new Set<string>()
 
   quadrants.forEach((quadrant, index) => {
@@ -137,7 +138,7 @@ function validateQuadrants(quadrants: any[], errors: ValidationError[]): void {
 /**
  * Validate rings section
  */
-function validateRings(rings: any[], errors: ValidationError[]): void {
+function _validateRings(rings: any[], errors: ValidationError[]): void {
   const ringIds = new Set<string>()
 
   rings.forEach((ring, index) => {

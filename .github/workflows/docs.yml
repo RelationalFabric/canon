@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "docs/**"
-      - "planning/**"
-      - "README.md"
-      - ".vitepress/**"
+      - 'docs/**'
+      - 'planning/**'
+      - README.md
+      - '.vitepress/**'
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages

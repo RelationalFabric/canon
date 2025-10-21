@@ -45,6 +45,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "tsc --noEmit && eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
     "dev": "tsx --watch src/index.ts",
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
@@ -56,7 +60,8 @@
     "docs:dev": "npx vitepress dev",
     "docs:build": "scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
     "docs:preview": "npx vitepress preview",
-    "docs:restore": "scripts/restore-readmes-from-build.sh"
+    "docs:restore": "scripts/restore-readmes-from-build.sh",
+    "checks": "npm-run-all lint check test"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
@@ -80,11 +85,15 @@
   },
   "devDependencies": {
     "@types/node": "^24.7.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "adr-tools": "^2.0.4",
     "chokidar-cli": "^3.0.0",
+    "depcheck": "^1.4.7",
     "eslint": "^9.10.0",
+    "npm-run-all": "^4.1.5",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0",
-    "vitepress": "^1.0.0"
+    "vitepress": "^1.0.0",
+    "vitest": "^3.2.4"
   }
 }
