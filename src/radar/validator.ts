@@ -194,21 +194,59 @@ function validateRings(rings: any[], errors: ValidationError[]): void {
 function validateItems(items: any[], quadrants: string[], rings: string[], errors: ValidationError[], warnings: string[]): void {
   const itemNames = new Set<string>()
 
-  items.forEach((item: any, index: number) => {
-    validateRadarItem(item, quadrants, rings, errors, warnings, `items[${index}]`)
-
-    // Check for duplicate names
-    if (item.name && itemNames.has(item.name)) {
+  items.forEach((itemLine: any, index: number) => {
+    if (typeof itemLine !== 'string') {
       errors.push({
-        type: 'duplicate_entry',
-        message: `Duplicate item name: ${item.name}`,
-        path: `items[${index}].name`,
+        type: 'invalid_value',
+        message: `Item ${index} must be a string`,
+        path: `items[${index}]`,
+      })
+      return
+    }
+
+    try {
+      const item = parseFlatItem(itemLine)
+      validateRadarItem(item, quadrants, rings, errors, warnings, `items[${index}]`)
+
+      // Check for duplicate names
+      if (item.name && itemNames.has(item.name)) {
+        errors.push({
+          type: 'duplicate_entry',
+          message: `Duplicate item name: ${item.name}`,
+          path: `items[${index}]`,
+        })
+      }
+      else if (item.name) {
+        itemNames.add(item.name)
+      }
+    }
+    catch (error) {
+      errors.push({
+        type: 'invalid_value',
+        message: `Invalid item format: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        path: `items[${index}]`,
       })
     }
-    else if (item.name) {
-      itemNames.add(item.name)
-    }
   })
+}
+
+/**
+ * Parse a flat radar item line into components
+ */
+function parseFlatItem(line: string): { name: string, quadrant: string, ring: string, description: string, isNew: boolean, justification?: string } {
+  const parts = line.split(' | ')
+  if (parts.length < 5) {
+    throw new Error(`Invalid radar item format. Expected: "name | quadrant | ring | description | isNew | justification"`)
+  }
+
+  return {
+    name: parts[0].trim(),
+    quadrant: parts[1].trim(),
+    ring: parts[2].trim(),
+    description: parts[3].trim(),
+    isNew: parts[4].trim().toLowerCase() === 'true',
+    justification: parts[5]?.trim() || undefined,
+  }
 }
 
 /**

@@ -44,10 +44,10 @@ This format had several issues:
 We will simplify the radar YAML format to be as shallow as possible with the following structure:
 
 ```yaml
-# New simplified format
+# New truly flat format
 quadrants: string[] # Just the names
 rings: string[] # Just the names
-items: Item[] # Flat array with quadrant/ring references
+items: string[] # Single-line strings with all item data
 ```
 
 The new format looks like this:
@@ -72,28 +72,27 @@ rings:
   - Hold
 
 items:
-  - name: '@antfu/eslint-config'
-    description: Modern ESLint configuration with TypeScript support
-    quadrant: Tools & Libraries
-    ring: Adopt
-    isNew: false
-    justification: Proven configuration that reduces setup overhead
+  - '@antfu/eslint-config | Tools & Libraries | Adopt | Modern ESLint configuration with TypeScript support | false | Proven configuration that reduces setup overhead'
+  - 'typescript | Tools & Libraries | Adopt | TypeScript compiler and type system | false | Essential for type safety and modern TypeScript features'
+  - 'type-fest | Tools & Libraries | Trial | Comprehensive collection of TypeScript utility types | true | Provides battle-tested utility types for complex TypeScript scenarios'
 ```
 
 This achieves the "one line for one reason" goal by:
 - Quadrants and rings become simple string arrays
-- Items become a flat array where each item specifies its quadrant and ring
-- Much easier to add/edit individual items
+- Items become a flat array of single-line strings with all data separated by `|`
+- Each radar item is literally one line - maximum human friendliness
+- Much easier to add/edit individual items (just add one line)
 - Reduces cognitive load when editing
-- Maintains all necessary information while being more readable
+- Maintains all necessary information while being maximally readable
 
 ## Consequences
 
 ### Positive
-- **Easier editing**: Each radar item is now a single, self-contained block
-- **Reduced complexity**: Eliminates deep nesting and repetitive structures
-- **Better maintainability**: Simpler format is easier to understand and modify
-- **Human-friendly**: Follows the "one line for one reason" principle
+- **Maximum human friendliness**: Each radar item is literally one line
+- **Ultra-simple editing**: Adding/editing items requires only one line changes
+- **Reduced complexity**: Eliminates all nesting and repetitive structures
+- **Better maintainability**: Truly flat format is maximally easy to understand and modify
+- **Perfect "one line for one reason"**: Each item is exactly one line with all information
 - **Preserved functionality**: All existing data is converted without loss
 - **Backward compatibility**: Legacy types are maintained during migration
 

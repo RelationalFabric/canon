@@ -17,6 +17,11 @@ export interface RadarItem {
   justification?: string
 }
 
+export interface FlatRadarItem {
+  /** Single line representation: "name | quadrant | ring | description | isNew | justification" */
+  line: string
+}
+
 export interface RadarMetadata {
   /** Title of the radar */
   title: string
@@ -37,8 +42,8 @@ export interface RadarData {
   quadrants: string[]
   /** Ring names as simple strings */
   rings: string[]
-  /** Radar items as a flat array */
-  items: RadarItem[]
+  /** Radar items as a flat array of single-line strings */
+  items: string[]
 }
 
 export interface RadarConfig {

@@ -1,0 +1,376 @@
+metadata:
+  title: Canon Technology Radar
+  subtitle: Relational Fabric's technology recommendations and assessments
+  version: 1.0.0
+  lastUpdated: 2025-01-26
+quadrants:
+  - Tools & Libraries
+  - Techniques & Patterns
+  - Features & Capabilities
+  - Data Structures, Formats & Standards
+rings:
+  - Adopt
+  - Trial
+  - Assess
+  - Hold
+items:
+  - name: '@antfu/eslint-config'
+    description: Modern ESLint configuration with TypeScript support, automatic fixing capabilities
+    quadrant: Tools & Libraries
+    ring: Adopt
+    isNew: false
+    justification: Proven configuration that reduces setup overhead while maintaining high code quality
+  - name: '@tsconfig/node-lts'
+    description: Official TypeScript configuration for Node.js LTS environments
+    quadrant: Tools & Libraries
+    ring: Adopt
+    isNew: false
+    justification: Ensures compatibility with current Node.js features and modern TypeScript settings
+  - name: defu
+    description: Lightweight object merging utility for configuration composition
+    quadrant: Tools & Libraries
+    ring: Adopt
+    isNew: false
+    justification: Enables flexible configuration merging without overwriting nested properties
+  - name: typescript
+    description: TypeScript compiler and type system
+    quadrant: Tools & Libraries
+    ring: Adopt
+    isNew: false
+    justification: Essential for type safety and modern TypeScript features
+  - name: eslint
+    description: JavaScript/TypeScript linter for code quality enforcement
+    quadrant: Tools & Libraries
+    ring: Adopt
+    isNew: false
+    justification: Core linting functionality required for code quality and consistency
+  - name: type-fest
+    description: Comprehensive collection of TypeScript utility types for advanced type manipulation
+    quadrant: Tools & Libraries
+    ring: Trial
+    isNew: true
+    justification: Provides battle-tested utility types for complex TypeScript scenarios
+  - name: radash
+    description: Modern utility library designed specifically for TypeScript
+    quadrant: Tools & Libraries
+    ring: Trial
+    isNew: true
+    justification: Better TypeScript support than lodash, smaller bundle size, tree-shakeable
+  - name: jsonpath-plus
+    description: Enhanced JSONPath implementation for querying JSON structures
+    quadrant: Tools & Libraries
+    ring: Trial
+    isNew: true
+    justification: Essential for querying JSON-LD and complex nested structures in multi-format scenarios
+  - name: json-stable-stringify
+    description: Deterministic JSON serialization for consistent hashing and comparison
+    quadrant: Tools & Libraries
+    ring: Trial
+    isNew: true
+    justification: Ensures consistent serialization across different environments for object hashing
+  - name: zod
+    description: TypeScript-first schema validation library for runtime type safety
+    quadrant: Tools & Libraries
+    ring: Trial
+    isNew: true
+    justification: Complements TypeScript's compile-time checking with runtime validation
+  - name: uuid
+    description: RFC4122 compliant UUID generation for unique identifiers
+    quadrant: Tools & Libraries
+    ring: Assess
+    isNew: true
+    justification: Industry standard for unique identifier generation across systems
+  - name: nanoid
+    description: Tiny, secure, URL-friendly unique string ID generator
+    quadrant: Tools & Libraries
+    ring: Assess
+    isNew: true
+    justification: Smaller bundle size than UUID, perfect for frontend applications
+  - name: object-hash
+    description: JavaScript object hashing library for creating consistent hashes
+    quadrant: Tools & Libraries
+    ring: Assess
+    isNew: true
+    justification: Enables object comparison and caching strategies
+  - name: immutable
+    description: Immutable data structures library for functional programming
+    quadrant: Tools & Libraries
+    ring: Assess
+    isNew: true
+    justification: Prevents accidental mutations and enables predictable state management
+  - name: date-fns
+    description: Modern JavaScript date utility library with tree-shaking support
+    quadrant: Tools & Libraries
+    ring: Assess
+    isNew: true
+    justification: Functional approach to date handling with excellent performance
+  - name: lodash
+    description: Comprehensive utility library for JavaScript
+    quadrant: Tools & Libraries
+    ring: Hold
+    isNew: false
+    justification: Replaced by radash for better TypeScript support and smaller bundle size
+  - name: ts-essentials
+    description: Essential TypeScript utility types
+    quadrant: Tools & Libraries
+    ring: Hold
+    isNew: false
+    justification: Redundant with type-fest and modern TypeScript built-in utilities
+  - name: Dual Export Strategy
+    description: Opinionated + transparent access patterns for library consumers
+    quadrant: Techniques & Patterns
+    ring: Adopt
+    isNew: false
+    justification: Provides both convenience and flexibility while preserving library contracts
+  - name: ADR Methodology
+    description: Architecture Decision Records for documenting architectural decisions
+    quadrant: Techniques & Patterns
+    ring: Adopt
+    isNew: false
+    justification: Proven documentation and decision tracking methodology
+  - name: Configuration Composition
+    description: Merging configurations using utilities like defu for flexible setup
+    quadrant: Techniques & Patterns
+    ring: Adopt
+    isNew: false
+    justification: Enables flexible configuration merging without overwriting nested properties
+  - name: ES Modules
+    description: Modern module system with TypeScript support
+    quadrant: Techniques & Patterns
+    ring: Adopt
+    isNew: false
+    justification: Standard module system with excellent tooling and performance
+  - name: Universal Adapter Pattern
+    description: Multi-format data handling through common interfaces
+    quadrant: Techniques & Patterns
+    ring: Trial
+    isNew: true
+    justification: Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first
+  - name: Lazy Typing
+    description: Deferred type resolution for flexible type definitions
+    quadrant: Techniques & Patterns
+    ring: Trial
+    isNew: true
+    justification: Enables type blueprints that can be universally understood
+  - name: Canon Pattern
+    description: Axiomatic type definitions with basis, key, and meta properties
+    quadrant: Techniques & Patterns
+    ring: Trial
+    isNew: true
+    justification: Core pattern but NOT YET IMPLEMENTED - needs core axiom system first
+  - name: Tree-shaking Support
+    description: Optimized bundling with unused code elimination
+    quadrant: Techniques & Patterns
+    ring: Trial
+    isNew: true
+    justification: Essential for modern bundling and consumer bundle optimization
+  - name: Immutable Data Patterns
+    description: Functional programming approach to data management
+    quadrant: Techniques & Patterns
+    ring: Assess
+    isNew: true
+    justification: Prevents accidental mutations but may add complexity
+  - name: Schema Evolution
+    description: Managing type changes over time across different systems
+    quadrant: Techniques & Patterns
+    ring: Assess
+    isNew: true
+    justification: Important for long-term maintenance but complex to implement
+  - name: Runtime Validation
+    description: Type safety enforcement at runtime using libraries like Zod
+    quadrant: Techniques & Patterns
+    ring: Assess
+    isNew: true
+    justification: Complements compile-time checking but adds runtime overhead
+  - name: TypeScript Configuration Sharing
+    description: Extendable base configurations for TypeScript projects
+    quadrant: Features & Capabilities
+    ring: Adopt
+    isNew: false
+    justification: Reduces setup overhead and ensures consistent TypeScript settings
+  - name: ESLint Configuration Composition
+    description: Flexible ESLint setup with customizable rules and options
+    quadrant: Features & Capabilities
+    ring: Adopt
+    isNew: false
+    justification: Enables consistent code quality across projects with customization
+  - name: Multi-format Data Support
+    description: Support for JSON-LD, MongoDB, REST APIs through unified interfaces
+    quadrant: Features & Capabilities
+    ring: Adopt
+    isNew: false
+    justification: Core to Canon's vision but NOT YET IMPLEMENTED - needs core axiom system first
+  - name: Type Checking
+    description: Compile-time type safety and validation
+    quadrant: Features & Capabilities
+    ring: Adopt
+    isNew: false
+    justification: Essential for preventing runtime errors and improving developer experience
+  - name: Runtime Type Validation
+    description: Type safety enforcement at runtime using schema validation
+    quadrant: Features & Capabilities
+    ring: Trial
+    isNew: true
+    justification: Complements compile-time checking but requires careful implementation
+  - name: Configuration Merging
+    description: Flexible configuration composition and override capabilities
+    quadrant: Features & Capabilities
+    ring: Trial
+    isNew: true
+    justification: Enables sophisticated configuration patterns but adds complexity
+  - name: Hot Reloading
+    description: Development experience with automatic reloading on changes
+    quadrant: Features & Capabilities
+    ring: Trial
+    isNew: true
+    justification: Improves developer experience but may impact performance
+  - name: Automatic Fixing
+    description: ESLint auto-fix capabilities for code quality
+    quadrant: Features & Capabilities
+    ring: Trial
+    isNew: true
+    justification: Reduces manual work but requires careful rule selection
+  - name: Advanced Type Manipulation
+    description: Complex type operations and transformations
+    quadrant: Features & Capabilities
+    ring: Assess
+    isNew: true
+    justification: Powerful but may impact compilation performance and complexity
+  - name: Data Transformation
+    description: Cross-format data conversion and mapping
+    quadrant: Features & Capabilities
+    ring: Assess
+    isNew: true
+    justification: Essential for multi-format support but complex to implement
+  - name: Caching Strategies
+    description: Object hashing and comparison for performance optimization
+    quadrant: Features & Capabilities
+    ring: Assess
+    isNew: true
+    justification: Important for performance but requires careful cache invalidation
+  - name: JSON
+    description: Universal web format for data exchange
+    quadrant: Data Structures, Formats & Standards
+    ring: Adopt
+    isNew: false
+    justification: Universal support, native JavaScript integration, extensive tooling
+  - name: JSON-LD
+    description: Semantic web standard for linked data
+    quadrant: Data Structures, Formats & Standards
+    ring: Adopt
+    isNew: false
+    justification: Core to Canon's semantic web vision and universal adapter concept
+  - name: TypeScript Types
+    description: Canon's primary type system and interface definitions
+    quadrant: Data Structures, Formats & Standards
+    ring: Adopt
+    isNew: false
+    justification: Provides compile-time type safety and excellent developer experience
+  - name: RFC4122 UUIDs
+    description: Standard unique identifier format
+    quadrant: Data Structures, Formats & Standards
+    ring: Adopt
+    isNew: false
+    justification: Industry standard for unique identifiers across systems
+  - name: ISO8601 Dates
+    description: Standard temporal format for dates and times
+    quadrant: Data Structures, Formats & Standards
+    ring: Adopt
+    isNew: false
+    justification: Universal standard for temporal data representation
+  - name: REST APIs
+    description: Universal HTTP integration pattern
+    quadrant: Data Structures, Formats & Standards
+    ring: Adopt
+    isNew: false
+    justification: Standard web API pattern with broad support and tooling
+  - name: MongoDB Documents
+    description: Document database format for flexible data storage
+    quadrant: Data Structures, Formats & Standards
+    ring: Trial
+    isNew: true
+    justification: Growing popularity, flexible schema, good TypeScript integration
+  - name: YAML
+    description: Human-readable configuration format
+    quadrant: Data Structures, Formats & Standards
+    ring: Trial
+    isNew: true
+    justification: Common in DevOps tooling, good for complex configurations
+  - name: NanoID
+    description: Lightweight alternative to UUIDs for unique identifiers
+    quadrant: Data Structures, Formats & Standards
+    ring: Trial
+    isNew: true
+    justification: Smaller than UUID, URL-safe, perfect for frontend use
+  - name: GraphQL
+    description: Query language for APIs with strong typing
+    quadrant: Data Structures, Formats & Standards
+    ring: Trial
+    isNew: true
+    justification: Growing adoption, good TypeScript support, flexible querying
+  - name: JSON Schema
+    description: Standard for describing JSON data structure
+    quadrant: Data Structures, Formats & Standards
+    ring: Trial
+    isNew: true
+    justification: Runtime validation, API documentation, but adds complexity
+  - name: Tree Structures
+    description: Hierarchical data organization patterns
+    quadrant: Data Structures, Formats & Standards
+    ring: Trial
+    isNew: true
+    justification: Common in many domains, supports Canon's tree examples
+  - name: Immutable Collections
+    description: Functional programming data structures
+    quadrant: Data Structures, Formats & Standards
+    ring: Assess
+    isNew: true
+    justification: Prevents mutations but may impact performance and memory usage
+  - name: MessagePack
+    description: Binary serialization format for performance
+    quadrant: Data Structures, Formats & Standards
+    ring: Assess
+    isNew: true
+    justification: Better performance than JSON but limited web adoption
+  - name: OpenAPI
+    description: API specification standard
+    quadrant: Data Structures, Formats & Standards
+    ring: Assess
+    isNew: true
+    justification: Good for API-first development but may be overkill for some use cases
+  - name: SQL Schemas
+    description: Relational database structure patterns
+    quadrant: Data Structures, Formats & Standards
+    ring: Assess
+    isNew: true
+    justification: Traditional but may conflict with document-based approaches
+  - name: WebSockets
+    description: Real-time bidirectional communication
+    quadrant: Data Structures, Formats & Standards
+    ring: Assess
+    isNew: true
+    justification: Useful for real-time features but adds complexity
+  - name: Graph Data Structures
+    description: Complex relationship modeling
+    quadrant: Data Structures, Formats & Standards
+    ring: Assess
+    isNew: true
+    justification: Powerful for complex relationships but may be overkill
+  - name: Protocol Buffers
+    description: Binary serialization format
+    quadrant: Data Structures, Formats & Standards
+    ring: Hold
+    isNew: false
+    justification: Complex setup, limited web adoption, not aligned with Canon's web focus
+  - name: gRPC
+    description: High-performance RPC framework
+    quadrant: Data Structures, Formats & Standards
+    ring: Hold
+    isNew: false
+    justification: Binary protocol, limited web usage, not suitable for browser environments
+  - name: XML
+    description: Extensible markup language format
+    quadrant: Data Structures, Formats & Standards
+    ring: Hold
+    isNew: false
+    justification: Legacy format, not core to Canon's modern web focus
