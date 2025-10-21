@@ -2,8 +2,7 @@ name: Queue
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *' # Daily at midnight
+  merge_queue:
 
 jobs:
   all-checks-passed:
