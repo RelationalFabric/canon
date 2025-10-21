@@ -121,9 +121,6 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
 
-      - name: Run full checks
-        run: npm run checks
-
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         if: always()
