@@ -5,12 +5,11 @@
  * and demonstrating cross-format compatibility.
  */
 
-import { 
-  idOf, 
-  typeOf, 
-  versionOf, 
-  timestampsOf, 
-  referencesOf 
+import {
+  idOf,
+  referencesOf,
+  typeOf,
+  versionOf,
 } from '@relational-fabric/canon'
 
 // =============================================================================
@@ -25,8 +24,17 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
     const id = idOf(entity)
     const type = typeOf(entity)
     const version = versionOf(entity)
-    const timestamps = timestampsOf(entity)
     const references = referencesOf(entity)
+
+    // Handle timestamps manually
+    const timestamps: Date[] = []
+    if (typeof entity === 'object' && entity !== null) {
+      const obj = entity as Record<string, unknown>
+      if (obj.createdAt instanceof Date)
+        timestamps.push(obj.createdAt)
+      if (obj.updatedAt instanceof Date)
+        timestamps.push(obj.updatedAt)
+    }
 
     // Convert timestamps to Unix timestamps
     const mongoTimestamps = timestamps.map(ts => ts instanceof Date ? ts.getTime() : Date.now())
@@ -46,7 +54,8 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
       ...(entity as Record<string, unknown>),
       createdBy: references[0]?.ref,
     }
-  } catch (error) {
+  }
+  catch {
     // Fallback for entities that don't match the canon
     const entityObj = entity as Record<string, unknown>
     return {
@@ -68,33 +77,43 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
     const id = idOf(entity)
     const type = typeOf(entity)
     const version = versionOf(entity)
-    const timestamps = timestampsOf(entity)
     const references = referencesOf(entity)
+
+    // Handle timestamps manually
+    const timestamps: Date[] = []
+    if (typeof entity === 'object' && entity !== null) {
+      const obj = entity as Record<string, unknown>
+      if (obj.createdAt instanceof Date)
+        timestamps.push(obj.createdAt)
+      if (obj.updatedAt instanceof Date)
+        timestamps.push(obj.updatedAt)
+    }
 
     return {
       '@id': `https://api.example.com/${type}s/${id}`,
       '@type': `https://schema.org/${type.charAt(0).toUpperCase() + type.slice(1)}`,
       '@version': version.toString(),
-      created_at: timestamps[0]?.toISOString(),
-      updated_at: timestamps[1]?.toISOString(),
+      'created_at': timestamps[0]?.toISOString(),
+      'updated_at': timestamps[1]?.toISOString(),
       // Keep original fields for compatibility
       id,
       type,
       version,
-      createdAt: timestamps[0]?.toISOString(),
-      updatedAt: timestamps[1]?.toISOString(),
+      'createdAt': timestamps[0]?.toISOString(),
+      'updatedAt': timestamps[1]?.toISOString(),
       ...(entity as Record<string, unknown>),
-      createdBy: references[0]?.ref,
+      'createdBy': references[0]?.ref,
     }
-  } catch (error) {
+  }
+  catch {
     // Fallback for entities that don't match the canon
     const entityObj = entity as Record<string, unknown>
     return {
       '@id': `https://api.example.com/entities/${entityObj.id || 'unknown'}`,
       '@type': 'https://schema.org/Thing',
       '@version': (entityObj.version || 1).toString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      'created_at': new Date().toISOString(),
+      'updated_at': new Date().toISOString(),
       ...entityObj,
     }
   }
@@ -134,10 +153,10 @@ export function processUsersFromDifferentSources(): void {
     '@id': 'https://api.example.com/users/user-123',
     '@type': 'https://schema.org/Person',
     '@version': '5-updated',
-    created_at: '2024-01-15T10:30:00Z',
-    updated_at: '2024-01-20T14:45:00Z',
-    profile: { name: 'Carol Davis', email: 'carol@example.com' },
-    createdBy: 'admin-123',
+    'created_at': '2024-01-15T10:30:00Z',
+    'updated_at': '2024-01-20T14:45:00Z',
+    'profile': { name: 'Carol Davis', email: 'carol@example.com' },
+    'createdBy': 'admin-123',
   }
 
   // Process each user
@@ -147,7 +166,24 @@ export function processUsersFromDifferentSources(): void {
       const id = idOf(user)
       const type = typeOf(user)
       const version = versionOf(user)
-      const updated = timestampsOf(user)[1] || new Date()
+
+      // Handle timestamps manually for different formats
+      let updated = new Date()
+      if (typeof user === 'object' && user !== null) {
+        const userObj = user as Record<string, unknown>
+        if (userObj.updatedAt instanceof Date) {
+          updated = userObj.updatedAt
+        }
+        else if (userObj.updated_at instanceof Date) {
+          updated = userObj.updated_at
+        }
+        else if (typeof userObj.updated_at === 'number') {
+          updated = new Date(userObj.updated_at)
+        }
+        else if (typeof userObj.updated_at === 'string') {
+          updated = new Date(userObj.updated_at)
+        }
+      }
 
       console.log(`User ${index + 1}:`)
       console.log(`  ID: ${id}`)
@@ -155,7 +191,8 @@ export function processUsersFromDifferentSources(): void {
       console.log(`  Version: ${version}`)
       console.log(`  Updated: ${updated.toISOString()}`)
       console.log()
-    } catch (error) {
+    }
+    catch (error) {
       console.log(`User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`)
       console.log()
     }
@@ -201,19 +238,21 @@ export function demonstrateErrorHandling(): void {
 
   // Test with invalid data
   const invalidData = { name: 'Invalid User' }
-  
+
   try {
     idOf(invalidData)
-  } catch (error) {
+  }
+  catch (error) {
     console.log(`Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 
   // Test with partial data
   const partialData = { id: 'user-123' }
-  
+
   try {
     typeOf(partialData)
-  } catch (error) {
+  }
+  catch (error) {
     console.log(`Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }

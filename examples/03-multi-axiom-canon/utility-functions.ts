@@ -5,12 +5,11 @@
  * entities that implement multiple axioms.
  */
 
-import { 
-  idOf, 
-  typeOf, 
-  versionOf, 
-  timestampsOf, 
-  referencesOf 
+import {
+  idOf,
+  referencesOf,
+  typeOf,
+  versionOf,
 } from '@relational-fabric/canon'
 
 // =============================================================================
@@ -25,12 +24,22 @@ export function analyzeEntity(entity: unknown): {
   type: string
   version: number
   timestamps: Date[]
-  references: Array<{ ref: string; resolved: boolean; value?: unknown }>
+  references: Array<{ ref: string, resolved: boolean, value?: unknown }>
 } {
   const id = idOf(entity)
   const type = typeOf(entity)
   const version = versionOf(entity)
-  const timestamps = timestampsOf(entity)
+
+  // Handle timestamps manually since the canon doesn't know about createdAt/updatedAt
+  const timestamps: Date[] = []
+  if (typeof entity === 'object' && entity !== null) {
+    const obj = entity as Record<string, unknown>
+    if (obj.createdAt instanceof Date)
+      timestamps.push(obj.createdAt)
+    if (obj.updatedAt instanceof Date)
+      timestamps.push(obj.updatedAt)
+  }
+
   const references = referencesOf(entity)
 
   return {
@@ -38,7 +47,7 @@ export function analyzeEntity(entity: unknown): {
     type,
     version,
     timestamps,
-    references,
+    references: Array.isArray(references) ? references : [references],
   }
 }
 
@@ -47,17 +56,17 @@ export function analyzeEntity(entity: unknown): {
  */
 export function demonstrateTimestampConversion(): void {
   console.log('=== Timestamp Conversion Examples ===')
-  
+
   // Unix timestamp
   const unixTimestamp = 1640995200000
   const unixConverted = new Date(unixTimestamp)
   console.log(`Unix timestamp ${unixTimestamp} -> ${unixConverted.toISOString()}`)
-  
+
   // ISO string
   const isoString = '2024-01-15T10:30:00Z'
   const isoConverted = new Date(isoString)
   console.log(`ISO string "${isoString}" -> ${isoConverted.toISOString()}`)
-  
+
   // Date object
   const dateObject = new Date('2024-01-15T10:30:00Z')
   console.log(`Date object -> ${dateObject.toISOString()}`)
@@ -68,16 +77,16 @@ export function demonstrateTimestampConversion(): void {
  */
 export function demonstrateReferenceConversion(): void {
   console.log('=== Reference Conversion Examples ===')
-  
+
   // String reference
   const stringRef = 'user-123'
   const stringConverted = { ref: stringRef, resolved: false }
   console.log(`String reference "${stringRef}" ->`, stringConverted)
-  
+
   // Object reference
   const objectRef = { ref: 'product-456', resolved: false }
   console.log(`Object reference ->`, objectRef)
-  
+
   // Complex object
   const complexRef = { ref: 'order-789', resolved: false, value: undefined }
   console.log(`Complex object ->`, complexRef)

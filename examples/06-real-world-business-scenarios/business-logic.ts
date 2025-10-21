@@ -5,8 +5,7 @@
  * how Canon's universal type system enables complex business operations.
  */
 
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon'
-import type { Customer, Product, Order } from './domain-models'
+import { idOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Order Processing Functions
@@ -25,7 +24,7 @@ export function calculateOrderTotal(order: unknown): {
   const orderId = idOf(order)
   const orderType = typeOf(order)
   const orderVersion = versionOf(order)
-  
+
   console.log(`Calculating total for ${orderType} ${orderId} (v${orderVersion})`)
 
   if (typeof order !== 'object' || order === null) {
@@ -33,24 +32,24 @@ export function calculateOrderTotal(order: unknown): {
   }
 
   const orderObj = order as Record<string, unknown>
-  
+
   // Extract items
-  const items = (orderObj.items as Array<{ productId: string; quantity: number; price: number }>) || []
-  
+  const items = (orderObj.items as Array<{ productId: string, quantity: number, price: number }>) || []
+
   // Calculate subtotal
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  
+
   // Apply discount (10% for orders over $100)
   const discountRate = subtotal > 100 ? 0.1 : 0
   const discount = subtotal * discountRate
-  
+
   // Calculate tax (8% on discounted amount)
   const taxRate = 0.08
   const tax = (subtotal - discount) * taxRate
-  
+
   // Calculate total
   const total = subtotal - discount + tax
-  
+
   return {
     subtotal: Math.round(subtotal * 100) / 100,
     discount: Math.round(discount * 100) / 100,
@@ -72,7 +71,7 @@ export function updateOrderStatus(order: unknown, newStatus: string): {
   try {
     const orderId = idOf(order)
     const currentVersion = versionOf(order)
-    
+
     if (typeof order !== 'object' || order === null) {
       throw new Error('Order must be an object')
     }
@@ -83,12 +82,12 @@ export function updateOrderStatus(order: unknown, newStatus: string): {
 
     // Validate status transition
     const validTransitions: Record<string, string[]> = {
-      'pending': ['confirmed', 'cancelled'],
-      'confirmed': ['processing', 'cancelled'],
-      'processing': ['shipped', 'cancelled'],
-      'shipped': ['delivered'],
-      'delivered': [],
-      'cancelled': [],
+      pending: ['confirmed', 'cancelled'],
+      confirmed: ['processing', 'cancelled'],
+      processing: ['shipped', 'cancelled'],
+      shipped: ['delivered'],
+      delivered: [],
+      cancelled: [],
     }
 
     const allowedTransitions = validTransitions[oldStatus] || []
@@ -107,7 +106,8 @@ export function updateOrderStatus(order: unknown, newStatus: string): {
       oldStatus,
       newVersion,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -128,17 +128,22 @@ export function generateOrderSummary(order: unknown): {
   customerId: string
 } {
   const orderId = idOf(order)
-  const orderType = typeOf(order)
-  const timestamps = timestampsOf(order)
-  
+  typeOf(order)
+
   if (typeof order !== 'object' || order === null) {
     throw new Error('Order must be an object')
   }
 
   const orderObj = order as Record<string, unknown>
   const items = (orderObj.items as Array<unknown>) || []
-  const totals = (orderObj.totals as { total: number; currency: string }) || { total: 0, currency: 'USD' }
+  const totals = (orderObj.totals as { total: number, currency: string }) || { total: 0, currency: 'USD' }
   const customerId = (orderObj.customerId as string) || 'unknown'
+
+  // Handle timestamps manually
+  let createdAt = new Date()
+  if (orderObj.createdAt instanceof Date) {
+    createdAt = orderObj.createdAt
+  }
 
   return {
     orderId,
@@ -146,7 +151,7 @@ export function generateOrderSummary(order: unknown): {
     total: totals.total,
     currency: totals.currency,
     itemCount: items.length,
-    createdAt: timestamps[0] || new Date(),
+    createdAt,
     customerId,
   }
 }
@@ -167,16 +172,16 @@ export function validateCustomerForOrder(customer: unknown): {
   const errors: string[] = []
 
   try {
-    const customerId = idOf(customer)
-    const customerType = typeOf(customer)
-    
+    idOf(customer)
+    typeOf(customer)
+
     if (typeof customer !== 'object' || customer === null) {
       errors.push('Customer must be an object')
       return { valid: false, warnings, errors }
     }
 
     const customerObj = customer as Record<string, unknown>
-    
+
     // Check for payment methods
     const paymentMethods = (customerObj.paymentMethods as Array<unknown>) || []
     if (paymentMethods.length === 0) {
@@ -187,7 +192,8 @@ export function validateCustomerForOrder(customer: unknown): {
     const profile = customerObj.profile as Record<string, unknown> | undefined
     if (!profile) {
       errors.push('Customer profile is missing')
-    } else {
+    }
+    else {
       if (!profile.email) {
         errors.push('Customer email is missing')
       }
@@ -201,7 +207,8 @@ export function validateCustomerForOrder(customer: unknown): {
       warnings,
       errors,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       valid: false,
       warnings,
@@ -226,8 +233,8 @@ export function processOrderWorkflow(customer: unknown, order: unknown): {
   }>
   finalOrder?: unknown
 } {
-  const steps: Array<{ step: string; success: boolean; message: string }> = []
-  
+  const steps: Array<{ step: string, success: boolean, message: string }> = []
+
   try {
     // Step 1: Validate Customer
     const customerValidation = validateCustomerForOrder(customer)
@@ -274,7 +281,8 @@ export function processOrderWorkflow(customer: unknown, order: unknown): {
       steps,
       finalOrder: order,
     }
-  } catch (error) {
+  }
+  catch (error) {
     steps.push({
       step: 'Error Handling',
       success: false,

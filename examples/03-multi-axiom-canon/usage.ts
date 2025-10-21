@@ -5,20 +5,13 @@
  * entities that implement multiple axioms.
  */
 
-import { 
-  idOf, 
-  typeOf, 
-  versionOf, 
-  timestampsOf, 
-  referencesOf 
-} from '@relational-fabric/canon'
-import './comprehensive-canon' // Import canon definition
-import { 
-  analyzeEntity, 
-  demonstrateTimestampConversion, 
-  demonstrateReferenceConversion, 
-  processEntityUpdate 
+import {
+  analyzeEntity,
+  demonstrateReferenceConversion,
+  demonstrateTimestampConversion,
+  processEntityUpdate,
 } from './utility-functions'
+import './comprehensive-canon' // Import canon definition
 
 // =============================================================================
 // Sample Data
@@ -65,7 +58,7 @@ if (import.meta.vitest) {
   describe('Multi-Axiom Canon Examples', () => {
     it('analyzes user entity correctly', () => {
       const analysis = analyzeEntity(userEntity)
-      
+
       expect(analysis.id).toBe('user-123')
       expect(analysis.type).toBe('user')
       expect(analysis.version).toBe(5)
@@ -75,7 +68,7 @@ if (import.meta.vitest) {
 
     it('analyzes product entity correctly', () => {
       const analysis = analyzeEntity(productEntity)
-      
+
       expect(analysis.id).toBe('product-456')
       expect(analysis.type).toBe('product')
       expect(analysis.version).toBe(12)
@@ -85,7 +78,7 @@ if (import.meta.vitest) {
 
     it('processes entity updates with version increment', () => {
       const update = processEntityUpdate(productEntity)
-      
+
       expect(update.id).toBe('product-456')
       expect(update.oldVersion).toBe(12)
       expect(update.newVersion).toBe(13)

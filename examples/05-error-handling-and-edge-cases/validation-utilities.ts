@@ -5,7 +5,7 @@
  * in a robust manner.
  */
 
-import { safeIdOf, safeTypeOf, safeVersionOf, safeTimestampsOf, safeReferencesOf } from './safe-functions'
+import { safeIdOf, safeReferencesOf, safeTimestampsOf, safeTypeOf, safeVersionOf } from './safe-functions'
 
 // =============================================================================
 // Validation Functions
@@ -71,24 +71,25 @@ export function findMatchingCanon(entity: unknown): string | undefined {
     // Try to extract basic information to determine canon type
     const id = safeIdOf(entity)
     const type = safeTypeOf(entity)
-    
+
     if (id && type) {
       // Check for MongoDB format
       if (typeof entity === 'object' && entity !== null && '_id' in entity) {
         return 'MongoDbCanon'
       }
-      
+
       // Check for JSON-LD format
       if (typeof entity === 'object' && entity !== null && '@id' in entity) {
         return 'JsonLdCanon'
       }
-      
+
       // Default to REST API format
       return 'RestApiCanon'
     }
-    
+
     return undefined
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('Failed to find matching canon:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }
@@ -109,7 +110,7 @@ export function processEntitySafely(entity: unknown): {
   canon?: string
 } {
   const errors: string[] = []
-  
+
   try {
     // Validate entity
     const validation = validateEntity(entity)
@@ -154,7 +155,8 @@ export function processEntitySafely(entity: unknown): {
       errors: [],
       canon,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       success: false,
       errors: [error instanceof Error ? error.message : 'Unknown error'],

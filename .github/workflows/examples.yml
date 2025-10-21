@@ -7,8 +7,8 @@ on:
       - develop
     paths:
       - 'examples/**'
-      - 'scripts/generate-examples-docs.ts'
-      - 'package.json'
+      - scripts/generate-examples-docs.ts
+      - package.json
       - 'tsconfig*.json'
   workflow_dispatch:
 
@@ -18,7 +18,7 @@ permissions:
 jobs:
   build-and-deploy-examples:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,25 +70,25 @@ jobs:
       - name: Run individual examples
         run: |
           echo "=== Running Individual Examples ==="
-          
+
           echo "1. Basic ID Axiom Example:"
           npx tsx examples/01-basic-id-axiom.ts
-          
+
           echo "2. Module Style Canon Example:"
           npx tsx examples/02-module-style-canon/usage.ts
-          
+
           echo "3. Multi-Axiom Canon Example:"
           npx tsx examples/03-multi-axiom-canon.ts
-          
+
           echo "4. Format Conversion Example:"
           npx tsx examples/04-format-conversion-examples.ts
-          
+
           echo "5. Error Handling Example:"
           npx tsx examples/05-error-handling-and-edge-cases.ts
-          
+
           echo "6. Real-World Business Scenarios Example:"
           npx tsx examples/06-real-world-business-scenarios.ts
-          
+
           echo "7. Custom Axioms Example:"
           npx tsx examples/07-custom-axioms-example.ts
 

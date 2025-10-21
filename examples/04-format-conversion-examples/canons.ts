@@ -17,7 +17,7 @@ type RestApiCanon = Canon<{
   Type: { $basis: { type: string }, key: 'type', $meta: { format: 'camelCase' } }
   Version: { $basis: { version: number }, key: 'version', $meta: { format: 'integer' } }
   Timestamps: { $basis: number | string | Date, isCanonical: (v: unknown) => v is Date, $meta: { format: 'Date' } }
-  References: { $basis: string | object, isCanonical: (v: unknown) => v is { ref: string; resolved: boolean }, $meta: { format: 'string' } }
+  References: { $basis: string | object, isCanonical: (v: unknown) => v is { ref: string, resolved: boolean }, $meta: { format: 'string' } }
 }>
 
 declare module '@relational-fabric/canon' {
@@ -32,7 +32,7 @@ declareCanon('RestApiCanon', {
     Type: { $basis: pojoWithOfType('type', 'string'), key: 'type', $meta: { format: 'camelCase' } },
     Version: { $basis: pojoWithOfType('version', 'number'), key: 'version', $meta: { format: 'integer' } },
     Timestamps: { $basis: (v: unknown): v is number | string | Date => typeof v === 'number' || typeof v === 'string' || v instanceof Date, isCanonical: (v: unknown): v is Date => v instanceof Date, $meta: { format: 'Date' } },
-    References: { $basis: (v: unknown): v is string | object => typeof v === 'string' || (typeof v === 'object' && v !== null), isCanonical: (v: unknown): v is { ref: string; resolved: boolean } => typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v, $meta: { format: 'string' } },
+    References: { $basis: (v: unknown): v is string | object => typeof v === 'string' || (typeof v === 'object' && v !== null), isCanonical: (v: unknown): v is { ref: string, resolved: boolean } => typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v, $meta: { format: 'string' } },
   },
 })
 
@@ -45,7 +45,7 @@ type MongoDbCanon = Canon<{
   Type: { $basis: { _type: string }, key: '_type', $meta: { format: 'underscore' } }
   Version: { $basis: { _version: number }, key: '_version', $meta: { format: 'integer' } }
   Timestamps: { $basis: number | string | Date, isCanonical: (v: unknown) => v is Date, $meta: { format: 'mixed' } }
-  References: { $basis: string | object, isCanonical: (v: unknown) => v is { ref: string; resolved: boolean }, $meta: { format: 'ObjectId' } }
+  References: { $basis: string | object, isCanonical: (v: unknown) => v is { ref: string, resolved: boolean }, $meta: { format: 'ObjectId' } }
 }>
 
 declare module '@relational-fabric/canon' {
@@ -60,7 +60,7 @@ declareCanon('MongoDbCanon', {
     Type: { $basis: pojoWithOfType('_type', 'string'), key: '_type', $meta: { format: 'underscore' } },
     Version: { $basis: pojoWithOfType('_version', 'number'), key: '_version', $meta: { format: 'integer' } },
     Timestamps: { $basis: (v: unknown): v is number | string | Date => typeof v === 'number' || typeof v === 'string' || v instanceof Date, isCanonical: (v: unknown): v is Date => v instanceof Date, $meta: { format: 'mixed' } },
-    References: { $basis: (v: unknown): v is string | object => typeof v === 'string' || (typeof v === 'object' && v !== null), isCanonical: (v: unknown): v is { ref: string; resolved: boolean } => typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v, $meta: { format: 'ObjectId' } },
+    References: { $basis: (v: unknown): v is string | object => typeof v === 'string' || (typeof v === 'object' && v !== null), isCanonical: (v: unknown): v is { ref: string, resolved: boolean } => typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v, $meta: { format: 'ObjectId' } },
   },
 })
 
@@ -73,7 +73,7 @@ type JsonLdCanon = Canon<{
   Type: { $basis: { '@type': string }, key: '@type', $meta: { format: 'URI' } }
   Version: { $basis: { '@version': string }, key: '@version', $meta: { format: 'string' } }
   Timestamps: { $basis: number | string | Date, isCanonical: (v: unknown) => v is Date, $meta: { format: 'iso8601' } }
-  References: { $basis: string | object, isCanonical: (v: unknown) => v is { ref: string; resolved: boolean }, $meta: { format: 'URI' } }
+  References: { $basis: string | object, isCanonical: (v: unknown) => v is { ref: string, resolved: boolean }, $meta: { format: 'URI' } }
 }>
 
 declare module '@relational-fabric/canon' {
@@ -88,8 +88,8 @@ declareCanon('JsonLdCanon', {
     Type: { $basis: pojoWithOfType('@type', 'string'), key: '@type', $meta: { format: 'URI' } },
     Version: { $basis: pojoWithOfType('@version', 'string'), key: '@version', $meta: { format: 'string' } },
     Timestamps: { $basis: (v: unknown): v is number | string | Date => typeof v === 'number' || typeof v === 'string' || v instanceof Date, isCanonical: (v: unknown): v is Date => v instanceof Date, $meta: { format: 'iso8601' } },
-    References: { $basis: (v: unknown): v is string | object => typeof v === 'string' || (typeof v === 'object' && v !== null), isCanonical: (v: unknown): v is { ref: string; resolved: boolean } => typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v, $meta: { format: 'URI' } },
+    References: { $basis: (v: unknown): v is string | object => typeof v === 'string' || (typeof v === 'object' && v !== null), isCanonical: (v: unknown): v is { ref: string, resolved: boolean } => typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v, $meta: { format: 'URI' } },
   },
 })
 
-export type { RestApiCanon, MongoDbCanon, JsonLdCanon }
+export type { JsonLdCanon, MongoDbCanon, RestApiCanon }

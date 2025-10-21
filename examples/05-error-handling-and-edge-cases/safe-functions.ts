@@ -5,12 +5,12 @@
  * and provide fallback values instead of throwing exceptions.
  */
 
-import { 
-  idOf, 
-  typeOf, 
-  versionOf, 
-  timestampsOf, 
-  referencesOf 
+import {
+  idOf,
+  referencesOf,
+  timestampsOf,
+  typeOf,
+  versionOf,
 } from '@relational-fabric/canon'
 
 // =============================================================================
@@ -23,7 +23,8 @@ import {
 export function safeIdOf(entity: unknown): string | undefined {
   try {
     return idOf(entity)
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('Failed to extract ID:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }
@@ -35,7 +36,8 @@ export function safeIdOf(entity: unknown): string | undefined {
 export function safeTypeOf(entity: unknown): string | undefined {
   try {
     return typeOf(entity)
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('Failed to extract type:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }
@@ -46,8 +48,14 @@ export function safeTypeOf(entity: unknown): string | undefined {
  */
 export function safeVersionOf(entity: unknown): number | undefined {
   try {
-    return versionOf(entity)
-  } catch (error) {
+    const version = versionOf(entity)
+    // Additional validation to ensure it's actually a number
+    if (typeof version !== 'number') {
+      return undefined
+    }
+    return version
+  }
+  catch (error) {
     console.warn('Failed to extract version:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }
@@ -59,7 +67,8 @@ export function safeVersionOf(entity: unknown): number | undefined {
 export function safeTimestampsOf(entity: unknown): Date[] {
   try {
     return timestampsOf(entity)
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('Failed to extract timestamps:', error instanceof Error ? error.message : 'Unknown error')
     return []
   }
@@ -68,10 +77,11 @@ export function safeTimestampsOf(entity: unknown): Date[] {
 /**
  * Safely extract references from any entity, returning empty array on error
  */
-export function safeReferencesOf(entity: unknown): Array<{ ref: string; resolved: boolean; value?: unknown }> {
+export function safeReferencesOf(entity: unknown): Array<{ ref: string, resolved: boolean, value?: unknown }> {
   try {
     return referencesOf(entity)
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('Failed to extract references:', error instanceof Error ? error.message : 'Unknown error')
     return []
   }
@@ -85,25 +95,26 @@ export function safeTimestampConversion(value: unknown): Date | undefined {
     if (value instanceof Date) {
       return value
     }
-    
+
     if (typeof value === 'string') {
       const date = new Date(value)
-      if (isNaN(date.getTime())) {
-        throw new Error(`Invalid date string: ${value}`)
+      if (Number.isNaN(date.getTime())) {
+        throw new TypeError(`Invalid date string: ${value}`)
       }
       return date
     }
-    
+
     if (typeof value === 'number') {
       const date = new Date(value)
-      if (isNaN(date.getTime())) {
-        throw new Error(`Invalid timestamp: ${value}`)
+      if (Number.isNaN(date.getTime())) {
+        throw new TypeError(`Invalid timestamp: ${value}`)
       }
       return date
     }
-    
+
     throw new Error(`Unsupported timestamp type: ${typeof value}`)
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('Failed to convert timestamp:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }
@@ -112,14 +123,14 @@ export function safeTimestampConversion(value: unknown): Date | undefined {
 /**
  * Safely convert reference with error handling
  */
-export function safeReferenceConversion(value: unknown): { ref: string; resolved: boolean; value?: unknown } | undefined {
+export function safeReferenceConversion(value: unknown): { ref: string, resolved: boolean, value?: unknown } | undefined {
   try {
     if (typeof value === 'string') {
       return { ref: value, resolved: false }
     }
-    
+
     if (typeof value === 'object' && value !== null && 'ref' in value) {
-      const obj = value as { ref: unknown; resolved?: unknown; value?: unknown }
+      const obj = value as { ref: unknown, resolved?: unknown, value?: unknown }
       if (typeof obj.ref === 'string') {
         return {
           ref: obj.ref,
@@ -128,9 +139,10 @@ export function safeReferenceConversion(value: unknown): { ref: string; resolved
         }
       }
     }
-    
+
     throw new Error(`Expected string or object, got ${typeof value}`)
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('Failed to convert reference:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }

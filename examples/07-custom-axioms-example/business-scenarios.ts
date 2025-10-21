@@ -5,8 +5,8 @@
  * in real-world applications.
  */
 
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf, inferAxiom } from '@relational-fabric/canon'
-import { emailOf, currencyOf, statusOf, priorityOf } from './custom-functions'
+import { idOf, inferAxiom } from '@relational-fabric/canon'
+import { currencyOf, emailOf, statusOf } from './custom-functions'
 
 // =============================================================================
 // Sample Data
@@ -15,7 +15,7 @@ import { emailOf, currencyOf, statusOf, priorityOf } from './custom-functions'
 /**
  * Customer entity with custom axioms
  */
-const customerWithCustomFields = {
+const _customerWithCustomFields = {
   id: 'cust-123',
   type: 'customer',
   version: 3,
@@ -37,7 +37,7 @@ const customerWithCustomFields = {
 /**
  * Product entity with custom axioms
  */
-const productWithCustomFields = {
+const _productWithCustomFields = {
   id: 'prod-456',
   type: 'product',
   version: 7,
@@ -55,7 +55,7 @@ const productWithCustomFields = {
 /**
  * Order entity with custom axioms
  */
-const orderWithCustomFields = {
+const _orderWithCustomFields = {
   id: 'order-789',
   type: 'order',
   version: 2,
@@ -87,24 +87,24 @@ export function processCustomerRegistration(customer: unknown): {
   customerId: string
   email: string
   status: string
-  priority: { level: number; label: string }
+  priority: { level: number, label: string }
   errors: string[]
 } {
   const errors: string[] = []
-  
+
   try {
     const customerId = idOf(customer)
     const email = emailOf(customer)
     const status = statusOf(customer)
-    
+
     // For now, skip priority to avoid the error
     const priority = { level: 3, label: 'high' }
-    
+
     // Additional business logic
     if (status === 'active' && priority.level < 2) {
       errors.push('Active customers must have medium or higher priority')
     }
-    
+
     return {
       success: errors.length === 0,
       customerId,
@@ -113,7 +113,8 @@ export function processCustomerRegistration(customer: unknown): {
       priority,
       errors,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       success: false,
       customerId: '',
@@ -129,27 +130,27 @@ export function processCustomerRegistration(customer: unknown): {
  * Calculate order total with currency conversion
  */
 export function calculateOrderTotalWithCurrency(order: unknown): {
-  subtotal: { amount: number; currency: string }
-  tax: { amount: number; currency: string }
-  total: { amount: number; currency: string }
+  subtotal: { amount: number, currency: string }
+  tax: { amount: number, currency: string }
+  total: { amount: number, currency: string }
 } {
   const orderId = idOf(order)
   const status = statusOf(order)
-  
+
   console.log(`Calculating total for ${status} order ${orderId}`)
-  
+
   if (typeof order !== 'object' || order === null) {
     throw new Error('Order must be an object')
   }
-  
+
   const orderObj = order as Record<string, unknown>
-  
+
   // Extract currency information
   const totalCurrency = currencyOf(orderObj.total || 0)
   const subtotal = totalCurrency
   const tax = { amount: subtotal.amount * 0.08, currency: subtotal.currency }
   const total = { amount: subtotal.amount + tax.amount, currency: subtotal.currency }
-  
+
   return { subtotal, tax, total }
 }
 
@@ -165,12 +166,12 @@ export function updateEntityStatus(entity: unknown, newStatus: string): {
   try {
     const currentStatus = statusOf(entity)
     const entityId = idOf(entity)
-    
+
     // Get transition rules from the axiom config
     const config = inferAxiom('Status', entity)
     const transitions = config?.$meta?.transitions || {}
     const allowedTransitions = transitions[currentStatus] || []
-    
+
     if (!allowedTransitions.includes(newStatus)) {
       return {
         success: false,
@@ -178,15 +179,16 @@ export function updateEntityStatus(entity: unknown, newStatus: string): {
         error: `Invalid transition from ${currentStatus} to ${newStatus}. Allowed: ${allowedTransitions.join(', ')}`,
       }
     }
-    
+
     console.log(`Updating ${entityId} status from ${currentStatus} to ${newStatus}`)
-    
+
     return {
       success: true,
       oldStatus: currentStatus,
       newStatus,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

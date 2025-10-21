@@ -5,9 +5,9 @@
  * when working with Canon's universal type system.
  */
 
+import { safeIdOf, safeReferenceConversion, safeTimestampConversion, safeTypeOf, safeVersionOf } from './safe-functions'
+import { findMatchingCanon, processBatchSafely, processEntitySafely, validateEntity } from './validation-utilities'
 import './basic-canon' // Import canon definition
-import { safeIdOf, safeTypeOf, safeVersionOf, safeTimestampsOf, safeReferencesOf, safeTimestampConversion, safeReferenceConversion } from './safe-functions'
-import { validateEntity, processEntitySafely, processBatchSafely, findMatchingCanon } from './validation-utilities'
 
 // =============================================================================
 // Sample Data for Testing
@@ -120,8 +120,8 @@ if (import.meta.vitest) {
 
       expect(id).toBeUndefined()
       expect(type).toBeUndefined()
-      // versionOf returns 0 when the value is 0, safeVersionOf returns undefined
-      expect(version).toBeUndefined()
+      // The nullValues object has version: 0, which is a valid number, so safeVersionOf returns 0
+      expect(version).toBe(0)
     })
 
     it('handles empty objects', () => {
@@ -150,7 +150,7 @@ if (import.meta.vitest) {
 
       expect(validResult.isValid).toBe(true)
       expect(validResult.errors).toHaveLength(0)
-      
+
       expect(invalidResult.isValid).toBe(false)
       expect(invalidResult.errors.length).toBeGreaterThan(0)
     })
@@ -161,7 +161,7 @@ if (import.meta.vitest) {
 
       expect(validResult.success).toBe(true)
       expect(validResult.result?.id).toBe('user-123')
-      
+
       expect(invalidResult.success).toBe(false)
       expect(invalidResult.errors.length).toBeGreaterThan(0)
     })
@@ -211,19 +211,19 @@ console.log('=== Edge Case Examples ===\n')
 testCases.forEach(({ name, data }) => {
   console.log(`--- ${name} ---`)
   console.log('Data:', JSON.stringify(data, null, 2))
-  
+
   const validation = validateEntity(data)
   console.log('Validation:', validation)
-  
+
   const id = safeIdOf(data)
   const type = safeTypeOf(data)
   const version = safeVersionOf(data)
-  
+
   console.log('Extracted values:')
   console.log(`  ID: ${id}`)
   console.log(`  Type: ${type}`)
   console.log(`  Version: ${version}`)
-  
+
   const canon = findMatchingCanon(data)
   console.log(`  Canon match: ${canon ? `Found matching canon` : 'No matching canon'}`)
   console.log()

@@ -39,7 +39,7 @@ type ComprehensiveCanon = Canon<{
   }
   References: {
     $basis: string | object
-    isCanonical: (value: unknown) => value is { ref: string; resolved: boolean; value?: unknown }
+    isCanonical: (value: unknown) => value is { ref: string, resolved: boolean, value?: unknown }
     $meta: { format: string, validation: string }
   }
 }>
@@ -53,33 +53,33 @@ declare module '@relational-fabric/canon' {
 // Register the comprehensive canon
 declareCanon('ComprehensiveCanon', {
   axioms: {
-    Id: { 
-      $basis: pojoWithOfType('id', 'string'), 
-      key: 'id', 
-      $meta: { type: 'string', format: 'uuid' } 
+    Id: {
+      $basis: pojoWithOfType('id', 'string'),
+      key: 'id',
+      $meta: { type: 'string', format: 'uuid' },
     },
-    Type: { 
-      $basis: pojoWithOfType('type', 'string'), 
-      key: 'type', 
-      $meta: { enum: 'entity', discriminator: true } 
+    Type: {
+      $basis: pojoWithOfType('type', 'string'),
+      key: 'type',
+      $meta: { enum: 'entity', discriminator: true },
     },
-    Version: { 
-      $basis: pojoWithOfType('version', 'number'), 
-      key: 'version', 
-      $meta: { min: 1, max: 1000000 } 
+    Version: {
+      $basis: pojoWithOfType('version', 'number'),
+      key: 'version',
+      $meta: { min: 1, max: 1000000 },
     },
-    Timestamps: { 
-      $basis: (v: unknown): v is number | string | Date => 
+    Timestamps: {
+      $basis: (v: unknown): v is number | string | Date =>
         typeof v === 'number' || typeof v === 'string' || v instanceof Date,
       isCanonical: (v: unknown): v is Date => v instanceof Date,
-      $meta: { format: 'iso8601', timezone: 'UTC' }
+      $meta: { format: 'iso8601', timezone: 'UTC' },
     },
-    References: { 
-      $basis: (v: unknown): v is string | object => 
+    References: {
+      $basis: (v: unknown): v is string | object =>
         typeof v === 'string' || (typeof v === 'object' && v !== null),
-      isCanonical: (v: unknown): v is { ref: string; resolved: boolean; value?: unknown } => 
+      isCanonical: (v: unknown): v is { ref: string, resolved: boolean, value?: unknown } =>
         typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v,
-      $meta: { format: 'uuid', validation: 'strict' }
+      $meta: { format: 'uuid', validation: 'strict' },
     },
   },
 })

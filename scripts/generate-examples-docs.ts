@@ -106,20 +106,21 @@ function processExample(examplePath: string, relativePath: string): ExampleInfo 
     // Process directory - look for usage.ts or main entry point
     const usagePath = join(fullPath, 'usage.ts')
     const readmePath = join(fullPath, 'README.md')
-    
+
     // Try to get description from usage.ts first, then README.md
     let description = ''
     if (statSync(usagePath).isFile()) {
       const metadata = extractMetadata(usagePath)
       description = metadata.description || ''
-    } else if (statSync(readmePath).isFile()) {
+    }
+    else if (statSync(readmePath).isFile()) {
       const readmeContent = readFileSync(readmePath, 'utf-8')
       const descriptionMatch = readmeContent.match(/^#\s+([^\n]+)/)
       if (descriptionMatch) {
         description = descriptionMatch[1].trim()
       }
     }
-    
+
     exampleInfo.description = description
 
     // Process sub-files
@@ -131,7 +132,7 @@ function processExample(examplePath: string, relativePath: string): ExampleInfo 
       exampleInfo.subExamples = subFiles
       // Merge key concepts from all sub-files
       const allKeyConcepts = new Set<string>()
-      subFiles.forEach(sub => {
+      subFiles.forEach((sub) => {
         sub.keyConcepts.forEach(concept => allKeyConcepts.add(concept))
       })
       exampleInfo.keyConcepts = Array.from(allKeyConcepts)

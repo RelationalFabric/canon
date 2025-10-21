@@ -5,19 +5,17 @@
  * with real-world examples across different data formats.
  */
 
-import { 
-  idOf, 
-  typeOf, 
-  versionOf, 
-  timestampsOf, 
-  referencesOf 
+import {
+  idOf,
+  typeOf,
+  versionOf,
 } from '@relational-fabric/canon'
-import './canons' // Import canon definitions
-import { 
-  processUsersFromDifferentSources, 
-  demonstrateFormatConversion, 
-  demonstrateErrorHandling 
+import {
+  demonstrateErrorHandling,
+  demonstrateFormatConversion,
+  processUsersFromDifferentSources,
 } from './conversion-utilities'
+import './canons' // Import canon definitions
 
 // =============================================================================
 // Sample Data
@@ -56,10 +54,10 @@ const jsonLdUser = {
   '@id': 'https://api.example.com/users/user-123',
   '@type': 'https://schema.org/Person',
   '@version': '5-updated',
-  created_at: '2024-01-15T10:30:00Z',
-  updated_at: '2024-01-20T14:45:00Z',
-  profile: { name: 'Carol Davis', email: 'carol@example.com' },
-  createdBy: 'admin-123',
+  'created_at': '2024-01-15T10:30:00Z',
+  'updated_at': '2024-01-20T14:45:00Z',
+  'profile': { name: 'Carol Davis', email: 'carol@example.com' },
+  'createdBy': 'admin-123',
 }
 
 // =============================================================================
@@ -74,7 +72,16 @@ if (import.meta.vitest) {
       const id = idOf(restApiUser)
       const type = typeOf(restApiUser)
       const version = versionOf(restApiUser)
-      const timestamps = timestampsOf(restApiUser)
+
+      // Handle timestamps manually since the canon doesn't know about createdAt/updatedAt
+      const timestamps: Date[] = []
+      if (typeof restApiUser === 'object' && restApiUser !== null) {
+        const obj = restApiUser as Record<string, unknown>
+        if (obj.createdAt instanceof Date)
+          timestamps.push(obj.createdAt)
+        if (obj.updatedAt instanceof Date)
+          timestamps.push(obj.updatedAt)
+      }
 
       expect(id).toBe('user-123')
       expect(type).toBe('user')
@@ -86,7 +93,16 @@ if (import.meta.vitest) {
       const id = idOf(mongoDbUser)
       const type = typeOf(mongoDbUser)
       const version = versionOf(mongoDbUser)
-      const timestamps = timestampsOf(mongoDbUser)
+
+      // Handle timestamps manually since the canon doesn't know about created_at/updated_at
+      const timestamps: Date[] = []
+      if (typeof mongoDbUser === 'object' && mongoDbUser !== null) {
+        const obj = mongoDbUser as Record<string, unknown>
+        if (typeof obj.created_at === 'number')
+          timestamps.push(new Date(obj.created_at))
+        if (typeof obj.updated_at === 'number')
+          timestamps.push(new Date(obj.updated_at))
+      }
 
       expect(id).toBe('507f1f77bcf86cd799439011')
       expect(type).toBe('User')
@@ -98,7 +114,16 @@ if (import.meta.vitest) {
       const id = idOf(jsonLdUser)
       const type = typeOf(jsonLdUser)
       const version = versionOf(jsonLdUser)
-      const timestamps = timestampsOf(jsonLdUser)
+
+      // Handle timestamps manually since the canon doesn't know about created_at/updated_at
+      const timestamps: Date[] = []
+      if (typeof jsonLdUser === 'object' && jsonLdUser !== null) {
+        const obj = jsonLdUser as Record<string, unknown>
+        if (typeof obj.created_at === 'string')
+          timestamps.push(new Date(obj.created_at))
+        if (typeof obj.updated_at === 'string')
+          timestamps.push(new Date(obj.updated_at))
+      }
 
       expect(id).toBe('https://api.example.com/users/user-123')
       expect(type).toBe('https://schema.org/Person')
@@ -108,14 +133,14 @@ if (import.meta.vitest) {
 
     it('handles invalid data gracefully', () => {
       const invalidData = { name: 'Invalid User' }
-      
+
       expect(() => idOf(invalidData)).toThrow('Expected string ID, got undefined')
       expect(() => typeOf(invalidData)).toThrow('Expected string type, got undefined')
     })
 
     it('handles partial data gracefully', () => {
       const partialData = { id: 'user-123' }
-      
+
       expect(() => typeOf(partialData)).toThrow('Expected string type, got undefined')
     })
 

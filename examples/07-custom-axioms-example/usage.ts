@@ -5,13 +5,13 @@
  * with comprehensive examples and testing.
  */
 
-import './custom-axioms' // Import canon definitions
-import { emailOf, currencyOf, statusOf, priorityOf } from './custom-functions'
-import { 
-  processCustomerRegistration, 
-  calculateOrderTotalWithCurrency, 
-  updateEntityStatus 
+import {
+  calculateOrderTotalWithCurrency,
+  processCustomerRegistration,
+  updateEntityStatus,
 } from './business-scenarios'
+import { currencyOf, emailOf, priorityOf, statusOf } from './custom-functions'
+import './custom-axioms' // Import canon definitions
 
 // =============================================================================
 // Sample Data
@@ -42,7 +42,7 @@ const customerWithCustomFields = {
 /**
  * Product entity with custom axioms
  */
-const productWithCustomFields = {
+const _productWithCustomFields = {
   id: 'prod-456',
   type: 'product',
   version: 7,
@@ -102,11 +102,11 @@ if (import.meta.vitest) {
       // Test number conversion
       const currency1 = currencyOf(99.99)
       expect(currency1).toEqual({ amount: 99.99, currency: 'USD' })
-      
+
       // Test string conversion
       const currency2 = currencyOf('$150.50 USD')
       expect(currency2).toEqual({ amount: 150.50, currency: 'USD' })
-      
+
       // Test object (already canonical)
       const currency3 = currencyOf({ amount: 200, currency: 'EUR' })
       expect(currency3).toEqual({ amount: 200, currency: 'EUR' })
@@ -126,11 +126,11 @@ if (import.meta.vitest) {
       // Test string conversion
       const priority1 = priorityOf('high')
       expect(priority1).toEqual({ level: 3, label: 'high' })
-      
+
       // Test number conversion
       const priority2 = priorityOf(2)
       expect(priority2).toEqual({ level: 2, label: 'medium' })
-      
+
       // Test object (already canonical)
       const priority3 = priorityOf({ level: 4, label: 'critical' })
       expect(priority3).toEqual({ level: 4, label: 'critical' })
@@ -138,7 +138,7 @@ if (import.meta.vitest) {
 
     it('processes customer registration with custom validation', () => {
       const result = processCustomerRegistration(customerWithCustomFields)
-      
+
       expect(result.success).toBe(true)
       expect(result.customerId).toBe('cust-123')
       expect(result.email).toBe('alice@example.com')
@@ -148,7 +148,7 @@ if (import.meta.vitest) {
 
     it('calculates order total with currency conversion', () => {
       const result = calculateOrderTotalWithCurrency(orderWithCustomFields)
-      
+
       expect(result.subtotal.amount).toBe(199.98)
       expect(result.tax.amount).toBeCloseTo(15.998, 2)
       expect(result.total.amount).toBeCloseTo(215.978, 2)
@@ -157,7 +157,7 @@ if (import.meta.vitest) {
 
     it('validates status transitions', () => {
       const result = updateEntityStatus(customerWithCustomFields, 'inactive')
-      
+
       expect(result.success).toBe(true)
       expect(result.oldStatus).toBe('active')
       expect(result.newStatus).toBe('inactive')
@@ -165,7 +165,7 @@ if (import.meta.vitest) {
 
     it('rejects invalid status transitions', () => {
       const result = updateEntityStatus(customerWithCustomFields, 'draft')
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toContain('Invalid transition')
     })

@@ -5,16 +5,14 @@
  * universal type system in real-world applications.
  */
 
-import { idOf, typeOf, versionOf, timestampsOf, referencesOf } from '@relational-fabric/canon'
-import './domain-models' // Import canon definitions
-import { sampleCustomer, sampleProduct, sampleOrder } from './domain-models'
-import { 
-  calculateOrderTotal, 
-  updateOrderStatus, 
-  generateOrderSummary, 
-  validateCustomerForOrder, 
-  processOrderWorkflow 
+import {
+  calculateOrderTotal,
+  generateOrderSummary,
+  processOrderWorkflow,
+  updateOrderStatus,
+  validateCustomerForOrder,
 } from './business-logic'
+import { sampleCustomer, sampleOrder } from './domain-models'
 
 // =============================================================================
 // Example Usage
@@ -26,7 +24,7 @@ if (import.meta.vitest) {
   describe('Real-World Business Scenarios', () => {
     it('calculates order total correctly', () => {
       const totals = calculateOrderTotal(sampleOrder)
-      
+
       expect(totals.subtotal).toBe(199.98)
       expect(totals.discount).toBeCloseTo(19.998, 2)
       expect(totals.tax).toBeCloseTo(14.398, 2)
@@ -36,7 +34,7 @@ if (import.meta.vitest) {
 
     it('updates order status with version control', () => {
       const result = updateOrderStatus(sampleOrder, 'shipped')
-      
+
       expect(result.success).toBe(true)
       expect(result.oldStatus).toBe('processing')
       expect(result.newVersion).toBe(3)
@@ -44,14 +42,14 @@ if (import.meta.vitest) {
 
     it('rejects invalid status transitions', () => {
       const result = updateOrderStatus(sampleOrder, 'pending')
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toContain('Invalid status transition')
     })
 
     it('generates order summary correctly', () => {
       const summary = generateOrderSummary(sampleOrder)
-      
+
       expect(summary.orderId).toBe('order-789')
       expect(summary.status).toBe('processing')
       expect(summary.total).toBe(194.38)
@@ -62,7 +60,7 @@ if (import.meta.vitest) {
 
     it('validates customer for order', () => {
       const validation = validateCustomerForOrder(sampleCustomer)
-      
+
       expect(validation.valid).toBe(true)
       expect(validation.warnings).toHaveLength(0)
       expect(validation.errors).toHaveLength(0)
@@ -71,14 +69,16 @@ if (import.meta.vitest) {
     it('validates customer with missing payment methods', () => {
       const customerWithoutPayment = { ...sampleCustomer, paymentMethods: [] }
       const validation = validateCustomerForOrder(customerWithoutPayment)
-      
+
       expect(validation.valid).toBe(true)
       expect(validation.warnings).toContain('Customer has no payment methods')
     })
 
     it('processes complete order workflow', () => {
-      const workflow = processOrderWorkflow(sampleCustomer, sampleOrder)
-      
+      // Create a new order with 'pending' status for the workflow test
+      const pendingOrder = { ...sampleOrder, status: 'pending' }
+      const workflow = processOrderWorkflow(sampleCustomer, pendingOrder)
+
       expect(workflow.success).toBe(true)
       expect(workflow.steps).toHaveLength(4)
       expect(workflow.steps.every(step => step.success)).toBe(true)
@@ -87,7 +87,7 @@ if (import.meta.vitest) {
     it('handles workflow errors gracefully', () => {
       const invalidCustomer = { id: 'invalid' }
       const workflow = processOrderWorkflow(invalidCustomer, sampleOrder)
-      
+
       expect(workflow.success).toBe(false)
       expect(workflow.steps.some(step => !step.success)).toBe(true)
     })
@@ -108,7 +108,8 @@ const statusUpdate = updateOrderStatus(sampleOrder, 'shipped')
 console.log(`Status update result: ${statusUpdate.success ? 'Success' : 'Failed'}`)
 if (statusUpdate.success) {
   console.log(`New version: ${statusUpdate.newVersion}`)
-} else {
+}
+else {
   console.log(`Error: ${statusUpdate.error}`)
 }
 
