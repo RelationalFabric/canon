@@ -42,8 +42,8 @@ export interface RadarData {
   quadrants: string[]
   /** Ring names as simple strings */
   rings: string[]
-  /** Radar items as a flat array of single-line strings */
-  items: string[]
+  /** Radar items as a flat array with proper field formatting */
+  items: RadarItem[]
 }
 
 export interface RadarConfig {

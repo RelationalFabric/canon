@@ -44,10 +44,10 @@ This format had several issues:
 We will simplify the radar YAML format to be as shallow as possible with the following structure:
 
 ```yaml
-# New truly flat format
+# New human-friendly flat format
 quadrants: string[] # Just the names
 rings: string[] # Just the names
-items: string[] # Single-line strings with all item data
+items: RadarItem[] # Flat array with proper field formatting
 ```
 
 The new format looks like this:
@@ -72,27 +72,44 @@ rings:
   - Hold
 
 items:
-  - '@antfu/eslint-config | Tools & Libraries | Adopt | Modern ESLint configuration with TypeScript support | false | Proven configuration that reduces setup overhead'
-  - 'typescript | Tools & Libraries | Adopt | TypeScript compiler and type system | false | Essential for type safety and modern TypeScript features'
-  - 'type-fest | Tools & Libraries | Trial | Comprehensive collection of TypeScript utility types | true | Provides battle-tested utility types for complex TypeScript scenarios'
+  - name: '@antfu/eslint-config'
+    quadrant: 'Tools & Libraries'
+    ring: Adopt
+    description: 'Modern ESLint configuration with TypeScript support, automatic fixing capabilities'
+    isNew: false
+    justification: Proven configuration that reduces setup overhead while maintaining high code quality
+
+  - name: typescript
+    quadrant: 'Tools & Libraries'
+    ring: Adopt
+    description: TypeScript compiler and type system
+    isNew: false
+    justification: Essential for type safety and modern TypeScript features
+
+  - name: type-fest
+    quadrant: 'Tools & Libraries'
+    ring: Trial
+    description: Comprehensive collection of TypeScript utility types for advanced type manipulation
+    isNew: true
+    justification: Provides battle-tested utility types for complex TypeScript scenarios
 ```
 
-This achieves the "one line for one reason" goal by:
+This achieves the human-friendly goal by:
 - Quadrants and rings become simple string arrays
-- Items become a flat array of single-line strings with all data separated by `|`
-- Each radar item is literally one line - maximum human friendliness
-- Much easier to add/edit individual items (just add one line)
+- Items become a flat array with proper field formatting
+- Each radar item has clear, labeled fields - truly human-friendly
+- Much easier to add/edit individual items (clear field structure)
 - Reduces cognitive load when editing
 - Maintains all necessary information while being maximally readable
 
 ## Consequences
 
 ### Positive
-- **Maximum human friendliness**: Each radar item is literally one line
-- **Ultra-simple editing**: Adding/editing items requires only one line changes
+- **Maximum human friendliness**: Each radar item has clear, labeled fields
+- **Easy editing**: Adding/editing items is straightforward with proper field structure
 - **Reduced complexity**: Eliminates all nesting and repetitive structures
-- **Better maintainability**: Truly flat format is maximally easy to understand and modify
-- **Perfect "one line for one reason"**: Each item is exactly one line with all information
+- **Better maintainability**: Flat format with proper fields is easy to understand and modify
+- **Clear field structure**: Each field is clearly labeled and properly formatted
 - **Preserved functionality**: All existing data is converted without loss
 - **Backward compatibility**: Legacy types are maintained during migration
 

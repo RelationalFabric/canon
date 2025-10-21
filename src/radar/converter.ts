@@ -9,25 +9,6 @@ import process from 'node:process'
 import { parse } from 'yaml'
 
 /**
- * Parse a flat radar item line into components
- */
-function parseFlatItem(line: string): RadarItem {
-  const parts = line.split(' | ')
-  if (parts.length < 5) {
-    throw new Error(`Invalid radar item format: ${line}. Expected: "name | quadrant | ring | description | isNew | justification"`)
-  }
-
-  return {
-    name: parts[0].trim(),
-    quadrant: parts[1].trim(),
-    ring: parts[2].trim(),
-    description: parts[3].trim(),
-    isNew: parts[4].trim().toLowerCase() === 'true',
-    justification: parts[5]?.trim() || undefined,
-  }
-}
-
-/**
  * Convert YAML radar data to CSV format
  */
 export function convertYamlToCsv(yamlContent: string): string {
@@ -36,23 +17,17 @@ export function convertYamlToCsv(yamlContent: string): string {
   // Generate CSV content
   const csvRows: string[] = ['name,ring,quadrant,isNew,description']
 
-  // Process each item line in the flat items array
-  data.items.forEach((itemLine: string) => {
-    try {
-      const item = parseFlatItem(itemLine)
-      const row: CsvRow = {
-        name: item.name,
-        ring: item.ring,
-        quadrant: item.quadrant,
-        isNew: item.isNew,
-        description: item.description,
-      }
+  // Process each item in the flat items array
+  data.items.forEach((item: RadarItem) => {
+    const row: CsvRow = {
+      name: item.name,
+      ring: item.ring,
+      quadrant: item.quadrant,
+      isNew: item.isNew,
+      description: item.description,
+    }
 
-      csvRows.push(formatCsvRow(row))
-    }
-    catch (error) {
-      console.warn(`Skipping invalid item: ${itemLine} - ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+    csvRows.push(formatCsvRow(row))
   })
 
   return csvRows.join('\n')
