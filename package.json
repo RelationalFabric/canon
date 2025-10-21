@@ -54,11 +54,12 @@
     "adr:list": "cd docs/adrs && npx adr list",
     "adr:index": "cd docs/adrs && npx adr generate toc",
     "adr:generate-index": "node scripts/generate-adr-index.js",
+    "examples:generate-docs": "tsx scripts/generate-examples-docs.ts",
     "radar:convert": "tsx scripts/convert-radar.ts",
     "radar:validate": "tsx scripts/validate-radar.ts",
     "radar:watch": "chokidar './planning/radar/data.yaml' -c 'npm run radar:convert'",
     "docs:dev": "npx vitepress dev",
-    "docs:build": "scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
+    "docs:build": "npm run examples:generate-docs && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
     "docs:preview": "npx vitepress preview",
     "docs:restore": "scripts/restore-readmes-from-build.sh",
     "checks": "npm-run-all lint check test"
