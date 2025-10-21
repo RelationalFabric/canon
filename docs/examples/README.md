@@ -93,6 +93,25 @@ Example: Real-World Business Scenarios
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios.ts)
 
+### [07-custom-axioms-example](./07-custom-axioms-example.ts)
+Example: Custom Axioms - Defining Your Own Semantic Concepts
+
+**Key Concepts:**
+- **Custom Axiom Types**: Define your own axiom types using KeyNameAxiom, RepresentationAxiom, or custom Axiom types
+- **Axiom Registration**: Register custom axioms in the global Axioms interface
+- **Custom Functions**: Implement your own universal functions (emailOf, currencyOf, etc.)
+- **Domain-Specific Logic**: Add validation, conversion, and business logic specific to your domain
+- **Type Safety**: Maintain full TypeScript type safety with custom axioms
+- **Canon Integration**: Use custom axioms in your canon definitions
+- **Real-World Applications**: Custom axioms enable domain-specific semantic concepts
+- **Validation**: Add custom validation logic for your specific use cases
+- **Conversion**: Implement format conversion for your custom data types
+- **Business Rules**: Encode business rules directly into your axiom implementations
+
+**Pattern:** Declarative canon registration
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example.ts)
+
 ## Example Patterns
 
 The examples demonstrate two main patterns for working with Canon:

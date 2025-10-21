@@ -2,6 +2,9 @@ name: Update ADR Index
 
 on:
   push:
+    branches-ignore:
+      - main
+      - develop
     paths:
       - 'docs/adrs/*.md'
       - '!docs/adrs/README.md'
