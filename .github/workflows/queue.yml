@@ -2,7 +2,7 @@ name: Queue
 
 on:
   workflow_dispatch:
-  merge_queue:
+  merge_group:
 
 jobs:
   all-checks-passed:
