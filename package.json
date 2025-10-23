@@ -45,10 +45,15 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "tsc --noEmit && eslint .",
+    "check:examples": "tsc --noEmit --project tsconfig.examples.json && eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "test:examples": "vitest run --config vitest.examples.config.ts",
+    "test:examples:watch": "vitest --config vitest.examples.config.ts",
+    "test:examples:ui": "vitest --ui --config vitest.examples.config.ts",
+    "test:examples:coverage": "vitest run --coverage --config vitest.examples.config.ts",
     "dev": "tsx --watch src/index.ts",
     "adr:new": "cd docs/adrs && npx adr new",
     "adr:list": "cd docs/adrs && npx adr list",
@@ -62,7 +67,8 @@
     "docs:build": "npm run examples:generate-docs && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
     "docs:preview": "npx vitepress preview",
     "docs:restore": "scripts/restore-readmes-from-build.sh",
-    "checks": "npm-run-all lint check test"
+    "checks": "npm-run-all lint check test",
+    "checks:examples": "npm-run-all lint test:examples"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",

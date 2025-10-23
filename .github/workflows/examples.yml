@@ -37,8 +37,14 @@ jobs:
       - name: Run linting and type checking
         run: npm run check
 
-      - name: Run tests
+      - name: Run main tests
         run: npm test
+
+      - name: Run examples tests
+        run: npm run test:examples
+
+      - name: Run examples type checking (may have errors)
+        run: npm run check:examples || true
 
       - name: Generate examples documentation
         run: npm run examples:generate-docs
