@@ -1,10 +1,10 @@
 <script setup>
 import { ref } from 'vue'
 
-const radarUrl = ref('/planning/radar/radar.html')
+const radarUrl = ref('/planning/radar/iframe.html')
 
 function onIframeLoad() {
-  console.log('Technology radar loaded successfully')
+  // Technology radar loaded successfully
 }
 </script>
 

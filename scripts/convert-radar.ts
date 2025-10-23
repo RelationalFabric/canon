@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 
 import process from 'node:process'
-import { convertYamlFileToCsv } from '../src/radar/converter.js'
+import { convertYamlFileToHtml } from '../src/radar/converter.js'
 
 function main() {
   try {
-    convertYamlFileToCsv('./planning/radar/data.yaml', './docs/public/radar/data.csv')
+    convertYamlFileToHtml('./planning/radar/data.yaml', './.vitepress/public/planning/radar/iframe.html')
   }
   catch (error) {
     console.error('❌ Error converting radar data:', error instanceof Error ? error.message : 'Unknown error')
