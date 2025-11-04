@@ -7,6 +7,7 @@
  */
 
 import type { AxiomConfig, Axioms } from './axioms.js'
+import { type Expect, invariant } from '../testing.js'
 
 /**
  * Canon type that maps axiom labels to their type-level configurations
@@ -69,3 +70,10 @@ export type Satisfies<
 export function defineCanon(config: CanonConfig): CanonConfig {
   return config
 }
+
+// ---------------------------------------------------------------------------
+// Compile-time invariants
+// ---------------------------------------------------------------------------
+
+void invariant<Expect<CanonConfig['axioms'], Record<string, AxiomConfig>>>()
+void invariant<Expect<Satisfies<'Id'>, never>>()

@@ -8,6 +8,32 @@ type ObjectKey = string | number | symbol
 ```
 Union type representing all valid JavaScript object key types.
 
+## Type Testing
+
+### `Expect<A, B>`
+```typescript
+type Expect<A, B> = A extends B ? true : false
+```
+Resolves to `true` when `A` extends `B`; otherwise `false`.
+
+### `IsTrue<A>`
+```typescript
+type IsTrue<A> = Expect<A, true>
+```
+Convenience alias that verifies a type reduces to `true`.
+
+### `IsFalse<A>`
+```typescript
+type IsFalse<A> = A extends false ? true : false
+```
+Resolves to `true` only when the argument is exactly `false`.
+
+### `invariant<T extends true>()`
+```typescript
+function invariant<T extends true>(): void
+```
+Runtime no-op that fails to compile when `T` is not `true`.
+
 ### `Pojo`
 ```typescript
 interface Pojo {

@@ -32,6 +32,7 @@ export default createEslintConfig()
 - **[Canons](./canons.md)** - Core principles and guidelines
 - **[Axioms](./axioms.md)** - Fundamental assumptions and rules
 - **[Examples](./examples/README.md)** - Practical usage examples
+- **[Type Testing](./type-testing/README.md)** - Compile-time invariants and assertion helpers
 - **[Radar Methodology](./radar-methodology.md)** - Technology assessment approach
 
 ## Architecture Decisions

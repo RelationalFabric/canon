@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains practical examples demonstrating how to use the @relational-fabric/canon package and its configurations.
+This directory contains practical examples demonstrating how to use the @relational-fabric/canon package and its configurations. Each example can be paired with `void invariant<Expect<...>>()` checks from the new type testing utilities to pin key assumptions.
 
 ## Available Examples
 

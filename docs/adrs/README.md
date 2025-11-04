@@ -11,3 +11,4 @@
 * [9. node-js-version-requirement](0009-node-js-version-requirement.md)
 * [10. vitepress-documentation-solution](0010-vitepress-documentation-solution.md)
 * [11. examples-documentation-generation-from-source-files](0011-examples-documentation-generation-from-source-files.md)
+* [12. type-testing-framework](0012-type-testing-framework.md)

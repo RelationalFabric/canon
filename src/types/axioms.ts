@@ -6,6 +6,7 @@
  */
 
 import type { TypeGuard } from './guards.js'
+import { type Expect, invariant } from '../testing.js'
 
 /**
  * Base axiom type that merges configuration with metadata
@@ -109,3 +110,13 @@ export interface AxiomConfig {
 export function defineAxiom(config: AxiomConfig): AxiomConfig {
   return config
 }
+
+// ---------------------------------------------------------------------------
+// Compile-time invariants
+// ---------------------------------------------------------------------------
+
+void invariant<Expect<KeyNameAxiom['key'], string>>()
+void invariant<Expect<RepresentationAxiom<string, string>['isCanonical'], (value: unknown) => value is string>>()
+void invariant<Expect<EntityReference<string>['ref'], string>>()
+void invariant<Expect<EntityReference<string>['resolved'], boolean>>()
+void invariant<Expect<AxiomConfig['$basis'], TypeGuard<unknown>>>()

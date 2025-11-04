@@ -2,6 +2,8 @@
  * Technology Radar data structures and types
  */
 
+import { type Expect, invariant } from '../testing.js'
+
 export interface RadarEntry {
   /** The name of the technology or practice */
   name: string
@@ -83,3 +85,13 @@ export interface CsvRow {
 
 export type QuadrantKey = 'tools-libraries' | 'techniques-patterns' | 'features-capabilities' | 'data-structures-formats'
 export type RingKey = 'adopt' | 'trial' | 'assess' | 'hold'
+
+// ---------------------------------------------------------------------------
+// Compile-time invariants
+// ---------------------------------------------------------------------------
+
+void invariant<Expect<RadarEntry['isNew'], boolean>>()
+void invariant<Expect<Quadrant['id'], string>>()
+void invariant<Expect<Ring['color'], string>>()
+void invariant<Expect<QuadrantKey, 'tools-libraries' | 'techniques-patterns' | 'features-capabilities' | 'data-structures-formats'>>()
+void invariant<Expect<RingKey, 'adopt' | 'trial' | 'assess' | 'hold'>>()
