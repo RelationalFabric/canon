@@ -1,8 +1,7 @@
 # ADR-0012: Type Testing Framework
 
-## Status
-
-Accepted
+* Status: accepted
+* Date: 2025-11-04
 
 ## Context
 

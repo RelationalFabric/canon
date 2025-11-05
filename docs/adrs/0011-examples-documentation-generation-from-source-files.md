@@ -1,8 +1,9 @@
 # ADR-0011: Examples Documentation Generation from Source Files
 
-## Status
+# ADR-0011: Examples Documentation Generation from Source Files
 
-Accepted
+* Status: accepted
+* Date: 2025-01-26
 
 ## Context
 

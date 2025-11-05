@@ -304,7 +304,8 @@ npm test
 function main() {
   console.log('🔍 Scanning examples directory...')
 
-  const examplesDir = '/workspace/examples'
+  const rootDir = process.cwd()
+  const examplesDir = join(rootDir, 'examples')
   const files = readdirSync(examplesDir)
     .filter((file) => {
       const fullPath = join(examplesDir, file)
@@ -324,7 +325,7 @@ function main() {
 
   const documentation = generateExamplesDocumentation(examples)
 
-  const outputPath = '/workspace/docs/examples/README.md'
+  const outputPath = join(rootDir, 'docs', 'examples', 'README.md')
   writeFileSync(outputPath, documentation)
 
   console.log(`✅ Documentation generated: ${outputPath}`)
