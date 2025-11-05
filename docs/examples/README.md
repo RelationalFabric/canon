@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains practical examples demonstrating how to use the @relational-fabric/canon package and its configurations. Each example can be paired with `void invariant<Expect<...>>()` checks from the new type testing utilities to pin key assumptions.
+This directory contains practical examples demonstrating how to use the @relational-fabric/canon package and its configurations.
 
 ## Available Examples
 
@@ -97,6 +97,7 @@ Error Handling and Edge Cases Usage Examples
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases)
 
 **Files:**
+- [basic-canon](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/basic-canon.ts) - Basic Canon for Error Handling Examples
 - [safe-functions](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/safe-functions.ts) - Safe Wrapper Functions
 - [usage](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/usage.ts) - Error Handling and Edge Cases Usage Examples
 - [validation-utilities](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/validation-utilities.ts) - Validation Utilities
@@ -164,7 +165,7 @@ The examples demonstrate different patterns for working with Canon:
 - **Use case**: Complex examples with multiple concerns
 - **Pattern**: Organized into multiple files with clear separation of concerns
 - **Benefits**: Modular, maintainable, demonstrates real-world architecture
-- **Structure**:
+- **Structure**: 
   - `usage.ts` - Main entry point and examples
   - `canons.ts` - Canon definitions
   - `utility-functions.ts` - Helper functions
