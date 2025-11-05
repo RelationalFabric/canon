@@ -10,7 +10,7 @@
  * comprehensive documentation that's always up-to-date with the source code.
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 
 interface ExampleInfo {
@@ -85,8 +85,8 @@ function extractMetadata(filePath: string): Partial<ExampleInfo> {
 /**
  * Process a single example file or directory
  */
-function processExample(examplePath: string, relativePath: string): ExampleInfo {
-  const fullPath = join('/workspace/examples', examplePath)
+function processExample(examplePath: string, relativePath: string, baseDir: string): ExampleInfo {
+  const fullPath = join(baseDir, examplePath)
   const stat = statSync(fullPath)
   const isDirectory = stat.isDirectory()
 
@@ -109,11 +109,11 @@ function processExample(examplePath: string, relativePath: string): ExampleInfo 
 
     // Try to get description from usage.ts first, then README.md
     let description = ''
-    if (statSync(usagePath).isFile()) {
+    if (existsSync(usagePath) && statSync(usagePath).isFile()) {
       const metadata = extractMetadata(usagePath)
       description = metadata.description || ''
     }
-    else if (statSync(readmePath).isFile()) {
+    else if (existsSync(readmePath) && statSync(readmePath).isFile()) {
       const readmeContent = readFileSync(readmePath, 'utf-8')
       const descriptionMatch = readmeContent.match(/^#\s+([^\n]+)/)
       if (descriptionMatch) {
@@ -126,7 +126,7 @@ function processExample(examplePath: string, relativePath: string): ExampleInfo 
     // Process sub-files
     const subFiles = readdirSync(fullPath)
       .filter(file => file.endsWith('.ts') && file !== 'README.md')
-      .map(file => processExample(join(examplePath, file), join(relativePath, file)))
+      .map(file => processExample(join(examplePath, file), join(relativePath, file), baseDir))
 
     if (subFiles.length > 0) {
       exampleInfo.subExamples = subFiles
@@ -318,7 +318,7 @@ function main() {
 
   const examples = files.map((file) => {
     console.log(`📄 Processing: ${file}`)
-    return processExample(file, file)
+    return processExample(file, file, examplesDir)
   })
 
   console.log('📝 Generating documentation...')
