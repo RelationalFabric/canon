@@ -49,10 +49,10 @@
     "build:docs:examples": "tsx scripts/generate-examples-docs.ts",
     "build:docs:restore": "scripts/restore-readmes-from-build.sh",
     "build:radar": "tsx scripts/convert-radar.ts",
-    "check:all": "npm-run-all check:lint check:types check:test",
+    "check:all": "npm-run-all check:lint check:types check:test check:radar ",
+    "check:all:fix": "npm-run-all check:lint:fix check:types check:test",
     "check:lint": "eslint .",
     "check:lint:fix": "eslint . --fix",
-    "format": "eslint . --fix",
     "check:radar": "tsx scripts/validate-radar.ts",
     "check:test": "vitest run",
     "check:types": "npm run check:types:all",
@@ -106,7 +106,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,md}": [
-      "npm run check:lint:fix"
+      "npx eslint --fix"
     ]
   }
 }

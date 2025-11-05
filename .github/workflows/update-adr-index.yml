@@ -6,8 +6,8 @@ on:
       - main
       - develop
     paths:
-      - 'docs/adrs/*.md'
-      - '!docs/adrs/README.md'
+      - "docs/adrs/*.md"
+      - "!docs/adrs/README.md"
   workflow_dispatch:
 
 permissions:
@@ -30,9 +30,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
       - name: Generate ADR Index
-        run: node scripts/generate-adr-index.js
+        run: npm run build:adr
 
       - name: Check for changes
         id: verify-changed-files
