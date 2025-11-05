@@ -22,7 +22,9 @@ export type PojoWith<T extends Pojo, K extends string, V = unknown> = T & { [P i
 // Compile-time invariants
 // ---------------------------------------------------------------------------
 
-interface SampleBase extends Pojo { name: string }
+interface SampleBase extends Pojo {
+  name: string
+}
 type SamplePojo = PojoWith<SampleBase, 'id', string>
 
 void invariant<Expect<Pojo, Record<string, unknown>>>()

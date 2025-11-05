@@ -5,12 +5,7 @@
  * and demonstrating cross-format compatibility.
  */
 
-import {
-  idOf,
-  referencesOf,
-  typeOf,
-  versionOf,
-} from '@relational-fabric/canon'
+import { idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Format Conversion Functions
@@ -37,7 +32,7 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
     }
 
     // Convert timestamps to Unix timestamps
-    const mongoTimestamps = timestamps.map(ts => ts instanceof Date ? ts.getTime() : Date.now())
+    const mongoTimestamps = timestamps.map(ts => (ts instanceof Date ? ts.getTime() : Date.now()))
 
     return {
       _id: id,
@@ -193,7 +188,9 @@ export function processUsersFromDifferentSources(): void {
       console.log()
     }
     catch (error) {
-      console.log(`User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.log(
+        `User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
       console.log()
     }
   })
@@ -243,7 +240,9 @@ export function demonstrateErrorHandling(): void {
     idOf(invalidData)
   }
   catch (error) {
-    console.log(`Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    console.log(
+      `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 
   // Test with partial data
@@ -253,6 +252,8 @@ export function demonstrateErrorHandling(): void {
     typeOf(partialData)
   }
   catch (error) {
-    console.log(`Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    console.log(
+      `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 }

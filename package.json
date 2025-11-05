@@ -52,6 +52,7 @@
     "check:all": "npm-run-all check:lint check:types check:test",
     "check:lint": "eslint .",
     "check:lint:fix": "eslint . --fix",
+    "format": "eslint . --fix",
     "check:radar": "tsx scripts/validate-radar.ts",
     "check:test": "vitest run",
     "check:types": "npm run check:types:all",
@@ -60,7 +61,8 @@
     "check:types:src": "tsc --noEmit",
     "checks": "npm run check:all",
     "dev": "tsx --watch src/index.ts",
-    "test": "npm run check:test"
+    "test": "npm run check:test",
+    "prepare": "husky"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
@@ -89,10 +91,22 @@
     "chokidar-cli": "^3.0.0",
     "depcheck": "^1.4.7",
     "eslint": "^9.10.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "npm-run-all": "^4.1.5",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0",
     "vitepress": "^1.0.0",
     "vitest": "^3.2.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,md}": [
+      "npm run check:lint:fix"
+    ]
   }
 }

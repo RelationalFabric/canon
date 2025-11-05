@@ -5,12 +5,7 @@
  * entities that implement multiple axioms.
  */
 
-import {
-  idOf,
-  referencesOf,
-  typeOf,
-  versionOf,
-} from '@relational-fabric/canon'
+import { idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Entity Analysis Functions

@@ -83,7 +83,11 @@ export interface CsvRow {
   description: string
 }
 
-export type QuadrantKey = 'tools-libraries' | 'techniques-patterns' | 'features-capabilities' | 'data-structures-formats'
+export type QuadrantKey =
+  | 'tools-libraries'
+  | 'techniques-patterns'
+  | 'features-capabilities'
+  | 'data-structures-formats'
 export type RingKey = 'adopt' | 'trial' | 'assess' | 'hold'
 
 // ---------------------------------------------------------------------------
@@ -93,5 +97,10 @@ export type RingKey = 'adopt' | 'trial' | 'assess' | 'hold'
 void invariant<Expect<RadarEntry['isNew'], boolean>>()
 void invariant<Expect<Quadrant['id'], string>>()
 void invariant<Expect<Ring['color'], string>>()
-void invariant<Expect<QuadrantKey, 'tools-libraries' | 'techniques-patterns' | 'features-capabilities' | 'data-structures-formats'>>()
+void invariant<
+  Expect<
+    QuadrantKey,
+    'tools-libraries' | 'techniques-patterns' | 'features-capabilities' | 'data-structures-formats'
+  >
+>()
 void invariant<Expect<RingKey, 'adopt' | 'trial' | 'assess' | 'hold'>>()

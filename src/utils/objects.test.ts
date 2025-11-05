@@ -3,7 +3,15 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { isPojo, objectEntries, objectKeys, objectValues, pojoHas, pojoHasOfType, pojoWithOfType } from './objects.js'
+import {
+  isPojo,
+  objectEntries,
+  objectKeys,
+  objectValues,
+  pojoHas,
+  pojoHasOfType,
+  pojoWithOfType,
+} from './objects.js'
 
 describe('isPojo', () => {
   it('should return true for plain objects', () => {
@@ -125,6 +133,9 @@ describe('objectEntries', () => {
   it('should return entries', () => {
     const obj = { a: 1, b: 2 }
     const entries = objectEntries(obj)
-    expect(entries).toEqual([['a', 1], ['b', 2]])
+    expect(entries).toEqual([
+      ['a', 1],
+      ['b', 2],
+    ])
   })
 })

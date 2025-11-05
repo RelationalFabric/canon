@@ -5,8 +5,19 @@
  * when working with Canon's universal type system.
  */
 
-import { safeIdOf, safeReferenceConversion, safeTimestampConversion, safeTypeOf, safeVersionOf } from './safe-functions'
-import { findMatchingCanon, processBatchSafely, processEntitySafely, validateEntity } from './validation-utilities'
+import {
+  safeIdOf,
+  safeReferenceConversion,
+  safeTimestampConversion,
+  safeTypeOf,
+  safeVersionOf,
+} from './safe-functions'
+import {
+  findMatchingCanon,
+  processBatchSafely,
+  processEntitySafely,
+  validateEntity,
+} from './validation-utilities'
 import './basic-canon' // Import canon definition
 
 // =============================================================================

@@ -1,7 +1,7 @@
 # ADR-006: Unbuilt TypeScript Library
 
-* Status: accepted
-* Date: 2025-01-26
+- Status: accepted
+- Date: 2025-01-26
 
 ## Context and Problem Statement
 
@@ -9,20 +9,20 @@ The package currently includes a build process that compiles TypeScript to JavaS
 
 ## Decision Drivers
 
-* Need to maintain data structure consistency between package and consumers
-* Requirement for type safety and compile-time validation
-* Desire to avoid serialization/deserialization issues with complex data structures
-* Need to provide consumers with exact types and interfaces
-* Requirement for transparent dependency management
-* Need to avoid build process complexity and maintenance overhead
-* Desire to provide better IDE support and debugging experience
+- Need to maintain data structure consistency between package and consumers
+- Requirement for type safety and compile-time validation
+- Desire to avoid serialization/deserialization issues with complex data structures
+- Need to provide consumers with exact types and interfaces
+- Requirement for transparent dependency management
+- Need to avoid build process complexity and maintenance overhead
+- Desire to provide better IDE support and debugging experience
 
 ## Considered Options
 
-* Keep current build process (TypeScript → JavaScript + declarations)
-* Remove build process and distribute TypeScript source directly
-* Hybrid approach with both built and unbuilt options
-* Use different build tools or configurations
+- Keep current build process (TypeScript → JavaScript + declarations)
+- Remove build process and distribute TypeScript source directly
+- Hybrid approach with both built and unbuilt options
+- Use different build tools or configurations
 
 ## Decision Outcome
 
@@ -30,33 +30,34 @@ Chosen option: "Remove build process and distribute TypeScript source directly",
 
 ### Positive Consequences
 
-* **Data Structure Consistency**: Consumers get direct access to the same objects and types used internally
-* **Type Safety**: TypeScript compiler ensures compatibility at compile time, preventing runtime errors
-* **No Serialization Issues**: Direct object references eliminate JSON serialization/deserialization problems
-* **Transparent Dependencies**: Consumers see exactly what libraries and versions are being used
-* **Better IDE Support**: Full IntelliSense, go-to-definition, and refactoring support
-* **Easier Debugging**: Source code is directly accessible, no minified/obfuscated code
-* **Simplified Maintenance**: No build artifacts to maintain or version
-* **Version Consistency**: TypeScript ensures consumers use the exact same library versions
+- **Data Structure Consistency**: Consumers get direct access to the same objects and types used internally
+- **Type Safety**: TypeScript compiler ensures compatibility at compile time, preventing runtime errors
+- **No Serialization Issues**: Direct object references eliminate JSON serialization/deserialization problems
+- **Transparent Dependencies**: Consumers see exactly what libraries and versions are being used
+- **Better IDE Support**: Full IntelliSense, go-to-definition, and refactoring support
+- **Easier Debugging**: Source code is directly accessible, no minified/obfuscated code
+- **Simplified Maintenance**: No build artifacts to maintain or version
+- **Version Consistency**: TypeScript ensures consumers use the exact same library versions
 
 ### Negative Consequences
 
-* **Consumer Requirements**: Consumers must have TypeScript in their build process
-* **Node.js Requirement**: Consumers need Node.js build environment
-* **Slightly More Complex Setup**: Consumers need to handle TypeScript compilation
-* **Source Code Exposure**: Package source code is directly accessible (though this may be a feature)
+- **Consumer Requirements**: Consumers must have TypeScript in their build process
+- **Node.js Requirement**: Consumers need Node.js build environment
+- **Slightly More Complex Setup**: Consumers need to handle TypeScript compilation
+- **Source Code Exposure**: Package source code is directly accessible (though this may be a feature)
 
 ## Implementation Details
 
-* **Remove Build Process**: Eliminate `tsc` compilation and related scripts
-* **Update Package Exports**: Change exports to point to TypeScript source files
-* **Update Package Files**: Include TypeScript source files instead of compiled JavaScript
-* **Update Documentation**: Reflect the unbuilt approach in documentation
-* **Maintain TypeScript Configuration**: Keep `tsconfig.base.json` for consumers to extend
+- **Remove Build Process**: Eliminate `tsc` compilation and related scripts
+- **Update Package Exports**: Change exports to point to TypeScript source files
+- **Update Package Files**: Include TypeScript source files instead of compiled JavaScript
+- **Update Documentation**: Reflect the unbuilt approach in documentation
+- **Maintain TypeScript Configuration**: Keep `tsconfig.base.json` for consumers to extend
 
 ## Package Structure Changes
 
 **Before:**
+
 ```
 dist/
   index.js
@@ -67,6 +68,7 @@ dist/
 ```
 
 **After:**
+
 ```
 src/
   index.ts
@@ -95,6 +97,7 @@ This modern approach ensures consumers get the exact same version used internall
 ## Package.json Changes
 
 **Exports:**
+
 ```json
 {
   "exports": {
@@ -109,19 +112,17 @@ This modern approach ensures consumers get the exact same version used internall
 ```
 
 **Files:**
+
 ```json
 {
-  "files": [
-    "src",
-    "eslint.js",
-    "tsconfig.base.json"
-  ]
+  "files": ["src", "eslint.js", "tsconfig.base.json"]
 }
 ```
 
 ## Consumer Usage
 
 **TypeScript Configuration:**
+
 ```json
 {
   "extends": "@relational-fabric/canon/tsconfig"
@@ -129,12 +130,14 @@ This modern approach ensures consumers get the exact same version used internall
 ```
 
 **ESLint Configuration:**
+
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
 export default createEslintConfig()
 ```
 
 **Utility Libraries:**
+
 ```typescript
 import { defu } from '@relational-fabric/canon'
 // Direct access to the same utility used internally
@@ -142,5 +145,5 @@ import { defu } from '@relational-fabric/canon'
 
 ## Links
 
-* [TypeScript Module Resolution](https://www.typescriptlang.org/docs/handbook/module-resolution.html)
-* [Node.js ES Modules](https://nodejs.org/api/esm.html)
+- [TypeScript Module Resolution](https://www.typescriptlang.org/docs/handbook/module-resolution.html)
+- [Node.js ES Modules](https://nodejs.org/api/esm.html)

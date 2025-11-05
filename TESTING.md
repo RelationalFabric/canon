@@ -14,11 +14,13 @@ Unit tests are colocated with source files using Vitest's `if (import.meta.vites
 - **Production Stripping**: Test code is removed in production builds
 
 **Files with In-Source Tests:**
+
 - `src/runtime/core.ts` - Functional core tests
 - `src/runtime/registry.ts` - Global registry tests
 - `src/utils/objects.ts` - Object utility tests
 
 **Example:**
+
 ```typescript
 // Implementation
 export function isPojo(value: unknown): value is Pojo {
@@ -47,6 +49,7 @@ Integration tests are located in the `examples/` directory and serve triple duty
 3. **Regression Testing** - Ensure changes don't break functionality
 
 **Current Examples:**
+
 - `examples/01-basic-id-axiom.ts` - Basic canon usage with multiple formats
 - `examples/02-module-style-canon.ts` - Module-style canon definition pattern
 
@@ -131,6 +134,7 @@ if (import.meta.vitest) {
 ```
 
 **Guidelines:**
+
 - Keep tests focused on the module's functionality
 - Test private functions when appropriate
 - Use `beforeEach`/`afterEach` to manage state
@@ -168,6 +172,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 ```
 
 **Guidelines:**
+
 - Use numbered prefixes (`01-`, `02-`, etc.)
 - Include comprehensive comments
 - Show real-world usage patterns
@@ -183,16 +188,19 @@ npx vitest run --coverage
 ```
 
 Coverage includes:
+
 - `src/**/*.{js,ts}` files
 - Excludes: test files, radar, examples
 
 Reports are available in:
+
 - Terminal: Text summary
 - Files: `coverage/index.html`
 
 ## Best Practices
 
 ### Do:
+
 - ✅ Write unit tests for core functionality
 - ✅ Write examples for user-facing features
 - ✅ Test both success and error cases
@@ -201,6 +209,7 @@ Reports are available in:
 - ✅ Use descriptive test names
 
 ### Don't:
+
 - ❌ Put integration tests in source files
 - ❌ Create `.test.ts` files (use in-source instead)
 - ❌ Test implementation details

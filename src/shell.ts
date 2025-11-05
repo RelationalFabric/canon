@@ -33,10 +33,7 @@ export function resetRegistry(): void {
  * @param label - The canon label
  * @param config - The canon configuration
  */
-export function declareCanon<Label extends keyof Canons>(
-  label: Label,
-  config: CanonConfig,
-): void {
+export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig): void {
   globalRegistry.register(label, defineCanon(config))
 }
 

@@ -5,11 +5,7 @@
  * with real-world examples across different data formats.
  */
 
-import {
-  idOf,
-  typeOf,
-  versionOf,
-} from '@relational-fabric/canon'
+import { idOf, typeOf, versionOf } from '@relational-fabric/canon'
 import {
   demonstrateErrorHandling,
   demonstrateFormatConversion,

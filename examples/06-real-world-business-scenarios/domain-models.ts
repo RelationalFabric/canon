@@ -17,7 +17,11 @@ type EcommerceCanon = Canon<{
   Type: { $basis: { type: string }, key: 'type', $meta: { discriminator: true } }
   Version: { $basis: { version: number }, key: 'version', $meta: { optimistic: true } }
   Timestamps: { $basis: Date, isCanonical: (v: unknown) => v is Date, $meta: { format: 'iso8601' } }
-  References: { $basis: string | object, isCanonical: (v: unknown) => v is { ref: string, resolved: boolean }, $meta: { format: 'uuid' } }
+  References: {
+    $basis: string | object
+    isCanonical: (v: unknown) => v is { ref: string, resolved: boolean }
+    $meta: { format: 'uuid' }
+  }
 }>
 
 declare module '@relational-fabric/canon' {
@@ -30,9 +34,23 @@ declareCanon('EcommerceCanon', {
   axioms: {
     Id: { $basis: pojoWithOfType('id', 'string'), key: 'id', $meta: { format: 'uuid' } },
     Type: { $basis: pojoWithOfType('type', 'string'), key: 'type', $meta: { discriminator: true } },
-    Version: { $basis: pojoWithOfType('version', 'number'), key: 'version', $meta: { optimistic: true } },
-    Timestamps: { $basis: (v: unknown): v is Date => v instanceof Date, isCanonical: (v: unknown): v is Date => v instanceof Date, $meta: { format: 'iso8601' } },
-    References: { $basis: (v: unknown): v is string | object => typeof v === 'string' || (typeof v === 'object' && v !== null), isCanonical: (v: unknown): v is { ref: string, resolved: boolean } => typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v, $meta: { format: 'uuid' } },
+    Version: {
+      $basis: pojoWithOfType('version', 'number'),
+      key: 'version',
+      $meta: { optimistic: true },
+    },
+    Timestamps: {
+      $basis: (v: unknown): v is Date => v instanceof Date,
+      isCanonical: (v: unknown): v is Date => v instanceof Date,
+      $meta: { format: 'iso8601' },
+    },
+    References: {
+      $basis: (v: unknown): v is string | object =>
+        typeof v === 'string' || (typeof v === 'object' && v !== null),
+      isCanonical: (v: unknown): v is { ref: string, resolved: boolean } =>
+        typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v,
+      $meta: { format: 'uuid' },
+    },
   },
 })
 

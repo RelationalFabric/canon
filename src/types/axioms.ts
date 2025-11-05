@@ -22,12 +22,15 @@ export type Axiom<TConfig, TMeta> = TConfig & { $meta: TMeta }
  * This represents concepts that can be found by looking for a specific
  * key name within an object (e.g., 'id', '@id', '_id').
  */
-export type KeyNameAxiom = Axiom<{
-  $basis: Record<string, unknown>
-  key: string
-}, {
+export type KeyNameAxiom = Axiom<
+  {
+    $basis: Record<string, unknown>
+    key: string
+  },
+  {
     [key: string]: unknown
-  }>
+  }
+>
 
 /**
  * Representation axiom for data with multiple representations
@@ -38,12 +41,15 @@ export type KeyNameAxiom = Axiom<{
  * @template T - The input type that can be converted
  * @template C - The canonical type (defaults to unknown)
  */
-export type RepresentationAxiom<T, C = unknown> = Axiom<{
-  $basis: T | TypeGuard<unknown>
-  isCanonical: (value: unknown) => value is C
-}, {
+export type RepresentationAxiom<T, C = unknown> = Axiom<
+  {
+    $basis: T | TypeGuard<unknown>
+    isCanonical: (value: unknown) => value is C
+  },
+  {
     [key: string]: unknown
-  }>
+  }
+>
 
 /**
  * Global registry of axioms available in Canon
@@ -81,12 +87,13 @@ export interface EntityReference<R, T = unknown> {
  *
  * @template TLabel - The axiom label (e.g., 'Id', 'Type')
  */
-export type AxiomValue<TLabel extends keyof Axioms> =
-  Axioms[TLabel] extends { $basis: infer TBasis }
-    ? TBasis extends TypeGuard<infer T>
-      ? T
-      : TBasis
-    : never
+export type AxiomValue<TLabel extends keyof Axioms> = Axioms[TLabel] extends {
+  $basis: infer TBasis
+}
+  ? TBasis extends TypeGuard<infer T>
+    ? T
+    : TBasis
+  : never
 
 /**
  * Runtime configuration for an axiom
@@ -116,7 +123,9 @@ export function defineAxiom(config: AxiomConfig): AxiomConfig {
 // ---------------------------------------------------------------------------
 
 void invariant<Expect<KeyNameAxiom['key'], string>>()
-void invariant<Expect<RepresentationAxiom<string, string>['isCanonical'], (value: unknown) => value is string>>()
+void invariant<
+  Expect<RepresentationAxiom<string, string>['isCanonical'], (value: unknown) => value is string>
+>()
 void invariant<Expect<EntityReference<string>['ref'], string>>()
 void invariant<Expect<EntityReference<string>['resolved'], boolean>>()
 void invariant<Expect<AxiomConfig['$basis'], TypeGuard<unknown>>>()

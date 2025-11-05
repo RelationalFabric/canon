@@ -1,69 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>Canon Technology Radar</title>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://zalando.github.io/tech-radar/release/radar-0.6.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #fff;
-        }
-        .radar-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .radar-title {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .radar-subtitle {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #666;
-            font-size: 14px;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #fff;
+      }
+      .radar-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .radar-title {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+      }
+      .radar-subtitle {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #666;
+        font-size: 14px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="radar-container">
-        <h1 class="radar-title">Canon Technology Radar</h1>
-        <p class="radar-subtitle">Technology landscape and recommendations</p>
-        <div id="radar"></div>
+      <h1 class="radar-title">Canon Technology Radar</h1>
+      <p class="radar-subtitle">Technology landscape and recommendations</p>
+      <div id="radar"></div>
     </div>
 
     <script>
-        const entries = [{"label":"@antfu/eslint-config","quadrant":0,"ring":0,"moved":0},{"label":"@tsconfig/node-lts","quadrant":0,"ring":0,"moved":0},{"label":"defu","quadrant":0,"ring":0,"moved":0},{"label":"typescript","quadrant":0,"ring":0,"moved":0},{"label":"eslint","quadrant":0,"ring":0,"moved":0},{"label":"type-fest","quadrant":0,"ring":1,"moved":1},{"label":"radash","quadrant":0,"ring":1,"moved":1},{"label":"jsonpath-plus","quadrant":0,"ring":1,"moved":1},{"label":"json-stable-stringify","quadrant":0,"ring":1,"moved":1},{"label":"zod","quadrant":0,"ring":1,"moved":1},{"label":"uuid","quadrant":0,"ring":2,"moved":1},{"label":"nanoid","quadrant":0,"ring":2,"moved":1},{"label":"object-hash","quadrant":0,"ring":2,"moved":1},{"label":"immutable","quadrant":0,"ring":2,"moved":1},{"label":"date-fns","quadrant":0,"ring":2,"moved":1},{"label":"lodash","quadrant":0,"ring":3,"moved":0},{"label":"ts-essentials","quadrant":0,"ring":3,"moved":0},{"label":"Dual Export Strategy","quadrant":1,"ring":0,"moved":0},{"label":"ADR Methodology","quadrant":1,"ring":0,"moved":0},{"label":"Configuration Composition","quadrant":1,"ring":0,"moved":0},{"label":"ES Modules","quadrant":1,"ring":0,"moved":0},{"label":"Universal Adapter Pattern","quadrant":1,"ring":1,"moved":1},{"label":"Lazy Typing","quadrant":1,"ring":1,"moved":1},{"label":"Canon Pattern","quadrant":1,"ring":1,"moved":1},{"label":"Tree-shaking Support","quadrant":1,"ring":1,"moved":1},{"label":"Immutable Data Patterns","quadrant":1,"ring":2,"moved":1},{"label":"Schema Evolution","quadrant":1,"ring":2,"moved":1},{"label":"Runtime Validation","quadrant":1,"ring":2,"moved":1},{"label":"TypeScript Configuration Sharing","quadrant":2,"ring":0,"moved":0},{"label":"ESLint Configuration Composition","quadrant":2,"ring":0,"moved":0},{"label":"Multi-format Data Support","quadrant":2,"ring":0,"moved":0},{"label":"Type Checking","quadrant":2,"ring":0,"moved":0},{"label":"Runtime Type Validation","quadrant":2,"ring":1,"moved":1},{"label":"Configuration Merging","quadrant":2,"ring":1,"moved":1},{"label":"Hot Reloading","quadrant":2,"ring":1,"moved":1},{"label":"Automatic Fixing","quadrant":2,"ring":1,"moved":1},{"label":"Advanced Type Manipulation","quadrant":2,"ring":2,"moved":1},{"label":"Data Transformation","quadrant":2,"ring":2,"moved":1},{"label":"Caching Strategies","quadrant":2,"ring":2,"moved":1},{"label":"JSON","quadrant":3,"ring":0,"moved":0},{"label":"JSON-LD","quadrant":3,"ring":0,"moved":0},{"label":"TypeScript Types","quadrant":3,"ring":0,"moved":0},{"label":"RFC4122 UUIDs","quadrant":3,"ring":0,"moved":0},{"label":"ISO8601 Dates","quadrant":3,"ring":0,"moved":0},{"label":"REST APIs","quadrant":3,"ring":0,"moved":0},{"label":"MongoDB Documents","quadrant":3,"ring":1,"moved":1},{"label":"YAML","quadrant":3,"ring":1,"moved":1},{"label":"NanoID","quadrant":3,"ring":1,"moved":1},{"label":"GraphQL","quadrant":3,"ring":1,"moved":1},{"label":"JSON Schema","quadrant":3,"ring":1,"moved":1},{"label":"Tree Structures","quadrant":3,"ring":1,"moved":1},{"label":"Immutable Collections","quadrant":3,"ring":2,"moved":1},{"label":"MessagePack","quadrant":3,"ring":2,"moved":1},{"label":"OpenAPI","quadrant":3,"ring":2,"moved":1},{"label":"SQL Schemas","quadrant":3,"ring":2,"moved":1},{"label":"WebSockets","quadrant":3,"ring":2,"moved":1},{"label":"Graph Data Structures","quadrant":3,"ring":2,"moved":1},{"label":"Protocol Buffers","quadrant":3,"ring":3,"moved":0},{"label":"gRPC","quadrant":3,"ring":3,"moved":0},{"label":"XML","quadrant":3,"ring":3,"moved":0}];
-        
-        const radar = new Radar({
-            container: '#radar',
-            width: 1000,
-            height: 1000,
-            padding: 60,
-            colors: {
-                background: '#fff',
-                grid: '#bbb',
-                inactive: '#ddd'
-            },
-            quadrants: [
-                { name: 'Tools & Libraries' },
-                { name: 'Techniques & Patterns' },
-                { name: 'Features & Capabilities' },
-                { name: 'Data Structures, Formats & Standards' }
-            ],
-            rings: [
-                { name: 'Adopt', color: '#93c47d' },
-                { name: 'Trial', color: '#93d2c2' },
-                { name: 'Assess', color: '#fbdb84' },
-                { name: 'Hold', color: '#efafa9' }
-            ],
-            entries: entries
-        });
+      const entries = [
+        { label: '@antfu/eslint-config', quadrant: 0, ring: 0, moved: 0 },
+        { label: '@tsconfig/node-lts', quadrant: 0, ring: 0, moved: 0 },
+        { label: 'defu', quadrant: 0, ring: 0, moved: 0 },
+        { label: 'typescript', quadrant: 0, ring: 0, moved: 0 },
+        { label: 'eslint', quadrant: 0, ring: 0, moved: 0 },
+        { label: 'type-fest', quadrant: 0, ring: 1, moved: 1 },
+        { label: 'radash', quadrant: 0, ring: 1, moved: 1 },
+        { label: 'jsonpath-plus', quadrant: 0, ring: 1, moved: 1 },
+        { label: 'json-stable-stringify', quadrant: 0, ring: 1, moved: 1 },
+        { label: 'zod', quadrant: 0, ring: 1, moved: 1 },
+        { label: 'uuid', quadrant: 0, ring: 2, moved: 1 },
+        { label: 'nanoid', quadrant: 0, ring: 2, moved: 1 },
+        { label: 'object-hash', quadrant: 0, ring: 2, moved: 1 },
+        { label: 'immutable', quadrant: 0, ring: 2, moved: 1 },
+        { label: 'date-fns', quadrant: 0, ring: 2, moved: 1 },
+        { label: 'lodash', quadrant: 0, ring: 3, moved: 0 },
+        { label: 'ts-essentials', quadrant: 0, ring: 3, moved: 0 },
+        { label: 'Dual Export Strategy', quadrant: 1, ring: 0, moved: 0 },
+        { label: 'ADR Methodology', quadrant: 1, ring: 0, moved: 0 },
+        { label: 'Configuration Composition', quadrant: 1, ring: 0, moved: 0 },
+        { label: 'ES Modules', quadrant: 1, ring: 0, moved: 0 },
+        { label: 'Universal Adapter Pattern', quadrant: 1, ring: 1, moved: 1 },
+        { label: 'Lazy Typing', quadrant: 1, ring: 1, moved: 1 },
+        { label: 'Canon Pattern', quadrant: 1, ring: 1, moved: 1 },
+        { label: 'Tree-shaking Support', quadrant: 1, ring: 1, moved: 1 },
+        { label: 'Immutable Data Patterns', quadrant: 1, ring: 2, moved: 1 },
+        { label: 'Schema Evolution', quadrant: 1, ring: 2, moved: 1 },
+        { label: 'Runtime Validation', quadrant: 1, ring: 2, moved: 1 },
+        { label: 'TypeScript Configuration Sharing', quadrant: 2, ring: 0, moved: 0 },
+        { label: 'ESLint Configuration Composition', quadrant: 2, ring: 0, moved: 0 },
+        { label: 'Multi-format Data Support', quadrant: 2, ring: 0, moved: 0 },
+        { label: 'Type Checking', quadrant: 2, ring: 0, moved: 0 },
+        { label: 'Runtime Type Validation', quadrant: 2, ring: 1, moved: 1 },
+        { label: 'Configuration Merging', quadrant: 2, ring: 1, moved: 1 },
+        { label: 'Hot Reloading', quadrant: 2, ring: 1, moved: 1 },
+        { label: 'Automatic Fixing', quadrant: 2, ring: 1, moved: 1 },
+        { label: 'Advanced Type Manipulation', quadrant: 2, ring: 2, moved: 1 },
+        { label: 'Data Transformation', quadrant: 2, ring: 2, moved: 1 },
+        { label: 'Caching Strategies', quadrant: 2, ring: 2, moved: 1 },
+        { label: 'JSON', quadrant: 3, ring: 0, moved: 0 },
+        { label: 'JSON-LD', quadrant: 3, ring: 0, moved: 0 },
+        { label: 'TypeScript Types', quadrant: 3, ring: 0, moved: 0 },
+        { label: 'RFC4122 UUIDs', quadrant: 3, ring: 0, moved: 0 },
+        { label: 'ISO8601 Dates', quadrant: 3, ring: 0, moved: 0 },
+        { label: 'REST APIs', quadrant: 3, ring: 0, moved: 0 },
+        { label: 'MongoDB Documents', quadrant: 3, ring: 1, moved: 1 },
+        { label: 'YAML', quadrant: 3, ring: 1, moved: 1 },
+        { label: 'NanoID', quadrant: 3, ring: 1, moved: 1 },
+        { label: 'GraphQL', quadrant: 3, ring: 1, moved: 1 },
+        { label: 'JSON Schema', quadrant: 3, ring: 1, moved: 1 },
+        { label: 'Tree Structures', quadrant: 3, ring: 1, moved: 1 },
+        { label: 'Immutable Collections', quadrant: 3, ring: 2, moved: 1 },
+        { label: 'MessagePack', quadrant: 3, ring: 2, moved: 1 },
+        { label: 'OpenAPI', quadrant: 3, ring: 2, moved: 1 },
+        { label: 'SQL Schemas', quadrant: 3, ring: 2, moved: 1 },
+        { label: 'WebSockets', quadrant: 3, ring: 2, moved: 1 },
+        { label: 'Graph Data Structures', quadrant: 3, ring: 2, moved: 1 },
+        { label: 'Protocol Buffers', quadrant: 3, ring: 3, moved: 0 },
+        { label: 'gRPC', quadrant: 3, ring: 3, moved: 0 },
+        { label: 'XML', quadrant: 3, ring: 3, moved: 0 },
+      ]
+
+      const radar = new Radar({
+        container: '#radar',
+        width: 1000,
+        height: 1000,
+        padding: 60,
+        colors: {
+          background: '#fff',
+          grid: '#bbb',
+          inactive: '#ddd',
+        },
+        quadrants: [
+          { name: 'Tools & Libraries' },
+          { name: 'Techniques & Patterns' },
+          { name: 'Features & Capabilities' },
+          { name: 'Data Structures, Formats & Standards' },
+        ],
+        rings: [
+          { name: 'Adopt', color: '#93c47d' },
+          { name: 'Trial', color: '#93d2c2' },
+          { name: 'Assess', color: '#fbdb84' },
+          { name: 'Hold', color: '#efafa9' },
+        ],
+        entries: entries,
+      })
     </script>
-</body>
+  </body>
 </html>

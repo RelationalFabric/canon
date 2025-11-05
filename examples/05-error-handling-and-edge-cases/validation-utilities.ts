@@ -5,7 +5,13 @@
  * in a robust manner.
  */
 
-import { safeIdOf, safeReferencesOf, safeTimestampsOf, safeTypeOf, safeVersionOf } from './safe-functions'
+import {
+  safeIdOf,
+  safeReferencesOf,
+  safeTimestampsOf,
+  safeTypeOf,
+  safeVersionOf,
+} from './safe-functions'
 
 // =============================================================================
 // Validation Functions
@@ -90,7 +96,10 @@ export function findMatchingCanon(entity: unknown): string | undefined {
     return undefined
   }
   catch (error) {
-    console.warn('Failed to find matching canon:', error instanceof Error ? error.message : 'Unknown error')
+    console.warn(
+      'Failed to find matching canon:',
+      error instanceof Error ? error.message : 'Unknown error',
+    )
     return undefined
   }
 }

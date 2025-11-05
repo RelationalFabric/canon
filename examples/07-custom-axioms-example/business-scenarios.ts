@@ -157,12 +157,15 @@ export function calculateOrderTotalWithCurrency(order: unknown): {
 /**
  * Update entity status with transition validation
  */
-export function updateEntityStatus(entity: unknown, newStatus: string): {
-  success: boolean
-  oldStatus?: string
-  newStatus?: string
-  error?: string
-} {
+export function updateEntityStatus(
+  entity: unknown,
+  newStatus: string,
+): {
+    success: boolean
+    oldStatus?: string
+    newStatus?: string
+    error?: string
+  } {
   try {
     const currentStatus = statusOf(entity)
     const entityId = idOf(entity)

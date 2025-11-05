@@ -74,9 +74,12 @@ function generateAdrTable(adrs) {
 
   const tableHeader = `| ADR | Title | Status | Date |\n|-----|-------|--------|------|`
 
-  const tableRows = adrs.map(adr =>
-    `| [ADR-${adr.number}](./${adr.filename}) | ${adr.title} | ${adr.color} ${adr.label} | ${adr.date} |`,
-  ).join('\n')
+  const tableRows = adrs
+    .map(
+      adr =>
+        `| [ADR-${adr.number}](./${adr.filename}) | ${adr.title} | ${adr.color} ${adr.label} | ${adr.date} |`,
+    )
+    .join('\n')
 
   return `${tableHeader}\n${tableRows}`
 }
@@ -122,9 +125,7 @@ function main() {
 
     console.log(`📁 Found ${files.length} ADR files`)
 
-    const adrs = files
-      .map(extractAdrInfo)
-      .filter(adr => adr !== null)
+    const adrs = files.map(extractAdrInfo).filter(adr => adr !== null)
 
     console.log(`✅ Successfully parsed ${adrs.length} ADRs`)
 

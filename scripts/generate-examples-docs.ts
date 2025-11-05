@@ -33,7 +33,9 @@ function extractMetadata(filePath: string): Partial<ExampleInfo> {
   const content = readFileSync(filePath, 'utf-8')
 
   // Extract description from JSDoc comments (first comment block)
-  const descriptionMatch = content.match(/\/\*\*[\t\v\f\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*\n\s*\*\s*([^*\n]+)/)
+  const descriptionMatch = content.match(
+    /\/\*\*[\t\v\f\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*\n\s*\*\s*([^*\n]+)/,
+  )
   const description = descriptionMatch ? descriptionMatch[1].trim() : ''
 
   // Extract key concepts from comments
@@ -159,52 +161,54 @@ This directory contains practical examples demonstrating how to use the @relatio
 
 `
 
-  const examplesContent = examples.map((example) => {
-    let content = `### [${example.name}](./${example.path})\n`
+  const examplesContent = examples
+    .map((example) => {
+      let content = `### [${example.name}](./${example.path})\n`
 
-    if (example.description) {
-      content += `${example.description}\n\n`
-    }
+      if (example.description) {
+        content += `${example.description}\n\n`
+      }
 
-    if (example.keyConcepts.length > 0) {
-      content += `**Key Concepts:**\n`
-      example.keyConcepts.forEach((concept) => {
-        content += `- ${concept}\n`
-      })
-      content += '\n'
-    }
-
-    if (example.prerequisites && example.prerequisites.length > 0) {
-      content += `**Prerequisites:**\n`
-      example.prerequisites.forEach((prereq) => {
-        content += `- ${prereq}\n`
-      })
-      content += '\n'
-    }
-
-    if (example.isDirectory) {
-      content += `**Pattern:** Multi-file example with modular structure\n\n`
-    }
-    else {
-      content += `**Pattern:** Single-file example\n\n`
-    }
-
-    content += `**Source:** [View on GitHub](${example.githubUrl})\n\n`
-
-    if (example.subExamples && example.subExamples.length > 0) {
-      content += `**Files:**\n`
-      example.subExamples.forEach((subExample) => {
-        content += `- [${subExample.name}](${subExample.githubUrl})`
-        if (subExample.description) {
-          content += ` - ${subExample.description}`
-        }
+      if (example.keyConcepts.length > 0) {
+        content += `**Key Concepts:**\n`
+        example.keyConcepts.forEach((concept) => {
+          content += `- ${concept}\n`
+        })
         content += '\n'
-      })
-      content += '\n'
-    }
+      }
 
-    return content
-  }).join('')
+      if (example.prerequisites && example.prerequisites.length > 0) {
+        content += `**Prerequisites:**\n`
+        example.prerequisites.forEach((prereq) => {
+          content += `- ${prereq}\n`
+        })
+        content += '\n'
+      }
+
+      if (example.isDirectory) {
+        content += `**Pattern:** Multi-file example with modular structure\n\n`
+      }
+      else {
+        content += `**Pattern:** Single-file example\n\n`
+      }
+
+      content += `**Source:** [View on GitHub](${example.githubUrl})\n\n`
+
+      if (example.subExamples && example.subExamples.length > 0) {
+        content += `**Files:**\n`
+        example.subExamples.forEach((subExample) => {
+          content += `- [${subExample.name}](${subExample.githubUrl})`
+          if (subExample.description) {
+            content += ` - ${subExample.description}`
+          }
+          content += '\n'
+        })
+        content += '\n'
+      }
+
+      return content
+    })
+    .join('')
 
   const footer = `## Example Patterns
 

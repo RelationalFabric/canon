@@ -9,6 +9,7 @@ Architecture Decision Records are documents that capture important architectural
 ## ADR Formats
 
 ### Traditional ADR Format
+
 For architectural decisions, each ADR follows the format defined by [Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions):
 
 1. **Title** - A descriptive title
@@ -18,6 +19,7 @@ For architectural decisions, each ADR follows the format defined by [Michael Nyg
 5. **Consequences** - What becomes easier or more difficult to do and any risks introduced by this change
 
 ### Y-Statement Format
+
 For policy decisions and ongoing constraints, use the Y-statement format:
 
 1. **Start with the Statement**: Begin with a clear, concise policy statement
@@ -26,6 +28,7 @@ For policy decisions and ongoing constraints, use the Y-statement format:
 4. **Maintain ADR sequence**: Follow normal ADR numbering
 
 Example:
+
 ```markdown
 ---
 format: y-statement
@@ -33,16 +36,19 @@ format: y-statement
 
 # ADR-XXX: Policy Title
 
-* Status: accepted
-* Date: YYYY-MM-DD
+- Status: accepted
+- Date: YYYY-MM-DD
 
 ## Statement
+
 We require Node.js 22+ as the minimum supported version.
 
 ## Rationale
+
 Node.js 18 reached End-of-Life in April 2025.
 
 ## Implications
+
 All packages must specify `>=22.0.0` in engines field.
 ```
 
@@ -53,6 +59,7 @@ We use [adr-tools](https://github.com/npryce/adr-tools) to manage ADRs. This ens
 ### Prerequisites
 
 Install adr-tools (already included as a dev dependency):
+
 ```bash
 npm install
 ```
@@ -60,11 +67,13 @@ npm install
 ### Creating a New ADR
 
 1. **Navigate to the ADR directory:**
+
    ```bash
    cd docs/adrs
    ```
 
 2. **Create a new ADR:**
+
    ```bash
    npx adr new "Descriptive Title of Your Decision"
    ```
@@ -76,11 +85,13 @@ npm install
 ### ADR Management Commands
 
 #### Using adr-tools directly (recommended):
+
 - **List all ADRs:** `cd docs/adrs && npx adr list`
 - **Create new ADR:** `cd docs/adrs && npx adr new "Title"`
 - **Build ADR artifacts:** `npm run build:adr` (generates TOC + index)
 
 #### Direct adr-tools commands:
+
 - **List all ADRs:** `npx adr list`
 - **Create new ADR:** `npx adr new "Title"`
 - **Link ADRs:** `npx adr link <from> <to> <relationship>`

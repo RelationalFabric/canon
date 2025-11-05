@@ -11,6 +11,7 @@ This directory contains the Canon Technology Radar source data and configuration
 ## Generated Files
 
 The compiled/generated files are stored in `docs/public/radar/` (created automatically by scripts):
+
 - `data.csv` - Generated CSV format for build-your-own-radar tool
 - `radar.html` - Generated radar visualization (when using build-your-own-radar tool)
 

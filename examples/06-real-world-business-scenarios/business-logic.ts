@@ -34,10 +34,11 @@ export function calculateOrderTotal(order: unknown): {
   const orderObj = order as Record<string, unknown>
 
   // Extract items
-  const items = (orderObj.items as Array<{ productId: string, quantity: number, price: number }>) || []
+  const items
+    = (orderObj.items as Array<{ productId: string, quantity: number, price: number }>) || []
 
   // Calculate subtotal
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   // Apply discount (10% for orders over $100)
   const discountRate = subtotal > 100 ? 0.1 : 0
@@ -62,12 +63,15 @@ export function calculateOrderTotal(order: unknown): {
 /**
  * Update order status with optimistic concurrency control
  */
-export function updateOrderStatus(order: unknown, newStatus: string): {
-  success: boolean
-  oldStatus?: string
-  newVersion?: number
-  error?: string
-} {
+export function updateOrderStatus(
+  order: unknown,
+  newStatus: string,
+): {
+    success: boolean
+    oldStatus?: string
+    newVersion?: number
+    error?: string
+  } {
   try {
     const orderId = idOf(order)
     const currentVersion = versionOf(order)
@@ -136,7 +140,10 @@ export function generateOrderSummary(order: unknown): {
 
   const orderObj = order as Record<string, unknown>
   const items = (orderObj.items as Array<unknown>) || []
-  const totals = (orderObj.totals as { total: number, currency: string }) || { total: 0, currency: 'USD' }
+  const totals = (orderObj.totals as { total: number, currency: string }) || {
+    total: 0,
+    currency: 'USD',
+  }
   const customerId = (orderObj.customerId as string) || 'unknown'
 
   // Handle timestamps manually
@@ -224,15 +231,18 @@ export function validateCustomerForOrder(customer: unknown): {
 /**
  * Process complete order workflow
  */
-export function processOrderWorkflow(customer: unknown, order: unknown): {
-  success: boolean
-  steps: Array<{
-    step: string
+export function processOrderWorkflow(
+  customer: unknown,
+  order: unknown,
+): {
     success: boolean
-    message: string
-  }>
-  finalOrder?: unknown
-} {
+    steps: Array<{
+      step: string
+      success: boolean
+      message: string
+    }>
+    finalOrder?: unknown
+  } {
   const steps: Array<{ step: string, success: boolean, message: string }> = []
 
   try {
@@ -241,7 +251,9 @@ export function processOrderWorkflow(customer: unknown, order: unknown): {
     steps.push({
       step: 'Validate Customer',
       success: customerValidation.valid,
-      message: customerValidation.valid ? 'Customer is valid' : customerValidation.errors.join(', '),
+      message: customerValidation.valid
+        ? 'Customer is valid'
+        : customerValidation.errors.join(', '),
     })
 
     if (!customerValidation.valid) {
@@ -261,7 +273,9 @@ export function processOrderWorkflow(customer: unknown, order: unknown): {
     steps.push({
       step: 'Update Status',
       success: statusUpdate.success,
-      message: statusUpdate.success ? `Order status updated to confirmed` : statusUpdate.error || 'Unknown error',
+      message: statusUpdate.success
+        ? `Order status updated to confirmed`
+        : statusUpdate.error || 'Unknown error',
     })
 
     if (!statusUpdate.success) {

@@ -5,6 +5,7 @@ This section contains strategic planning and direction for the Canon project, se
 ## Contents
 
 ### [Technology Radar](./radar/)
+
 Our comprehensive technology radar tracking recommendations for tools, techniques, features, and data formats used with Canon.
 
 ## Philosophy
