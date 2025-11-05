@@ -1,3 +1,4 @@
+import process from 'node:process'
 import antfu from '@antfu/eslint-config'
 import { defu } from 'defu'
 

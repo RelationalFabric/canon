@@ -41,8 +41,8 @@ We will implement automatic documentation generation from example source files u
 - Maintains pattern information (declarative vs module-style)
 
 **Build Integration**:
-- Added `npm run examples:generate-docs` script
-- Integrated into `npm run docs:build` process
+- Added `npm run build:docs:examples` script
+- Integrated into `npm run build:docs` process
 - Documentation regenerated on every build
 
 **Generated Documentation Structure**:
@@ -79,8 +79,8 @@ We will implement automatic documentation generation from example source files u
 The solution includes:
 
 1. **Documentation Generation Script** (`/scripts/generate-examples-docs.ts`)
-2. **NPM Script** (`npm run examples:generate-docs`)
-3. **Build Integration** (updated `docs:build` script)
+2. **NPM Script** (`npm run build:docs:examples`)
+3. **Build Integration** (updated `build:docs` script)
 4. **Removed Static Files** (deleted outdated static documentation)
 5. **Updated Documentation** (generated comprehensive examples overview)
 

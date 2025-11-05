@@ -60,7 +60,7 @@ void invariant<IsFalse<true>>()
 ## Integration Tips
 
 - **IDE Feedback** – failed invariants surface as regular TypeScript errors. Jump to definition from the error to inspect the assertion.
-- **CI/CD** – invariants run automatically when you execute `npm run check` (`tsc --noEmit`). No additional tooling is required.
+- **CI/CD** – invariants run automatically when you execute `npm run check:types` (`tsc --noEmit`). No additional tooling is required.
 - **Examples** – use the utilities inside example files with `void invariant<Expect<...>>()` to keep lint checks satisfied.
 
 ## Advanced Usage

@@ -19,4 +19,4 @@
 
 ## ADR Process
 
-ADR content is managed with [adr-tools](https://github.com/npryce/adr-tools). Use `npm run adr:new "Title"` to create a new record and `npm run adr:list` to review the catalog. The `scripts/generate-adr-index.js` utility regenerates the table above.
+ADR content is managed with [adr-tools](https://github.com/npryce/adr-tools). Use `cd docs/adrs && npx adr new "Title"` to create a new record and `cd docs/adrs && npx adr list` to review the catalog. The `scripts/generate-adr-index.js` utility regenerates the table above.

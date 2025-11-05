@@ -56,23 +56,14 @@ Integration tests are located in the `examples/` directory and serve triple duty
 
 ```bash
 # Run all unit tests once
-npm run test
-
-# Watch mode - re-run on changes
-npm run test:watch
-
-# With UI
-npm run test:ui
-
-# With coverage report
-npm run test:coverage
+npm test  # or: npm run check:test
 ```
 
 ### Integration Tests (Examples)
 
 ```bash
-# Run all examples
-npm run example
+# Examples are included in main test suite
+npm test
 
 # Run specific example
 npx tsx examples/01-basic-id-axiom.ts
@@ -81,8 +72,8 @@ npx tsx examples/01-basic-id-axiom.ts
 ### All Checks
 
 ```bash
-# TypeScript + ESLint + Tests
-npm run check && npm run test
+# All checks (TypeScript + ESLint + Tests)
+npm run check:all
 ```
 
 ## Configuration
@@ -185,10 +176,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 ## Test Coverage
 
-Coverage reports are generated with:
+Coverage reports can be generated with vitest directly:
 
 ```bash
-npm run test:coverage
+npx vitest run --coverage
 ```
 
 Coverage includes:
@@ -222,9 +213,12 @@ Tests run automatically in CI:
 
 ```bash
 # In CI pipeline
-npm run check    # TypeScript + ESLint
-npm run test     # Unit tests
-npm run example  # Integration tests
+npm run check:all     # All checks (TypeScript + ESLint + Tests)
+
+# Or run individually
+npm run check:types   # TypeScript only
+npm run check:lint    # ESLint only
+npm run check:test    # Tests only
 ```
 
 ## Debugging Tests
@@ -238,8 +232,8 @@ Add to `.vscode/launch.json`:
   "type": "node",
   "request": "launch",
   "name": "Debug Vitest",
-  "runtimeExecutable": "npm",
-  "runtimeArgs": ["run", "test:watch"],
+  "runtimeExecutable": "npx",
+  "runtimeArgs": ["vitest"],
   "console": "integratedTerminal"
 }
 ```
@@ -251,7 +245,7 @@ Add to `.vscode/launch.json`:
 npx vitest run src/runtime/core.ts --reporter=verbose
 
 # UI mode for interactive debugging
-npm run test:ui
+npx vitest --ui
 ```
 
 ## References

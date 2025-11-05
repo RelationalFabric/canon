@@ -211,7 +211,7 @@ Canon maintains transparent planning and strategic direction:
 - **Strategic Vision**: [planning/](planning/) - Long-term direction and positioning
 - **Development Roadmap**: [planning/](planning/) - Detailed development phases and milestones
 - **Architecture Decisions**: [docs/adrs/](docs/adrs/) - Documented ADRs for major decisions
-- **Update Radar**: `npm run radar:convert` - Convert YAML to CSV for visualization
+- **Update Radar**: `npm run build:radar` - Convert YAML to CSV for visualization
 
 ## Development
 
@@ -230,32 +230,38 @@ npm install
 
 ### Available Scripts
 
-- `npm run check` - Type check and lint the package
+**Checks (Validation):**
+- `npm run check:all` - Run all checks (lint, type check, and tests)
+- `npm run checks` - Alias for check:all
+- `npm run check:types` - Type check all code (src + examples)
+- `npm run check:types:src` - Type check source code only
+- `npm run check:types:examples` - Type check examples only
+- `npm run check:lint` - Lint code
+- `npm run check:lint:fix` - Fix ESLint issues automatically
+- `npm run check:radar` - Validate radar configuration
+- `npm test` - Run tests (npm standard)
+- `npm run check:test` - Run tests (includes examples)
+
+**Development:**
 - `npm run dev` - Run TypeScript in watch mode
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues automatically
 
-### Documentation Scripts
-
-- `npm run docs:dev` - Start VitePress development server
-- `npm run docs:build` - Build documentation for production (with automatic file renaming)
-- `npm run docs:preview` - Preview built documentation
-- `npm run docs:restore` - Manually restore README.md files from index.md
+**Documentation:**
+- `npm run build:docs` - Build documentation for production
+- `npm run build:docs:restore` - Restore README.md files from build
 
 **Note**: The documentation build process uses a GitHub-first approach. All files use `README.md` naming in the repository for GitHub compatibility. During build, files are temporarily renamed to `index.md` for VitePress routing, then automatically restored. Always edit `README.md` files directly.
 
-### ADR Management
+**Architecture Decision Records:**
+- `cd docs/adrs && npx adr new "Title"` - Create a new ADR
+- `npm run build:adr` - Build all ADR artifacts (TOC + index)
+- `npm run build:adr:toc` - Generate table of contents
+- `npm run build:adr:index` - Generate ADR index in documentation
 
-This project uses Architecture Decision Records (ADRs) to document architectural decisions:
+**Technology Radar:**
+- `npm run build:radar` - Convert YAML radar data to CSV
 
-- `npm run adr:list` - List all ADRs
-- `npm run adr:new "Title"` - Create a new ADR
-- `npm run adr:index` - Generate table of contents (in ADR directory)
-
-### Technology Radar Management
-
-- `npm run radar:convert` - Convert YAML radar data to CSV for visualization
-- `npm run radar:validate` - Validate radar configuration and data
+**Examples:**
+- `npm run build:docs:examples` - Generate documentation from examples
 
 ## Documentation
 

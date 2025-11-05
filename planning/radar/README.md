@@ -38,10 +38,9 @@ if (!result.isValid) {
 ### NPM Scripts
 
 1. **Edit radar data**: Modify `data.yaml` with new entries or changes
-2. **Generate CSV**: Run `npm run radar:convert` to create `data.csv` in `docs/public/radar/`
-3. **Validate data**: Run `npm run radar:validate` to check for errors
-4. **Watch for changes**: Run `npm run radar:watch` to auto-convert on changes
-5. **Visualize**: Use build-your-own-radar tool with generated CSV from `docs/public/radar/`
+2. **Generate CSV**: Run `npm run build:radar` to create `data.csv` in `docs/public/radar/`
+3. **Validate data**: Run `npm run check:radar` to check for errors
+4. **Visualize**: Use build-your-own-radar tool with generated CSV from `docs/public/radar/`
 
 ## Radar Methodology
 

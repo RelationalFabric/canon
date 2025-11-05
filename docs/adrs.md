@@ -75,10 +75,10 @@ npm install
 
 ### ADR Management Commands
 
-#### Using npm scripts (recommended):
-- **List all ADRs:** `npm run adr:list`
-- **Create new ADR:** `npm run adr:new "Title"`
-- **Generate table of contents:** `npm run adr:index` (generates index in ADR directory)
+#### Using adr-tools directly (recommended):
+- **List all ADRs:** `cd docs/adrs && npx adr list`
+- **Create new ADR:** `cd docs/adrs && npx adr new "Title"`
+- **Build ADR artifacts:** `npm run build:adr` (generates TOC + index)
 
 #### Direct adr-tools commands:
 - **List all ADRs:** `npx adr list`
@@ -94,7 +94,7 @@ If adr-tools is not available, you can create ADRs manually:
 1. Copy the template from an existing ADR file
 2. Rename it to `XXXX-descriptive-title.md` where XXXX is the next sequential number
 3. Fill in the template with your decision
-4. Use `npm run adr:index` to generate an updated table of contents
+4. Use `npm run build:adr` to generate updated artifacts
 5. Update the status as the decision progresses through the lifecycle
 
 ## ADR Lifecycle

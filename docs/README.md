@@ -48,7 +48,7 @@ export default createEslintConfig()
 
 **Build Process**: The documentation build process automatically renames all `README.md` files to `index.md` within the docs directory to work with VitePress routing. This is handled by the build scripts in `package.json`:
 
-- `npm run docs:dev` and `npm run docs:build` rename README.md → index.md
-- `npm run docs:restore` renames index.md → README.md for editing
+- `npm run build:docs` renames README.md → index.md during build
+- `npm run build:docs:restore` renames index.md → README.md for editing
 
-When editing documentation, use `npm run docs:restore` first to convert index.md files back to README.md, make your changes, then run the build commands.
+When editing documentation, use `npm run build:docs:restore` first to convert index.md files back to README.md, make your changes, then run the build commands.

@@ -165,7 +165,7 @@ The examples demonstrate different patterns for working with Canon:
 - **Use case**: Complex examples with multiple concerns
 - **Pattern**: Organized into multiple files with clear separation of concerns
 - **Benefits**: Modular, maintainable, demonstrates real-world architecture
-- **Structure**: 
+- **Structure**:
   - `usage.ts` - Main entry point and examples
   - `canons.ts` - Canon definitions
   - `utility-functions.ts` - Helper functions

@@ -87,7 +87,7 @@ Follow the conventions outlined in [CONTRIBUTING.md](./CONTRIBUTING.md):
 
 ### Code Quality Standards
 - **❌ NEVER use the TypeScript `any` type** (see Critical Rule above)
-- All code must pass `npm run check` validation (type checking and linting)
+- All code must pass `npm run check:all` validation (linting, type checking, and tests)
 - Follow the established patterns in [src/](./src/) directory
 - Prefer `unknown` over `any` for truly unknown types
 - Use type guards and type narrowing for type safety
@@ -123,21 +123,36 @@ Before making significant changes, review the [Architecture Decision Records (AD
 Use these npm scripts for development tasks:
 
 ### Development & Quality
-- `npm run check` - Run all validation checks (type checking and linting)
-- `npm run checks` - Run comprehensive validation (lint, type check, and tests)
+- `npm run check:types` - Run TypeScript type checking only
+- `npm run check:lint` - Run ESLint checks only
+- `npm run check:lint:fix` - Fix ESLint issues automatically
+- `npm run check:test` - Run tests only
+- `npm run check:radar` - Validate radar configuration
+- `npm run check:all` - Run all checks (lint, types, tests)
+- `npm run checks` - Alias for check:all
+
+### Development
 - `npm run dev` - Run TypeScript in watch mode
 
 ### Testing
-- `npm run test` - Run all unit tests (Vitest in-source tests)
-- `npm run test:watch` - Watch mode for tests
-- `npm run test:ui` - Run tests with UI
-- `npm run test:coverage` - Generate coverage reports
-- `npm run example` - Run integration examples
+- `npm test` - Run all unit tests (npm standard, alias for check:test)
+- `npm run check:test` - Run all unit tests (Vitest in-source tests, includes examples)
 
 ### Documentation
-- `npm run adr:new "Title"` - Create a new ADR
-- `npm run adr:list` - List all ADRs
-- `npm run adr:index` - Generate ADR table of contents (in ADR directory)
+- `npm run build:docs` - Build documentation for production (with automatic file renaming)
+- `npm run build:docs:restore` - Manually restore README.md files from index.md
+
+### ADR Management
+- `cd docs/adrs && npx adr new "Title"` - Create a new ADR
+- `npm run build:adr` - Build all ADR artifacts (TOC + index)
+- `npm run build:adr:toc` - Generate table of contents (in ADR directory)
+- `npm run build:adr:index` - Generate ADR index in documentation
+
+### Radar Management
+- `npm run build:radar` - Convert YAML radar data to CSV
+
+### Examples
+- `npm run build:docs:examples` - Generate documentation from examples
 
 ## Build Process and File Naming
 
@@ -170,9 +185,8 @@ The documentation system follows a specific process to maintain GitHub compatibi
 
 ### Documentation Build Scripts
 
-- `npm run docs:build` - Complete build process with automatic file renaming
-- `npm run docs:restore` - Manually restore files if needed after build
-- `npm run docs:dev` - Development server (no file renaming needed)
+- `npm run build:docs` - Complete build process with automatic file renaming
+- `npm run build:docs:restore` - Manually restore files if needed after build
 
 ### ADR Documentation Process
 
@@ -188,7 +202,7 @@ The documentation system follows a specific process to maintain GitHub compatibi
 - **Never manually rename files** - the build process handles this automatically
 - **The repository structure must remain GitHub-compatible** at all times
 - **VitePress routing is handled at build time only**
-- **If you see index.md files, run `npm run docs:restore` before editing**
+- **If you see index.md files, run `npm run build:docs:restore` before editing**
 
 ## Key Patterns to Follow
 
@@ -288,7 +302,7 @@ Canon uses [Vitest's in-source testing](https://vitest.dev/guide/in-source) patt
 See [TESTING.md](./TESTING.md) for complete testing documentation.
 
 ### Quality Standards
-- All code must pass `npm run checks` before merging PRs (validates linting, type checking, and tests)
+- All code must pass `npm run check:all` before merging PRs (validates linting, type checking, and tests)
 - Examples must use package imports, not relative paths
 - Test across different data formats to ensure compatibility
 

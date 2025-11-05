@@ -82,7 +82,7 @@ When making architectural decisions that affect the project structure, configura
 1. **Read existing ADRs** to understand current decisions and context
 2. **Use adr-tools to create a new ADR:**
    ```bash
-   npm run adr:new "Descriptive Title of Your Decision"
+   cd docs/adrs && npx adr new "Descriptive Title of Your Decision"
    ```
 3. **Edit the generated ADR file** with your decision details
 4. **Follow the ADR format** with clear context, decision drivers, and consequences
@@ -90,9 +90,9 @@ When making architectural decisions that affect the project structure, configura
 
 #### ADR Management Commands
 
-- **List all ADRs:** `npm run adr:list`
-- **Create new ADR:** `npm run adr:new "Title"`
-- **Generate index:** `npm run adr:index` (generates index in ADR directory)
+- **List all ADRs:** `cd docs/adrs && npx adr list`
+- **Create new ADR:** `cd docs/adrs && npx adr new "Title"`
+- **Build ADR artifacts:** `npm run build:adr` (generates TOC + index)
 - **Link ADRs:** `cd docs/adrs && npx adr link <from> <to> <relationship>`
 - **Help:** `cd docs/adrs && npx adr help`
 
@@ -117,16 +117,16 @@ For more details, see the [ADR Documentation](./docs/adrs.md).
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Run checks: `npm run check`
+3. Run checks: `npm run check:all`
 
 ### Definition of Done
 
 Before submitting any changes, ensure the following criteria are met:
 
 1. **Code Quality**
-   - All code passes ESLint checks: `npm run lint`
-   - TypeScript compilation succeeds: `npm run check`
-   - All linting issues are automatically fixable: `npm run lint:fix` runs cleanly (presupposes `npm run lint` passes)
+   - All code passes ESLint checks: `npm run check:lint`
+   - TypeScript compilation succeeds: `npm run check:types`
+   - All linting issues are automatically fixable: `npm run check:lint:fix` runs cleanly (presupposes `npm run check:lint` passes)
 
 2. **Commit Standards**
    - Commit messages follow [Conventional Commits](#conventional-commits) format
@@ -143,16 +143,18 @@ Before submitting any changes, ensure the following criteria are met:
    - New functionality includes appropriate tests (when testing framework is available)
 
 5. **Type Verification**
-   - TypeScript compilation succeeds: `npm run check`
+   - TypeScript compilation succeeds: `npm run check:types`
    - No type errors or warnings
    - All exports are properly typed
 
 ### Code Quality
 
-- All code must pass ESLint checks: `npm run lint`
-- TypeScript compilation must succeed: `npm run check`
+- All code must pass ESLint checks: `npm run check:lint`
+- TypeScript compilation must succeed: `npm run check:types`
+- All tests must pass: `npm run check:test`
+- Run all checks before submitting: `npm run check:all`
 - Documentation code examples must be properly formatted (see [ADR-003](./docs/adrs/0003-documentation-linting-inclusion.md))
-- **Clean lint:fix required** - All linting issues must be automatically fixable and resolved before submission (presupposes `npm run lint` passes)
+- **Clean lint:fix required** - All linting issues must be automatically fixable and resolved before submission (presupposes `npm run check:lint` passes)
 
 ## Testing
 

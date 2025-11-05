@@ -48,7 +48,7 @@ Chosen option: "Use @antfu/eslint-config", because it provides a modern, opinion
 * ESLint version: ^9.10.0
 * Configuration: @antfu/eslint-config ^3.0.0
 * Features: TypeScript support, Node.js support, automatic fixing
-* Scripts: `lint`, `lint:fix`, `check` (TypeScript + ESLint)
+* Scripts: `check:lint`, `check:lint:fix`, `check:types`, `check:all`
 * Configuration file: `eslint.config.js`
 
 ## Links

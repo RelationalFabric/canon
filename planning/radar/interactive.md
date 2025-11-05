@@ -2,7 +2,7 @@
 
 This interactive radar provides a visual representation of our technology landscape, showing the current state and trajectory of various technologies, tools, and practices we use.
 
-The radar data is generated from `data.yaml` and converted to CSV format for visualization. To update the radar, edit the YAML file and run `npm run radar:convert`.
+The radar data is generated from `data.yaml` and converted to CSV format for visualization. To update the radar, edit the YAML file and run `npm run build:radar`.
 
 <Radar />
 

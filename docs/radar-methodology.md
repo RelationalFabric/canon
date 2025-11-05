@@ -110,15 +110,14 @@ radar/
 ### Workflow
 
 1. **Edit** - Modify `data.yaml` with new entries or changes
-2. **Convert** - Run `npm run radar:convert` to generate CSV
-3. **Review** - Validate changes before committing
+2. **Convert** - Run `npm run build:radar` to generate CSV
+3. **Review** - Run `npm run check:radar` to validate changes before committing
 4. **Commit** - Version control both YAML and CSV files
 5. **Visualize** - Use generated CSV with build-your-own-radar tool
 
 ### Automation
 
-- **Watch Mode** - `npm run radar:watch` for automatic CSV regeneration
-- **Validation** - Scripts to validate data structure and completeness
+- **Validation** - `npm run check:radar` to validate data structure and completeness
 - **CI Integration** - Automated testing of radar data format
 
 ## Integration with ADRs
