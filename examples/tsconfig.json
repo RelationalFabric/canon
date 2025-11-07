@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["vitest/importMeta"],
+    "noEmit": true
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
+}

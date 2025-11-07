@@ -32,6 +32,7 @@ Runs on pull requests to `main` and `develop` branches. This workflow ensures al
    - Provides clear status indicator
 
 **Features:**
+
 - ✅ Inline PR review comments via reviewdog
 - ✅ TypeScript error reporting
 - ✅ ESLint error reporting with auto-fix suggestions
@@ -43,11 +44,13 @@ Runs on pull requests to `main` and `develop` branches. This workflow ensures al
 Runs on pushes to `main` and `develop` branches. This workflow validates the codebase after merges.
 
 **Jobs:**
+
 1. **lint-and-typecheck** - Type checking and linting
 2. **test** - Unit and integration tests
 3. **coverage** - Coverage reporting
 
 **Triggers:**
+
 - Push to `main` or `develop`
 - Manual workflow dispatch
 
@@ -67,6 +70,7 @@ TypeScript errors are reported using the `tsc` formatter:
 ```
 
 **Example output in PR:**
+
 ```
 src/example.ts:10:5
 error TS2322: Type 'string' is not assignable to type 'number'.
@@ -87,6 +91,7 @@ ESLint uses the dedicated reviewdog action:
 ```
 
 **Features:**
+
 - Inline comments on specific lines
 - Auto-fix suggestions when available
 - Severity levels (error, warning, info)
@@ -195,6 +200,7 @@ Dependencies are cached using `actions/setup-node@v4`:
 ### Parallelization
 
 Jobs run in parallel when possible:
+
 - `lint-and-typecheck`, `test`, and `coverage` run simultaneously
 - Reduces total CI time
 - `all-checks-passed` waits for all to complete
@@ -202,6 +208,7 @@ Jobs run in parallel when possible:
 ### Fail Fast
 
 Workflows fail fast on first error:
+
 - TypeScript: `fail-on-error=true`
 - ESLint: `fail_on_error: true`
 - Tests: Default behavior
@@ -227,6 +234,7 @@ Monitor workflow performance:
 4. Review detailed logs for failures
 
 **Target metrics:**
+
 - Success rate: > 95%
 - Average duration: < 5 minutes
 - Time to feedback: < 2 minutes

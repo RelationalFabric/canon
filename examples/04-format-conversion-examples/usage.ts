@@ -5,17 +5,13 @@
  * with real-world examples across different data formats.
  */
 
-import {
-  idOf,
-  typeOf,
-  versionOf,
-} from '@relational-fabric/canon'
+import { idOf, typeOf, versionOf } from '@relational-fabric/canon'
 import {
   demonstrateErrorHandling,
   demonstrateFormatConversion,
   processUsersFromDifferentSources,
-} from './conversion-utilities'
-import './canons' // Import canon definitions
+} from './conversion-utilities.js'
+import './canons.js' // Import canon definitions
 
 // =============================================================================
 // Sample Data
@@ -134,13 +130,16 @@ if (import.meta.vitest) {
     it('handles invalid data gracefully', () => {
       const invalidData = { name: 'Invalid User' }
 
+      // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
       expect(() => idOf(invalidData)).toThrow('Expected string ID, got undefined')
+      // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
       expect(() => typeOf(invalidData)).toThrow('Expected string type, got undefined')
     })
 
     it('handles partial data gracefully', () => {
       const partialData = { id: 'user-123' }
 
+      // @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
       expect(() => typeOf(partialData)).toThrow('Expected string type, got undefined')
     })
 

@@ -5,6 +5,7 @@
  * domain-specific semantic concepts defined in custom-axioms.ts.
  */
 
+import type { Satisfies } from '@relational-fabric/canon'
 import { inferAxiom } from '@relational-fabric/canon'
 
 // =============================================================================
@@ -14,7 +15,7 @@ import { inferAxiom } from '@relational-fabric/canon'
 /**
  * Extract email address from any entity that satisfies the Email axiom
  */
-export function emailOf<T extends { [K in keyof Axioms['Email']['$basis']]: Axioms['Email']['$basis'][K] }>(x: T): string {
+export function emailOf<T extends Satisfies<'Email'>>(x: T): string {
   const config = inferAxiom('Email', x)
 
   if (!config) {
@@ -43,7 +44,7 @@ export function emailOf<T extends { [K in keyof Axioms['Email']['$basis']]: Axio
 /**
  * Extract and convert currency data to canonical format
  */
-export function currencyOf<T extends { [K in keyof Axioms['Currency']['$basis']]: Axioms['Currency']['$basis'][K] }>(x: T): { amount: number, currency: string } {
+export function currencyOf(x: unknown): { amount: number, currency: string } {
   const config = inferAxiom('Currency', x)
 
   if (!config) {
@@ -81,7 +82,7 @@ export function currencyOf<T extends { [K in keyof Axioms['Currency']['$basis']]
 /**
  * Extract status from any entity that satisfies the Status axiom
  */
-export function statusOf<T extends { [K in keyof Axioms['Status']['$basis']]: Axioms['Status']['$basis'][K] }>(x: T): string {
+export function statusOf<T extends Satisfies<'Status'>>(x: T): string {
   const config = inferAxiom('Status', x)
 
   if (!config) {
@@ -96,7 +97,8 @@ export function statusOf<T extends { [K in keyof Axioms['Status']['$basis']]: Ax
     }
 
     // Validate against allowed states
-    const validStates = config.$meta?.validStates || []
+    const meta = config.$meta as { validStates?: string[] } | undefined
+    const validStates = meta?.validStates || []
     if (validStates.length > 0 && !validStates.includes(value)) {
       throw new TypeError(`Invalid status: ${value}. Valid states: ${validStates.join(', ')}`)
     }
@@ -110,7 +112,7 @@ export function statusOf<T extends { [K in keyof Axioms['Status']['$basis']]: Ax
 /**
  * Extract and convert priority data to canonical format
  */
-export function priorityOf<T extends { [K in keyof Axioms['Priority']['$basis']]: Axioms['Priority']['$basis'][K] }>(x: T): { level: number, label: string } {
+export function priorityOf(x: unknown): { level: number, label: string } {
   const config = inferAxiom('Priority', x)
 
   if (!config) {
@@ -127,7 +129,12 @@ export function priorityOf<T extends { [K in keyof Axioms['Priority']['$basis']]
   }
 
   // Check if already canonical
-  if (typeof priorityValue === 'object' && priorityValue !== null && 'level' in priorityValue && 'label' in priorityValue) {
+  if (
+    typeof priorityValue === 'object'
+    && priorityValue !== null
+    && 'level' in priorityValue
+    && 'label' in priorityValue
+  ) {
     const obj = priorityValue as { level: unknown, label: unknown }
     if (typeof obj.level === 'number' && typeof obj.label === 'string') {
       return { level: obj.level, label: obj.label }
@@ -159,7 +166,12 @@ export function priorityOf<T extends { [K in keyof Axioms['Priority']['$basis']]
   }
 
   // Handle object with level and label properties
-  if (typeof priorityValue === 'object' && priorityValue !== null && 'level' in priorityValue && 'label' in priorityValue) {
+  if (
+    typeof priorityValue === 'object'
+    && priorityValue !== null
+    && 'level' in priorityValue
+    && 'label' in priorityValue
+  ) {
     const obj = priorityValue as { level: unknown, label: unknown }
     if (typeof obj.level === 'number' && typeof obj.label === 'string') {
       return { level: obj.level, label: obj.label }

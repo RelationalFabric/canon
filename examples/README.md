@@ -25,6 +25,7 @@ npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon.
 ### 01-basic-id-axiom.ts
 
 Demonstrates the fundamental usage of the Canon framework:
+
 - Defining type-level canon configurations
 - Registering runtime canon configurations
 - Using the `idOf()` function across different formats
@@ -32,6 +33,7 @@ Demonstrates the fundamental usage of the Canon framework:
 - Universal functions that work with any canon
 
 **Key Concepts:**
+
 - Declarative canon registration with `declareCanon()`
 - Internal format (standard `id` field)
 - JSON-LD format (semantic `@id` field)
@@ -40,12 +42,14 @@ Demonstrates the fundamental usage of the Canon framework:
 ### 02-module-style-canon.ts
 
 Demonstrates the module-style pattern for shareable canons:
+
 - Using `defineCanon()` to create reusable configurations
 - Using `registerCanons()` for batch registration
 - Exporting canon definitions for use in other projects
 - MongoDB format with `_id` field
 
 **Key Concepts:**
+
 - Module-style canon definition
 - Reusable canon configurations
 - Batch registration
@@ -54,6 +58,7 @@ Demonstrates the module-style pattern for shareable canons:
 ## Testing Strategy
 
 These examples serve as:
+
 1. **Documentation** - Show how to use the framework
 2. **Integration tests** - Verify the complete workflow works
 3. **Regression tests** - Ensure changes don't break functionality
@@ -61,6 +66,7 @@ These examples serve as:
 ## Unit Tests
 
 Unit tests are colocated with source files using the `.test.ts` extension:
+
 - `src/runtime/core.test.ts` - Tests for functional core
 - `src/runtime/registry.test.ts` - Tests for global registry
 - `src/utils/objects.test.ts` - Tests for object utilities
@@ -68,6 +74,7 @@ Unit tests are colocated with source files using the `.test.ts` extension:
 ## Adding New Examples
 
 When adding new examples:
+
 1. Use the `0X-descriptive-name.ts` naming convention
 2. Include comprehensive comments explaining concepts
 3. Demonstrate one key feature or pattern per file

@@ -17,10 +17,7 @@ export class Registry {
   /**
    * Register a canon
    */
-  register<Label extends keyof Canons>(
-    label: Label,
-    config: CanonConfig,
-  ): void {
+  register<Label extends keyof Canons>(label: Label, config: CanonConfig): void {
     this.canons.set(label as string, config)
   }
 

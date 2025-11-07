@@ -13,6 +13,7 @@ An axiom is a **type definition** that specifies what utility types and function
 A common axiom type is the **KeyNameAxiom** concept. This represents the fundamental idea that many semantic concepts can be found by looking for a specific key name within an object. For example, an "ID" concept might be found at different key names depending on the data format - it could be `id`, `@id`, `_id`, or any other field name.
 
 The KeyNameAxiom concept captures this pattern by specifying that:
+
 - There must be a $basis object with at least one string key
 - There is a field name that contains the concept (which varies by data format)
 - Additional metadata can be attached to describe the concept
@@ -37,21 +38,28 @@ These keys are available to all axioms through the `Axiom` utility type, providi
 Axioms are type definitions that can be reused for multiple specific axiom types. Here are some common axiom patterns:
 
 #### Key-Name Axiom Type
+
 ```typescript
-type KeyNameAxiom = Axiom<{
-  $basis: Record<string, unknown> // Object with at least 1 string key
-  key: string // The field name that contains the concept
-}, {
+type KeyNameAxiom = Axiom<
+  {
+    $basis: Record<string, unknown> // Object with at least 1 string key
+    key: string // The field name that contains the concept
+  },
+  {
     key: string
-  }>
+  }
+>
 
 // Representation axiom for data with multiple representations
-type RepresentationAxiom<T, C = unknown> = Axiom<{
-  $basis: T | TypeGuard<unknown>
-  isCanonical: (value: T | TypeGuard<unknown>) => value is C
-}, {
+type RepresentationAxiom<T, C = unknown> = Axiom<
+  {
+    $basis: T | TypeGuard<unknown>
     isCanonical: (value: T | TypeGuard<unknown>) => value is C
-  }>
+  },
+  {
+    isCanonical: (value: T | TypeGuard<unknown>) => value is C
+  }
+>
 
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>
@@ -67,6 +75,7 @@ type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<stri
 ```
 
 #### Axiom Registration
+
 Axioms are registered in the global `Axioms` interface using these type definitions:
 
 ```typescript
@@ -143,11 +152,12 @@ const runtimeConfig = {
     $basis: { id: 'string' }, // TypeGuard<Satisfies<'Id', 'Internal'>>
     key: 'id',
     $meta: { type: 'uuid', required: 'true' },
-  }
+  },
 }
 ```
 
 **What happens at runtime:**
+
 1. The TypeGuard validates that the runtime configuration structure matches the expected axiom type
 2. The string literals (`'string'`, `'number'`) represent the actual runtime type information
 3. The `inferAxiom()` function uses this information to extract values with the correct types

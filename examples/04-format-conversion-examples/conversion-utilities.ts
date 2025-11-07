@@ -5,12 +5,8 @@
  * and demonstrating cross-format compatibility.
  */
 
-import {
-  idOf,
-  referencesOf,
-  typeOf,
-  versionOf,
-} from '@relational-fabric/canon'
+import type { Satisfies } from '@relational-fabric/canon'
+import { idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Format Conversion Functions
@@ -21,10 +17,10 @@ import {
  */
 export function convertToMongoDb(entity: unknown): Record<string, unknown> {
   try {
-    const id = idOf(entity)
-    const type = typeOf(entity)
-    const version = versionOf(entity)
-    const references = referencesOf(entity)
+    const id = idOf(entity as Satisfies<'Id'>)
+    const type = typeOf(entity as Satisfies<'Type'>)
+    const version = versionOf(entity as Satisfies<'Version'>)
+    const references = referencesOf(entity as Satisfies<'References'>)
 
     // Handle timestamps manually
     const timestamps: Date[] = []
@@ -37,7 +33,7 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
     }
 
     // Convert timestamps to Unix timestamps
-    const mongoTimestamps = timestamps.map(ts => ts instanceof Date ? ts.getTime() : Date.now())
+    const mongoTimestamps = timestamps.map(ts => (ts instanceof Date ? ts.getTime() : Date.now()))
 
     return {
       _id: id,
@@ -52,7 +48,7 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
       createdAt: timestamps[0]?.toISOString(),
       updatedAt: timestamps[1]?.toISOString(),
       ...(entity as Record<string, unknown>),
-      createdBy: references[0]?.ref,
+      createdBy: references.ref,
     }
   }
   catch {
@@ -74,10 +70,10 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
  */
 export function convertToJsonLd(entity: unknown): Record<string, unknown> {
   try {
-    const id = idOf(entity)
-    const type = typeOf(entity)
-    const version = versionOf(entity)
-    const references = referencesOf(entity)
+    const id = idOf(entity as Satisfies<'Id'>)
+    const type = typeOf(entity as Satisfies<'Type'>)
+    const version = versionOf(entity as Satisfies<'Version'>)
+    const references = referencesOf(entity as Satisfies<'References'>)
 
     // Handle timestamps manually
     const timestamps: Date[] = []
@@ -102,7 +98,7 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
       'createdAt': timestamps[0]?.toISOString(),
       'updatedAt': timestamps[1]?.toISOString(),
       ...(entity as Record<string, unknown>),
-      'createdBy': references[0]?.ref,
+      'createdBy': references.ref,
     }
   }
   catch {
@@ -193,7 +189,9 @@ export function processUsersFromDifferentSources(): void {
       console.log()
     }
     catch (error) {
-      console.log(`User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.log(
+        `User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
       console.log()
     }
   })
@@ -240,19 +238,25 @@ export function demonstrateErrorHandling(): void {
   const invalidData = { name: 'Invalid User' }
 
   try {
+    // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
     idOf(invalidData)
   }
   catch (error) {
-    console.log(`Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    console.log(
+      `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 
   // Test with partial data
   const partialData = { id: 'user-123' }
 
   try {
+    // @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
     typeOf(partialData)
   }
   catch (error) {
-    console.log(`Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    console.log(
+      `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 }

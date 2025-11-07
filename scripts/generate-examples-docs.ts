@@ -10,7 +10,7 @@
  * comprehensive documentation that's always up-to-date with the source code.
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 
 interface ExampleInfo {
@@ -29,11 +29,13 @@ const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/exa
 /**
  * Extract metadata from a TypeScript file
  */
-function extractMetadata(filePath: string): Partial<ExampleInfo> {
+function extractMetadata(filePath: string): Partial<ExampleInfo> & { files?: string[] } {
   const content = readFileSync(filePath, 'utf-8')
 
   // Extract description from JSDoc comments (first comment block)
-  const descriptionMatch = content.match(/\/\*\*[\t\v\f\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*\n\s*\*\s*([^*\n]+)/)
+  const descriptionMatch = content.match(
+    /\/\*\*[\t\v\f\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*\n\s*\*\s*([^*\n]+)/,
+  )
   const description = descriptionMatch ? descriptionMatch[1].trim() : ''
 
   // Extract key concepts from comments
@@ -75,18 +77,33 @@ function extractMetadata(filePath: string): Partial<ExampleInfo> {
     })
   }
 
+  // Extract referenced files from @file comments
+  // Pattern 1: @file axioms/email.ts - In block comments
+  // Pattern 2: // @file axioms/email.ts - Description - Standalone
+  const filesMatch = content.match(/@file\s+(\S+)(?:\s+-\s+(.+))?/g)
+  const files: string[] = []
+  if (filesMatch) {
+    filesMatch.forEach((match) => {
+      const fileMatch = match.match(/@file\s+(\S+)/)
+      if (fileMatch) {
+        files.push(fileMatch[1])
+      }
+    })
+  }
+
   return {
     description,
     keyConcepts,
     prerequisites: prerequisites.length > 0 ? prerequisites : undefined,
+    files: files.length > 0 ? files : undefined,
   }
 }
 
 /**
  * Process a single example file or directory
  */
-function processExample(examplePath: string, relativePath: string): ExampleInfo {
-  const fullPath = join('/workspace/examples', examplePath)
+function processExample(examplePath: string, relativePath: string, baseDir: string): ExampleInfo {
+  const fullPath = join(baseDir, examplePath)
   const stat = statSync(fullPath)
   const isDirectory = stat.isDirectory()
 
@@ -103,39 +120,46 @@ function processExample(examplePath: string, relativePath: string): ExampleInfo 
   }
 
   if (isDirectory) {
-    // Process directory - look for usage.ts or main entry point
+    // Process directory - look for index.ts, usage.ts, or README.md as entry point
+    const indexPath = join(fullPath, 'index.ts')
     const usagePath = join(fullPath, 'usage.ts')
     const readmePath = join(fullPath, 'README.md')
 
-    // Try to get description from usage.ts first, then README.md
-    let description = ''
-    if (statSync(usagePath).isFile()) {
-      const metadata = extractMetadata(usagePath)
-      description = metadata.description || ''
+    // Try to get metadata from index.ts first, then usage.ts, then README.md
+    let metadata: Partial<ExampleInfo> & { files?: string[] } = {}
+    if (existsSync(indexPath) && statSync(indexPath).isFile()) {
+      metadata = extractMetadata(indexPath)
     }
-    else if (statSync(readmePath).isFile()) {
+    else if (existsSync(usagePath) && statSync(usagePath).isFile()) {
+      metadata = extractMetadata(usagePath)
+    }
+    else if (existsSync(readmePath) && statSync(readmePath).isFile()) {
       const readmeContent = readFileSync(readmePath, 'utf-8')
       const descriptionMatch = readmeContent.match(/^#\s+([^\n]+)/)
       if (descriptionMatch) {
-        description = descriptionMatch[1].trim()
+        metadata.description = descriptionMatch[1].trim()
       }
     }
 
-    exampleInfo.description = description
+    exampleInfo.description = metadata.description || ''
+    exampleInfo.keyConcepts = metadata.keyConcepts || []
+    exampleInfo.prerequisites = metadata.prerequisites
 
-    // Process sub-files
-    const subFiles = readdirSync(fullPath)
-      .filter(file => file.endsWith('.ts') && file !== 'README.md')
-      .map(file => processExample(join(examplePath, file), join(relativePath, file)))
+    // Process referenced files from @file comments
+    if (metadata.files && metadata.files.length > 0) {
+      const subFiles = metadata.files
+        .map((file) => {
+          const subFilePath = join(fullPath, file)
+          if (existsSync(subFilePath) && statSync(subFilePath).isFile()) {
+            return processExample(join(examplePath, file), join(relativePath, file), baseDir)
+          }
+          return null
+        })
+        .filter((f): f is ExampleInfo => f !== null)
 
-    if (subFiles.length > 0) {
-      exampleInfo.subExamples = subFiles
-      // Merge key concepts from all sub-files
-      const allKeyConcepts = new Set<string>()
-      subFiles.forEach((sub) => {
-        sub.keyConcepts.forEach(concept => allKeyConcepts.add(concept))
-      })
-      exampleInfo.keyConcepts = Array.from(allKeyConcepts)
+      if (subFiles.length > 0) {
+        exampleInfo.subExamples = subFiles
+      }
     }
   }
   else {
@@ -159,95 +183,93 @@ This directory contains practical examples demonstrating how to use the @relatio
 
 `
 
-  const examplesContent = examples.map((example) => {
-    let content = `### [${example.name}](./${example.path})\n`
+  const examplesContent = examples
+    .map((example) => {
+      let content = `### [${example.name}](./${example.path})\n`
 
-    if (example.description) {
-      content += `${example.description}\n\n`
-    }
+      if (example.description) {
+        content += `${example.description}\n\n`
+      }
 
-    if (example.keyConcepts.length > 0) {
-      content += `**Key Concepts:**\n`
-      example.keyConcepts.forEach((concept) => {
-        content += `- ${concept}\n`
-      })
-      content += '\n'
-    }
-
-    if (example.prerequisites && example.prerequisites.length > 0) {
-      content += `**Prerequisites:**\n`
-      example.prerequisites.forEach((prereq) => {
-        content += `- ${prereq}\n`
-      })
-      content += '\n'
-    }
-
-    if (example.isDirectory) {
-      content += `**Pattern:** Multi-file example with modular structure\n\n`
-    }
-    else {
-      content += `**Pattern:** Single-file example\n\n`
-    }
-
-    content += `**Source:** [View on GitHub](${example.githubUrl})\n\n`
-
-    if (example.subExamples && example.subExamples.length > 0) {
-      content += `**Files:**\n`
-      example.subExamples.forEach((subExample) => {
-        content += `- [${subExample.name}](${subExample.githubUrl})`
-        if (subExample.description) {
-          content += ` - ${subExample.description}`
-        }
+      if (example.keyConcepts.length > 0) {
+        content += `**Key Concepts:**\n`
+        example.keyConcepts.forEach((concept) => {
+          content += `- ${concept}\n`
+        })
         content += '\n'
-      })
-      content += '\n'
-    }
+      }
 
-    return content
-  }).join('')
+      if (example.prerequisites && example.prerequisites.length > 0) {
+        content += `**Prerequisites:**\n`
+        example.prerequisites.forEach((prereq) => {
+          content += `- ${prereq}\n`
+        })
+        content += '\n'
+      }
+
+      if (example.isDirectory) {
+        content += `**Pattern:** Multi-file example with modular structure\n\n`
+      }
+      else {
+        content += `**Pattern:** Single-file example\n\n`
+      }
+
+      content += `**Source:** [View on GitHub](${example.githubUrl})\n\n`
+
+      if (example.subExamples && example.subExamples.length > 0) {
+        content += `**Supporting Files:**\n`
+        example.subExamples.forEach((subExample) => {
+          content += `- [\`${subExample.name}\`](${subExample.githubUrl})`
+          if (subExample.description) {
+            content += ` - ${subExample.description}`
+          }
+          content += '\n'
+        })
+        content += '\n'
+      }
+
+      return content
+    })
+    .join('')
 
   const footer = `## Example Patterns
 
-The examples demonstrate different patterns for working with Canon:
+### Single-File Examples
+- **Use case**: Simple, focused examples
+- **Pattern**: All code in a single file with narrative flow
+- **Structure**: \`01-basic-id-axiom.ts\`
+- **Benefits**: Easy to understand, quick to read, perfect for learning one concept
 
-### Single-File Examples (01-basic-id-axiom)
-- **Use case**: Simple, self-contained examples
-- **Pattern**: All code in a single file with clear sections
-- **Benefits**: Easy to understand, quick to run, perfect for learning
-- **Example**: \`01-basic-id-axiom.ts\`
+### Folder-Based Examples
+- **Use case**: Complex examples with custom axioms or multiple canons
+- **Pattern**: Organized into focused files
+- **Structure**:
+  - \`index.ts\` - Main entry point with narrative and tests
+  - \`axioms/{concept}.ts\` - Custom axiom definitions (type + API)
+  - \`canons/{notation}.ts\` - Canon definitions (type + runtime)
+  - Supporting files as needed for clarity
+- **Benefits**: Clear separation, easy to navigate, demonstrates real-world architecture
 
-### Multi-File Examples (02-module-style-canon, 03-multi-axiom-canon, etc.)
-- **Use case**: Complex examples with multiple concerns
-- **Pattern**: Organized into multiple files with clear separation of concerns
-- **Benefits**: Modular, maintainable, demonstrates real-world architecture
-- **Structure**: 
-  - \`usage.ts\` - Main entry point and examples
-  - \`canons.ts\` - Canon definitions
-  - \`utility-functions.ts\` - Helper functions
-  - \`domain-models.ts\` - Type definitions
-  - \`business-logic.ts\` - Business logic
+### Understanding Axioms vs Canons
 
-### Canon Definition Patterns
+**Axioms** define semantic concepts (Id, Email, Currency) and their APIs:
+- Each axiom file contains both the type definition AND the API functions (\`emailOf\`, \`currencyOf\`)
+- Example: \`axioms/email.ts\` defines EmailAxiom type and exports \`emailOf()\` function
 
-#### Declarative Style
-- **Use case**: Internal, app-specific canons
-- **Pattern**: Define and register canons directly in your application
-- **Benefits**: Simple, direct, perfect for internal use
-- **Example**: \`declareCanon('Internal', { ... })\`
+**Canons** aggregate axioms and map them to specific notations:
+- REST API canon: maps axioms to \`id\`, \`type\`, \`email\`
+- MongoDB canon: maps axioms to \`_id\`, \`_type\`, \`email\`
+- JSON-LD canon: maps axioms to \`@id\`, \`@type\`, \`email\`
 
-#### Module Style
-- **Use case**: Shared, reusable canons
-- **Pattern**: Define canons in separate modules, register when needed
-- **Benefits**: Reusable, testable, composable, versionable
-- **Example**: \`defineCanon({ ... })\` + \`registerCanons({ ... })\`
+Canons don't have APIs - they configure how axiom APIs work with different data formats
 
 ## Getting Started
 
 Each example includes:
+- **Narrative documentation** that teaches concepts through prose
 - **Complete code samples** with full TypeScript typing
-- **Step-by-step explanations** of the implementation
-- **Best practices** and common pitfalls to avoid
-- **Integration examples** showing how to use with the canon configurations
+- **In-source tests** that demonstrate and validate behavior
+- **Real-world scenarios** showing practical applications
 - **Live source code** linked directly to GitHub
 
 ## Prerequisites
@@ -275,24 +297,35 @@ For more information about the package configurations, see the main [documentati
 You can run examples directly using tsx:
 
 \`\`\`bash
-# Run a specific example
+# Run a single-file example
 npx tsx examples/01-basic-id-axiom.ts
 
-# Run all examples
-npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon/usage.ts
+# Run a folder example
+npx tsx examples/02-module-style-canon/index.ts
+
+# Run multiple examples
+npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon/index.ts
 \`\`\`
 
 ## Testing
 
-All examples include built-in tests using Vitest's in-source testing pattern. The examples serve as:
-1. **Documentation** - Show how to use the framework
-2. **Integration tests** - Verify the complete workflow works
+Examples use Vitest's in-source testing pattern in their entry points. The examples serve as:
+1. **Living documentation** - Narrative code that teaches concepts
+2. **Integration tests** - Verify complete workflows work correctly
 3. **Regression tests** - Ensure changes don't break functionality
 
 Run the tests with:
 \`\`\`bash
 npm test
 \`\`\`
+
+## Writing New Examples
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) in the examples directory for guidelines on:
+- Structuring examples as narrative documentation
+- When to use single-file vs folder-based examples
+- Naming conventions for axioms, canons, and supporting files
+- Writing tests that teach
 `
 
   return header + examplesContent + footer
@@ -304,12 +337,26 @@ npm test
 function main() {
   console.log('🔍 Scanning examples directory...')
 
-  const examplesDir = '/workspace/examples'
+  const rootDir = process.cwd()
+  const examplesDir = join(rootDir, 'examples')
   const files = readdirSync(examplesDir)
     .filter((file) => {
       const fullPath = join(examplesDir, file)
       const stat = statSync(fullPath)
-      return stat.isDirectory() || file.endsWith('.ts')
+
+      // Include *.ts files at root level (single-file examples)
+      if (stat.isFile() && file.endsWith('.ts') && !file.includes('README') && !file.includes('CONTRIBUTING')) {
+        return true
+      }
+
+      // Include directories that have index.ts (folder examples)
+      if (stat.isDirectory()) {
+        const indexPath = join(fullPath, 'index.ts')
+        const usagePath = join(fullPath, 'usage.ts') // Backwards compatibility
+        return existsSync(indexPath) || existsSync(usagePath)
+      }
+
+      return false
     })
     .sort()
 
@@ -317,14 +364,14 @@ function main() {
 
   const examples = files.map((file) => {
     console.log(`📄 Processing: ${file}`)
-    return processExample(file, file)
+    return processExample(file, file, examplesDir)
   })
 
   console.log('📝 Generating documentation...')
 
   const documentation = generateExamplesDocumentation(examples)
 
-  const outputPath = '/workspace/docs/examples/README.md'
+  const outputPath = join(rootDir, 'docs', 'examples', 'README.md')
   writeFileSync(outputPath, documentation)
 
   console.log(`✅ Documentation generated: ${outputPath}`)

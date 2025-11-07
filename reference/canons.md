@@ -5,9 +5,11 @@ This document describes the shared canons available in the Canon system.
 ## Available Canons
 
 ### `JsonLdCanon`
+
 **Purpose**: JSON-LD canon implementation for working with JSON-LD formatted data.
 
 **Definition and Export**:
+
 ```typescript
 // Define well-named interfaces that communicate the JSON-LD structure
 interface JsonLdEntity {
@@ -57,30 +59,32 @@ export default defineCanon<JsonLdCanon>({
     Id: {
       $basis: (value: unknown): value is JsonLdEntity =>
         isPojo(value) && pojoHas(value, '@id') && typeof value['@id'] === 'string',
-      key: '@id'
+      key: '@id',
     },
     Type: {
       $basis: (value: unknown): value is JsonLdEntity =>
         isPojo(value) && pojoHas(value, '@type') && typeof value['@type'] === 'string',
-      key: '@type'
+      key: '@type',
     },
     Version: {
       $basis: (value: unknown): value is JsonLdEntity =>
-        isPojo(value) && pojoHas(value, '@version')
+        isPojo(value)
+        && pojoHas(value, '@version')
         && (typeof value['@version'] === 'string' || typeof value['@version'] === 'number'),
-      key: '@version'
+      key: '@version',
     },
     Timestamps: {
       $basis: <U extends JsonLdDate>(value: U | unknown): value is U =>
         isPojo(value)
-        && pojoHas(value, '@value') && pojoHas(value, '@type')
+        && pojoHas(value, '@value')
+        && pojoHas(value, '@type')
         && typeof value['@value'] === 'string'
         && ['xsd:dateTime', 'xsd:date', 'xsd:time'].includes(value['@type']),
       toCanonical: (value: JsonLdDate) => new Date(value['@value']),
       fromCanonical: (value: Date) => ({
         '@value': value.toISOString(),
-        '@type': 'xsd:dateTime' as const
-      })
+        '@type': 'xsd:dateTime' as const,
+      }),
     },
     References: {
       $basis: <U extends JsonLdReference>(value: U | unknown): value is U =>
@@ -88,13 +92,13 @@ export default defineCanon<JsonLdCanon>({
       toCanonical: (value: JsonLdReference) => {
         return {
           ref: value['@id'],
-          resolved: false
+          resolved: false,
         }
       },
       fromCanonical: (value: EntityReference<string, unknown>) => {
         return { '@id': value.ref }
-      }
-    }
-  }
+      },
+    },
+  },
 })
 ```

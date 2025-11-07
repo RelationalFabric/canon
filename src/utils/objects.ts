@@ -23,11 +23,12 @@ export type { Pojo, PojoWith }
  * isPojo('string') // false
  * ```
  */
-export const isPojo = typeGuard<Pojo>((value: unknown) =>
-  typeof value === 'object'
-  && value !== null
-  && !Array.isArray(value)
-  && Object.getPrototypeOf(value) === Object.prototype,
+export const isPojo = typeGuard<Pojo>(
+  (value: unknown) =>
+    typeof value === 'object'
+    && value !== null
+    && !Array.isArray(value)
+    && Object.getPrototypeOf(value) === Object.prototype,
 )
 
 /**
@@ -163,9 +164,7 @@ export function objectValues<T extends object>(obj: T): unknown[] {
  * objectEntries([1, 2, 3]) // [[0, 1], [1, 2], [2, 3]]
  * ```
  */
-export function objectEntries<T extends object>(
-  obj: T,
-): Array<[keyof T, T[keyof T]]> {
+export function objectEntries<T extends object>(obj: T): Array<[keyof T, T[keyof T]]> {
   if (Array.isArray(obj)) {
     return Array.from(obj.entries()) as Array<[keyof T, T[keyof T]]>
   }

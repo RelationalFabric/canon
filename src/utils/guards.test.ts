@@ -15,11 +15,9 @@ describe('typeGuard', () => {
   })
 
   it('should work with complex predicates', () => {
-    const hasId = typeGuard<{ id: string }>((v: unknown) =>
-      typeof v === 'object'
-      && v !== null
-      && 'id' in v
-      && typeof (v as any).id === 'string',
+    const hasId = typeGuard<{ id: string }>(
+      (v: unknown) =>
+        typeof v === 'object' && v !== null && 'id' in v && typeof (v as any).id === 'string',
     )
 
     expect(hasId({ id: '123' })).toBe(true)

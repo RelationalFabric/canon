@@ -35,19 +35,9 @@ jobs:
         run: npm ci
 
       - name: Run linting and type checking
-        run: npm run check
-
-      - name: Run main tests
-        run: npm test
-
-      - name: Run examples tests
-        run: npm run test:examples
-
-      - name: Run examples type checking (may have errors)
-        run: npm run check:examples || true
-
+        run: npm run check:all
       - name: Generate examples documentation
-        run: npm run examples:generate-docs
+        run: npm run build:docs:examples
 
       - name: Check for documentation changes
         id: verify-changed-files

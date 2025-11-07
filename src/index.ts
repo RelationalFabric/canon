@@ -16,6 +16,9 @@ export * from './radar/index.js'
 export * from './registry.js'
 export * from './shell.js'
 
+// Type testing utilities (compile-time helpers only)
+export * from './testing.js'
+
 // Type system (includes defineAxiom, defineCanon)
 export * from './types/index.js'
 

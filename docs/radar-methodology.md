@@ -25,6 +25,7 @@ The Canon Technology Radar is a living document that tracks our recommendations 
 ## Decision Criteria
 
 ### Adopt
+
 - Proven track record in production
 - Strong community support and maintenance
 - Aligns with Canon's philosophy and goals
@@ -32,6 +33,7 @@ The Canon Technology Radar is a living document that tracks our recommendations 
 - Has been successfully used in Canon development
 
 ### Trial
+
 - Shows promise but needs evaluation
 - Addresses specific needs not met by current tools
 - Has good TypeScript support (for libraries)
@@ -39,12 +41,14 @@ The Canon Technology Radar is a living document that tracks our recommendations 
 - Active maintenance and community
 
 ### Assess
+
 - Interesting but unproven
 - May address future needs
 - Requires further investigation
 - Potential risks or limitations need evaluation
 
 ### Hold
+
 - Proven to be problematic
 - Superseded by better alternatives
 - Doesn't align with Canon's direction
@@ -55,12 +59,14 @@ The Canon Technology Radar is a living document that tracks our recommendations 
 ### Regular Reviews
 
 **Quarterly Reviews** (every 3 months)
+
 - Review all Trial entries for promotion/demotion
 - Evaluate Assess entries for potential promotion
 - Check Adopt entries for any issues or deprecations
 - Update justifications based on new information
 
 **Annual Reviews** (every 12 months)
+
 - Comprehensive review of entire radar
 - Strategic alignment with Canon's roadmap
 - Major technology trend evaluation
@@ -69,11 +75,13 @@ The Canon Technology Radar is a living document that tracks our recommendations 
 ### Ad-Hoc Updates
 
 **Immediate Updates**
+
 - Security vulnerabilities in Adopt entries
 - Breaking changes in critical dependencies
 - New technologies that significantly impact Canon's mission
 
 **Monthly Updates**
+
 - New library evaluations
 - Community feedback integration
 - Performance or compatibility issues
@@ -110,15 +118,14 @@ radar/
 ### Workflow
 
 1. **Edit** - Modify `data.yaml` with new entries or changes
-2. **Convert** - Run `npm run radar:convert` to generate CSV
-3. **Review** - Validate changes before committing
+2. **Convert** - Run `npm run build:radar` to generate CSV
+3. **Review** - Run `npm run check:radar` to validate changes before committing
 4. **Commit** - Version control both YAML and CSV files
 5. **Visualize** - Use generated CSV with build-your-own-radar tool
 
 ### Automation
 
-- **Watch Mode** - `npm run radar:watch` for automatic CSV regeneration
-- **Validation** - Scripts to validate data structure and completeness
+- **Validation** - `npm run check:radar` to validate data structure and completeness
 - **CI Integration** - Automated testing of radar data format
 
 ## Integration with ADRs
@@ -130,6 +137,7 @@ The radar methodology integrates with our Architecture Decision Record (ADR) pro
 - **ADR-012** - Radar Governance and Update Process
 
 Each major radar decision should be documented as an ADR, including:
+
 - Context and problem statement
 - Decision drivers and criteria
 - Considered options

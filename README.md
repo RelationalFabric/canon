@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: "@relational-fabric/canon"
-  text: "Universal Type Primitives & Axiomatic Systems"
-  tagline: "Build robust, data-centric applications with consistent type blueprints and a curated library ecosystem"
+  name: '@relational-fabric/canon'
+  text: 'Universal Type Primitives & Axiomatic Systems'
+  tagline: 'Build robust, data-centric applications with consistent type blueprints and a curated library ecosystem'
   actions:
     - theme: brand
       text: Get Started
@@ -49,19 +49,25 @@ Canon is a modern TypeScript package that enables **lazy typing** - writing type
 ### The Lazy Typing Triplet
 
 #### 1. Axioms - Define Semantic Concepts
+
 Axioms define **what** semantic concepts mean, independent of any specific data shape:
+
 - Define the semantic concept (e.g., "unique identifier", "type classification", "temporal data")
 - Specify the type structure without implementation details
 - Enable compile-time type safety through TypeScript interfaces
 
 #### 2. Canons - Implement for Shapes
+
 Canons provide **how** each axiom is implemented for specific data shapes:
+
 - Provide shape-specific field names and structures
 - Multiple canons can coexist for different data sources
 - Register both type-level and runtime configurations
 
 #### 3. Universal APIs - Work Across Shapes
+
 Universal APIs provide **the interface** your application code uses:
+
 - Single API that works across all registered canons
 - Type-safe functions that adapt to different data shapes
 - No shape-specific code in your business logic
@@ -69,12 +75,15 @@ Universal APIs provide **the interface** your application code uses:
 ### Additional Capabilities
 
 #### Universal Type Primitives
+
 - Battle-tested types from the TypeScript ecosystem
 - Foundation for building data-centric applications
 - Type-safe operations and proven patterns
 
 #### Curated Library Ecosystem
+
 Canon serves as a **canonical starting point** by providing:
+
 - **Pre-configured TypeScript setup** - Base configurations that work out of the box
 - **Curated dependency set** - Known good versions of essential libraries for common needs
 - **Standardized patterns** - Consistent approaches to common problems
@@ -117,8 +126,8 @@ import createEslintConfig from '@relational-fabric/canon/eslint'
 export default createEslintConfig({
   ignores: ['custom-ignore'],
   rules: {
-    'no-console': 'warn'
-  }
+    'no-console': 'warn',
+  },
 })
 ```
 
@@ -137,7 +146,9 @@ This package requires the following peer dependencies:
 Canon implements **lazy typing** through three complementary components that work together:
 
 #### Axioms
+
 Axioms define semantic concepts independent of data shape. They specify **what** concepts your code works with, such as:
+
 - Unique identifiers across different systems
 - Type information and classification
 - Versioning and change tracking
@@ -147,7 +158,9 @@ Axioms define semantic concepts independent of data shape. They specify **what**
 See [docs/axioms.md](docs/axioms.md) for the complete type system architecture.
 
 #### Canons
+
 Canons provide shape-specific implementations of axioms. They specify **how** each semantic concept is represented in a particular data shape:
+
 - **Declarative Style**: Local configurations for specific use cases
 - **Module Style**: Shareable configurations across projects
 - **Type Safety**: Full TypeScript support with compile-time checking
@@ -156,7 +169,9 @@ Canons provide shape-specific implementations of axioms. They specify **how** ea
 See [docs/canons.md](docs/canons.md) for implementation patterns.
 
 #### Universal APIs
+
 Universal APIs provide functions that work across all registered canons. They are **the interface** your application code uses:
+
 - Write code once that works with any registered canon
 - Automatic adaptation to different data shapes
 - Full type safety maintained across all shapes
@@ -172,6 +187,7 @@ See [reference/api.md](reference/api.md) for available APIs.
 ## Key Patterns
 
 ### Module Augmentation
+
 Register axioms and canons using TypeScript module augmentation:
 
 ```typescript
@@ -186,6 +202,7 @@ declare module '@relational-fabric/canon' {
 ```
 
 ### Naming Conventions
+
 - **Axiom Keys**: PascalCase, plural for general concepts (`Timestamps`, `References`), singular for specific concepts (`Id`, `Type`)
 - **Function Names**: Use relational `*Of` pattern (`idOf()`, `typeOf()`) not imperative `get*` patterns
 - **Type Names**: PascalCase for all type definitions
@@ -211,7 +228,7 @@ Canon maintains transparent planning and strategic direction:
 - **Strategic Vision**: [planning/](planning/) - Long-term direction and positioning
 - **Development Roadmap**: [planning/](planning/) - Detailed development phases and milestones
 - **Architecture Decisions**: [docs/adrs/](docs/adrs/) - Documented ADRs for major decisions
-- **Update Radar**: `npm run radar:convert` - Convert YAML to CSV for visualization
+- **Update Radar**: `npm run build:radar` - Convert YAML to CSV for visualization
 
 ## Development
 
@@ -230,56 +247,72 @@ npm install
 
 ### Available Scripts
 
-- `npm run check` - Type check and lint the package
+**Checks (Validation):**
+
+- `npm run check:all` - Run all checks (lint, type check, and tests)
+- `npm run checks` - Alias for check:all
+- `npm run check:types` - Type check all code (src + examples)
+- `npm run check:types:src` - Type check source code only
+- `npm run check:types:examples` - Type check examples only
+- `npm run check:lint` - Lint code
+- `npm run check:lint:fix` - Fix ESLint issues automatically
+- `npm run check:radar` - Validate radar configuration
+- `npm test` - Run tests (npm standard)
+- `npm run check:test` - Run tests (includes examples)
+
+**Development:**
+
 - `npm run dev` - Run TypeScript in watch mode
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues automatically
 
-### Documentation Scripts
+**Documentation:**
 
-- `npm run docs:dev` - Start VitePress development server
-- `npm run docs:build` - Build documentation for production (with automatic file renaming)
-- `npm run docs:preview` - Preview built documentation
-- `npm run docs:restore` - Manually restore README.md files from index.md
+- `npm run build:docs` - Build documentation for production
+- `npm run build:docs:restore` - Restore README.md files from build
 
 **Note**: The documentation build process uses a GitHub-first approach. All files use `README.md` naming in the repository for GitHub compatibility. During build, files are temporarily renamed to `index.md` for VitePress routing, then automatically restored. Always edit `README.md` files directly.
 
-### ADR Management
+**Architecture Decision Records:**
 
-This project uses Architecture Decision Records (ADRs) to document architectural decisions:
+- `cd docs/adrs && npx adr new "Title"` - Create a new ADR
+- `npm run build:adr` - Build all ADR artifacts (TOC + index)
+- `npm run build:adr:toc` - Generate table of contents
+- `npm run build:adr:index` - Generate ADR index in documentation
 
-- `npm run adr:list` - List all ADRs
-- `npm run adr:new "Title"` - Create a new ADR
-- `npm run adr:index` - Generate table of contents (in ADR directory)
+**Technology Radar:**
 
-### Technology Radar Management
+- `npm run build:radar` - Convert YAML radar data to CSV
 
-- `npm run radar:convert` - Convert YAML radar data to CSV for visualization
-- `npm run radar:validate` - Validate radar configuration and data
+**Examples:**
+
+- `npm run build:docs:examples` - Generate documentation from examples
 
 ## Documentation
 
 Canon provides comprehensive documentation to help you understand and use the system:
 
 ### Core Documentation
+
 - **[Getting Started](docs/)** - Introduction and quick start guide
 - **[Axioms](docs/axioms.md)** - Fundamental building blocks and type system
 - **[Canons](docs/canons.md)** - Universal type blueprints and implementation patterns
 - **[Contributing](CONTRIBUTING.md)** - Conventions, naming patterns, and development workflow
 
 ### Reference Documentation
+
 - **[API Reference](reference/api.md)** - Complete API documentation
 - **[Core Axioms](reference/axioms.md)** - Detailed axiom specifications
 - **[Canons Reference](reference/canons.md)** - Canon implementation guide
 - **[Third-Party Integrations](reference/third-party.md)** - External library integrations
 
 ### Examples
+
 - **[Deduplicating Entities](docs/examples/deduplicating-entities.md)** - Using axioms for entity deduplication
 - **[Tree Walk Over Mixed Entities](docs/examples/tree-walk-over-mixed-entities.md)** - Working with heterogeneous data structures
 - **[User Authentication Tokens](docs/examples/user-authentication-tokens.md)** - Implementing authentication patterns
 - **[More Examples](docs/examples/)** - Additional examples and use cases
 
 ### Architecture
+
 - **[ADRs](docs/adrs/)** - Architecture Decision Records
 - **[Technology Radar](docs/radar-methodology.md)** - Technology assessment methodology
 

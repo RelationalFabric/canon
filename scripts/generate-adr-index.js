@@ -4,8 +4,8 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 
-// Paths - use process.cwd() to get the current working directory (project root)
-const adrsDir = join(process.cwd(), 'docs', 'adrs')
+const rootDir = process.cwd()
+const adrsDir = join(rootDir, 'docs', 'adrs')
 const readmePath = join(adrsDir, 'README.md')
 
 // Status color mapping
@@ -74,9 +74,12 @@ function generateAdrTable(adrs) {
 
   const tableHeader = `| ADR | Title | Status | Date |\n|-----|-------|--------|------|`
 
-  const tableRows = adrs.map(adr =>
-    `| [ADR-${adr.number}](./${adr.filename}) | ${adr.title} | ${adr.color} ${adr.label} | ${adr.date} |`,
-  ).join('\n')
+  const tableRows = adrs
+    .map(
+      adr =>
+        `| [ADR-${adr.number}](./${adr.filename}) | ${adr.title} | ${adr.color} ${adr.label} | ${adr.date} |`,
+    )
+    .join('\n')
 
   return `${tableHeader}\n${tableRows}`
 }
@@ -122,9 +125,7 @@ function main() {
 
     console.log(`📁 Found ${files.length} ADR files`)
 
-    const adrs = files
-      .map(extractAdrInfo)
-      .filter(adr => adr !== null)
+    const adrs = files.map(extractAdrInfo).filter(adr => adr !== null)
 
     console.log(`✅ Successfully parsed ${adrs.length} ADRs`)
 

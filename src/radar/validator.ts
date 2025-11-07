@@ -4,7 +4,12 @@
 
 import type { QuadrantKey, RadarData, RingKey } from '../types/radar.js'
 
-const VALID_QUADRANTS: QuadrantKey[] = ['tools-libraries', 'techniques-patterns', 'features-capabilities', 'data-structures-formats']
+const VALID_QUADRANTS: QuadrantKey[] = [
+  'tools-libraries',
+  'techniques-patterns',
+  'features-capabilities',
+  'data-structures-formats',
+]
 const VALID_RINGS: RingKey[] = ['adopt', 'trial', 'assess', 'hold']
 
 export interface ValidationError {
@@ -245,7 +250,12 @@ function validateEntries(entries: any, errors: ValidationError[], warnings: stri
 /**
  * Validate individual radar entry
  */
-function validateRadarEntry(entry: any, errors: ValidationError[], warnings: string[], path: string): void {
+function validateRadarEntry(
+  entry: any,
+  errors: ValidationError[],
+  warnings: string[],
+  path: string,
+): void {
   if (!entry.name || typeof entry.name !== 'string') {
     errors.push({
       type: 'missing_field',
@@ -295,11 +305,13 @@ export async function validateRadarFile(filePath: string): Promise<ValidationRes
   catch (error) {
     return {
       isValid: false,
-      errors: [{
-        type: 'invalid_structure',
-        message: `Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        path: filePath,
-      }],
+      errors: [
+        {
+          type: 'invalid_structure',
+          message: `Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          path: filePath,
+        },
+      ],
       warnings: [],
     }
   }

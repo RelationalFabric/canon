@@ -37,11 +37,13 @@ A Canon is a type that defines its data model using a predefined set of universa
 Canons require both **type-level** and **runtime** configurations because they serve different purposes:
 
 #### Type-Level Configuration
+
 - **Purpose**: Defines the structure and constraints at compile time
 - **Benefits**: Provides type safety, IntelliSense, and compile-time type checking
 - **When**: Used during development to catch errors before runtime
 
 #### Runtime Configuration
+
 - **Purpose**: Provides actual values and behavior at execution time
 - **Benefits**: Enables dynamic behavior, format conversion, and runtime flexibility
 - **When**: Used during execution to determine how axioms behave with real data
@@ -53,6 +55,7 @@ This dual approach enables **lazy typing** - you can write type-safe code that w
 Axioms define the **semantic concepts** that canons implement. Each canon provides specific implementations of these concepts for different data formats. See the [Axioms documentation](./axioms.md) for detailed information about how axioms are structured and registered.
 
 The key insight is that:
+
 - **Axioms define what utilities expect** - The interface that universal functions work with
 - **Canons provide specific implementations** - Each canon implements the axioms for its data format
 - **Type safety is enforced** - The compiler ensures only valid axioms can be used in canon definitions
@@ -68,25 +71,33 @@ Canon supports two complementary registration patterns, each designed for differ
 The **Declarative Style** is ideal for canons that are defined and used within a single project or module. This pattern uses `declareCanon()` to register both the type and runtime configuration in one place.
 
 **Use Cases:**
+
 - Internal data formats specific to your application
 - Project-specific canon configurations
 - Simple, self-contained canon definitions
 - When you want everything in one place for clarity
 
 **Example:**
+
 ```typescript
 // Define and register in one step
 declareCanon('myProject', {
   axioms: {
     Id: {
       $basis: (value: unknown): value is { id: string } =>
-        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
+        typeof value === 'object'
+        && value !== null
+        && 'id' in value
+        && typeof (value as any).id === 'string',
       key: 'id',
       $meta: { type: 'uuid' },
     },
     Type: {
       $basis: (value: unknown): value is { type: string } =>
-        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
+        typeof value === 'object'
+        && value !== null
+        && 'type' in value
+        && typeof (value as any).type === 'string',
       key: 'type',
       $meta: { description: 'Entity type' },
     },
@@ -99,12 +110,14 @@ declareCanon('myProject', {
 The **Module Style** is designed for canons that will be shared across multiple projects or published as reusable modules. This pattern separates type definition from runtime configuration, making canons more portable and composable.
 
 **Use Cases:**
+
 - Canons that will be shared between projects
 - Published libraries that provide canon definitions
 - Complex canons with multiple dependencies
 - When you want to separate concerns for better maintainability
 
 **Example:**
+
 ```typescript
 // my-module/canon.ts - Define and export
 export type MyCanon = Canon<{
@@ -116,13 +129,19 @@ export default defineCanon<MyCanon>({
   axioms: {
     Id: {
       $basis: (value: unknown): value is { id: string } =>
-        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
-      key: 'id'
+        typeof value === 'object'
+        && value !== null
+        && 'id' in value
+        && typeof (value as any).id === 'string',
+      key: 'id',
     },
     Type: {
       $basis: (value: unknown): value is { type: string } =>
-        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
-      key: 'type'
+        typeof value === 'object'
+        && value !== null
+        && 'type' in value
+        && typeof (value as any).type === 'string',
+      key: 'type',
     },
   },
 })
@@ -202,13 +221,19 @@ declareCanon('Internal', {
   axioms: {
     Id: {
       $basis: (value: unknown): value is { id: string } =>
-        typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
+        typeof value === 'object'
+        && value !== null
+        && 'id' in value
+        && typeof (value as any).id === 'string',
       key: 'id',
       $meta: { type: 'uuid', required: 'true' },
     },
     Type: {
       $basis: (value: unknown): value is { type: string } =>
-        typeof value === 'object' && value !== null && 'type' in value && typeof (value as any).type === 'string',
+        typeof value === 'object'
+        && value !== null
+        && 'type' in value
+        && typeof (value as any).type === 'string',
       key: 'type',
       $meta: { enum: 'user,admin,guest', discriminator: 'true' },
     },
@@ -233,6 +258,7 @@ Canon uses special keys that have specific meaning to the system:
 The `$basis` field defines the underlying TypeScript type structure for an axiom. In runtime configurations, `$basis` must be a TypeGuard that discriminates between `T extends ExpectedType` and `unknown`.
 
 **Type-level definition:**
+
 ```typescript
 interface IdAxiom {
   $basis: { id: string }
@@ -242,10 +268,14 @@ interface IdAxiom {
 ```
 
 **Runtime configuration:**
+
 ```typescript
 const Id = {
   $basis: (value: unknown): value is { id: string } =>
-    typeof value === 'object' && value !== null && 'id' in value && typeof (value as any).id === 'string',
+    typeof value === 'object'
+    && value !== null
+    && 'id' in value
+    && typeof (value as any).id === 'string',
   key: 'id',
   $meta: { type: 'uuid', required: 'true' },
 } as const
@@ -256,6 +286,7 @@ const Id = {
 The `$meta` field provides additional metadata about the axiom. This can include type information, constraints, or behavioral hints.
 
 **Example:**
+
 ```typescript
 $meta: {
   type: 'uuid'
@@ -278,7 +309,7 @@ import { idOf, timestampsOf, typeOf } from '@relational-fabric/canon'
 const internalData = {
   id: 'user-123',
   type: 'user',
-  createdAt: new Date('2022-01-01')
+  createdAt: new Date('2022-01-01'),
 }
 
 console.log(idOf(internalData)) // "user-123" - runtime finds 'id' key

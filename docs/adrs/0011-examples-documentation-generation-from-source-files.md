@@ -1,8 +1,9 @@
 # ADR-0011: Examples Documentation Generation from Source Files
 
-## Status
+# ADR-0011: Examples Documentation Generation from Source Files
 
-Accepted
+- Status: accepted
+- Date: 2025-01-26
 
 ## Context
 
@@ -14,6 +15,7 @@ The Canon project has examples in the `/examples` directory that demonstrate key
 4. **Missing Information**: Static docs couldn't capture all the rich metadata available in the source files
 
 The examples serve multiple purposes:
+
 - **Documentation**: Show how to use the framework
 - **Integration tests**: Verify the complete workflow works
 - **Regression tests**: Ensure changes don't break functionality
@@ -33,6 +35,7 @@ We will implement automatic documentation generation from example source files u
 **Script Location**: `/scripts/generate-examples-docs.ts`
 
 **Key Features**:
+
 - Extracts descriptions from JSDoc comments
 - Identifies key concepts and prerequisites
 - Generates GitHub links to source files
@@ -40,11 +43,13 @@ We will implement automatic documentation generation from example source files u
 - Maintains pattern information (declarative vs module-style)
 
 **Build Integration**:
-- Added `npm run examples:generate-docs` script
-- Integrated into `npm run docs:build` process
+
+- Added `npm run build:docs:examples` script
+- Integrated into `npm run build:docs` process
 - Documentation regenerated on every build
 
 **Generated Documentation Structure**:
+
 - Overview of all examples with descriptions
 - Pattern explanations (declarative vs module-style)
 - Direct links to GitHub source files
@@ -78,19 +83,21 @@ We will implement automatic documentation generation from example source files u
 The solution includes:
 
 1. **Documentation Generation Script** (`/scripts/generate-examples-docs.ts`)
-2. **NPM Script** (`npm run examples:generate-docs`)
-3. **Build Integration** (updated `docs:build` script)
+2. **NPM Script** (`npm run build:docs:examples`)
+3. **Build Integration** (updated `build:docs` script)
 4. **Removed Static Files** (deleted outdated static documentation)
 5. **Updated Documentation** (generated comprehensive examples overview)
 
 ## Examples
 
 ### Before
+
 - Static markdown files with hardcoded information
 - Manual maintenance required
 - Potential for documentation drift
 
 ### After
+
 - Dynamic documentation generated from source
 - Automatic updates on build
 - Direct links to GitHub source files

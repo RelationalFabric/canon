@@ -5,12 +5,17 @@
  * entities that implement multiple axioms.
  */
 
-import {
-  idOf,
-  referencesOf,
-  typeOf,
-  versionOf,
-} from '@relational-fabric/canon'
+import type { EntityReference, Satisfies } from '@relational-fabric/canon'
+import { idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
+
+type MultiAxiomEntity = Satisfies<'Id'> & Satisfies<'Type'> & Satisfies<'Version'> & Satisfies<'References'> & {
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+function ensureEntity(entity: unknown): MultiAxiomEntity {
+  return entity as MultiAxiomEntity
+}
 
 // =============================================================================
 // Entity Analysis Functions
@@ -19,35 +24,36 @@ import {
 /**
  * Analyze an entity and extract all available axiom data
  */
-export function analyzeEntity(entity: unknown): {
+export function analyzeEntity(input: unknown): {
   id: string
   type: string
-  version: number
+  version: string | number
   timestamps: Date[]
   references: Array<{ ref: string, resolved: boolean, value?: unknown }>
 } {
+  const entity = ensureEntity(input)
   const id = idOf(entity)
   const type = typeOf(entity)
-  const version = versionOf(entity)
+  const version = typeof versionOf(entity) === 'number'
+    ? versionOf(entity) as number
+    : Number(versionOf(entity))
 
   // Handle timestamps manually since the canon doesn't know about createdAt/updatedAt
   const timestamps: Date[] = []
-  if (typeof entity === 'object' && entity !== null) {
-    const obj = entity as Record<string, unknown>
-    if (obj.createdAt instanceof Date)
-      timestamps.push(obj.createdAt)
-    if (obj.updatedAt instanceof Date)
-      timestamps.push(obj.updatedAt)
-  }
+  if (entity.createdAt instanceof Date)
+    timestamps.push(entity.createdAt)
+  if (entity.updatedAt instanceof Date)
+    timestamps.push(entity.updatedAt)
 
   const references = referencesOf(entity)
+  const referenceList: EntityReference<string, unknown>[] = Array.isArray(references) ? references : [references]
 
   return {
     id,
     type,
-    version,
+    version: Number.isFinite(version) ? version : 0,
     timestamps,
-    references: Array.isArray(references) ? references : [references],
+    references: referenceList,
   }
 }
 
@@ -95,18 +101,21 @@ export function demonstrateReferenceConversion(): void {
 /**
  * Process an entity update with version increment
  */
-export function processEntityUpdate(entity: unknown): {
+export function processEntityUpdate(input: unknown): {
   id: string
-  oldVersion: number
-  newVersion: number
+  oldVersion: string | number
+  newVersion: string | number
   updatedAt: Date
 } {
+  const entity = ensureEntity(input)
   const id = idOf(entity)
-  const oldVersion = versionOf(entity)
+  const rawVersion = versionOf(entity)
+  const numericVersion = typeof rawVersion === 'number' ? rawVersion : Number(rawVersion)
+  const oldVersion = Number.isFinite(numericVersion) ? numericVersion : 0
   const newVersion = oldVersion + 1
   const updatedAt = new Date()
 
-  console.log(`\n=== Processing Update for ${typeOf(entity)} ${id} ===`)
+  console.log(`\n=== Processing Update for ${typeOf(entity as Satisfies<'Type'>)} ${id} ===`)
   console.log(`Current version: ${oldVersion}`)
   console.log(`New version: ${newVersion}`)
   console.log(`Updated at: ${updatedAt.toISOString()}`)

@@ -2,15 +2,15 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    // Include only source files for main testing
-    includeSource: ['src/**/*.{js,ts}'],
+    // Include source and example files for testing
+    includeSource: ['src/**/*.{js,ts}', 'examples/**/*.{js,ts}'],
     // Exclude certain files from testing
-    exclude: ['**/node_modules/**', '**/dist/**', '**/radar/**', 'examples/**/*.{js,ts}'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/radar/**'],
     // Coverage configuration
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.{js,ts}'],
+      include: ['src/**/*.{js,ts}', 'examples/**/*.{js,ts}'],
       exclude: ['src/**/*.test.ts', 'src/radar/**'],
     },
   },

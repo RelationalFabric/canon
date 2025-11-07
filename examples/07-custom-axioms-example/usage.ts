@@ -9,8 +9,8 @@ import {
   calculateOrderTotalWithCurrency,
   processCustomerRegistration,
   updateEntityStatus,
-} from './business-scenarios'
-import { currencyOf, emailOf, priorityOf, statusOf } from './custom-functions'
+} from './business-scenarios.js'
+import { currencyOf, emailOf, priorityOf, statusOf } from './custom-functions.js'
 import './custom-axioms' // Import canon definitions
 
 // =============================================================================
@@ -105,7 +105,7 @@ if (import.meta.vitest) {
 
       // Test string conversion
       const currency2 = currencyOf('$150.50 USD')
-      expect(currency2).toEqual({ amount: 150.50, currency: 'USD' })
+      expect(currency2).toEqual({ amount: 150.5, currency: 'USD' })
 
       // Test object (already canonical)
       const currency3 = currencyOf({ amount: 200, currency: 'EUR' })

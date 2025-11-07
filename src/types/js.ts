@@ -1,3 +1,5 @@
+import { type Expect, invariant } from '../testing.js'
+
 export interface JsType {
   string: string
   number: number
@@ -13,3 +15,11 @@ export interface JsType {
 }
 
 export type JsTypeName = keyof JsType
+
+// ---------------------------------------------------------------------------
+// Compile-time invariants
+// ---------------------------------------------------------------------------
+
+void invariant<Expect<JsType['string'], string>>()
+void invariant<Expect<JsType['array'], unknown[]>>()
+void invariant<Expect<JsTypeName, keyof JsType>>()
