@@ -20,11 +20,20 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { spawn } from 'node:child_process'
 
 type Segment =
   | { kind: 'narrative'; text: string }
   | { kind: 'code'; code: string }
   | { kind: 'section'; title: string }
+
+type TestCaseStatus = 'pass' | 'fail' | 'skip' | 'todo' | 'unknown'
+
+interface TestResultsByFile {
+  [relativePath: string]: {
+    cases: Array<{ fullName: string; status: TestCaseStatus }>
+  }
+}
 
 interface ParsedSource {
   filePath: string
@@ -71,7 +80,7 @@ function isBlank(line: string): boolean {
   return line.trim() === ''
 }
 
-function parseSourceFile(filePath: string, raw: string): ParsedSource {
+function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: string; examplesDir?: string; vitest?: TestResultsByFile }): ParsedSource {
   const lines = raw.split(/\r?\n/)
   const segments: Segment[] = []
   let codeBuffer: string[] = []
@@ -89,32 +98,64 @@ function parseSourceFile(filePath: string, raw: string): ParsedSource {
   }
 
   let i = 0
-  let skippingVitest = false
-  let vitestBraceDepth = 0
   while (i < lines.length) {
     const line = lines[i]
 
-    // Handle start of vitest in-source block
-    if (!skippingVitest && /\bif\s*\(\s*import\.meta\.vitest\s*\)/.test(line)) {
-      skippingVitest = true
-      // Initialize brace depth from this line and forward
-      const rest = line.slice(line.indexOf('{') >= 0 ? line.indexOf('{') : line.length)
-      vitestBraceDepth = (rest.match(/\{/g) || []).length - (rest.match(/\}/g) || []).length
-      if (vitestBraceDepth <= 0) {
-        // Might be on next lines; ensure at least 1 to enter skipping
-        vitestBraceDepth = 1
-      }
-      i += 1
+    // Handle vitest in-source block: collect, summarize results, and include code
+    if (/\bif\s*\(\s*import\.meta\.vitest\s*\)/.test(line)) {
       // Flush any preceding code so we don't interleave with narrative
       flushCode()
-      // Skip lines until balanced
-      while (i < lines.length && vitestBraceDepth > 0) {
+      // Capture from the opening brace to the matching closing
+      let braceDepth = 0
+      const blockLines: string[] = []
+      // Consume current line through end
+      // Find first '{' from current or subsequent lines
+      let started = false
+      while (i < lines.length) {
         const ln = lines[i]
-        vitestBraceDepth += (ln.match(/\{/g) || []).length
-        vitestBraceDepth -= (ln.match(/\}/g) || []).length
+        if (!started) {
+          const idx = ln.indexOf('{')
+          if (idx >= 0) {
+            started = true
+            const after = ln.slice(idx)
+            braceDepth += (after.match(/\{/g) || []).length
+            braceDepth -= (after.match(/\}/g) || []).length
+            blockLines.push(ln)
+            i += 1
+            if (braceDepth <= 0) break
+            continue
+          }
+          blockLines.push(ln)
+          i += 1
+          continue
+        }
+        blockLines.push(ln)
+        braceDepth += (ln.match(/\{/g) || []).length
+        braceDepth -= (ln.match(/\}/g) || []).length
         i += 1
+        if (braceDepth <= 0) break
       }
-      skippingVitest = false
+
+      // Summarize tests for this file
+      const relativePath = opts?.repoRoot ? path.relative(opts.repoRoot, filePath) : filePath
+      const testResults = opts?.vitest?.[relativePath]
+      const statusLines: string[] = []
+      if (testResults && testResults.cases.length > 0) {
+        statusLines.push('Test status:')
+        for (const c of testResults.cases) {
+          const badge = c.status === 'pass' ? '✅' : c.status === 'fail' ? '❌' : c.status === 'skip' ? '⏭️' : c.status === 'todo' ? '📝' : '❔'
+          statusLines.push(`- ${badge} ${c.fullName}`)
+        }
+      }
+      else {
+        statusLines.push('_No test results available for this file._')
+      }
+      // Insert a generic Tests section heading, then status, then the block code
+      segments.push({ kind: 'section', title: 'Tests' })
+      segments.push({ kind: 'narrative', text: statusLines.join('\n') })
+      segments.push({ kind: 'code', code: blockLines.join('\n') })
+      // Skip trailing blanks
+      while (i < lines.length && isBlank(lines[i])) i += 1
       continue
     }
 
@@ -272,12 +313,12 @@ function sortExampleFiles(fileNames: string[]): string[] {
   return [...fileNames].sort((a, b) => orderKey(a).localeCompare(orderKey(b)))
 }
 
-async function processExample(exampleRoot: string, entry: string): Promise<ExampleInfo> {
+async function processExample(exampleRoot: string, entry: string, opts: { repoRoot: string; examplesDir: string; vitest: TestResultsByFile }): Promise<ExampleInfo> {
   const abs = path.join(exampleRoot, entry)
   const stat = await fs.lstat(abs)
   if (stat.isFile()) {
     const raw = await readText(abs)
-    const parsed = parseSourceFile(abs, raw)
+    const parsed = parseSourceFile(abs, raw, opts)
     const name = entry.replace(/\.[^.]+$/, '')
     const title = deriveTitle(name, [parsed])
     return { name, title, files: [parsed] }
@@ -290,7 +331,7 @@ async function processExample(exampleRoot: string, entry: string): Promise<Examp
   for (const f of ordered) {
     const full = path.join(abs, f)
     const raw = await readText(full)
-    files.push(parseSourceFile(full, raw))
+    files.push(parseSourceFile(full, raw, opts))
   }
   const name = entry
   const title = deriveTitle(name, files)
@@ -309,7 +350,7 @@ function generateExampleMarkdown(example: ExampleInfo, examplesDir: string): str
   for (const parsed of example.files) {
     // Add a heading for secondary files or always for multi-file examples
     if (example.files.length > 1) {
-      lines.push(`## File: ${path.relative(path.join(examplesDir, example.name), parsed.filePath)}`)
+      lines.push(`## In ${path.relative(path.join(examplesDir, example.name), parsed.filePath)}`)
       lines.push('')
     }
     for (const seg of parsed.segments) {
@@ -386,6 +427,48 @@ function upsertGeneratedIndex(original: string, entries: IndexEntry[]): string {
   return `${trimmed}\n\n${block}\n`
 }
 
+async function collectVitestResults(repoRoot: string): Promise<TestResultsByFile> {
+  return await new Promise<TestResultsByFile>((resolve) => {
+    const child = spawn('npx', ['vitest', 'run', '--reporter=json'], {
+      cwd: repoRoot,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, CI: 'true' },
+    })
+    let stdout = ''
+    child.stdout.on('data', (d: Buffer) => {
+      stdout += d.toString('utf8')
+    })
+    child.on('close', () => {
+      try {
+        // Vitest JSON reporter typically outputs a single JSON object
+        const parsed = JSON.parse(stdout)
+        const results: TestResultsByFile = {}
+        if (parsed && Array.isArray(parsed.files)) {
+          for (const f of parsed.files as Array<any>) {
+            const filePath = typeof f.file === 'string' ? f.file : (f.path as string | undefined) ?? ''
+            if (!filePath) continue
+            const rel = path.relative(repoRoot, path.resolve(repoRoot, filePath))
+            const cases: Array<{ fullName: string; status: TestCaseStatus }> = []
+            if (Array.isArray(f.tests)) {
+              for (const t of f.tests) {
+                const fullName: string = [t.suiteName, t.name].filter(Boolean).join(' > ')
+                const status: TestCaseStatus = (t.status as TestCaseStatus) ?? 'unknown'
+                cases.push({ fullName, status })
+              }
+            }
+            results[rel] = { cases }
+          }
+        }
+        resolve(results)
+      }
+      catch {
+        resolve({})
+      }
+    })
+    child.on('error', () => resolve({}))
+  })
+}
+
 async function generateExamplesDocumentation(): Promise<void> {
   const __filename = fileURLToPath(import.meta.url)
   const __dirname = path.dirname(__filename)
@@ -400,6 +483,9 @@ async function generateExamplesDocumentation(): Promise<void> {
     await fs.mkdir(outputDir, { recursive: true })
   }
 
+  // Run tests once to collect results for inclusion
+  const vitest = await collectVitestResults(repoRoot)
+
   const { files, dirs } = await listExampleEntries(examplesDir)
   const exampleFiles = files.filter((f) => f.endsWith('.ts'))
   const exampleDirs = dirs
@@ -407,11 +493,11 @@ async function generateExamplesDocumentation(): Promise<void> {
   // Process single-file examples
   const allExamples: ExampleInfo[] = []
   for (const f of exampleFiles) {
-    allExamples.push(await processExample(examplesDir, f))
+    allExamples.push(await processExample(examplesDir, f, { repoRoot, examplesDir, vitest }))
   }
   // Process multi-file examples (directories)
   for (const d of exampleDirs) {
-    allExamples.push(await processExample(examplesDir, d))
+    allExamples.push(await processExample(examplesDir, d, { repoRoot, examplesDir, vitest }))
   }
 
   // Write individual markdown files

@@ -1,6 +1,6 @@
 # 02 Module Style Canon
 
-## File: usage.ts
+## In usage.ts
 
 Using the MongoDB Canon Module
 
@@ -50,7 +50,31 @@ const userId = idOf(userDocument)
 
 Test: Verify MongoDB canon works after registration
 
-## File: mongodb-canon.ts
+## Tests
+
+_No test results available for this file._
+
+```typescript
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+
+  it('extracts _id from MongoDB documents', () => {
+    expect(userId).toBe('507f1f77bcf86cd799439011')
+  })
+
+  it('works with any MongoDB document structure', () => {
+    const productDocument = {
+      _id: 'abc123def456',
+      title: 'Product Name',
+      price: 29.99,
+    }
+
+    expect(idOf(productDocument)).toBe('abc123def456')
+  })
+}
+```
+
+## In mongodb-canon.ts
 
 MongoDB Canon Module
 
@@ -94,4 +118,20 @@ export const mongoDbCanon = defineCanon({
 ```
 
 Test: defineCanon creates the expected structure
+
+## Tests
+
+_No test results available for this file._
+
+```typescript
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+
+  it('creates a reusable MongoDB canon configuration', () => {
+    expect(mongoDbCanon.axioms.Id.key).toBe('_id')
+    expect((mongoDbCanon.axioms.Id.$meta as any).type).toBe('objectid')
+    expect((mongoDbCanon.axioms.Id.$meta as any).format).toBe('hex')
+  })
+}
+```
 

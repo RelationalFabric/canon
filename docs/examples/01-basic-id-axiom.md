@@ -67,6 +67,19 @@ const userId = idOf(user) // Returns: "user-123"
 
 Let's verify this works as expected
 
+## Tests
+
+_No test results available for this file._
+
+```typescript
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('extracts ID from internal format using standard "id" field', () => {
+    expect(userId).toBe('user-123')
+  })
+}
+```
+
 =============================================================================
 STEP 2: Add Support for External Data (JSON-LD)
 =============================================================================
@@ -116,6 +129,19 @@ const jsonLdPerson = {
 const personId = idOf(jsonLdPerson) // Returns: "https://example.com/users/jane-456"
 ```
 
+## Tests
+
+_No test results available for this file._
+
+```typescript
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('extracts ID from JSON-LD format using "@id" field', () => {
+    expect(personId).toBe('https://example.com/users/jane-456')
+  })
+}
+```
+
 =============================================================================
 STEP 3: Write Universal Code
 =============================================================================
@@ -149,6 +175,20 @@ const jsonLdProduct = {
 }
 const jsonLdDisplay = displayEntity(jsonLdProduct)
 // Returns: "Entity with ID: https://example.com/products/gadget-999"
+```
+
+## Tests
+
+_No test results available for this file._
+
+```typescript
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('writes universal functions that work across both formats', () => {
+    expect(internalDisplay).toBe('Entity with ID: product-789')
+    expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
+  })
+}
 ```
 
 Key Takeaways:
