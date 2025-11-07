@@ -58,7 +58,7 @@ function toTitleFromSlug(slug: string): string {
     .join(' ')
 }
 
-function stripJsDocStars(lines: string[]): string[] {
+function stripBlockCommentStars(lines: string[]): string[] {
   return lines.map((line) => {
     const trimmed = line.trimStart()
     if (trimmed.startsWith('*')) {
@@ -128,22 +128,41 @@ function parseSourceFile(filePath: string, raw: string): ParsedSource {
       continue
     }
 
-    // JSDoc narrative block
-    if (/^\s*\/\*\*/.test(line)) {
-      flushCode()
-      const docLines: string[] = []
-      // Consume until */
+    // Block comment: treat uniformly for JSDoc and regular block comments
+    if (/^\s*\/\*/.test(line)) {
+      const prevLineForBlock = i > 0 ? lines[i - 1] : ''
+      const isTopLevelBlock = i === 0 || isBlank(prevLineForBlock)
+
+      const rawBlock: string[] = []
+      const innerLines: string[] = []
+
+      // Capture opening line
+      rawBlock.push(lines[i])
       i += 1
-      while (i < lines.length && !/\*\//.test(lines[i])) {
-        docLines.push(lines[i])
+
+      // Capture inner and closing line
+      while (i < lines.length) {
+        rawBlock.push(lines[i])
+        if (/\*\//.test(lines[i])) {
+          i += 1
+          break
+        }
+        innerLines.push(lines[i])
         i += 1
       }
-      // Skip the closing */ line
-      if (i < lines.length) i += 1
-      const cleaned = stripJsDocStars(docLines).join('\n')
-      const text = cleaned.replace(/@\w+[^\n]*\n?/g, '').trim()
-      if (text.length > 0) {
-        segments.push({ kind: 'narrative', text })
+
+      if (isTopLevelBlock) {
+        flushCode()
+        const cleaned = stripBlockCommentStars(innerLines).join('\n').trim()
+        if (cleaned.length > 0) {
+          segments.push({ kind: 'narrative', text: cleaned })
+        }
+        // Skip trailing blank lines between comment block and code
+        while (i < lines.length && isBlank(lines[i])) i += 1
+      }
+      else {
+        // Inline/embedded block comment stays inside code
+        for (const rb of rawBlock) codeBuffer.push(rb)
       }
       continue
     }
