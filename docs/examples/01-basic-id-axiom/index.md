@@ -186,5 +186,4 @@ if (import.meta.vitest) {
  * 4. Add new formats anytime without changing existing code
  * 5. Use Canon's utility functions (pojoHasString, isPojo) for clean type guards
  */
-
 ```

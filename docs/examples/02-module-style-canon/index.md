@@ -63,9 +63,7 @@ if (import.meta.vitest) {
     expect((mongoDbCanon.axioms.Id.$meta as any).format).toBe('hex')
   })
 }
-
 ```
-
 ## File: `02-module-style-canon/usage.ts`
 
 ```typescript
@@ -130,5 +128,4 @@ if (import.meta.vitest) {
     expect(idOf(productDocument)).toBe('abc123def456')
   })
 }
-
 ```

@@ -231,9 +231,7 @@ export function updateEntityStatus(
     }
   }
 }
-
 ```
-
 ## File: `07-custom-axioms-example/custom-axioms.ts`
 
 ```typescript
@@ -406,9 +404,7 @@ declareCanon('EcommerceWithCustomAxioms', {
 })
 
 export type { CurrencyAxiom, EcommerceWithCustomAxioms, EmailAxiom, PriorityAxiom, StatusAxiom }
-
 ```
-
 ## File: `07-custom-axioms-example/custom-functions.ts`
 
 ```typescript
@@ -594,9 +590,7 @@ export function priorityOf(x: unknown): { level: number, label: string } {
 
   throw new TypeError(`Expected number, string, or priority object, got ${typeof priorityValue}`)
 }
-
 ```
-
 ## File: `07-custom-axioms-example/usage.ts`
 
 ```typescript
@@ -819,5 +813,4 @@ console.log('Priority conversions:', priorityExamples)
  * 9. **Conversion**: Implement format conversion for your custom data types
  * 10. **Business Rules**: Encode business rules directly into your axiom implementations
  */
-
 ```

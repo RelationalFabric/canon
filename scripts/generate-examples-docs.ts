@@ -115,15 +115,23 @@ function formatTitle(slug: string): string {
   return slug
     .replace(/-/g, ' ')
     .replace(/\.ts$/u, '')
-    .replace(/\b\w/gu, (match) => match.toUpperCase())
+    .replace(/\b\w/gu, match => match.toUpperCase())
 }
 
 function determineCodeFenceLanguage(filePath: string): string {
   const extension = extname(filePath).toLowerCase()
-  if (extension === '.ts') return 'typescript'
-  if (extension === '.js') return 'javascript'
-  if (extension === '.json') return 'json'
-  if (extension === '.md') return 'markdown'
+  if (extension === '.ts') {
+    return 'typescript'
+  }
+  if (extension === '.js') {
+    return 'javascript'
+  }
+  if (extension === '.json') {
+    return 'json'
+  }
+  if (extension === '.md') {
+    return 'markdown'
+  }
   return ''
 }
 
@@ -240,7 +248,7 @@ function processExample(examplePath: string, relativePath: string, baseDir: stri
       }
     }
 
-    const referencedFiles = metadata.files?.map((file) =>
+    const referencedFiles = metadata.files?.map(file =>
       normalizeRelativePath(join(normalizedRelativePath, file)),
     ) ?? []
     const discoveredFiles = referencedFiles.length > 0
@@ -324,7 +332,7 @@ function generateExamplePage(example: ExampleInfo, examplesDir: string): string 
       return
     }
 
-    const code = readFileSync(absolutePath, 'utf-8')
+    const code = readFileSync(absolutePath, 'utf-8').trimEnd()
     const language = determineCodeFenceLanguage(relativeFile)
 
     lines.push(`## File: \`${relativeFile}\``)
@@ -332,8 +340,11 @@ function generateExamplePage(example: ExampleInfo, examplesDir: string): string 
     lines.push(`\`\`\`${language}`)
     lines.push(code)
     lines.push('```')
-    lines.push('')
   })
+
+  while (lines.length > 0 && lines[lines.length - 1] === '') {
+    lines.pop()
+  }
 
   const content = lines.join('\n').replace(/\n{3,}/g, '\n\n')
   return `${content.trimEnd()}\n`

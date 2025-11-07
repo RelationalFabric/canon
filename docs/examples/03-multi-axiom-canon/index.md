@@ -115,9 +115,7 @@ declareCanon('ComprehensiveCanon', {
 })
 
 export type { ComprehensiveCanon }
-
 ```
-
 ## File: `03-multi-axiom-canon/usage.ts`
 
 ```typescript
@@ -251,9 +249,7 @@ processEntityUpdate(productEntity)
  * 9. **Entity Analysis**: Comprehensive entity analysis across all axioms
  * 10. **Business Logic**: Real-world business scenarios with multiple axioms
  */
-
 ```
-
 ## File: `03-multi-axiom-canon/utility-functions.ts`
 
 ```typescript
@@ -386,5 +382,4 @@ export function processEntityUpdate(input: unknown): {
     updatedAt,
   }
 }
-
 ```

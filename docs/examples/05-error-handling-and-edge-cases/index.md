@@ -85,9 +85,7 @@ declareCanon('BasicCanon', {
 })
 
 export type { BasicCanon }
-
 ```
-
 ## File: `05-error-handling-and-edge-cases/safe-functions.ts`
 
 ```typescript
@@ -257,9 +255,7 @@ export function safeReferenceConversion(
     return undefined
   }
 }
-
 ```
-
 ## File: `05-error-handling-and-edge-cases/usage.ts`
 
 ```typescript
@@ -528,9 +524,7 @@ console.log()
  * 9. **Validation Results**: Return detailed validation results with errors and warnings
  * 10. **Robust Processing**: Build robust systems that handle real-world data variations
  */
-
 ```
-
 ## File: `05-error-handling-and-edge-cases/validation-utilities.ts`
 
 ```typescript
@@ -746,5 +740,4 @@ export function processBatchSafely(entities: unknown[]): {
     results,
   }
 }
-
 ```

@@ -337,9 +337,7 @@ export function processOrderWorkflow(
     return { success: false, steps }
   }
 }
-
 ```
-
 ## File: `06-real-world-business-scenarios/domain-models.ts`
 
 ```typescript
@@ -580,9 +578,7 @@ export const sampleOrder: Order = {
 }
 
 export type { EcommerceCanon }
-
 ```
-
 ## File: `06-real-world-business-scenarios/usage.ts`
 
 ```typescript
@@ -740,5 +736,4 @@ workflow.steps.forEach((step, index) => {
  * 9. **Modularity**: Clean separation of concerns with focused modules
  * 10. **Maintainability**: Easy to maintain and extend business logic
  */
-
 ```

@@ -196,9 +196,7 @@ declareCanon('JsonLdCanon', {
 })
 
 export type { JsonLdCanon, MongoDbCanon, RestApiCanon }
-
 ```
-
 ## File: `04-format-conversion-examples/conversion-utilities.ts`
 
 ```typescript
@@ -464,9 +462,7 @@ export function demonstrateErrorHandling(): void {
     )
   }
 }
-
 ```
-
 ## File: `04-format-conversion-examples/usage.ts`
 
 ```typescript
@@ -648,5 +644,4 @@ demonstrateErrorHandling()
  * 9. **Business Logic**: Complex business logic works seamlessly across formats
  * 10. **Integration**: Easy integration with existing systems and data sources
  */
-
 ```
