@@ -17,21 +17,22 @@
 // - docs/examples/README.md is updated to include a generated index between
 //   BEGIN/END markers, preserving surrounding static content
 
+import type { Buffer } from 'node:buffer'
+import { spawn } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { spawn } from 'node:child_process'
 
 type Segment =
-  | { kind: 'narrative'; text: string }
-  | { kind: 'code'; code: string }
-  | { kind: 'section'; title: string }
+  | { kind: 'narrative', text: string }
+  | { kind: 'code', code: string }
+  | { kind: 'section', title: string }
 
 type TestCaseStatus = 'pass' | 'fail' | 'skip' | 'todo' | 'unknown'
 
 interface TestResultsByFile {
   [relativePath: string]: {
-    cases: Array<{ fullName: string; status: TestCaseStatus }>
+    cases: Array<{ fullName: string, status: TestCaseStatus }>
   }
 }
 
@@ -62,7 +63,7 @@ function toTitleFromSlug(slug: string): string {
   const spaced = withSpaces.replace(/^(\d{1,3})\s+/, (_, n: string) => `${n} `)
   return spaced
     .split(' ')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ')
 }
 
@@ -80,7 +81,7 @@ function isBlank(line: string): boolean {
   return line.trim() === ''
 }
 
-function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: string; examplesDir?: string; vitest?: TestResultsByFile }): ParsedSource {
+function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: string, examplesDir?: string, vitest?: TestResultsByFile }): ParsedSource {
   const lines = raw.split(/\r?\n/)
   const segments: Segment[] = []
   let codeBuffer: string[] = []
@@ -122,7 +123,9 @@ function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: stri
             braceDepth -= (after.match(/\}/g) || []).length
             blockLines.push(ln)
             i += 1
-            if (braceDepth <= 0) break
+            if (braceDepth <= 0) {
+              break
+            }
             continue
           }
           blockLines.push(ln)
@@ -133,7 +136,9 @@ function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: stri
         braceDepth += (ln.match(/\{/g) || []).length
         braceDepth -= (ln.match(/\}/g) || []).length
         i += 1
-        if (braceDepth <= 0) break
+        if (braceDepth <= 0) {
+          break
+        }
       }
 
       // Summarize tests for this file
@@ -160,12 +165,21 @@ function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: stri
     }
 
     // Section marker
-    const sectionMatch = line.match(/^\s*\/\/\s*---SECTION:\s*(.+?)\s*---\s*$/)
-    if (sectionMatch) {
-      flushCode()
-      segments.push({ kind: 'section', title: sectionMatch[1].trim() })
-      i += 1
-      continue
+    // Section marker parsing without regex backtracking risks
+    const trimmedLine = line.trim()
+    if (trimmedLine.startsWith('//')) {
+      const body = trimmedLine.slice(2).trim()
+      if (body.startsWith('---SECTION:')) {
+        const rest = body.slice('---SECTION:'.length).trim()
+        let title = rest
+        if (title.endsWith('---')) {
+          title = title.slice(0, -3).trim()
+        }
+        flushCode()
+        segments.push({ kind: 'section', title })
+        i += 1
+        continue
+      }
     }
 
     // Block comment: treat JSDoc (/** ... */) and regular (/* ... */) with slight differences
@@ -197,19 +211,25 @@ function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: stri
         const cleanedLines = stripBlockCommentStars(innerLines)
         if (isJsDoc) {
           const proseLines: string[] = []
-          const tagRows: Array<{ tag: string; text: string }> = []
+          const tagRows: Array<{ tag: string, text: string }> = []
           for (const ln of cleanedLines) {
             const t = ln.trim()
             if (t.startsWith('@')) {
-              const m = t.match(/^@(\w+)\s*(.*)$/)
-              if (m) tagRows.push({ tag: m[1], text: m[2]?.trim() ?? '' })
+              const space = t.indexOf(' ')
+              const tag = t.slice(1, space >= 0 ? space : t.length)
+              const rest = space >= 0 ? t.slice(space + 1).trim() : ''
+              if (tag) {
+                tagRows.push({ tag, text: rest })
+              }
             }
             else {
               proseLines.push(ln)
             }
           }
           const prose = proseLines.join('\n').trim()
-          if (prose.length > 0) segments.push({ kind: 'narrative', text: prose })
+          if (prose.length > 0) {
+            segments.push({ kind: 'narrative', text: prose })
+          }
           if (tagRows.length > 0) {
             const tableLines = ['| Tag | Description |', '| --- | --- |', ...tagRows.map(r => `| @${r.tag} | ${r.text} |`)]
             segments.push({ kind: 'narrative', text: tableLines.join('\n') })
@@ -217,14 +237,20 @@ function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: stri
         }
         else {
           const cleaned = cleanedLines.join('\n').trim()
-          if (cleaned.length > 0) segments.push({ kind: 'narrative', text: cleaned })
+          if (cleaned.length > 0) {
+            segments.push({ kind: 'narrative', text: cleaned })
+          }
         }
         // Skip trailing blank lines between comment block and code
-        while (i < lines.length && isBlank(lines[i])) i += 1
+        while (i < lines.length && isBlank(lines[i])) {
+          i += 1
+        }
       }
       else {
         // Inline/embedded block comment stays inside code
-        for (const rb of rawBlock) codeBuffer.push(rb)
+        for (const rb of rawBlock) {
+          codeBuffer.push(rb)
+        }
       }
       continue
     }
@@ -236,9 +262,10 @@ function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: stri
       // Peek ahead to collect contiguous comment lines
       const commentBlock: string[] = []
       while (i < lines.length && /^\s*\/\//.test(lines[i])) {
-        // Capture text after //
-        const m = lines[i].match(/^\s*\/\/\s?(.*)$/)
-        commentBlock.push(m ? m[1] : '')
+        // Capture text after // without regex
+        const idx = lines[i].indexOf('//')
+        const after = idx >= 0 ? lines[i].slice(idx + 2) : ''
+        commentBlock.push(after.startsWith(' ') ? after.slice(1) : after)
         i += 1
       }
       // If the next non-empty line starts with code (not another comment) we treat this as narrative
@@ -253,11 +280,13 @@ function parseSourceFile(filePath: string, raw: string, opts?: { repoRoot?: stri
         flushCode()
         segments.push({ kind: 'narrative', text })
         // Skip trailing blank lines between comment block and code
-        while (i < lines.length && isBlank(lines[i])) i += 1
+        while (i < lines.length && isBlank(lines[i])) {
+          i += 1
+        }
         continue
       }
       // Otherwise, fall through and treat original captured lines as code; push them back into buffer
-      for (const original of commentBlock.map((t) => `// ${t}`)) {
+      for (const original of commentBlock.map(t => `// ${t}`)) {
         codeBuffer.push(original)
       }
       continue
@@ -278,11 +307,19 @@ function deriveTitle(exampleName: string, parsedFiles: ParsedSource[]): string {
     for (const seg of parsed.segments) {
       if (seg.kind === 'narrative') {
         const firstLine = seg.text.split(/\r?\n/)[0] ?? ''
-        const m = firstLine.match(/^\s*#\s+(.*)$/)
-        if (m) return m[1].trim()
+        const trimmed = firstLine.trimStart()
+        if (trimmed.startsWith('#')) {
+          const after = trimmed.slice(1).trimStart()
+          if (after.length > 0) {
+            return after
+          }
+        }
         break
       }
-      if (seg.kind === 'code') break // code before narrative, stop scanning this file
+      if (seg.kind === 'code') {
+        // code before narrative, stop scanning this file
+        break
+      }
     }
   }
   return toTitleFromSlug(exampleName)
@@ -292,13 +329,17 @@ async function readText(filePath: string): Promise<string> {
   return await fs.readFile(filePath, 'utf8')
 }
 
-async function listExampleEntries(examplesDir: string): Promise<{ files: string[]; dirs: string[] }> {
+async function listExampleEntries(examplesDir: string): Promise<{ files: string[], dirs: string[] }> {
   const entries = await fs.readdir(examplesDir, { withFileTypes: true })
   const files: string[] = []
   const dirs: string[] = []
   for (const e of entries) {
-    if (e.isDirectory()) dirs.push(e.name)
-    else if (e.isFile()) files.push(e.name)
+    if (e.isDirectory()) {
+      dirs.push(e.name)
+    }
+    else if (e.isFile()) {
+      files.push(e.name)
+    }
   }
   return { files, dirs }
 }
@@ -306,14 +347,18 @@ async function listExampleEntries(examplesDir: string): Promise<{ files: string[
 function sortExampleFiles(fileNames: string[]): string[] {
   // Prefer usage.ts, then index.ts, then alphabetical
   const orderKey = (name: string): string => {
-    if (name === 'usage.ts') return '0-usage.ts'
-    if (name === 'index.ts') return '1-index.ts'
+    if (name === 'usage.ts') {
+      return '0-usage.ts'
+    }
+    if (name === 'index.ts') {
+      return '1-index.ts'
+    }
     return `z-${name}`
   }
   return [...fileNames].sort((a, b) => orderKey(a).localeCompare(orderKey(b)))
 }
 
-async function processExample(exampleRoot: string, entry: string, opts: { repoRoot: string; examplesDir: string; vitest: TestResultsByFile }): Promise<ExampleInfo> {
+async function processExample(exampleRoot: string, entry: string, opts: { repoRoot: string, examplesDir: string, vitest: TestResultsByFile }): Promise<ExampleInfo> {
   const abs = path.join(exampleRoot, entry)
   const stat = await fs.lstat(abs)
   if (stat.isFile()) {
@@ -325,7 +370,7 @@ async function processExample(exampleRoot: string, entry: string, opts: { repoRo
   }
   // Directory: collect .ts files
   const dirEntries = await fs.readdir(abs)
-  const tsFiles = dirEntries.filter((f) => f.endsWith('.ts'))
+  const tsFiles = dirEntries.filter(f => f.endsWith('.ts'))
   const ordered = sortExampleFiles(tsFiles)
   const files: ParsedSource[] = []
   for (const f of ordered) {
@@ -371,6 +416,10 @@ function generateExampleMarkdown(example: ExampleInfo, examplesDir: string): str
       }
     }
   }
+  // Trim trailing empty lines for linter compliance
+  while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+    lines.pop()
+  }
   return lines.join('\n')
 }
 
@@ -382,29 +431,38 @@ async function writeExampleMarkdown(example: ExampleInfo, outputDir: string, exa
   return outPath
 }
 
-interface IndexEntry { title: string; description: string; filename: string }
+interface IndexEntry { title: string, description: string, filename: string }
 
-async function extractTitleAndDescription(filePath: string): Promise<{ title: string; description: string }> {
+async function extractTitleAndDescription(filePath: string): Promise<{ title: string, description: string }> {
   const raw = await readText(filePath)
   const lines = raw.split(/\r?\n/)
   let title = ''
   let description = ''
   for (const line of lines) {
     if (!title) {
-      const m = line.match(/^#\s+(.*)$/)
-      if (m) {
-        title = m[1].trim()
-        continue
+      const t = line.trimStart()
+      if (t.startsWith('#')) {
+        const after = t.slice(1).trimStart()
+        if (after.length > 0) {
+          title = after
+          continue
+        }
       }
     }
     else if (!description) {
-      if (line.trim().length === 0) continue
-      if (line.startsWith('```')) break
+      if (line.trim().length === 0) {
+        continue
+      }
+      if (line.startsWith('```')) {
+        break
+      }
       description = line.trim()
       break
     }
   }
-  if (!title) title = toTitleFromSlug(path.basename(filePath, '.md'))
+  if (!title) {
+    title = toTitleFromSlug(path.basename(filePath, '.md'))
+  }
   return { title, description }
 }
 
@@ -419,12 +477,15 @@ function upsertGeneratedIndex(original: string, entries: IndexEntry[]): string {
     listLines.push(`- [${e.title}](./${e.filename})${desc}`)
   }
   const block = `${begin}\n\n${listLines.join('\n')}\n\n${end}`
-  if (original.includes(begin) && original.includes(end)) {
-    return original.replace(new RegExp(`${begin}[\s\S]*?${end}`), block)
+  const startIdx = original.indexOf(begin)
+  const endIdx = original.indexOf(end)
+  if (startIdx !== -1 && endIdx !== -1 && endIdx >= startIdx) {
+    const before = original.slice(0, startIdx)
+    const after = original.slice(endIdx + end.length)
+    return `${before}${block}${after}`.replace(/\n+$/u, '')
   }
-  // Append at the end, with spacing
-  const trimmed = original.trimEnd()
-  return `${trimmed}\n\n${block}\n`
+  const trimmed = original.replace(/\n+$/u, '')
+  return `${trimmed}\n\n${block}`
 }
 
 async function collectVitestResults(repoRoot: string): Promise<TestResultsByFile> {
@@ -441,22 +502,42 @@ async function collectVitestResults(repoRoot: string): Promise<TestResultsByFile
     child.on('close', () => {
       try {
         // Vitest JSON reporter typically outputs a single JSON object
-        const parsed = JSON.parse(stdout)
+        const parsed: unknown = JSON.parse(stdout)
         const results: TestResultsByFile = {}
-        if (parsed && Array.isArray(parsed.files)) {
-          for (const f of parsed.files as Array<any>) {
-            const filePath = typeof f.file === 'string' ? f.file : (f.path as string | undefined) ?? ''
-            if (!filePath) continue
-            const rel = path.relative(repoRoot, path.resolve(repoRoot, filePath))
-            const cases: Array<{ fullName: string; status: TestCaseStatus }> = []
-            if (Array.isArray(f.tests)) {
-              for (const t of f.tests) {
-                const fullName: string = [t.suiteName, t.name].filter(Boolean).join(' > ')
-                const status: TestCaseStatus = (t.status as TestCaseStatus) ?? 'unknown'
-                cases.push({ fullName, status })
+        if (isObject(parsed)) {
+          const filesVal = (parsed as Record<string, unknown>).files
+          if (Array.isArray(filesVal)) {
+            for (const f of filesVal) {
+              if (!isObject(f)) {
+                continue
               }
+              const filePathVal = (f as Record<string, unknown>).file ?? (f as Record<string, unknown>).path
+              const filePath = typeof filePathVal === 'string' ? filePathVal : ''
+              if (!filePath) {
+                continue
+              }
+              const rel = path.relative(repoRoot, path.resolve(repoRoot, filePath))
+              const cases: Array<{ fullName: string, status: TestCaseStatus }> = []
+              const testsVal = (f as Record<string, unknown>).tests
+              if (Array.isArray(testsVal)) {
+                for (const t of testsVal) {
+                  if (!isObject(t)) {
+                    continue
+                  }
+                  const suiteNameVal = (t as Record<string, unknown>).suiteName
+                  const nameVal = (t as Record<string, unknown>).name
+                  const statusVal = (t as Record<string, unknown>).status
+                  const suiteName = typeof suiteNameVal === 'string' ? suiteNameVal : ''
+                  const name = typeof nameVal === 'string' ? nameVal : ''
+                  const fullName = [suiteName, name].filter(Boolean).join(' > ')
+                  const status: TestCaseStatus = (typeof statusVal === 'string' && (['pass', 'fail', 'skip', 'todo'] as const).includes(statusVal as any))
+                    ? statusVal as TestCaseStatus
+                    : 'unknown'
+                  cases.push({ fullName, status })
+                }
+              }
+              results[rel] = { cases }
             }
-            results[rel] = { cases }
           }
         }
         resolve(results)
@@ -467,6 +548,10 @@ async function collectVitestResults(repoRoot: string): Promise<TestResultsByFile
     })
     child.on('error', () => resolve({}))
   })
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
 
 async function generateExamplesDocumentation(): Promise<void> {
@@ -487,7 +572,7 @@ async function generateExamplesDocumentation(): Promise<void> {
   const vitest = await collectVitestResults(repoRoot)
 
   const { files, dirs } = await listExampleEntries(examplesDir)
-  const exampleFiles = files.filter((f) => f.endsWith('.ts'))
+  const exampleFiles = files.filter(f => f.endsWith('.ts'))
   const exampleDirs = dirs
 
   // Process single-file examples
@@ -514,19 +599,18 @@ async function generateExamplesDocumentation(): Promise<void> {
     : '# Examples\n\n' // minimal fallback; project already has one
 
   const entries: IndexEntry[] = []
-  const mdFiles = (await fs.readdir(outputDir)).filter((f) => f.endsWith('.md') && f !== 'README.md')
+  const mdFiles = (await fs.readdir(outputDir)).filter(f => f.endsWith('.md') && f !== 'README.md')
   for (const f of mdFiles) {
     const { title, description } = await extractTitleAndDescription(path.join(outputDir, f))
     entries.push({ title, description, filename: f })
   }
   entries.sort((a, b) => a.filename.localeCompare(b.filename))
   const updatedReadme = upsertGeneratedIndex(existingReadme, entries)
-  await fs.writeFile(readmePath, `${updatedReadme}\n`, 'utf8')
+  await fs.writeFile(readmePath, `${updatedReadme.replace(/\n+$/u, '')}\n`, 'utf8')
 }
 
 // Execute when run directly
 generateExamplesDocumentation().catch((err: unknown) => {
-  // eslint-disable-next-line no-console
   console.error(err)
   process.exitCode = 1
 })

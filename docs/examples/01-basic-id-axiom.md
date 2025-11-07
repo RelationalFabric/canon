@@ -198,4 +198,3 @@ Key Takeaways:
 3. Write your business logic once - it works with any registered canon
 4. Add new formats anytime without changing existing code
 5. Use Canon's utility functions (pojoHasString, isPojo) for clean type guards
-

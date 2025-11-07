@@ -46,11 +46,9 @@ For more information about the package configurations, see the main [documentati
 ## Generated Example Docs
 
 - [01 Basic Id Axiom](./01-basic-id-axiom.md) — Example: Basic Id Axiom Usage
-- [02 Module Style Canon](./02-module-style-canon.md) — ## File: usage.ts
+- [02 Module Style Canon](./02-module-style-canon.md) — ## In usage.ts
 - [Deduplicating Entities in Heterogeneous Collections](./deduplicating-entities.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
 - [Canon Examples: Tree Walk Over Mixed Entities](./tree-walk-over-mixed-entities.md) — ## Overview
 - [Cross-Source Data Transformation](./user-authentication-tokens.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
 
 <!-- END GENERATED EXAMPLES INDEX -->
-
-
