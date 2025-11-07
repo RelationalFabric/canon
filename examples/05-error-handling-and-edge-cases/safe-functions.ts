@@ -5,6 +5,7 @@
  * and provide fallback values instead of throwing exceptions.
  */
 
+import type { Satisfies } from '@relational-fabric/canon'
 import { idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
@@ -16,7 +17,7 @@ import { idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational
  */
 export function safeIdOf(entity: unknown): string | undefined {
   try {
-    return idOf(entity)
+    return idOf(entity as Satisfies<'Id'>)
   }
   catch (error) {
     console.warn('Failed to extract ID:', error instanceof Error ? error.message : 'Unknown error')
@@ -29,7 +30,7 @@ export function safeIdOf(entity: unknown): string | undefined {
  */
 export function safeTypeOf(entity: unknown): string | undefined {
   try {
-    return typeOf(entity)
+    return typeOf(entity as Satisfies<'Type'>)
   }
   catch (error) {
     console.warn(
@@ -45,7 +46,7 @@ export function safeTypeOf(entity: unknown): string | undefined {
  */
 export function safeVersionOf(entity: unknown): number | undefined {
   try {
-    const version = versionOf(entity)
+    const version = versionOf(entity as Satisfies<'Version'>)
     // Additional validation to ensure it's actually a number
     if (typeof version !== 'number') {
       return undefined
@@ -64,16 +65,16 @@ export function safeVersionOf(entity: unknown): number | undefined {
 /**
  * Safely extract timestamps from any entity, returning empty array on error
  */
-export function safeTimestampsOf(entity: unknown): Date[] {
+export function safeTimestampsOf(entity: unknown): Date | undefined {
   try {
-    return timestampsOf(entity)
+    return timestampsOf(entity as Satisfies<'Timestamps'>)
   }
   catch (error) {
     console.warn(
       'Failed to extract timestamps:',
       error instanceof Error ? error.message : 'Unknown error',
     )
-    return []
+    return undefined
   }
 }
 
@@ -82,16 +83,16 @@ export function safeTimestampsOf(entity: unknown): Date[] {
  */
 export function safeReferencesOf(
   entity: unknown,
-): Array<{ ref: string, resolved: boolean, value?: unknown }> {
+): { ref: string, resolved: boolean, value?: unknown } | undefined {
   try {
-    return referencesOf(entity)
+    return referencesOf(entity as Satisfies<'References'>)
   }
   catch (error) {
     console.warn(
       'Failed to extract references:',
       error instanceof Error ? error.message : 'Unknown error',
     )
-    return []
+    return undefined
   }
 }
 

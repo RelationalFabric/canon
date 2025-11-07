@@ -11,14 +11,14 @@ import {
   safeTimestampConversion,
   safeTypeOf,
   safeVersionOf,
-} from './safe-functions'
+} from './safe-functions.js'
 import {
   findMatchingCanon,
   processBatchSafely,
   processEntitySafely,
   validateEntity,
-} from './validation-utilities'
-import './basic-canon' // Import canon definition
+} from './validation-utilities.js'
+import './basic-canon.js' // Import canon definition
 
 // =============================================================================
 // Sample Data for Testing

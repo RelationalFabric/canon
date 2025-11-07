@@ -10,8 +10,8 @@ import {
   demonstrateReferenceConversion,
   demonstrateTimestampConversion,
   processEntityUpdate,
-} from './utility-functions'
-import './comprehensive-canon' // Import canon definition
+} from './utility-functions.js'
+import './comprehensive-canon.js' // Import canon definition
 
 // =============================================================================
 // Sample Data

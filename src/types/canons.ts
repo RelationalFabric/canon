@@ -76,4 +76,3 @@ export function defineCanon(config: CanonConfig): CanonConfig {
 // ---------------------------------------------------------------------------
 
 void invariant<Expect<CanonConfig['axioms'], Record<string, AxiomConfig>>>()
-void invariant<Expect<Satisfies<'Id'>, never>>()

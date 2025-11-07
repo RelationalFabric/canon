@@ -9,8 +9,8 @@ import {
   calculateOrderTotalWithCurrency,
   processCustomerRegistration,
   updateEntityStatus,
-} from './business-scenarios'
-import { currencyOf, emailOf, priorityOf, statusOf } from './custom-functions'
+} from './business-scenarios.js'
+import { currencyOf, emailOf, priorityOf, statusOf } from './custom-functions.js'
 import './custom-axioms' // Import canon definitions
 
 // =============================================================================

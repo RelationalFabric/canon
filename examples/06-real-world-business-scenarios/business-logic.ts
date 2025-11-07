@@ -5,6 +5,7 @@
  * how Canon's universal type system enables complex business operations.
  */
 
+import type { Satisfies } from '@relational-fabric/canon'
 import { idOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
@@ -21,9 +22,9 @@ export function calculateOrderTotal(order: unknown): {
   total: number
   currency: string
 } {
-  const orderId = idOf(order)
-  const orderType = typeOf(order)
-  const orderVersion = versionOf(order)
+  const orderId = idOf(order as Satisfies<'Id'>)
+  const orderType = typeOf(order as Satisfies<'Type'>)
+  const orderVersion = versionOf(order as Satisfies<'Version'>)
 
   console.log(`Calculating total for ${orderType} ${orderId} (v${orderVersion})`)
 
@@ -69,12 +70,12 @@ export function updateOrderStatus(
 ): {
     success: boolean
     oldStatus?: string
-    newVersion?: number
+    newVersion?: number | string
     error?: string
   } {
   try {
-    const orderId = idOf(order)
-    const currentVersion = versionOf(order)
+    const orderId = idOf(order as Satisfies<'Id'>)
+    const currentVersion = versionOf(order as Satisfies<'Version'>)
 
     if (typeof order !== 'object' || order === null) {
       throw new Error('Order must be an object')
@@ -82,7 +83,7 @@ export function updateOrderStatus(
 
     const orderObj = order as Record<string, unknown>
     const oldStatus = orderObj.status as string
-    const newVersion = currentVersion + 1
+    const newVersion = typeof currentVersion === 'number' ? currentVersion + 1 : currentVersion
 
     // Validate status transition
     const validTransitions: Record<string, string[]> = {
@@ -131,8 +132,8 @@ export function generateOrderSummary(order: unknown): {
   createdAt: Date
   customerId: string
 } {
-  const orderId = idOf(order)
-  typeOf(order)
+  const orderId = idOf(order as Satisfies<'Id'>)
+  typeOf(order as Satisfies<'Type'>)
 
   if (typeof order !== 'object' || order === null) {
     throw new Error('Order must be an object')
@@ -179,8 +180,8 @@ export function validateCustomerForOrder(customer: unknown): {
   const errors: string[] = []
 
   try {
-    idOf(customer)
-    typeOf(customer)
+    idOf(customer as Satisfies<'Id'>)
+    typeOf(customer as Satisfies<'Type'>)
 
     if (typeof customer !== 'object' || customer === null) {
       errors.push('Customer must be an object')

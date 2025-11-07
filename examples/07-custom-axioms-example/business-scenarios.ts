@@ -5,8 +5,9 @@
  * in real-world applications.
  */
 
+import type { Satisfies } from '@relational-fabric/canon'
 import { idOf, inferAxiom } from '@relational-fabric/canon'
-import { currencyOf, emailOf, statusOf } from './custom-functions'
+import { currencyOf, emailOf, statusOf } from './custom-functions.js'
 
 // =============================================================================
 // Sample Data
@@ -93,9 +94,9 @@ export function processCustomerRegistration(customer: unknown): {
   const errors: string[] = []
 
   try {
-    const customerId = idOf(customer)
-    const email = emailOf(customer)
-    const status = statusOf(customer)
+    const customerId = idOf(customer as Satisfies<'Id'>)
+    const email = emailOf(customer as Satisfies<'Email'>)
+    const status = statusOf(customer as Satisfies<'Status'>)
 
     // For now, skip priority to avoid the error
     const priority = { level: 3, label: 'high' }
@@ -134,8 +135,8 @@ export function calculateOrderTotalWithCurrency(order: unknown): {
   tax: { amount: number, currency: string }
   total: { amount: number, currency: string }
 } {
-  const orderId = idOf(order)
-  const status = statusOf(order)
+  const orderId = idOf(order as Satisfies<'Id'>)
+  const status = statusOf(order as Satisfies<'Status'>)
 
   console.log(`Calculating total for ${status} order ${orderId}`)
 
@@ -167,12 +168,13 @@ export function updateEntityStatus(
     error?: string
   } {
   try {
-    const currentStatus = statusOf(entity)
-    const entityId = idOf(entity)
+    const currentStatus = statusOf(entity as Satisfies<'Status'>)
+    const entityId = idOf(entity as Satisfies<'Id'>)
 
     // Get transition rules from the axiom config
     const config = inferAxiom('Status', entity)
-    const transitions = config?.$meta?.transitions || {}
+    const meta = config?.$meta as { transitions?: Record<string, string[]> } | undefined
+    const transitions = meta?.transitions || {}
     const allowedTransitions = transitions[currentStatus] || []
 
     if (!allowedTransitions.includes(newStatus)) {

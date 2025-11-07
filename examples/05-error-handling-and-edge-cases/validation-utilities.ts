@@ -11,7 +11,7 @@ import {
   safeTimestampsOf,
   safeTypeOf,
   safeVersionOf,
-} from './safe-functions'
+} from './safe-functions.js'
 
 // =============================================================================
 // Validation Functions
@@ -52,13 +52,13 @@ export function validateEntity(entity: unknown): {
 
   // Check for timestamp fields
   const timestamps = safeTimestampsOf(entity)
-  if (timestamps.length === 0) {
+  if (!timestamps) {
     warnings.push('No timestamp fields found (createdAt, updatedAt, etc.)')
   }
 
   // Check for reference fields
   const references = safeReferencesOf(entity)
-  if (references.length === 0) {
+  if (!references) {
     warnings.push('No reference fields found (createdBy, updatedBy, etc.)')
   }
 

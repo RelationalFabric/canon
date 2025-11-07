@@ -5,6 +5,7 @@
  * entities that implement multiple axioms.
  */
 
+import type { Satisfies } from '@relational-fabric/canon'
 import { idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
@@ -17,13 +18,13 @@ import { idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 export function analyzeEntity(entity: unknown): {
   id: string
   type: string
-  version: number
+  version: string | number
   timestamps: Date[]
   references: Array<{ ref: string, resolved: boolean, value?: unknown }>
 } {
-  const id = idOf(entity)
-  const type = typeOf(entity)
-  const version = versionOf(entity)
+  const id = idOf(entity as Satisfies<'Id'>)
+  const type = typeOf(entity as Satisfies<'Type'>)
+  const version = versionOf(entity as Satisfies<'Version'>)
 
   // Handle timestamps manually since the canon doesn't know about createdAt/updatedAt
   const timestamps: Date[] = []
@@ -35,7 +36,7 @@ export function analyzeEntity(entity: unknown): {
       timestamps.push(obj.updatedAt)
   }
 
-  const references = referencesOf(entity)
+  const references = referencesOf(entity as Satisfies<'References'>)
 
   return {
     id,
@@ -92,16 +93,16 @@ export function demonstrateReferenceConversion(): void {
  */
 export function processEntityUpdate(entity: unknown): {
   id: string
-  oldVersion: number
-  newVersion: number
+  oldVersion: string | number
+  newVersion: string | number
   updatedAt: Date
 } {
-  const id = idOf(entity)
-  const oldVersion = versionOf(entity)
-  const newVersion = oldVersion + 1
+  const id = idOf(entity as Satisfies<'Id'>)
+  const oldVersion = versionOf(entity as Satisfies<'Version'>)
+  const newVersion = typeof oldVersion === 'number' ? oldVersion + 1 : oldVersion
   const updatedAt = new Date()
 
-  console.log(`\n=== Processing Update for ${typeOf(entity)} ${id} ===`)
+  console.log(`\n=== Processing Update for ${typeOf(entity as Satisfies<'Type'>)} ${id} ===`)
   console.log(`Current version: ${oldVersion}`)
   console.log(`New version: ${newVersion}`)
   console.log(`Updated at: ${updatedAt.toISOString()}`)

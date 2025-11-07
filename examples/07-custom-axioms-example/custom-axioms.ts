@@ -22,7 +22,10 @@ type EmailAxiom = KeyNameAxiom
  * Currency Axiom - Represents monetary values with currency codes
  * This is a RepresentationAxiom because it can be converted between formats
  */
-type CurrencyAxiom = RepresentationAxiom<number | string, { amount: number, currency: string }>
+type CurrencyAxiom = RepresentationAxiom<
+  (v: unknown) => v is number | string | object,
+  { amount: number, currency: string }
+>
 
 /**
  * Status Axiom - Represents entity status with state validation
@@ -49,7 +52,10 @@ type StatusAxiom = Axiom<
  * Priority Axiom - Represents priority levels with numeric conversion
  * This is a RepresentationAxiom that converts between string and numeric priorities
  */
-type PriorityAxiom = RepresentationAxiom<string | number, { level: number, label: string }>
+type PriorityAxiom = RepresentationAxiom<
+  (v: unknown) => v is string | number | object,
+  { level: number, label: string }
+>
 
 // =============================================================================
 // Register Custom Axioms
@@ -80,7 +86,7 @@ type EcommerceWithCustomAxioms = Canon<{
   }
   Email: { $basis: { email: string }, key: 'email', $meta: { validation: 'strict' } }
   Currency: {
-    $basis: number | string | object
+    $basis: (v: unknown) => v is number | string | object
     isCanonical: (v: unknown) => v is { amount: number, currency: string }
     $meta: { defaultCurrency: 'USD' }
   }
@@ -90,7 +96,7 @@ type EcommerceWithCustomAxioms = Canon<{
     $meta: { validStates: string[], defaultState: string, transitions: Record<string, string[]> }
   }
   Priority: {
-    $basis: string | number | object
+    $basis: (v: unknown) => v is string | number | object
     isCanonical: (v: unknown) => v is { level: number, label: string }
     $meta: { levels: string[] }
   }

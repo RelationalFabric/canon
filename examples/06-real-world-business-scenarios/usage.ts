@@ -11,8 +11,8 @@ import {
   processOrderWorkflow,
   updateOrderStatus,
   validateCustomerForOrder,
-} from './business-logic'
-import { sampleCustomer, sampleOrder } from './domain-models'
+} from './business-logic.js'
+import { sampleCustomer, sampleOrder } from './domain-models.js'
 
 // =============================================================================
 // Example Usage
