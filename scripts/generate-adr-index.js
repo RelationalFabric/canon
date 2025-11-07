@@ -86,7 +86,7 @@ function generateAdrTable(adrs) {
   const tableRows = adrs
     .map(
       adr =>
-          `| [ADR-${adr.number}](./${adr.filename}) | ${adr.title} | ${adr.color} ${adr.label} | ${adr.date} |`,
+        `| [ADR-${adr.number}](./${adr.filename}) | ${adr.title} | ${adr.color} ${adr.label} | ${adr.date} |`,
     )
     .join('\n')
 
@@ -114,8 +114,11 @@ function updateReadme(adrTable) {
   try {
     readmeContent = readFileSync(readmePath, 'utf-8')
   }
-  catch (error) {
-    console.warn('ℹ️  ADR README not found, generating a fresh one.')
+  catch (readError) {
+    console.warn(
+      'ℹ️  ADR README not found, generating a fresh one.',
+      readError instanceof Error ? readError.message : String(readError),
+    )
   }
 
   if (!readmeContent) {
