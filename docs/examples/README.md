@@ -40,3 +40,15 @@ npm install @relational-fabric/canon
 Each example can be run independently. Copy the code samples and adapt them to your specific use case. The examples are designed to work with the TypeScript and ESLint configurations provided by this package.
 
 For more information about the package configurations, see the main [documentation](../README.md).
+
+<!-- BEGIN GENERATED EXAMPLES INDEX -->
+
+## Generated Example Docs
+
+- [01 Basic Id Axiom](./01-basic-id-axiom.md) — Example: Basic Id Axiom Usage
+- [02 Module Style Canon](./02-module-style-canon.md) — ## In usage.ts
+- [Deduplicating Entities in Heterogeneous Collections](./deduplicating-entities.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
+- [Canon Examples: Tree Walk Over Mixed Entities](./tree-walk-over-mixed-entities.md) — ## Overview
+- [Cross-Source Data Transformation](./user-authentication-tokens.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
+
+<!-- END GENERATED EXAMPLES INDEX -->
