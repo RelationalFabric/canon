@@ -33,6 +33,9 @@
   },
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "bin": {
+    "adr": "./scripts/adr.js"
+  },
   "files": [
     "eslint.js",
     "src",
@@ -65,7 +68,8 @@
     "checks": "npm run check:all",
     "dev": "tsx --watch src/index.ts",
     "test": "npm run check:test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "husky"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
