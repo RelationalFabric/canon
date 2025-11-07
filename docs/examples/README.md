@@ -222,9 +222,11 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) in the examples directory for guideline
 
 - [01 Basic Id Axiom](./01-basic-id-axiom.md) — Example: Basic Id Axiom Usage
 - [02 Module Style Canon](./02-module-style-canon.md) — ## In usage.ts
-- [Deduplicating Entities in Heterogeneous Collections](./deduplicating-entities.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
-- [Canon Examples: Tree Walk Over Mixed Entities](./tree-walk-over-mixed-entities.md) — ## Overview
-- [Cross-Source Data Transformation](./user-authentication-tokens.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
+- [03 Multi Axiom Canon](./03-multi-axiom-canon.md) — ## In usage.ts
+- [04 Format Conversion Examples](./04-format-conversion-examples.md) — ## In usage.ts
+- [05 Error Handling And Edge Cases](./05-error-handling-and-edge-cases.md) — ## In usage.ts
+- [06 Real World Business Scenarios](./06-real-world-business-scenarios.md) — ## In usage.ts
+- [07 Custom Axioms Example](./07-custom-axioms-example.md) — ## In usage.ts
 
 <!-- END GENERATED EXAMPLES INDEX -->
 >>>>>>> origin/main
