@@ -1,26 +1,25 @@
-/*
-  Marginalia-Style Examples Documentation Generator
-
-  Generates per-example markdown in docs/examples/ by extracting narrative from
-  JSDoc and top-level comment blocks and interleaving with TypeScript code.
-
-  Rules and heuristics:
-  - JSDoc blocks (/** ... */) become narrative prose
-  - Top-level single-line comment blocks (// ...), separated by blank lines
-    from code, become narrative prose
-  - Inline comments remain inside code blocks
-  - Optional section markers: // ---SECTION: Title--- produce markdown sections
-  - Vitest in-source test blocks (if (import.meta.vitest) { ... }) are excluded
-  - Multi-file examples (directories) are combined into one doc with file headings
-
-  Output:
-  - docs/examples/<example>.md, preserving README.md in that folder
-  - docs/examples/README.md is updated to include a generated index between
-    BEGIN/END markers, preserving surrounding static content
-*/
+// Marginalia-Style Examples Documentation Generator
+//
+// Generates per-example markdown in docs/examples/ by extracting narrative from
+// comments and interleaving them with TypeScript code.
+//
+// Rules and heuristics:
+// - Top-level block comments become narrative prose (handles both regular and JSDoc)
+// - JSDoc blocks may include a simple tag table if tags are present
+// - Top-level single-line comment blocks become narrative prose
+// - Inline comments remain inside code blocks
+// - Optional section markers: // ---SECTION: Title--- produce markdown sections
+// - Vitest in-source test blocks (if (import.meta.vitest) { ... }) are excluded
+// - Multi-file examples (directories) are combined into one doc with file headings
+//
+// Output:
+// - docs/examples/<example>.md, preserving README.md in that folder
+// - docs/examples/README.md is updated to include a generated index between
+//   BEGIN/END markers, preserving surrounding static content
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 type Segment =
   | { kind: 'narrative'; text: string }
@@ -128,7 +127,7 @@ function parseSourceFile(filePath: string, raw: string): ParsedSource {
       continue
     }
 
-    // Block comment: treat uniformly for JSDoc and regular block comments
+    // Block comment: treat JSDoc (/** ... */) and regular (/* ... */) with slight differences
     if (/^\s*\/\*/.test(line)) {
       const prevLineForBlock = i > 0 ? lines[i - 1] : ''
       const isTopLevelBlock = i === 0 || isBlank(prevLineForBlock)
@@ -153,9 +152,31 @@ function parseSourceFile(filePath: string, raw: string): ParsedSource {
 
       if (isTopLevelBlock) {
         flushCode()
-        const cleaned = stripBlockCommentStars(innerLines).join('\n').trim()
-        if (cleaned.length > 0) {
-          segments.push({ kind: 'narrative', text: cleaned })
+        const isJsDoc = rawBlock[0].trim().startsWith('/**')
+        const cleanedLines = stripBlockCommentStars(innerLines)
+        if (isJsDoc) {
+          const proseLines: string[] = []
+          const tagRows: Array<{ tag: string; text: string }> = []
+          for (const ln of cleanedLines) {
+            const t = ln.trim()
+            if (t.startsWith('@')) {
+              const m = t.match(/^@(\w+)\s*(.*)$/)
+              if (m) tagRows.push({ tag: m[1], text: m[2]?.trim() ?? '' })
+            }
+            else {
+              proseLines.push(ln)
+            }
+          }
+          const prose = proseLines.join('\n').trim()
+          if (prose.length > 0) segments.push({ kind: 'narrative', text: prose })
+          if (tagRows.length > 0) {
+            const tableLines = ['| Tag | Description |', '| --- | --- |', ...tagRows.map(r => `| @${r.tag} | ${r.text} |`)]
+            segments.push({ kind: 'narrative', text: tableLines.join('\n') })
+          }
+        }
+        else {
+          const cleaned = cleanedLines.join('\n').trim()
+          if (cleaned.length > 0) segments.push({ kind: 'narrative', text: cleaned })
         }
         // Skip trailing blank lines between comment block and code
         while (i < lines.length && isBlank(lines[i])) i += 1
@@ -366,6 +387,8 @@ function upsertGeneratedIndex(original: string, entries: IndexEntry[]): string {
 }
 
 async function generateExamplesDocumentation(): Promise<void> {
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
   const repoRoot = path.resolve(__dirname, '..')
   const examplesDir = path.join(repoRoot, 'examples')
   const outputDir = path.join(repoRoot, 'docs', 'examples')
