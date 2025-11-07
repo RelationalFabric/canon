@@ -24,6 +24,16 @@ const statusLabels = {
   superseded: 'Superseded',
 }
 
+function findMetadataValue(lines, key) {
+  const pattern = new RegExp(`^\\s*[-*]\\s*${key}\\s*:\\s*(.+)$`, 'i')
+  for (const line of lines) {
+    const match = line.match(pattern)
+    if (match)
+      return match[1].trim()
+  }
+  return null
+}
+
 function extractAdrInfo(filePath) {
   try {
     const content = readFileSync(filePath, 'utf-8')
@@ -36,21 +46,20 @@ function extractAdrInfo(filePath) {
 
     const title = titleLine.replace('# ADR-', '').trim()
 
-    // Extract status (line with "* Status:")
-    const statusLine = lines.find(line => line.includes('* Status:'))
-    if (!statusLine)
+    // Extract status (line with "- Status:" or "* Status:")
+    const rawStatus = findMetadataValue(lines, 'Status')
+    if (!rawStatus)
       return null
 
-    const status = statusLine.split('* Status:')[1]?.trim().toLowerCase()
-    if (!status || !statusColors[status])
+    const status = rawStatus.toLowerCase()
+    if (!statusColors[status])
       return null
 
-    // Extract date (line with "* Date:")
-    const dateLine = lines.find(line => line.includes('* Date:'))
-    const date = dateLine ? dateLine.split('* Date:')[1]?.trim() : 'Unknown'
+    // Extract date (line with "- Date:" or "* Date:")
+    const date = findMetadataValue(lines, 'Date') ?? 'Unknown'
 
-    // Extract filename without extension for link
-    const filename = filePath.split('/').pop().replace('.md', '')
+    // Extract filename for link
+    const filename = filePath.split('/').pop()
 
     return {
       number: title.split(':')[0],
@@ -84,34 +93,61 @@ function generateAdrTable(adrs) {
   return `${tableHeader}\n${tableRows}`
 }
 
+function buildDefaultReadme(adrTable) {
+  return `# Architecture Decision Records
+
+## ADR List
+
+${adrTable}
+
+## ADR Process
+
+1. Use \`cd docs/adrs && npx adr new "Meaningful Decision Title"\` to draft a new record.
+2. Update the table with \`npm run build:adr\` so the index stays in sync.
+3. Commit the new ADR together with any code or documentation changes it describes.
+`
+}
+
 function updateReadme(adrTable) {
+  let readmeContent = ''
+
   try {
-    const readmeContent = readFileSync(readmePath, 'utf-8')
+    readmeContent = readFileSync(readmePath, 'utf-8')
+  }
+  catch (readError) {
+    console.warn(
+      'ℹ️  ADR README not found, generating a fresh one.',
+      readError instanceof Error ? readError.message : String(readError),
+    )
+  }
 
-    // Find the ADR List section and replace it with the table
-    const adrListStart = readmeContent.indexOf('## ADR List')
-    const adrProcessStart = readmeContent.indexOf('## ADR Process')
+  if (!readmeContent) {
+    writeFileSync(readmePath, buildDefaultReadme(adrTable), 'utf-8')
+    console.log('✅ ADR README created with fresh index')
+    return
+  }
 
-    if (adrListStart === -1 || adrProcessStart === -1) {
-      throw new Error('Could not find ADR List section in README')
-    }
+  const adrListStart = readmeContent.indexOf('## ADR List')
+  const adrProcessStart = readmeContent.indexOf('## ADR Process')
 
-    const beforeAdrList = readmeContent.substring(0, adrListStart)
-    const afterAdrProcess = readmeContent.substring(adrProcessStart)
+  if (adrListStart === -1 || adrProcessStart === -1) {
+    console.warn('ℹ️  ADR README missing expected sections, regenerating full content.')
+    writeFileSync(readmePath, buildDefaultReadme(adrTable), 'utf-8')
+    console.log('✅ ADR README regenerated with index and process guidance')
+    return
+  }
 
-    const newContent = `${beforeAdrList}## ADR List
+  const beforeAdrList = readmeContent.substring(0, adrListStart)
+  const afterAdrProcess = readmeContent.substring(adrProcessStart)
+
+  const newContent = `${beforeAdrList}## ADR List
 
 ${adrTable}
 
 ${afterAdrProcess}`
 
-    writeFileSync(readmePath, newContent, 'utf-8')
-    console.log('✅ ADR index updated successfully')
-  }
-  catch (error) {
-    console.error('Error updating README:', error.message)
-    process.exit(1)
-  }
+  writeFileSync(readmePath, newContent, 'utf-8')
+  console.log('✅ ADR index updated successfully')
 }
 
 function main() {
