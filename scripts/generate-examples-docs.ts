@@ -35,6 +35,7 @@ interface ExampleInfo {
   subExamples?: ExampleInfo[]
   sourceFiles: string[]
   testStatus?: TestStatus
+  docFile: string
 }
 
 interface TestStatus {
@@ -334,6 +335,7 @@ function processExample(examplePath: string, relativePath: string, baseDir: stri
   const name = basename(examplePath, extname(examplePath))
   const normalizedRelativePath = normalizeRelativePath(relativePath)
   const githubUrl = `${GITHUB_BASE_URL}/${normalizedRelativePath}`
+  const docFile = `${name}.md`
 
   const exampleInfo: ExampleInfo = {
     name,
@@ -343,6 +345,7 @@ function processExample(examplePath: string, relativePath: string, baseDir: stri
     githubUrl,
     isDirectory,
     sourceFiles: [],
+    docFile,
   }
 
   if (isDirectory) {
@@ -525,9 +528,7 @@ function generateExamplePage(example: ExampleInfo, examplesDir: string): string 
 }
 
 function writeExampleDocumentation(example: ExampleInfo, examplesDir: string, outputRoot: string) {
-  const exampleDir = join(outputRoot, example.name)
-  mkdirSync(exampleDir, { recursive: true })
-  const docPath = join(exampleDir, 'index.md')
+  const docPath = join(outputRoot, example.docFile)
   const pageContent = generateExamplePage(example, examplesDir)
   writeFileSync(docPath, pageContent)
 }
@@ -546,7 +547,7 @@ This directory contains practical examples demonstrating how to use the @relatio
 
   const examplesContent = examples
     .map((example) => {
-      const docLink = `./${example.name}/`
+      const docLink = `./${example.docFile}`
       let content = `### [${example.name}](${docLink})\n`
 
       if (example.description) {
