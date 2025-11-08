@@ -4,7 +4,7 @@ This directory contains practical examples demonstrating how to use the @relatio
 
 ## Available Examples
 
-### [01-basic-id-axiom](./01-basic-id-axiom.ts)
+### [01-basic-id-axiom](./01-basic-id-axiom.md)
 Example: Basic Id Axiom Usage
 
 **Key Concepts:**
@@ -18,14 +18,18 @@ Example: Basic Id Axiom Usage
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/01-basic-id-axiom.ts)
 
-### [02-module-style-canon](./02-module-style-canon)
+_Tests:_ ✅ 3/3 passed
+
+### [02-module-style-canon](./02-module-style-canon.md)
 Using the MongoDB Canon Module
 
 **Pattern:** Multi-file example with modular structure
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon)
 
-### [03-multi-axiom-canon](./03-multi-axiom-canon)
+_Tests:_ ✅ 3/3 passed
+
+### [03-multi-axiom-canon](./03-multi-axiom-canon.md)
 Multi-Axiom Canon Usage Examples
 
 **Key Concepts:**
@@ -44,7 +48,9 @@ Multi-Axiom Canon Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon)
 
-### [04-format-conversion-examples](./04-format-conversion-examples)
+_Tests:_ ✅ 5/5 passed
+
+### [04-format-conversion-examples](./04-format-conversion-examples.md)
 Format Conversion Usage Examples
 
 **Key Concepts:**
@@ -63,7 +69,9 @@ Format Conversion Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples)
 
-### [05-error-handling-and-edge-cases](./05-error-handling-and-edge-cases)
+_Tests:_ ✅ 7/7 passed
+
+### [05-error-handling-and-edge-cases](./05-error-handling-and-edge-cases.md)
 Error Handling and Edge Cases Usage Examples
 
 **Key Concepts:**
@@ -82,7 +90,9 @@ Error Handling and Edge Cases Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases)
 
-### [06-real-world-business-scenarios](./06-real-world-business-scenarios)
+_Tests:_ ✅ 11/11 passed
+
+### [06-real-world-business-scenarios](./06-real-world-business-scenarios.md)
 Real-World Business Scenarios Usage Examples
 
 **Key Concepts:**
@@ -101,7 +111,9 @@ Real-World Business Scenarios Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios)
 
-### [07-custom-axioms-example](./07-custom-axioms-example)
+_Tests:_ ✅ 8/8 passed
+
+### [07-custom-axioms-example](./07-custom-axioms-example.md)
 Custom Axioms Usage Examples
 
 **Key Concepts:**
@@ -120,19 +132,21 @@ Custom Axioms Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example)
 
+_Tests:_ ✅ 10/10 passed
+
 ## Example Patterns
 
 ### Single-File Examples
 - **Use case**: Simple, focused examples
 - **Pattern**: All code in a single file with narrative flow
-- **Structure**: `01-basic-id-axiom.ts`
+- **Structure**: `01-basic-id-axiom`
 - **Benefits**: Easy to understand, quick to read, perfect for learning one concept
 
 ### Folder-Based Examples
 - **Use case**: Complex examples with custom axioms or multiple canons
 - **Pattern**: Organized into focused files
 - **Structure**:
-  - `index.ts` - Main entry point with narrative and tests
+  - `usage.ts` - Main entry point with narrative and tests (legacy examples may still use `index.ts`)
   - `axioms/{concept}.ts` - Custom axiom definitions (type + API)
   - `canons/{notation}.ts` - Canon definitions (type + runtime)
   - Supporting files as needed for clarity
@@ -189,10 +203,10 @@ You can run examples directly using tsx:
 npx tsx examples/01-basic-id-axiom.ts
 
 # Run a folder example
-npx tsx examples/02-module-style-canon/index.ts
+npx tsx examples/02-module-style-canon/usage.ts
 
 # Run multiple examples
-npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon/index.ts
+npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon/usage.ts
 ```
 
 ## Testing

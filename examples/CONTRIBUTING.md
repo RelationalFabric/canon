@@ -37,7 +37,7 @@ if (import.meta.vitest) {
 
 ### 3. Clear Entry Point
 
-- Every folder example must have `index.ts` as the entry point
+- Every folder example must have `usage.ts` as the entry point (legacy `index.ts` is still supported, but new examples should use `usage.ts`)
 - This file contains the main narrative and demonstrates the concepts
 - Tests for the example concepts go here using in-source testing
 - Supporting files provide the infrastructure to make the example work
@@ -105,20 +105,20 @@ The documentation generator discovers and orders files based on where you refere
 For complex examples requiring multiple files:
 
 ```
-examples/
-  └── 07-defining-axioms/
-      ├── index.ts          # Main entry point with tests
-      ├── axioms/
-      │   ├── email.ts      # Email axiom: types + API (emailOf)
-      │   ├── currency.ts   # Currency axiom: types + API (currencyOf)
-      │   └── status.ts     # Status axiom: types + API (statusOf)
-      └── canons/
-          ├── rest-api.ts   # REST API notation (id, email, status)
-          └── json-ld.ts    # JSON-LD notation (@id, @email, @status)
+  examples/
+    └── 07-defining-axioms/
+        ├── usage.ts          # Main entry point with tests
+        ├── axioms/
+        │   ├── email.ts      # Email axiom: types + API (emailOf)
+        │   ├── currency.ts   # Currency axiom: types + API (currencyOf)
+        │   └── status.ts     # Status axiom: types + API (statusOf)
+        └── canons/
+            ├── rest-api.ts   # REST API notation (id, email, status)
+            └── json-ld.ts    # JSON-LD notation (@id, @email, @status)
 ```
 
 **Required files:**
-- `index.ts` - Main entry point with narrative and tests
+- `usage.ts` - Main entry point with narrative and tests (`index.ts` remains valid for legacy examples)
 
 **Axioms and Canons:**
 - `axioms/{concept}.ts` - Complete axiom: type definition + API functions
@@ -132,25 +132,25 @@ examples/
 Beyond axioms and canons, supporting files should only exist for one of these reasons:
 
 1. **The code implements infrastructure unrelated to what you're teaching**
-   - Example: You're teaching axioms, but need a mock database adapter to make the example realistic
-   - The database adapter goes in a supporting file; the axiom usage stays in `index.ts`
+    - Example: You're teaching axioms, but need a mock database adapter to make the example realistic
+    - The database adapter goes in a supporting file; the axiom usage stays in `usage.ts`
 
 2. **The code is reused across multiple examples in the same directory**
-   - Shared test fixtures, domain models, or utilities
-   - If it's only used in one place, keep it in `index.ts`
+    - Shared test fixtures, domain models, or utilities
+    - If it's only used in one place, keep it in `usage.ts`
 
 3. **The implementation is long enough to break the narrative flow**
-   - Rule of thumb: If extracting it makes `index.ts` easier to follow, extract it
+    - Rule of thumb: If extracting it makes `usage.ts` easier to follow, extract it
    - If extracting it requires the reader to jump between files, keep it inline
 
 **Testing supporting files:**
 
 If you create a supporting file that implements complex features, you may write tests for it:
 - Use separate `.test.ts` files for complex supporting code
-- Example: `mock-db.ts` with complex logic can have `mock-db.test.ts`
-- The main example concepts should still be tested in `index.ts` using in-source tests
+  - Example: `mock-db.ts` with complex logic can have `mock-db.test.ts`
+  - The main example concepts should still be tested in `usage.ts` using in-source tests
 
-**If you're unsure:** Start with everything in `index.ts`. Only extract when it clearly helps.
+**If you're unsure:** Start with everything in `usage.ts`. Only extract when it clearly helps.
 
 ## Naming Conventions
 
@@ -176,7 +176,7 @@ If you create a supporting file that implements complex features, you may write 
 
 | Pattern | Usage |
 |---------|-------|
-| `index.ts` | Main entry point - required for folder examples |
+| `usage.ts` | Main entry point - required for folder examples (`index.ts` allowed for legacy examples) |
 | `canons/{name}.ts` | Complete canon: types + runtime config |
 | `axioms/{name}.ts` | Complete axiom: types + runtime config + API |
 
@@ -332,19 +332,19 @@ Domain + notation (when you need multiple canons for the same notation):
 Supporting files exist to keep the main example clear and focused.
 
 **Create a supporting file when:**
-- The code would obscure what you're teaching in `index.ts`
+- The code would obscure what you're teaching in `usage.ts`
 - You need to implement complex infrastructure that enables the example
 - Multiple parts of the example need to share the same code
 - Separating the concern makes the narrative flow better
 
-**Keep it in `index.ts` when:**
+**Keep it in `usage.ts` when:**
 - It's used only once
 - It's simple enough not to distract
 - Including it helps the narrative flow
 
 **Testing supporting files:**
 - If a supporting file implements complex logic, it can have its own `.test.ts` file
-- The main example concepts should still be tested in `index.ts` using in-source tests
+- The main example concepts should still be tested in `usage.ts` using in-source tests
 - The goal is clarity and correctness, not bureaucracy
 
 **Remember:** The structure serves the narrative. Don't split things up just to split them up.
@@ -466,7 +466,7 @@ End each example with a comprehensive summary:
 
 ### Test Organization
 
-Tests live exclusively in the main entry point (`index.ts` or single file):
+Tests live exclusively in the main entry point (`usage.ts` or single file):
 
 ```typescript
 if (import.meta.vitest) {
@@ -635,7 +635,7 @@ interface Thing {
 
 Before submitting an example, verify:
 
-- [ ] Single file OR folder with `index.ts` entry point
+- [ ] Single file OR folder with `usage.ts` entry point (legacy `index.ts` accepted)
 - [ ] Supporting files referenced with inline `@file` comments where introduced
 - [ ] Markdown formatting in comments (`##` headers, `**bold**`, `` `code` ``)
 - [ ] Main concepts tested with in-source testing in entry point
@@ -714,7 +714,7 @@ if (import.meta.vitest) {
 
 ### Folder-Based Example with Inline @file References
 
-Entry point (`index.ts`):
+Entry point (`usage.ts`):
 
 ```typescript
 /**
