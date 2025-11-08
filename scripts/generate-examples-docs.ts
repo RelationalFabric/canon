@@ -426,7 +426,7 @@ This directory contains practical examples demonstrating how to use the @relatio
 - **Use case**: Complex examples with custom axioms or multiple canons
 - **Pattern**: Organized into focused files
 - **Structure**:
-  - \`index.ts\` - Main entry point with narrative and tests
+  - \`usage.ts\` - Main entry point with narrative and tests (legacy examples may still use \`index.ts\`)
   - \`axioms/{concept}.ts\` - Custom axiom definitions (type + API)
   - \`canons/{notation}.ts\` - Canon definitions (type + runtime)
   - Supporting files as needed for clarity
