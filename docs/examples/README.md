@@ -18,16 +18,12 @@ Example: Basic Id Axiom Usage
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/01-basic-id-axiom.ts)
 
-_Tests:_ ✅ 3/3 passed
-
 ### [02-module-style-canon](./02-module-style-canon/)
 Using the MongoDB Canon Module
 
 **Pattern:** Multi-file example with modular structure
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon)
-
-_Tests:_ ✅ 3/3 passed
 
 ### [03-multi-axiom-canon](./03-multi-axiom-canon/)
 Multi-Axiom Canon Usage Examples
@@ -48,8 +44,6 @@ Multi-Axiom Canon Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon)
 
-_Tests:_ ✅ 5/5 passed
-
 ### [04-format-conversion-examples](./04-format-conversion-examples/)
 Format Conversion Usage Examples
 
@@ -68,8 +62,6 @@ Format Conversion Usage Examples
 **Pattern:** Multi-file example with modular structure
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples)
-
-_Tests:_ ✅ 7/7 passed
 
 ### [05-error-handling-and-edge-cases](./05-error-handling-and-edge-cases/)
 Error Handling and Edge Cases Usage Examples
@@ -90,8 +82,6 @@ Error Handling and Edge Cases Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases)
 
-_Tests:_ ✅ 11/11 passed
-
 ### [06-real-world-business-scenarios](./06-real-world-business-scenarios/)
 Real-World Business Scenarios Usage Examples
 
@@ -111,8 +101,6 @@ Real-World Business Scenarios Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios)
 
-_Tests:_ ✅ 8/8 passed
-
 ### [07-custom-axioms-example](./07-custom-axioms-example/)
 Custom Axioms Usage Examples
 
@@ -131,8 +119,6 @@ Custom Axioms Usage Examples
 **Pattern:** Multi-file example with modular structure
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example)
-
-_Tests:_ ✅ 10/10 passed
 
 ## Example Patterns
 
