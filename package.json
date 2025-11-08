@@ -58,6 +58,7 @@
     "check:lint:fix": "eslint . --fix",
     "check:radar": "tsx scripts/validate-radar.ts",
     "check:test": "vitest run",
+    "check:test:json": "node -e \"import('node:fs').then(fs => fs.mkdirSync('.scratch', { recursive: true }))\" && vitest run --reporter=default --reporter=json --outputFile=.scratch/vitest-report.json",
     "check:test:coverage": "vitest run --coverage",
     "check:test:watch": "vitest run --watch",
     "check:test:ui": "vitest run --ui",

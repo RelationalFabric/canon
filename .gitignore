@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 
 # Generated radar data files
 docs/public/radar/
+.scratch/
