@@ -28,7 +28,10 @@ async function main() {
     }
   }
   catch (error) {
-    console.error('❌ Error validating radar data:', error instanceof Error ? error.message : 'Unknown error')
+    console.error(
+      '❌ Error validating radar data:',
+      error instanceof Error ? error.message : 'Unknown error',
+    )
     process.exit(1)
   }
 }

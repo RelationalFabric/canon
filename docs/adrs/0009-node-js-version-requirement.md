@@ -4,8 +4,8 @@ format: y-statement
 
 # ADR-009: Node.js Version Requirement
 
-* Status: accepted
-* Date: 2025-01-26
+- Status: accepted
+- Date: 2025-01-26
 
 ## Statement
 

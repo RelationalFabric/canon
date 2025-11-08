@@ -5,9 +5,11 @@ This document describes the augmentable interfaces that can be extended by users
 ## Available Interfaces
 
 ### `Axioms` (Canon)
+
 **Purpose**: Extend the Canon axiom system with custom domain-specific axioms.
 
 **Default**:
+
 ```typescript
 interface Axioms {
   Id: KeyNameAxiom
@@ -19,6 +21,7 @@ interface Axioms {
 ```
 
 **Usage Example**:
+
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
@@ -28,15 +31,17 @@ declare module '@relational-fabric/canon' {
 ```
 
 ### `Canons` (Canon)
+
 **Purpose**: Extend the Canon system with custom canon implementations for different data formats.
 
 **Default**:
+
 ```typescript
-interface Canons {
-}
+interface Canons {}
 ```
 
 **Usage Example**:
+
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Canons {
@@ -46,19 +51,37 @@ declare module '@relational-fabric/canon' {
 ```
 
 ### `NativeTypes`
+
 **Purpose**: Define native type mappings for different data sources, mapping source labels to their internal type unions.
 
 **Default**:
+
 ```typescript
 interface NativeTypes {
   ES5: Date | RegExp
-  ES2015: Map<unknown, unknown> | Set<unknown> | WeakMap<object, unknown> | WeakSet<object> | ArrayBuffer | DataView
-  ES2017: Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array
+  ES2015:
+    | Map<unknown, unknown>
+    | Set<unknown>
+    | WeakMap<object, unknown>
+    | WeakSet<object>
+    | ArrayBuffer
+    | DataView
+  ES2017:
+    | Int8Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array
   ES2020: BigInt64Array | BigUint64Array
 }
 ```
 
 **Usage Example**:
+
 ```typescript
 declare module '@relational-fabric/canon' {
   interface NativeTypes {

@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - develop
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
 
 permissions:
   contents: read
@@ -52,7 +57,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           eslint_flags: .
-          fail_on_error: false
+          fail_level: error
           filter_mode: nofilter
 
   dependency-check:
@@ -96,7 +101,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm run test
+        run: npm test
 
   coverage:
     name: Test Coverage
@@ -116,7 +121,7 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
-        run: npm run test:coverage
+        run: npm run check:test:coverage
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4

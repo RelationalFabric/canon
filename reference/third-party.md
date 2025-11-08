@@ -7,12 +7,14 @@ This document catalogs the third-party libraries that consumers can leverage whe
 When using `@relational-fabric/canon`, consumers must install these peer dependencies:
 
 ### TypeScript
+
 - **typescript** (`^5.0.0`) - TypeScript compiler
   - Required for TypeScript configuration support
   - Provides type checking and compilation capabilities
   - Must be installed as a peer dependency
 
 ### ESLint
+
 - **eslint** (`^9.0.0`) - JavaScript/TypeScript linter
   - Required for ESLint configuration support
   - Used for code quality and consistency enforcement
@@ -23,32 +25,37 @@ When using `@relational-fabric/canon`, consumers must install these peer depende
 The package provides the following configurations for consumers:
 
 ### TypeScript Configuration
+
 ```json
 {
   "extends": "@relational-fabric/canon/tsconfig"
 }
 ```
+
 - Extends `@tsconfig/node-lts` with additional modern TypeScript settings
 - Includes strict mode and modern TypeScript features
 - Optimized for Node.js LTS environments
 
 ### ESLint Configuration
+
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
 export default createEslintConfig()
 ```
+
 - Based on `@antfu/eslint-config` with TypeScript and Node.js support
 - Supports custom configuration merging
 - Includes automatic fixing capabilities
 
 ### Custom ESLint Configuration
+
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
 export default createEslintConfig({
   ignores: ['custom-ignore'],
   rules: {
-    'no-console': 'warn'
-  }
+    'no-console': 'warn',
+  },
 })
 ```
 
@@ -57,12 +64,14 @@ export default createEslintConfig({
 The package provides utility libraries through a dual export strategy, offering both opinionated and transparent access patterns.
 
 ### Opinionated Access (Recommended)
+
 ```typescript
 import { createEslintConfig, mergeConfigs } from '@relational-fabric/canon'
 // Curated, opinionated selection with our preferred naming and API shape
 ```
 
 ### Transparent Access (Advanced)
+
 ```typescript
 import antfu from '@relational-fabric/canon/_/antfu'
 import { defu } from '@relational-fabric/canon/_/defu'
@@ -72,10 +81,12 @@ import { defu } from '@relational-fabric/canon/_/defu'
 ### Available Utilities
 
 **Object Merging:**
+
 - **Opinionated**: `mergeConfigs` (wrapper function)
 - **Transparent**: `defu` (direct re-export)
 
 **ESLint Configuration:**
+
 - **Opinionated**: `createEslintConfig` (wrapper function)
 - **Transparent**: `antfu` (direct re-export)
 

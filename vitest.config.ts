@@ -2,8 +2,8 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    // Include only examples for in-source testing
-    includeSource: ['examples/**/*.{js,ts}'],
+    // Include source and example files for testing
+    includeSource: ['src/**/*.{js,ts}', 'examples/**/*.{js,ts}'],
     // Exclude certain files from testing
     exclude: ['**/node_modules/**', '**/dist/**', '**/radar/**'],
     // Coverage configuration
@@ -14,7 +14,7 @@ export default defineConfig({
       exclude: ['src/**/*.test.ts', 'src/radar/**'],
     },
   },
-  // Define for production builds to strip out test code in examples
+  // Define for production builds to strip out test code
   define: {
     'import.meta.vitest': 'undefined',
   },

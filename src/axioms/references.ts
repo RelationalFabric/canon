@@ -25,13 +25,17 @@ declare module '@relational-fabric/canon' {
  * @param value - The value to check
  * @returns True if the value is an EntityReference object
  */
-export function isCanonicalReference(value: string | object): value is EntityReference<string, unknown> {
-  return typeof value === 'object'
+export function isCanonicalReference(
+  value: string | object,
+): value is EntityReference<string, unknown> {
+  return (
+    typeof value === 'object'
     && value !== null
     && 'ref' in value
     && 'resolved' in value
     && typeof (value as EntityReference<string, unknown>).ref === 'string'
     && typeof (value as EntityReference<string, unknown>).resolved === 'boolean'
+  )
 }
 
 /**
@@ -49,7 +53,9 @@ export function isCanonicalReference(value: string | object): value is EntityRef
  * console.log(referencesOf(entityRef)) // Already canonical EntityReference
  * ```
  */
-export function referencesOf<T extends Satisfies<'References'>>(x: T): EntityReference<string, unknown> {
+export function referencesOf<T extends Satisfies<'References'>>(
+  x: T,
+): EntityReference<string, unknown> {
   const config = inferAxiom('References', x)
 
   if (!config) {

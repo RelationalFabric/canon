@@ -2,6 +2,9 @@ name: Update ADR Index
 
 on:
   push:
+    branches-ignore:
+      - main
+      - develop
     paths:
       - 'docs/adrs/*.md'
       - '!docs/adrs/README.md'
@@ -27,9 +30,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
       - name: Generate ADR Index
-        run: node scripts/generate-adr-index.js
+        run: npm run build:adr
 
       - name: Check for changes
         id: verify-changed-files

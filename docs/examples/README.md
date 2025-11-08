@@ -4,22 +4,175 @@ This directory contains practical examples demonstrating how to use the @relatio
 
 ## Available Examples
 
-### [Deduplicating Entities](./deduplicating-entities.md)
-Learn how to implement entity deduplication patterns using TypeScript and modern JavaScript features.
+### [01-basic-id-axiom](./01-basic-id-axiom.md)
+Example: Basic Id Axiom Usage
 
-### [Tree Walk Over Mixed Entities](./tree-walk-over-mixed-entities.md)
-Explore techniques for traversing heterogeneous data structures with type safety.
+**Key Concepts:**
+- Define canons for each data format you work with (internal, JSON-LD, etc.)
+- Use universal functions like idOf() that work across all formats
+- Write your business logic once - it works with any registered canon
+- Add new formats anytime without changing existing code
+- Use Canon's utility functions (pojoHasString, isPojo) for clean type guards
 
-### [User Authentication Tokens](./user-authentication-tokens.md)
-Implement secure token-based authentication patterns with proper TypeScript typing.
+**Pattern:** Single-file example
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/01-basic-id-axiom.ts)
+
+_Tests:_ ✅ 3/3 passed
+
+### [02-module-style-canon](./02-module-style-canon.md)
+Using the MongoDB Canon Module
+
+**Pattern:** Multi-file example with modular structure
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon)
+
+_Tests:_ ✅ 3/3 passed
+
+### [03-multi-axiom-canon](./03-multi-axiom-canon.md)
+Multi-Axiom Canon Usage Examples
+
+**Key Concepts:**
+- **Comprehensive Canon**: A single canon can implement all five core axioms
+- **Universal Functions**: The same functions work across all axiom types
+- **Type Safety**: Full TypeScript type safety with multiple axioms
+- **Format Conversion**: Automatic conversion between different data formats
+- **Real-World Usage**: Practical examples with user and product entities
+- **Version Control**: Built-in optimistic concurrency control
+- **Timestamp Handling**: Flexible timestamp conversion and validation
+- **Reference Management**: Structured reference handling with resolution tracking
+- **Entity Analysis**: Comprehensive entity analysis across all axioms
+- **Business Logic**: Real-world business scenarios with multiple axioms
+
+**Pattern:** Multi-file example with modular structure
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon)
+
+_Tests:_ ✅ 5/5 passed
+
+### [04-format-conversion-examples](./04-format-conversion-examples.md)
+Format Conversion Usage Examples
+
+**Key Concepts:**
+- **Cross-Format Compatibility**: Same business logic works across different data formats
+- **Automatic Conversion**: Canon automatically converts between formats
+- **Type Safety**: Full TypeScript type safety across all formats
+- **Real-World Usage**: Practical examples with REST APIs, MongoDB, and JSON-LD
+- **Error Handling**: Graceful error handling for invalid or partial data
+- **Format Conversion**: Built-in utilities for converting between formats
+- **Universal Functions**: Same functions work regardless of data format
+- **Metadata Preservation**: Format-specific metadata is preserved and accessible
+- **Business Logic**: Complex business logic works seamlessly across formats
+- **Integration**: Easy integration with existing systems and data sources
+
+**Pattern:** Multi-file example with modular structure
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples)
+
+_Tests:_ ✅ 7/7 passed
+
+### [05-error-handling-and-edge-cases](./05-error-handling-and-edge-cases.md)
+Error Handling and Edge Cases Usage Examples
+
+**Key Concepts:**
+- **Safe Wrapper Functions**: Use safe functions that return undefined instead of throwing
+- **Comprehensive Validation**: Validate entities before processing
+- **Graceful Error Handling**: Handle errors gracefully with fallback values
+- **Batch Processing**: Process multiple entities with individual error handling
+- **Edge Case Coverage**: Handle null, undefined, wrong types, and missing fields
+- **Type Safety**: Maintain type safety even with error handling
+- **Logging**: Log errors for debugging while continuing execution
+- **Fallback Values**: Provide sensible defaults for missing data
+- **Validation Results**: Return detailed validation results with errors and warnings
+- **Robust Processing**: Build robust systems that handle real-world data variations
+
+**Pattern:** Multi-file example with modular structure
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases)
+
+_Tests:_ ✅ 11/11 passed
+
+### [06-real-world-business-scenarios](./06-real-world-business-scenarios.md)
+Real-World Business Scenarios Usage Examples
+
+**Key Concepts:**
+- **Real-World Applications**: Canon enables complex business logic with type safety
+- **Domain Modeling**: Rich domain models with proper entity relationships
+- **Business Rules**: Encode business rules directly into the type system
+- **Workflow Management**: Complete business workflows with error handling
+- **Version Control**: Optimistic concurrency control for data consistency
+- **Validation**: Comprehensive validation with detailed error reporting
+- **Type Safety**: Full TypeScript type safety across complex business operations
+- **Error Handling**: Graceful error handling with detailed error messages
+- **Modularity**: Clean separation of concerns with focused modules
+- **Maintainability**: Easy to maintain and extend business logic
+
+**Pattern:** Multi-file example with modular structure
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios)
+
+_Tests:_ ✅ 8/8 passed
+
+### [07-custom-axioms-example](./07-custom-axioms-example.md)
+Custom Axioms Usage Examples
+
+**Key Concepts:**
+- **Custom Axiom Types**: Define your own axiom types using KeyNameAxiom, RepresentationAxiom, or custom Axiom types
+- **Axiom Registration**: Register custom axioms in the global Axioms interface
+- **Custom Functions**: Implement your own universal functions (emailOf, currencyOf, etc.)
+- **Domain-Specific Logic**: Add validation, conversion, and business logic specific to your domain
+- **Type Safety**: Maintain full TypeScript type safety with custom axioms
+- **Canon Integration**: Use custom axioms in your canon definitions
+- **Real-World Applications**: Custom axioms enable domain-specific semantic concepts
+- **Validation**: Add custom validation logic for your specific use cases
+- **Conversion**: Implement format conversion for your custom data types
+- **Business Rules**: Encode business rules directly into your axiom implementations
+
+**Pattern:** Multi-file example with modular structure
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example)
+
+_Tests:_ ✅ 10/10 passed
+
+## Example Patterns
+
+### Single-File Examples
+- **Use case**: Simple, focused examples
+- **Pattern**: All code in a single file with narrative flow
+- **Structure**: `01-basic-id-axiom`
+- **Benefits**: Easy to understand, quick to read, perfect for learning one concept
+
+### Folder-Based Examples
+- **Use case**: Complex examples with custom axioms or multiple canons
+- **Pattern**: Organized into focused files
+- **Structure**:
+  - `usage.ts` - Main entry point with narrative and tests (legacy examples may still use `index.ts`)
+  - `axioms/{concept}.ts` - Custom axiom definitions (type + API)
+  - `canons/{notation}.ts` - Canon definitions (type + runtime)
+  - Supporting files as needed for clarity
+- **Benefits**: Clear separation, easy to navigate, demonstrates real-world architecture
+
+### Understanding Axioms vs Canons
+
+**Axioms** define semantic concepts (Id, Email, Currency) and their APIs:
+- Each axiom file contains both the type definition AND the API functions (`emailOf`, `currencyOf`)
+- Example: `axioms/email.ts` defines EmailAxiom type and exports `emailOf()` function
+
+**Canons** aggregate axioms and map them to specific notations:
+- REST API canon: maps axioms to `id`, `type`, `email`
+- MongoDB canon: maps axioms to `_id`, `_type`, `email`
+- JSON-LD canon: maps axioms to `@id`, `@type`, `email`
+
+Canons don't have APIs - they configure how axiom APIs work with different data formats
 
 ## Getting Started
 
 Each example includes:
+- **Narrative documentation** that teaches concepts through prose
 - **Complete code samples** with full TypeScript typing
-- **Step-by-step explanations** of the implementation
-- **Best practices** and common pitfalls to avoid
-- **Integration examples** showing how to use with the canon configurations
+- **In-source tests** that demonstrate and validate behavior
+- **Real-world scenarios** showing practical applications
+- **Live source code** linked directly to GitHub
 
 ## Prerequisites
 
@@ -41,14 +194,37 @@ Each example can be run independently. Copy the code samples and adapt them to y
 
 For more information about the package configurations, see the main [documentation](../README.md).
 
-<!-- BEGIN GENERATED EXAMPLES INDEX -->
+## Running Examples
 
-## Generated Example Docs
+You can run examples directly using tsx:
 
-- [01 Basic Id Axiom](./01-basic-id-axiom.md) — Example: Basic Id Axiom Usage
-- [02 Module Style Canon](./02-module-style-canon.md) — ## In usage.ts
-- [Deduplicating Entities in Heterogeneous Collections](./deduplicating-entities.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
-- [Canon Examples: Tree Walk Over Mixed Entities](./tree-walk-over-mixed-entities.md) — ## Overview
-- [Cross-Source Data Transformation](./user-authentication-tokens.md) — > **Prerequisites**: This example builds on the concepts covered in the [main examples documentation](./tree-walk-over-mixed-entities.md). Make sure you understand the basic Canon concepts before proceeding.
+```bash
+# Run a single-file example
+npx tsx examples/01-basic-id-axiom.ts
 
-<!-- END GENERATED EXAMPLES INDEX -->
+# Run a folder example
+npx tsx examples/02-module-style-canon/usage.ts
+
+# Run multiple examples
+npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon/usage.ts
+```
+
+## Testing
+
+Examples use Vitest's in-source testing pattern in their entry points. The examples serve as:
+1. **Living documentation** - Narrative code that teaches concepts
+2. **Integration tests** - Verify complete workflows work correctly
+3. **Regression tests** - Ensure changes don't break functionality
+
+Run the tests with:
+```bash
+npm test
+```
+
+## Writing New Examples
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) in the examples directory for guidelines on:
+- Structuring examples as narrative documentation
+- When to use single-file vs folder-based examples
+- Naming conventions for axioms, canons, and supporting files
+- Writing tests that teach

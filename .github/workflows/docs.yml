@@ -45,13 +45,13 @@ jobs:
         run: npm ci
 
       - name: Validate tech radar data
-        run: npm run radar:validate
+        run: npm run check:radar
 
       - name: Build tech radar data
-        run: npm run radar:convert
+        run: npm run build:radar
 
       - name: Build with VitePress
-        run: npm run docs:build
+        run: npm run build:docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
