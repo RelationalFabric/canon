@@ -19,6 +19,10 @@ Multi-Axiom Canon Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon)
 
+## Test Status
+
+✅ Tests: 5/5 passed
+
 ## Files
 
 - `03-multi-axiom-canon/comprehensive-canon.ts`

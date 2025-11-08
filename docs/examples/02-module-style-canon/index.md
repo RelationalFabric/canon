@@ -6,6 +6,10 @@ Using the MongoDB Canon Module
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon)
 
+## Test Status
+
+✅ Tests: 3/3 passed
+
 ## Files
 
 - `02-module-style-canon/mongodb-canon.ts`

@@ -63,30 +63,8 @@ jobs:
           - Includes all 7 examples with comprehensive coverage"
           git push
 
-      - name: Run individual examples
-        run: |
-          echo "=== Running Individual Examples ==="
-
-            echo "1. Basic ID Axiom Example:"
-            npx tsx examples/01-basic-id-axiom.ts
-
-            echo "2. Module Style Canon Example:"
-            npx tsx examples/02-module-style-canon/usage.ts
-
-            echo "3. Multi-Axiom Canon Example:"
-            npx tsx examples/03-multi-axiom-canon/usage.ts
-
-            echo "4. Format Conversion Example:"
-            npx tsx examples/04-format-conversion-examples/usage.ts
-
-            echo "5. Error Handling Example:"
-            npx tsx examples/05-error-handling-and-edge-cases/usage.ts
-
-            echo "6. Real-World Business Scenarios Example:"
-            npx tsx examples/06-real-world-business-scenarios/usage.ts
-
-            echo "7. Custom Axioms Example:"
-            npx tsx examples/07-custom-axioms-example/usage.ts
+      - name: Run example suite
+        run: npm run check:test:json
 
       - name: Summary
         run: |

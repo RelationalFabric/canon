@@ -19,6 +19,10 @@ Format Conversion Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples)
 
+## Test Status
+
+✅ Tests: 7/7 passed
+
 ## Files
 
 - `04-format-conversion-examples/canons.ts`

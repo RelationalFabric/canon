@@ -19,6 +19,10 @@ Real-World Business Scenarios Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios)
 
+## Test Status
+
+✅ Tests: 8/8 passed
+
 ## Files
 
 - `06-real-world-business-scenarios/business-logic.ts`

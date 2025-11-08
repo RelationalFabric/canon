@@ -14,6 +14,10 @@ Example: Basic Id Axiom Usage
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/01-basic-id-axiom.ts)
 
+## Test Status
+
+✅ Tests: 3/3 passed
+
 ## Files
 
 - `01-basic-id-axiom.ts`

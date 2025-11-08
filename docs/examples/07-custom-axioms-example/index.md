@@ -19,6 +19,10 @@ Custom Axioms Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example)
 
+## Test Status
+
+✅ Tests: 10/10 passed
+
 ## Files
 
 - `07-custom-axioms-example/business-scenarios.ts`

@@ -34,6 +34,35 @@ interface ExampleInfo {
   isDirectory: boolean
   subExamples?: ExampleInfo[]
   sourceFiles: string[]
+  testStatus?: TestStatus
+}
+
+interface TestStatus {
+  status: 'passed' | 'failed' | 'unknown'
+  total: number
+  passed: number
+  failed: number
+  examples: Array<{
+    title: string
+    status: 'passed' | 'failed'
+    failureMessages: string[]
+  }>
+}
+
+interface VitestAssertionResult {
+  title: string
+  status: 'passed' | 'failed' | 'pending' | 'todo'
+  failureMessages: string[]
+}
+
+interface VitestFileResult {
+  name: string
+  status: 'passed' | 'failed'
+  assertionResults: VitestAssertionResult[]
+}
+
+interface VitestJsonReport {
+  testResults: VitestFileResult[]
 }
 
 const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/examples'
@@ -144,6 +173,20 @@ function resolveExamplesFilePath(examplesDir: string, relativeFile: string): str
   return join(examplesDir, ...segments)
 }
 
+function loadTestResults(reportPath: string): VitestJsonReport | null {
+  try {
+    const raw = readFileSync(reportPath, 'utf-8')
+    const data = JSON.parse(raw) as VitestJsonReport
+    if (!Array.isArray(data.testResults)) {
+      return null
+    }
+    return data
+  }
+  catch (error) {
+    console.warn(`⚠️ Unable to read Vitest JSON report at ${reportPath}:`, error instanceof Error ? error.message : error)
+    return null
+  }
+}
 function collectSourceFiles(baseDir: string, relativeDir: string): string[] {
   const fullDirPath = join(baseDir, relativeDir)
   if (!existsSync(fullDirPath)) {
@@ -175,6 +218,109 @@ function collectSourceFiles(baseDir: string, relativeDir: string): string[] {
   })
 
   return collected
+}
+
+function aggregateTestStatus(assertions: VitestAssertionResult[]): TestStatus {
+  const relevantAssertions = assertions.filter(assertion =>
+    assertion.status === 'passed' || assertion.status === 'failed',
+  )
+
+  if (relevantAssertions.length === 0) {
+    return {
+      status: 'unknown',
+      total: 0,
+      passed: 0,
+      failed: 0,
+      examples: [],
+    }
+  }
+
+  const failedAssertions = relevantAssertions.filter(assertion => assertion.status === 'failed')
+  const passedAssertions = relevantAssertions.length - failedAssertions.length
+
+  return {
+    status: failedAssertions.length > 0 ? 'failed' : 'passed',
+    total: relevantAssertions.length,
+    passed: passedAssertions,
+    failed: failedAssertions.length,
+    examples: relevantAssertions.map(assertion => ({
+      title: assertion.title,
+      status: assertion.status === 'failed' ? 'failed' : 'passed',
+      failureMessages: assertion.failureMessages,
+    })),
+  }
+}
+
+function augmentExampleWithTestResults(example: ExampleInfo, report: VitestJsonReport): ExampleInfo {
+  const cwdPrefix = `${process.cwd()}/`
+  const matchingResults = report.testResults.filter((result) => {
+    const normalizedName = normalizeRelativePath(result.name.replace(cwdPrefix, ''))
+    const possibleMatches = new Set<string>([normalizedName])
+    if (normalizedName.startsWith('examples/')) {
+      possibleMatches.add(normalizedName.slice('examples/'.length))
+    }
+    return Array.from(possibleMatches).some((candidate) => {
+      if (candidate === example.path) {
+        return true
+      }
+      return example.sourceFiles.includes(candidate)
+    })
+  })
+
+  if (matchingResults.length === 0) {
+    return {
+      ...example,
+      testStatus: { status: 'unknown', total: 0, passed: 0, failed: 0, examples: [] },
+    }
+  }
+
+  const assertionResults = matchingResults.flatMap(result => result.assertionResults)
+  const testStatus = aggregateTestStatus(assertionResults)
+  return { ...example, testStatus }
+}
+
+function formatTestStatus(testStatus: TestStatus | undefined): string | null {
+  if (!testStatus) {
+    return null
+  }
+
+  const { status, total, passed, failed } = testStatus
+
+  if (status === 'unknown' || total === 0) {
+    return '⚠️ Tests: status unknown (run `npm run check:test:json` to update)'
+  }
+
+  if (status === 'passed') {
+    return `✅ Tests: ${passed}/${total} passed`
+  }
+
+  return `❌ Tests: ${passed}/${total} passed (${failed} failing)`
+}
+
+function formatTestStatusSummary(testStatus: TestStatus | undefined): string | null {
+  if (!testStatus) {
+    return null
+  }
+
+  const { status, total, passed, failed } = testStatus
+
+  if (status === 'unknown' || total === 0) {
+    return '_Tests:_ ⚠️ status unknown (run `npm run check:test:json` to update)'
+  }
+
+  if (status === 'passed') {
+    return `_Tests:_ ✅ ${passed}/${total} passed`
+  }
+
+  return `_Tests:_ ❌ ${passed}/${total} passed (${failed} failing)`
+}
+
+function formatFailureMessage(message: string): string {
+  const normalized = message.trim()
+  if (normalized.length === 0) {
+    return '(no failure message provided)'
+  }
+  return normalized.replace(/\r?\n/g, '\n    ')
 }
 
 /**
@@ -317,6 +463,34 @@ function generateExamplePage(example: ExampleInfo, examplesDir: string): string 
     lines.push('')
   }
 
+  const formattedTestStatus = formatTestStatus(example.testStatus)
+  if (formattedTestStatus) {
+    lines.push('## Test Status')
+    lines.push('')
+    lines.push(formattedTestStatus)
+    lines.push('')
+
+    if (example.testStatus && example.testStatus.status === 'failed') {
+      lines.push('### Failing Assertions')
+      lines.push('')
+      example.testStatus.examples
+        .filter(assertion => assertion.status === 'failed')
+        .forEach((assertion) => {
+          lines.push(`- **${assertion.title}**`)
+          if (assertion.failureMessages.length === 0) {
+            lines.push('  - (no failure message provided)')
+          }
+          else {
+            assertion.failureMessages.forEach((message) => {
+              const formattedMessage = formatFailureMessage(message)
+              lines.push(`  - ${formattedMessage}`)
+            })
+          }
+        })
+      lines.push('')
+    }
+  }
+
   if (example.sourceFiles.length > 0) {
     lines.push('## Files')
     lines.push('')
@@ -397,6 +571,20 @@ This directory contains practical examples demonstrating how to use the @relatio
 
       content += `**Pattern:** ${example.isDirectory ? 'Multi-file example with modular structure' : 'Single-file example'}\n\n`
       content += `**Source:** [View on GitHub](${example.githubUrl})\n\n`
+
+      const testStatusSummary = formatTestStatusSummary(example.testStatus)
+      if (testStatusSummary) {
+        content += `${testStatusSummary}\n\n`
+        if (example.testStatus && example.testStatus.status === 'failed') {
+          content += '**Failing Assertions:**\n'
+          example.testStatus.examples
+            .filter(assertion => assertion.status === 'failed')
+            .forEach((assertion) => {
+              content += `- ${assertion.title}\n`
+            })
+          content += '\n'
+        }
+      }
 
       if (example.subExamples && example.subExamples.length > 0) {
         content += '**Supporting Files:**\n'
@@ -584,7 +772,24 @@ function main() {
 
   console.log('📝 Generating documentation...')
 
-  const documentation = generateExamplesDocumentation(examples)
+  const testReportPath = join(rootDir, '.scratch', 'vitest-report.json')
+  const tests = existsSync(testReportPath) && statSync(testReportPath).isFile()
+    ? loadTestResults(testReportPath)
+    : null
+
+  if (!tests) {
+    console.warn('⚠️ No Vitest JSON report found. Example status information will be omitted.')
+    console.warn('   Run `npm run check:test:json` before generating documentation to include test status.')
+  }
+
+  const examplesWithTests = examples.map((example) => {
+    if (!tests) {
+      return { ...example }
+    }
+    return augmentExampleWithTestResults(example, tests)
+  })
+
+  const documentation = generateExamplesDocumentation(examplesWithTests)
   const outputDir = join(rootDir, 'docs', 'examples')
 
   const tmpBaseDir = mkdtempSync(join(tmpdir(), 'canon-examples-'))
@@ -594,7 +799,7 @@ function main() {
   try {
     writeFileSync(join(tmpOutputDir, 'README.md'), documentation)
 
-    examples.forEach((example) => {
+    examplesWithTests.forEach((example) => {
       console.log(`🧾 Writing documentation for: ${example.name}`)
       writeExampleDocumentation(example, examplesDir, tmpOutputDir)
     })

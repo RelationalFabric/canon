@@ -19,6 +19,10 @@ Error Handling and Edge Cases Usage Examples
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases)
 
+## Test Status
+
+✅ Tests: 11/11 passed
+
 ## Files
 
 - `05-error-handling-and-edge-cases/basic-canon.ts`
