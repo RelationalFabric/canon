@@ -22,24 +22,11 @@ export default {
         {
           text: 'Documentation',
           items: [
-            { text: 'Introduction', link: '/docs/' },
-            { text: 'Canons', link: '/docs/canons' },
-            { text: 'Axioms', link: '/docs/axioms' },
-            {
-              text: 'Examples',
-              items: [
-                { text: 'Deduplicating Entities', link: '/docs/examples/deduplicating-entities' },
-                {
-                  text: 'Tree Walk Over Mixed Entities',
-                  link: '/docs/examples/tree-walk-over-mixed-entities',
-                },
-                {
-                  text: 'User Authentication Tokens',
-                  link: '/docs/examples/user-authentication-tokens',
-                },
-              ],
-            },
-            { text: 'Radar Methodology', link: '/docs/radar-methodology' },
+              { text: 'Introduction', link: '/docs/' },
+              { text: 'Canons', link: '/docs/canons' },
+              { text: 'Axioms', link: '/docs/axioms' },
+              { text: 'Examples', link: '/docs/examples/' },
+              { text: 'Radar Methodology', link: '/docs/radar-methodology' },
           ],
         },
       ],
