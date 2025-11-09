@@ -98,7 +98,7 @@
     "immutable": "^5.1.4",
     "object-hash": "^3.0.0",
     "reflect-metadata": "^0.2.2",
-    "yaml": "^2.4.1"
+    "yaml": "^2.8.1"
   },
   "optionalDependencies": {
     "defu": "^6.1.4"
@@ -114,14 +114,15 @@
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
+    "npm-check-updates": "^19.1.2",
     "npm-run-all": "^4.1.5",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
-    "tsx": "^4.7.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
-    "vitepress": "^1.0.0",
+    "vitepress": "^1.6.4",
     "vitest": "^4.0.8"
   },
   "husky": {
