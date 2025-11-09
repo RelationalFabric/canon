@@ -60,10 +60,10 @@ const productAnalysis = analyzeEntity(productEntity)
 
 ```ts
 expect(userAnalysis.id).toBe('user-123')
-expect(userAnalysis.type).toBe('user')
-expect(userAnalysis.version).toBe(5)
-expect(userAnalysis.timestamps).toHaveLength(2)
-expect(userAnalysis.references).toHaveLength(1)
+    expect(userAnalysis.type).toBe('user')
+    expect(userAnalysis.version).toBe(5)
+    expect(userAnalysis.timestamps).toHaveLength(2)
+    expect(userAnalysis.references).toHaveLength(1)
 ```
 
 _Status:_ ✅ pass
@@ -72,10 +72,10 @@ _Status:_ ✅ pass
 
 ```ts
 expect(productAnalysis.id).toBe('product-456')
-expect(productAnalysis.type).toBe('product')
-expect(productAnalysis.version).toBe(12)
-expect(productAnalysis.timestamps).toHaveLength(2)
-expect(productAnalysis.references).toHaveLength(1)
+    expect(productAnalysis.type).toBe('product')
+    expect(productAnalysis.version).toBe(12)
+    expect(productAnalysis.timestamps).toHaveLength(2)
+    expect(productAnalysis.references).toHaveLength(1)
 ```
 
 _Status:_ ✅ pass
@@ -92,9 +92,9 @@ const update = processEntityUpdate(productEntity)
 
 ```ts
 expect(update.id).toBe('product-456')
-expect(update.oldVersion).toBe(12)
-expect(update.newVersion).toBe(13)
-expect(update.updatedAt).toBeInstanceOf(Date)
+    expect(update.oldVersion).toBe(12)
+    expect(update.newVersion).toBe(13)
+    expect(update.updatedAt).toBeInstanceOf(Date)
 ```
 
 _Status:_ ✅ pass

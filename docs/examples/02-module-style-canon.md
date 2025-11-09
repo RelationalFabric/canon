@@ -128,12 +128,12 @@ _Status:_ ✅ pass
 
 ```ts
 const productDocument = {
-  _id: 'abc123def456',
-  title: 'Product Name',
-  price: 29.99,
-}
+      _id: 'abc123def456',
+      title: 'Product Name',
+      price: 29.99,
+    }
 
-expect(idOf(productDocument)).toBe('abc123def456')
+    expect(idOf(productDocument)).toBe('abc123def456')
 ```
 
 _Status:_ ✅ pass
