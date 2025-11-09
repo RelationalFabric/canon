@@ -133,6 +133,7 @@ This modern approach ensures consumers get the exact same version used internall
 
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
+
 export default createEslintConfig()
 ```
 

@@ -148,9 +148,10 @@ export default defineCanon<MyCanon>({
 ```
 
 ```typescript
+import type { MyCanon } from 'my-module/canon'
 import { registerCanons } from '@relationalfabric/canon'
 // main.ts - Import and register
-import myCanon, { type MyCanon } from 'my-module/canon'
+import myCanon from 'my-module/canon'
 
 declare module '@relationalfabric/canon' {
   interface Canons {
@@ -353,7 +354,7 @@ idOf(mongoData) // "user-123" using '_id'
 ## Best Practices
 
 1. **Complete Canon Definition**: Always include both type-level and runtime definitions
-2. **Use Core Axioms**: Start with the [core axiom set](../reference/axioms.md) before adding custom ones
+2. **Use Core Axioms**: Start with the [core axiom set](./reference/axioms.md) before adding custom ones
 3. **Register Early**: Register canons at application startup for best performance
 4. **Leverage Type Safety**: Use the `Satisfies` constraint to ensure compile-time type checking
 5. **Document Dependencies**: Clearly document inter-canon relationships

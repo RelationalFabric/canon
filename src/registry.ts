@@ -38,8 +38,8 @@ export class Registry {
   /**
    * Make registry iterable - iterates over canon configs
    */
-  *[Symbol.iterator](): Iterator<CanonConfig> {
-    yield * this.canons.values()
+  * [Symbol.iterator](): Iterator<CanonConfig> {
+    yield* this.canons.values()
   }
 
   /**

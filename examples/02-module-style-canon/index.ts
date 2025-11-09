@@ -40,9 +40,10 @@ First, we define our canon in a separate module. This module exports both the ty
 Now that we have a reusable canon module, let's see how a consumer application would use it.
 */
 
+import type { MongoDbCanon } from './mongodb-canon.js'
 // ```
 import { declareCanon, idOf } from '@relational-fabric/canon'
-import { mongoDbCanon, type MongoDbCanon } from './mongodb-canon.js'
+import { mongoDbCanon } from './mongodb-canon.js'
 
 declare module '@relational-fabric/canon' {
   interface Canons {

@@ -183,7 +183,7 @@ Universal APIs provide functions that work across all registered canons. They ar
 - Automatic adaptation to different data shapes
 - Full type safety maintained across all shapes
 
-See [reference/api.md](reference/api.md) for available APIs.
+See [docs/reference/api.md](docs/reference/api.md) for available APIs.
 
 ## Package Exports
 
@@ -306,11 +306,11 @@ Canon provides comprehensive documentation to help you understand and use the sy
 
 ### Reference Documentation
 
-- **[API Reference](reference/api.md)** - Complete API documentation
-- **[Core Axioms](reference/axioms.md)** - Detailed axiom specifications
-- **[Canons Reference](reference/canons.md)** - Canon implementation guide
+- **[API Reference](docs/reference/api.md)** - Complete API documentation
+- **[Core Axioms](docs/reference/axioms.md)** - Detailed axiom specifications
+- **[Canons Reference](docs/reference/canons.md)** - Canon implementation guide
 - **[Type Testing Utilities](docs/type-testing/)** - Compile-time type assertions and invariants
-- **[Third-Party Integrations](reference/third-party.md)** - External library integrations
+- **[Canon Kit & Third-Party Utilities](docs/reference/kit.md)** - Curated third-party surface and transparent access paths
 
 ### Examples
 

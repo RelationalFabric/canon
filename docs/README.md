@@ -29,6 +29,7 @@ export default createEslintConfig()
 
 ## Documentation Sections
 
+- **[Reference](./reference/)** - API details, axiom specifications, and integrations
 - **[Canons](./canons.md)** - Core principles and guidelines
 - **[Axioms](./axioms.md)** - Fundamental assumptions and rules
 - **[Examples](./examples/)** - Practical usage examples

@@ -4,8 +4,9 @@
  * Singleton registry instance with convenience API.
  */
 
+import type { Registry } from './registry.js'
 import type { CanonConfig, Canons } from './types/index.js'
-import { createRegistry, type Registry } from './registry.js'
+import { createRegistry } from './registry.js'
 import { defineCanon } from './types/index.js'
 
 /**
