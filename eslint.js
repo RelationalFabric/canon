@@ -23,6 +23,7 @@ export default function createEslintConfig(options = {}, ...configs) {
       rules: {
         'no-console': process.env.CI ? 'off' : 'warn',
         'node/prefer-global/process': 'off',
+        'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
       },
     },
     ...configs,

@@ -114,8 +114,7 @@ export function processCustomerRegistration(customer: unknown): {
       priority,
       errors,
     }
-  }
-  catch (error) {
+  } catch (error) {
     return {
       success: false,
       customerId: '',
@@ -192,8 +191,7 @@ export function updateEntityStatus(
       oldStatus: currentStatus,
       newStatus,
     }
-  }
-  catch (error) {
+  } catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

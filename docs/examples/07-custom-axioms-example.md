@@ -4,61 +4,61 @@ Creating and using custom axioms (Email, Currency, Status, Priority) for domain-
 
 ```ts
 const customerWithCustomFields = {
-  id: 'cust-123',
-  type: 'customer',
-  version: 3,
-  createdAt: new Date('2024-01-15T10:30:00Z'),
-  updatedAt: new Date('2024-01-20T14:45:00Z'),
-  email: 'alice@example.com',
-  status: 'active',
-  priority: 3,
-  profile: {
-    name: 'Alice Johnson',
-    phone: '+1-555-0123',
-  },
-  preferences: {
-    currency: 'USD',
-    language: 'en',
-  },
+id: 'cust-123',
+type: 'customer',
+version: 3,
+createdAt: new Date('2024-01-15T10:30:00Z'),
+updatedAt: new Date('2024-01-20T14:45:00Z'),
+email: 'alice@example.com',
+status: 'active',
+priority: 3,
+profile: {
+  name: 'Alice Johnson',
+  phone: '+1-555-0123',
+},
+preferences: {
+  currency: 'USD',
+  language: 'en',
+},
 }
 ```
 
 ```ts
 const _productWithCustomFields = {
-  id: 'prod-456',
-  type: 'product',
-  version: 7,
-  createdAt: new Date('2024-01-10T09:00:00Z'),
-  updatedAt: new Date('2024-01-25T16:20:00Z'),
-  name: 'Canon Framework License',
-  price: 99.99, // Will be converted to currency
-  currency: 'USD',
-  status: 'active',
-  priority: 2, // Numeric priority
-  category: 'software',
-  createdBy: 'admin-789',
+id: 'prod-456',
+type: 'product',
+version: 7,
+createdAt: new Date('2024-01-10T09:00:00Z'),
+updatedAt: new Date('2024-01-25T16:20:00Z'),
+name: 'Canon Framework License',
+price: 99.99, // Will be converted to currency
+currency: 'USD',
+status: 'active',
+priority: 2, // Numeric priority
+category: 'software',
+createdBy: 'admin-789',
 }
 ```
 
 ```ts
 const orderWithCustomFields = {
-  id: 'order-789',
-  type: 'order',
-  version: 2,
-  createdAt: new Date('2024-01-15T09:30:00Z'),
-  updatedAt: new Date('2024-01-15T11:45:00Z'),
-  status: 'active',
-  priority: { level: 2, label: 'medium' },
-  total: '$199.98', // Currency string
-  currency: 'USD',
-  customerId: 'cust-123',
-  items: [
-    {
-      productId: 'prod-456',
-      quantity: 2,
-      price: 99.99,
-    },
-  ],
+id: 'order-789',
+type: 'order',
+version: 2,
+createdAt: new Date('2024-01-15T09:30:00Z'),
+updatedAt: new Date('2024-01-15T11:45:00Z'),
+status: 'active',
+priority: { level: 2, label: 'medium' },
+total: '$199.98', // Currency string
+currency: 'USD',
+customerId: 'cust-123',
+items: [
+  {
+    productId: 'prod-456',
+    quantity: 2,
+    price: 99.99,
+  },
+],
 }
 ```
 
@@ -188,7 +188,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/home/runner/work/canon/canon/examples/07-custom-axioms-example/index.ts`
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example/index.ts)
 
 ## Metadata
 

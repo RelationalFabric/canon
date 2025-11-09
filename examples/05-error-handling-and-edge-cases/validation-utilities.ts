@@ -94,8 +94,7 @@ export function findMatchingCanon(entity: unknown): string | undefined {
     }
 
     return undefined
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       'Failed to find matching canon:',
       error instanceof Error ? error.message : 'Unknown error',
@@ -164,8 +163,7 @@ export function processEntitySafely(entity: unknown): {
       errors: [],
       canon,
     }
-  }
-  catch (error) {
+  } catch (error) {
     return {
       success: false,
       errors: [error instanceof Error ? error.message : 'Unknown error'],

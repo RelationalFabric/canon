@@ -29,7 +29,6 @@ export default {
               text: 'Examples',
               link: '/docs/examples',
             },
-            { text: 'Radar Methodology', link: '/docs/radar-methodology' },
           ],
         },
       ],
@@ -97,7 +96,7 @@ export default {
               items: [
                 { text: 'Overview', link: '/planning/radar/' },
                 { text: 'Interactive Radar', link: '/planning/radar/interactive' },
-                { text: 'Methodology', link: '/docs/radar-methodology' },
+                { text: 'Methodology', link: '/planning/radar/methodology' },
               ],
             },
           ],

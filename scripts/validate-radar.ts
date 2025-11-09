@@ -14,8 +14,7 @@ async function main() {
         result.warnings.forEach(warning => console.log(`  - ${warning}`))
       }
       process.exit(0)
-    }
-    else {
+    } else {
       console.log('❌ Radar data has errors:')
       result.errors.forEach((error) => {
         console.log(`  - ${error.path ? `${error.path}: ` : ''}${error.message}`)
@@ -26,8 +25,7 @@ async function main() {
       }
       process.exit(1)
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error(
       '❌ Error validating radar data:',
       error instanceof Error ? error.message : 'Unknown error',

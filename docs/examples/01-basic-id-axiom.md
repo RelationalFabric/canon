@@ -22,27 +22,27 @@ A canon definition has two parts:
 
 ```ts
 type InternalCanon = Canon<{
-  Id: {
-    $basis: { id: string }
-    key: 'id'
-    $meta: { type: string }
-  }
+Id: {
+  $basis: { id: string }
+  key: 'id'
+  $meta: { type: string }
+}
 }>
 
 declare module '@relational-fabric/canon' {
-  interface Canons {
-    Internal: InternalCanon
-  }
+interface Canons {
+  Internal: InternalCanon
+}
 }
 
 declareCanon('Internal', {
-  axioms: {
-    Id: {
-      $basis: pojoWithOfType('id', 'string'),
-      key: 'id',
-      $meta: { type: 'uuid' },
-    },
+axioms: {
+  Id: {
+    $basis: pojoWithOfType('id', 'string'),
+    key: 'id',
+    $meta: { type: 'uuid' },
   },
+},
 })
 ```
 
@@ -50,9 +50,9 @@ Now we can use `idOf()` with our internal data format. The function automaticall
 
 ```ts
 const user = {
-  id: 'user-123',
-  name: 'John Doe',
-  email: 'john@example.com',
+id: 'user-123',
+name: 'John Doe',
+email: 'john@example.com',
 }
 
 const userId = idOf(user)
@@ -72,27 +72,27 @@ Often you'll receive data from external APIs that use different conventions. JSO
 
 ```ts
 type JsonLdCanon = Canon<{
-  Id: {
-    $basis: { '@id': string }
-    key: '@id'
-    $meta: { type: string, format: string }
-  }
+Id: {
+  $basis: { '@id': string }
+  key: '@id'
+  $meta: { type: string, format: string }
+}
 }>
 
 declare module '@relational-fabric/canon' {
-  interface Canons {
-    JsonLd: JsonLdCanon
-  }
+interface Canons {
+  JsonLd: JsonLdCanon
+}
 }
 
 declareCanon('JsonLd', {
-  axioms: {
-    Id: {
-      $basis: pojoWithOfType('@id', 'string'),
-      key: '@id',
-      $meta: { type: 'uri', format: 'iri' },
-    },
+axioms: {
+  Id: {
+    $basis: pojoWithOfType('@id', 'string'),
+    key: '@id',
+    $meta: { type: 'uri', format: 'iri' },
   },
+},
 })
 ```
 
@@ -100,10 +100,10 @@ The magic: the **SAME** `idOf()` function now works with JSON-LD data too! Canon
 
 ```ts
 const jsonLdPerson = {
-  '@id': 'https://example.com/users/jane-456',
-  '@type': 'Person',
-  'name': 'Jane Smith',
-  'email': 'jane@example.com',
+'@id': 'https://example.com/users/jane-456',
+'@type': 'Person',
+'name': 'Jane Smith',
+'email': 'jane@example.com',
 }
 
 const personId = idOf(jsonLdPerson)
@@ -123,8 +123,8 @@ The real power: write functions that work with **any** format. You don't need to
 
 ```ts
 function displayEntity<T extends Satisfies<'Id'>>(entity: T): string {
-  const id = idOf(entity)
-  return `Entity with ID: ${id}`
+const id = idOf(entity)
+return `Entity with ID: ${id}`
 }
 
 // Works with internal format
@@ -133,9 +133,9 @@ const internalDisplay = displayEntity(internalProduct)
 
 // Works with JSON-LD format
 const jsonLdProduct = {
-  '@id': 'https://example.com/products/gadget-999',
-  '@type': 'Product',
-  'name': 'Gadget',
+'@id': 'https://example.com/products/gadget-999',
+'@type': 'Product',
+'name': 'Gadget',
 }
 const jsonLdDisplay = displayEntity(jsonLdProduct)
 ```
@@ -168,7 +168,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/home/runner/work/canon/canon/examples/01-basic-id-axiom.ts`
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/01-basic-id-axiom.ts)
 
 ## Metadata
 

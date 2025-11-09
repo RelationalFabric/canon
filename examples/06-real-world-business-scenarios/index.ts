@@ -108,8 +108,7 @@ const statusUpdate = updateOrderStatus(sampleOrder, 'shipped')
 console.log(`Status update result: ${statusUpdate.success ? 'Success' : 'Failed'}`)
 if (statusUpdate.success) {
   console.log(`New version: ${statusUpdate.newVersion}`)
-}
-else {
+} else {
   console.log(`Error: ${statusUpdate.error}`)
 }
 

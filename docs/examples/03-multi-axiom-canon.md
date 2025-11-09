@@ -8,10 +8,10 @@ In this example, we'll work with entities that implement all five core axioms an
 
 ```ts
 import {
-  analyzeEntity,
-  demonstrateReferenceConversion,
-  demonstrateTimestampConversion,
-  processEntityUpdate,
+analyzeEntity,
+demonstrateReferenceConversion,
+demonstrateTimestampConversion,
+processEntityUpdate,
 } from './utility-functions.js'
 import './comprehensive-canon.js'
 ```
@@ -22,28 +22,28 @@ Let's define some sample entities that implement all five axioms.
 
 ```ts
 const userEntity = {
-  id: 'user-123',
-  type: 'user',
-  version: 5,
-  createdAt: new Date('2024-01-15T10:30:00Z'),
-  updatedAt: new Date('2024-01-20T14:45:00Z'),
-  profile: {
-    name: 'Alice Johnson',
-    email: 'alice@example.com',
-  },
-  createdBy: 'admin-456',
+id: 'user-123',
+type: 'user',
+version: 5,
+createdAt: new Date('2024-01-15T10:30:00Z'),
+updatedAt: new Date('2024-01-20T14:45:00Z'),
+profile: {
+  name: 'Alice Johnson',
+  email: 'alice@example.com',
+},
+createdBy: 'admin-456',
 }
 
 const productEntity = {
-  id: 'product-456',
-  type: 'product',
-  version: 12,
-  createdAt: new Date('2024-01-10T09:00:00Z'),
-  updatedAt: new Date('2024-01-25T16:20:00Z'),
-  name: 'Canon Framework License',
-  price: 99.99,
-  category: 'software',
-  createdBy: 'user-123',
+id: 'product-456',
+type: 'product',
+version: 12,
+createdAt: new Date('2024-01-10T09:00:00Z'),
+updatedAt: new Date('2024-01-25T16:20:00Z'),
+name: 'Canon Framework License',
+price: 99.99,
+category: 'software',
+createdBy: 'user-123',
 }
 ```
 
@@ -131,7 +131,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/home/runner/work/canon/canon/examples/03-multi-axiom-canon/index.ts`
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/03-multi-axiom-canon/index.ts)
 
 ## Metadata
 

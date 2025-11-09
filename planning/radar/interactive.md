@@ -24,4 +24,4 @@ The radar is organized into four main categories:
 
 ## Methodology
 
-For more details about our radar methodology and how we evaluate technologies, see our [Radar Methodology](/docs/radar-methodology) documentation.
+For more details about our radar methodology and how we evaluate technologies, see our [Radar Methodology](./methodology.md) documentation.
