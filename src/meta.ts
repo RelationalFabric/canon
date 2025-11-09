@@ -1,10 +1,10 @@
 import 'reflect-metadata'
 
+import type { Metadata } from './types/metadata.js'
+
 const METADATA_KEY = Symbol.for('@relational-fabric/canon:meta')
 
-export type Metadata = Record<PropertyKey, unknown>
-
-export function meta<T extends object, M extends Metadata = Metadata>(obj: T): M {
+export function metaOf<T extends object, M extends Metadata = Metadata>(obj: T): M {
   const existing = Reflect.getMetadata(METADATA_KEY, obj) as M | undefined
   return (existing ?? ({} as M))
 }
