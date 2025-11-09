@@ -7,9 +7,10 @@ on:
       - develop
     paths:
       - "examples/**"
-      - scripts/generate-examples-docs.ts
-      - package.json
+      - "scripts/generate-examples-docs.ts"
+      - "package.json"
       - "tsconfig*.json"
+      - ".github/workflows/examples.yml"
   workflow_dispatch:
 
 permissions:
