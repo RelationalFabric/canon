@@ -108,7 +108,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/home/runner/work/canon/canon/examples/06-real-world-business-scenarios/index.ts`
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/06-real-world-business-scenarios/index.ts)
 
 ## Metadata
 

@@ -93,9 +93,9 @@ import { declareCanon, idOf } from '@relational-fabric/canon'
 import { mongoDbCanon, type MongoDbCanon } from './mongodb-canon.js'
 
 declare module '@relational-fabric/canon' {
-  interface Canons {
-    MongoDb: MongoDbCanon
-  }
+interface Canons {
+  MongoDb: MongoDbCanon
+}
 }
 
 declareCanon('MongoDb', mongoDbCanon)
@@ -107,10 +107,10 @@ Now `idOf()` automatically works with MongoDB documents.
 
 ```ts
 const userDocument = {
-  _id: '507f1f77bcf86cd799439011',
-  name: 'Alice Johnson',
-  email: 'alice@example.com',
-  createdAt: new Date('2024-01-15'),
+_id: '507f1f77bcf86cd799439011',
+name: 'Alice Johnson',
+email: 'alice@example.com',
+createdAt: new Date('2024-01-15'),
 }
 
 const userId = idOf(userDocument) // Returns: "507f1f77bcf86cd799439011"
@@ -151,7 +151,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/home/runner/work/canon/canon/examples/02-module-style-canon/index.ts`
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/02-module-style-canon/index.ts)
 
 **Referenced files:**
 - `./mongodb-canon.ts`

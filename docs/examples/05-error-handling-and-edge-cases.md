@@ -4,33 +4,33 @@ Gracefully handling errors, edge cases, and validation in Canon applications
 
 ```ts
 const validEntity = {
-  id: 'user-123',
-  type: 'user',
-  version: 5,
-  createdAt: new Date('2024-01-15T10:30:00Z'),
-  createdBy: 'admin-456',
+id: 'user-123',
+type: 'user',
+version: 5,
+createdAt: new Date('2024-01-15T10:30:00Z'),
+createdBy: 'admin-456',
 }
 ```
 
 ```ts
 const missingFields = {
-  name: 'Incomplete User',
-  email: 'incomplete@example.com',
+name: 'Incomplete User',
+email: 'incomplete@example.com',
 }
 ```
 
 ```ts
 const wrongTypes = {
-  id: 123,
-  type: true,
-  version: 'five',
+id: 123,
+type: true,
+version: 'five',
 }
 ```
 
 ```ts
 const nullValues = {
-  id: null,
-  version: 0,
+id: null,
+version: 0,
 }
 ```
 
@@ -44,15 +44,15 @@ const nonObject = 'not an object'
 
 ```ts
 const nestedObject = {
-  user: {
-    id: 'user-456',
-    type: 'user',
-    version: 3,
-  },
-  metadata: {
-    source: 'api',
-    timestamp: '2024-01-15T10:30:00Z',
-  },
+user: {
+  id: 'user-456',
+  type: 'user',
+  version: 3,
+},
+metadata: {
+  source: 'api',
+  timestamp: '2024-01-15T10:30:00Z',
+},
 }
 ```
 
@@ -212,7 +212,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/home/runner/work/canon/canon/examples/05-error-handling-and-edge-cases/index.ts`
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/05-error-handling-and-edge-cases/index.ts)
 
 ## Metadata
 

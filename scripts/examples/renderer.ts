@@ -10,6 +10,7 @@ import type {
   ParsedExample,
   TestStatusMap,
 } from './types.js'
+import dedent from 'dedent'
 import {
   applyHeaderControl,
   processInclude,
@@ -19,6 +20,24 @@ import {
 } from './markdown.js'
 import { parseExampleFile } from './parser.js'
 import { formatTestStatus } from './test-status.js'
+
+const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/examples'
+
+/**
+ * Convert absolute source path to GitHub URL
+ *
+ * @param sourcePath - Absolute path to source file
+ * @returns GitHub URL for the source file
+ */
+function sourcePathToGitHubUrl(sourcePath: string): string {
+  // Extract the relative path after 'examples/'
+  const match = /examples\/(.+)$/.exec(sourcePath)
+  if (match?.[1]) {
+    return `${GITHUB_BASE_URL}/${match[1]}`
+  }
+  // Fallback: return the original path if pattern doesn't match
+  return sourcePath
+}
 
 /**
  * Render tutorial body from parsed example
@@ -66,7 +85,7 @@ export async function renderTutorialBody(
       case 'code': {
         // Render code as fenced block
         lines.push('```ts')
-        lines.push(section.content)
+        lines.push(dedent(section.content))
         lines.push('```')
         lines.push('')
         break
@@ -94,7 +113,7 @@ export async function renderTutorialBody(
 
         // Render code
         lines.push('```ts')
-        lines.push(section.content)
+        lines.push(dedent(section.content))
         lines.push('```')
         lines.push('')
         break
@@ -112,7 +131,7 @@ export async function renderTutorialBody(
 
         // Test body code
         lines.push('```ts')
-        lines.push(section.content)
+        lines.push(dedent(section.content))
         lines.push('```')
         lines.push('')
 
@@ -183,7 +202,7 @@ export function renderFooter(parsed: ParsedExample): string {
   // References section
   lines.push('## References')
   lines.push('')
-  lines.push(`**Source:** \`${sourcePath}\``)
+  lines.push(`**Source:** [View on GitHub](${sourcePathToGitHubUrl(sourcePath)})`)
 
   if (referencedFiles.length > 0) {
     lines.push('')
