@@ -12,7 +12,20 @@ export default {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/docs/' },
-      { text: 'Reference', link: '/docs/reference/' },
+      {
+        text: 'Reference',
+        items: [
+          { text: 'Overview', link: '/docs/reference/' },
+          { text: 'API Reference', link: '/docs/reference/api' },
+          { text: 'Core Axioms', link: '/docs/reference/axioms' },
+          { text: 'Canons', link: '/docs/reference/canons' },
+          {
+            text: 'Augmentable Interfaces',
+            link: '/docs/reference/augmentable-interfaces',
+          },
+          { text: 'Canon Kit', link: '/docs/reference/kit' },
+        ],
+      },
       { text: 'Planning', link: '/planning/' },
     ],
 

@@ -66,7 +66,7 @@ The Kit provides utility libraries through a dual export strategy, offering both
 ### Opinionated Access (Recommended)
 
 ```typescript
-import { createEslintConfig, defu, parseYaml } from '@relational-fabric/canon'
+import { createEslintConfig, defu, objectHash, parseYaml } from '@relational-fabric/canon'
 // Curated Canon Kit selection with our preferred API surface
 ```
 
@@ -75,6 +75,7 @@ import { createEslintConfig, defu, parseYaml } from '@relational-fabric/canon'
 ```typescript
 import antfu from '@relational-fabric/canon/_/antfu'
 import { defu } from '@relational-fabric/canon/_/defu'
+import objectHash from '@relational-fabric/canon/_/object-hash'
 import * as yaml from '@relational-fabric/canon/_/yaml'
 // Direct access to third-party libraries with original API contracts preserved
 ```
@@ -95,6 +96,11 @@ import * as yaml from '@relational-fabric/canon/_/yaml'
 
 - **Opinionated**: `parseYaml` (alias for `yaml.parse`)
 - **Transparent**: `@relational-fabric/canon/_/yaml` (direct access to all `yaml` exports)
+
+**Content Hashing:**
+
+- **Opinionated**: `objectHash` (curated hash function built on [object-hash](https://github.com/puleos/object-hash))
+- **Transparent**: `@relational-fabric/canon/_/object-hash` (direct access to all helpers from [object-hash](https://github.com/puleos/object-hash))
 
 **Version Management**: The package uses both `dependencies` and `optionalDependencies` to ensure consumers get the exact same version used internally, preventing version conflicts and ensuring predictable behavior.
 
