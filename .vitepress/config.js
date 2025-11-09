@@ -12,6 +12,7 @@ export default {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/docs/' },
+      { text: 'Reference', link: '/docs/reference/' },
       { text: 'Planning', link: '/planning/' },
     ],
 
@@ -23,6 +24,7 @@ export default {
           text: 'Documentation',
           items: [
             { text: 'Introduction', link: '/docs/' },
+            { text: 'Reference', link: '/docs/reference/' },
             { text: 'Canons', link: '/docs/canons' },
             { text: 'Axioms', link: '/docs/axioms' },
             {
@@ -39,6 +41,7 @@ export default {
           text: 'Documentation',
           items: [
             { text: 'Documentation', link: '/docs/' },
+            { text: 'Reference', link: '/docs/reference/' },
             { text: 'Canons', link: '/docs/canons' },
             { text: 'Axioms', link: '/docs/axioms' },
             { text: 'Examples', link: '/docs/examples' },

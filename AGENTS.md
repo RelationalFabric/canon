@@ -71,7 +71,7 @@ Canons are universal type blueprints that implement axioms for specific data for
 
 ### Core Axioms
 
-The system includes five essential axioms: Id, Type, Version, Timestamps, and References. See [reference/axioms.md](./reference/axioms.md) for detailed specifications.
+The system includes five essential axioms: Id, Type, Version, Timestamps, and References. See [docs/reference/axioms.md](./docs/reference/axioms.md) for detailed specifications.
 
 ### Canonical Data Structures
 
@@ -125,7 +125,7 @@ Before making significant changes, review the [Architecture Decision Records (AD
 ### Documentation
 
 - **[docs/](./docs/)** - Core documentation including axioms, canons, and examples
-- **[reference/](./reference/)** - API reference and core axiom specifications
+- **[docs/reference/](./docs/reference/)** - API reference and core axiom specifications
 - **[docs/adrs/](./docs/adrs/)** - Architecture Decision Records
 
 ### Examples & Tests
@@ -267,7 +267,7 @@ declare module '@relational-fabric/canon' {
 
 ### Adding a New Axiom
 
-1. Define the axiom type following patterns in [reference/axioms.md](./reference/axioms.md)
+1. Define the axiom type following patterns in [docs/reference/axioms.md](./docs/reference/axioms.md)
 2. Register it in the `Axioms` interface using module augmentation
 3. Provide API functions following the `*Of` naming pattern
 4. Update documentation with examples

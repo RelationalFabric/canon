@@ -47,7 +47,7 @@ Chosen option: "Include all documentation files with ESLint", because it ensures
 
 - ESLint configuration includes all documentation files
 - Fixed 639 linting errors across documentation files
-- Updated ESLint configuration to include docs/, reference/, and \*.md files
+- Updated ESLint configuration to include docs/, docs/reference/, and \*.md files
 - Used automatic fixing where possible, manual fixes for parsing errors
 - Maintained code readability while ensuring compliance
 
