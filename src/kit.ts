@@ -27,4 +27,4 @@ export * from './utils/objects.js'
 
 // Opinionated wrappers for curated utilities
 export { default as createEslintConfig } from '../eslint.js'
-export { default as mergeConfigs } from 'defu'
+export { defu as mergeConfigs } from 'defu'
