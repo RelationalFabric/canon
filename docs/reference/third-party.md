@@ -66,8 +66,8 @@ The package provides utility libraries through a dual export strategy, offering 
 ### Opinionated Access (Recommended)
 
 ```typescript
-import { createEslintConfig, mergeConfigs } from '@relational-fabric/canon'
-// Curated, opinionated selection with our preferred naming and API shape
+import { createEslintConfig, defu, parseYaml } from '@relational-fabric/canon'
+// Curated, opinionated selection with Canon's preferred API surface
 ```
 
 ### Transparent Access (Advanced)
@@ -75,6 +75,7 @@ import { createEslintConfig, mergeConfigs } from '@relational-fabric/canon'
 ```typescript
 import antfu from '@relational-fabric/canon/_/antfu'
 import { defu } from '@relational-fabric/canon/_/defu'
+import * as yaml from '@relational-fabric/canon/_/yaml'
 // Direct access to third-party libraries with original API contracts preserved
 ```
 
@@ -82,13 +83,18 @@ import { defu } from '@relational-fabric/canon/_/defu'
 
 **Object Merging:**
 
-- **Opinionated**: `mergeConfigs` (wrapper function)
-- **Transparent**: `defu` (direct re-export)
+- **Opinionated**: `defu` (curated re-export available from the main entry point)
+- **Transparent**: `defu` (direct re-export via `_` path)
 
 **ESLint Configuration:**
 
 - **Opinionated**: `createEslintConfig` (wrapper function)
 - **Transparent**: `antfu` (direct re-export)
+
+**YAML Processing:**
+
+- **Opinionated**: `parseYaml` (alias for `yaml.parse`)
+- **Transparent**: `@relational-fabric/canon/_/yaml` (direct access to all `yaml` exports)
 
 **Version Management**: The package uses both `dependencies` and `optionalDependencies` to ensure consumers get the exact same version used internally, preventing version conflicts and ensuring predictable behavior.
 
@@ -102,7 +108,7 @@ import { defu } from '@relational-fabric/canon/_/defu'
 
 The design and implementation of these configurations is documented in:
 
-- [ADR-001: TypeScript Package Setup](../docs/adrs/0001-typescript-package-setup.md)
-- [ADR-002: ESLint Configuration with Antfu](../docs/adrs/0002-eslint-configuration-with-antfu.md)
-- [ADR-004: TypeScript Configuration Separation](../docs/adrs/0004-typescript-configuration-separation.md)
-- [ADR-005: ESLint Configuration Abstraction](../docs/adrs/0005-eslint-configuration-abstraction.md)
+- [ADR-001: TypeScript Package Setup](../adrs/0001-typescript-package-setup.md)
+- [ADR-002: ESLint Configuration with Antfu](../adrs/0002-eslint-configuration-with-antfu.md)
+- [ADR-004: TypeScript Configuration Separation](../adrs/0004-typescript-configuration-separation.md)
+- [ADR-005: ESLint Configuration Abstraction](../adrs/0005-eslint-configuration-abstraction.md)
