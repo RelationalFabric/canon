@@ -1,8 +1,8 @@
 /**
- * Error Handling and Edge Cases Usage Examples
- *
- * This file demonstrates how to handle errors and edge cases gracefully
- * when working with Canon's universal type system.
+ * @document.title Error Handling and Edge Cases
+ * @document.description Gracefully handling errors, edge cases, and validation in Canon applications
+ * @document.keywords error-handling, validation, edge-cases, safe-functions, robustness
+ * @document.difficulty intermediate
  */
 
 import {

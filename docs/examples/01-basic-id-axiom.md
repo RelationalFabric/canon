@@ -1,49 +1,26 @@
-# 01 Basic Id Axiom
+# Basic Id Axiom Usage
 
-Example: Basic Id Axiom Usage
+Learn how Canon enables universal code that works across different data formats using the Id axiom
 
-## Key Concepts
+Canon enables you to write universal code that works across different data formats. The same `idOf()` function extracts IDs regardless of whether your data uses `id`, `@id`, `_id`, or any other field name.
 
-- Define canons for each data format you work with (internal, JSON-LD, etc.)
-- Use universal functions like idOf() that work across all formats
-- Write your business logic once - it works with any registered canon
-- Add new formats anytime without changing existing code
-- Use Canon's utility functions (pojoHasString, isPojo) for clean type guards
+In this example, we'll explore how to define canons for different data formats, use universal axiom functions, and write format-agnostic business logic.
 
-**Pattern:** Single-file example
-
-**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/01-basic-id-axiom.ts)
-
-## Test Status
-
-✅ Tests: 3/3 passed
-
-## Files
-
-- `01-basic-id-axiom.ts`
-
-## File: `01-basic-id-axiom.ts`
-
-```typescript
-/**
- * Example: Basic Id Axiom Usage
- *
- * This example demonstrates how Canon enables you to write universal code
- * that works across different data formats. The same `idOf()` function
- * extracts IDs regardless of whether your data uses 'id' or '@id' fields.
- */
-
-import type { Canon } from '@relational-fabric/canon'
+```ts
+import type { Canon, Satisfies } from '@relational-fabric/canon'
 import { declareCanon, idOf, pojoWithOfType } from '@relational-fabric/canon'
+```
 
-// =============================================================================
-// STEP 1: Define Your Internal Data Format
-// =============================================================================
+## Defining Your Internal Data Format
 
-/**
- * Most applications have their own internal data format. Here we define
- * a canon for data that uses the standard 'id' field.
- */
+Most applications have their own internal data format. Here we'll define a canon for data that uses the standard `id` field.
+
+A canon definition has two parts:
+
+1. **Type-level** - Tells TypeScript about the structure
+2. **Runtime** - Tells Canon how to actually find and extract values
+
+```ts
 type InternalCanon = Canon<{
   Id: {
     $basis: { id: string }
@@ -52,14 +29,12 @@ type InternalCanon = Canon<{
   }
 }>
 
-// Register the type globally so TypeScript knows about it
 declare module '@relational-fabric/canon' {
   interface Canons {
     Internal: InternalCanon
   }
 }
 
-// Register the runtime behavior - how to actually find and extract IDs
 declareCanon('Internal', {
   axioms: {
     Id: {
@@ -69,35 +44,33 @@ declareCanon('Internal', {
     },
   },
 })
+```
 
-/**
- * Now we can use idOf() with our internal data format.
- * The function automatically knows to look for the 'id' field.
- */
+Now we can use `idOf()` with our internal data format. The function automatically knows to look for the `id` field.
+
+```ts
 const user = {
   id: 'user-123',
   name: 'John Doe',
   email: 'john@example.com',
 }
 
-const userId = idOf(user) // Returns: "user-123"
+const userId = idOf(user)
+```
 
-// Let's verify this works as expected
-if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-  it('extracts ID from internal format using standard "id" field', () => {
-    expect(userId).toBe('user-123')
-  })
-}
+**The userId variable contains "user-123".:**
 
-// =============================================================================
-// STEP 2: Add Support for External Data (JSON-LD)
-// =============================================================================
+```ts
+expect(userId).toBe('user-123')
+```
 
-/**
- * Often you'll receive data from external APIs that use different conventions.
- * JSON-LD, for example, uses '@id' instead of 'id'. Let's add support for it.
- */
+_Status:_ ✅ pass
+
+## Supporting External Data Formats
+
+Often you'll receive data from external APIs that use different conventions. JSON-LD, for example, uses `@id` instead of `id`. Let's add support for it.
+
+```ts
 type JsonLdCanon = Canon<{
   Id: {
     $basis: { '@id': string }
@@ -115,19 +88,17 @@ declare module '@relational-fabric/canon' {
 declareCanon('JsonLd', {
   axioms: {
     Id: {
-      // Clean type guard for JSON-LD '@id' field
       $basis: pojoWithOfType('@id', 'string'),
       key: '@id',
       $meta: { type: 'uri', format: 'iri' },
     },
   },
 })
+```
 
-/**
- * The magic: the SAME idOf() function now works with JSON-LD data too!
- * Canon automatically detects which format you're using and extracts
- * the ID from the correct field.
- */
+The magic: the **SAME** `idOf()` function now works with JSON-LD data too! Canon automatically detects which format you're using and extracts the ID from the correct field.
+
+```ts
 const jsonLdPerson = {
   '@id': 'https://example.com/users/jane-456',
   '@type': 'Person',
@@ -135,26 +106,23 @@ const jsonLdPerson = {
   'email': 'jane@example.com',
 }
 
-const personId = idOf(jsonLdPerson) // Returns: "https://example.com/users/jane-456"
+const personId = idOf(jsonLdPerson)
+```
 
-if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-  it('extracts ID from JSON-LD format using "@id" field', () => {
-    expect(personId).toBe('https://example.com/users/jane-456')
-  })
-}
+**The personId variable contains the full IRI.:**
 
-// =============================================================================
-// STEP 3: Write Universal Code
-// =============================================================================
+```ts
+expect(personId).toBe('https://example.com/users/jane-456')
+```
 
-/**
- * The real power: write functions that work with ANY format.
- * You don't need to check which format the data is in or write
- * conditional logic. Canon handles it for you.
- */
+_Status:_ ✅ pass
 
-function displayEntity(entity: any): string {
+## Writing Universal Code
+
+The real power: write functions that work with **any** format. You don't need to check which format the data is in or write conditional logic. Canon handles it for you.
+
+```ts
+function displayEntity<T extends Satisfies<'Id'>>(entity: T): string {
   const id = idOf(entity)
   return `Entity with ID: ${id}`
 }
@@ -162,7 +130,6 @@ function displayEntity(entity: any): string {
 // Works with internal format
 const internalProduct = { id: 'product-789', name: 'Widget' }
 const internalDisplay = displayEntity(internalProduct)
-// Returns: "Entity with ID: product-789"
 
 // Works with JSON-LD format
 const jsonLdProduct = {
@@ -171,23 +138,39 @@ const jsonLdProduct = {
   'name': 'Gadget',
 }
 const jsonLdDisplay = displayEntity(jsonLdProduct)
-// Returns: "Entity with ID: https://example.com/products/gadget-999"
-
-if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-  it('writes universal functions that work across both formats', () => {
-    expect(internalDisplay).toBe('Entity with ID: product-789')
-    expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
-  })
-}
-
-/**
- * Key Takeaways:
- *
- * 1. Define canons for each data format you work with (internal, JSON-LD, etc.)
- * 2. Use universal functions like idOf() that work across all formats
- * 3. Write your business logic once - it works with any registered canon
- * 4. Add new formats anytime without changing existing code
- * 5. Use Canon's utility functions (pojoHasString, isPojo) for clean type guards
- */
 ```
+
+**The function returns "Entity with ID: product-789" for the internal format.:**
+
+```ts
+expect(internalDisplay).toBe('Entity with ID: product-789')
+```
+
+_Status:_ ✅ pass
+
+**The same function returns the full IRI for the JSON-LD format.:**
+
+```ts
+expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
+```
+
+_Status:_ ✅ pass
+
+## Key Takeaways
+
+- **Define canons** for each data format you work with (internal, JSON-LD, MongoDB, etc.)
+- **Use universal functions** like `idOf()` that work across all formats
+- **Write business logic once** - it works with any registered canon
+- **Add new formats anytime** without changing existing code
+- Canon provides **type safety** throughout the entire system
+
+---
+
+## References
+
+**Source:** `/Users/bahulneel/Projects/RelationalFabric/canon/examples/01-basic-id-axiom.ts`
+
+## Metadata
+
+**Keywords:** axiom, canon, id, json-ld, universal functions
+**Difficulty:** introductory
