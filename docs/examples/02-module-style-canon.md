@@ -90,7 +90,7 @@ Now that we have a reusable canon module, let's see how a consumer application w
 
 ```ts
 import { declareCanon, idOf } from '@relational-fabric/canon'
-import { mongoDbCanon, type MongoDbCanon } from './mongodb-canon.js'
+import { mongoDbCanon } from './mongodb-canon.js'
 
 declare module '@relational-fabric/canon' {
 interface Canons {
