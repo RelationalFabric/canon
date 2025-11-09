@@ -4,9 +4,9 @@ This directory contains practical examples demonstrating how to use the @relatio
 
 ## Available Examples
 
-### [Example: Basic Id Axiom Usage](./01-basic-id-axiom.md)
+### [Basic ID Axiom Example](./01-basic-id-axiom.md)
 
-Example: Basic Id Axiom Usage
+Basic ID Axiom Example
 
 **Pattern:** Single-file example
 
