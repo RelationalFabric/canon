@@ -27,17 +27,7 @@ export default {
             { text: 'Axioms', link: '/docs/axioms' },
             {
               text: 'Examples',
-              items: [
-                { text: 'Deduplicating Entities', link: '/docs/examples/deduplicating-entities' },
-                {
-                  text: 'Tree Walk Over Mixed Entities',
-                  link: '/docs/examples/tree-walk-over-mixed-entities',
-                },
-                {
-                  text: 'User Authentication Tokens',
-                  link: '/docs/examples/user-authentication-tokens',
-                },
-              ],
+              link: '/docs/examples',
             },
             { text: 'Radar Methodology', link: '/docs/radar-methodology' },
           ],
