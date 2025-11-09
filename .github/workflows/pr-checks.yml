@@ -55,7 +55,7 @@ jobs:
         if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -118,7 +118,7 @@ jobs:
         if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -162,7 +162,7 @@ jobs:
         if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -202,7 +202,7 @@ jobs:
         if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
