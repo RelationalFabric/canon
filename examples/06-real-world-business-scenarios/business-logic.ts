@@ -111,8 +111,7 @@ export function updateOrderStatus(
       oldStatus,
       newVersion,
     }
-  }
-  catch (error) {
+  } catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -200,8 +199,7 @@ export function validateCustomerForOrder(customer: unknown): {
     const profile = customerObj.profile as Record<string, unknown> | undefined
     if (!profile) {
       errors.push('Customer profile is missing')
-    }
-    else {
+    } else {
       if (!profile.email) {
         errors.push('Customer email is missing')
       }
@@ -215,8 +213,7 @@ export function validateCustomerForOrder(customer: unknown): {
       warnings,
       errors,
     }
-  }
-  catch (error) {
+  } catch (error) {
     return {
       valid: false,
       warnings,
@@ -296,8 +293,7 @@ export function processOrderWorkflow(
       steps,
       finalOrder: order,
     }
-  }
-  catch (error) {
+  } catch (error) {
     steps.push({
       step: 'Error Handling',
       success: false,

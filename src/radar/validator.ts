@@ -38,8 +38,7 @@ export function validateRadarData(data: any): ValidationResult {
       message: 'Missing metadata section',
       path: 'metadata',
     })
-  }
-  else {
+  } else {
     validateMetadata(data.metadata, errors)
   }
 
@@ -50,8 +49,7 @@ export function validateRadarData(data: any): ValidationResult {
       message: 'Missing entries section',
       path: 'entries',
     })
-  }
-  else {
+  } else {
     validateEntries(data.entries, errors, warnings)
   }
 
@@ -110,15 +108,13 @@ function _validateQuadrants(quadrants: any[], errors: ValidationError[]): void {
         message: `Missing or invalid id in quadrant ${index}`,
         path: `quadrants[${index}].id`,
       })
-    }
-    else if (quadrantIds.has(quadrant.id)) {
+    } else if (quadrantIds.has(quadrant.id)) {
       errors.push({
         type: 'duplicate_entry',
         message: `Duplicate quadrant id: ${quadrant.id}`,
         path: `quadrants[${index}].id`,
       })
-    }
-    else {
+    } else {
       quadrantIds.add(quadrant.id)
     }
 
@@ -153,15 +149,13 @@ function _validateRings(rings: any[], errors: ValidationError[]): void {
         message: `Missing or invalid id in ring ${index}`,
         path: `rings[${index}].id`,
       })
-    }
-    else if (ringIds.has(ring.id)) {
+    } else if (ringIds.has(ring.id)) {
       errors.push({
         type: 'duplicate_entry',
         message: `Duplicate ring id: ${ring.id}`,
         path: `rings[${index}].id`,
       })
-    }
-    else {
+    } else {
       ringIds.add(ring.id)
     }
 
@@ -238,8 +232,7 @@ function validateEntries(entries: any, errors: ValidationError[], warnings: stri
             message: `Duplicate entry name: ${item.name}`,
             path: `entries.${quadrantKey}.${ringKey}[${index}].name`,
           })
-        }
-        else if (item.name) {
+        } else if (item.name) {
           entryNames.add(item.name)
         }
       })
@@ -301,8 +294,7 @@ export async function validateRadarFile(filePath: string): Promise<ValidationRes
     const data = yaml.parse(yamlContent) as RadarData
 
     return validateRadarData(data)
-  }
-  catch (error) {
+  } catch (error) {
     return {
       isValid: false,
       errors: [

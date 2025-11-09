@@ -123,8 +123,7 @@ export function priorityOf(x: unknown): { level: number, label: string } {
   let priorityValue: unknown
   if ('key' in config && typeof config.key === 'string') {
     priorityValue = (x as Record<string, unknown>)[config.key]
-  }
-  else {
+  } else {
     priorityValue = x
   }
 

@@ -50,8 +50,7 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
       ...(entity as Record<string, unknown>),
       createdBy: references.ref,
     }
-  }
-  catch {
+  } catch {
     // Fallback for entities that don't match the canon
     const entityObj = entity as Record<string, unknown>
     return {
@@ -100,8 +99,7 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
       ...(entity as Record<string, unknown>),
       'createdBy': references.ref,
     }
-  }
-  catch {
+  } catch {
     // Fallback for entities that don't match the canon
     const entityObj = entity as Record<string, unknown>
     return {
@@ -169,14 +167,11 @@ export function processUsersFromDifferentSources(): void {
         const userObj = user as Record<string, unknown>
         if (userObj.updatedAt instanceof Date) {
           updated = userObj.updatedAt
-        }
-        else if (userObj.updated_at instanceof Date) {
+        } else if (userObj.updated_at instanceof Date) {
           updated = userObj.updated_at
-        }
-        else if (typeof userObj.updated_at === 'number') {
+        } else if (typeof userObj.updated_at === 'number') {
           updated = new Date(userObj.updated_at)
-        }
-        else if (typeof userObj.updated_at === 'string') {
+        } else if (typeof userObj.updated_at === 'string') {
           updated = new Date(userObj.updated_at)
         }
       }
@@ -187,8 +182,7 @@ export function processUsersFromDifferentSources(): void {
       console.log(`  Version: ${version}`)
       console.log(`  Updated: ${updated.toISOString()}`)
       console.log()
-    }
-    catch (error) {
+    } catch (error) {
       console.log(
         `User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
@@ -240,8 +234,7 @@ export function demonstrateErrorHandling(): void {
   try {
     // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
     idOf(invalidData)
-  }
-  catch (error) {
+  } catch (error) {
     console.log(
       `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
     )
@@ -253,8 +246,7 @@ export function demonstrateErrorHandling(): void {
   try {
     // @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
     typeOf(partialData)
-  }
-  catch (error) {
+  } catch (error) {
     console.log(
       `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
     )

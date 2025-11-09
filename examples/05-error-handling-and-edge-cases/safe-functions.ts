@@ -18,8 +18,7 @@ import { idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational
 export function safeIdOf(entity: unknown): string | undefined {
   try {
     return idOf(entity as Satisfies<'Id'>)
-  }
-  catch (error) {
+  } catch (error) {
     console.warn('Failed to extract ID:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }
@@ -31,8 +30,7 @@ export function safeIdOf(entity: unknown): string | undefined {
 export function safeTypeOf(entity: unknown): string | undefined {
   try {
     return typeOf(entity as Satisfies<'Type'>)
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       'Failed to extract type:',
       error instanceof Error ? error.message : 'Unknown error',
@@ -52,8 +50,7 @@ export function safeVersionOf(entity: unknown): number | undefined {
       return undefined
     }
     return version
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       'Failed to extract version:',
       error instanceof Error ? error.message : 'Unknown error',
@@ -68,8 +65,7 @@ export function safeVersionOf(entity: unknown): number | undefined {
 export function safeTimestampsOf(entity: unknown): Date | undefined {
   try {
     return timestampsOf(entity as Satisfies<'Timestamps'>)
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       'Failed to extract timestamps:',
       error instanceof Error ? error.message : 'Unknown error',
@@ -86,8 +82,7 @@ export function safeReferencesOf(
 ): { ref: string, resolved: boolean, value?: unknown } | undefined {
   try {
     return referencesOf(entity as Satisfies<'References'>)
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       'Failed to extract references:',
       error instanceof Error ? error.message : 'Unknown error',
@@ -122,8 +117,7 @@ export function safeTimestampConversion(value: unknown): Date | undefined {
     }
 
     throw new Error(`Unsupported timestamp type: ${typeof value}`)
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       'Failed to convert timestamp:',
       error instanceof Error ? error.message : 'Unknown error',
@@ -155,8 +149,7 @@ export function safeReferenceConversion(
     }
 
     throw new Error(`Expected string or object, got ${typeof value}`)
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       'Failed to convert reference:',
       error instanceof Error ? error.message : 'Unknown error',
