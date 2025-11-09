@@ -1,13 +1,14 @@
 #!/usr/bin/env tsx
 
 /**
- * Generate Examples Documentation
+ * Generate Examples Documentation (Tutorial-First, Single Doc per Example)
  *
- * This script generates documentation from the example files in the /examples directory.
- * It extracts metadata, descriptions, and creates links to the source files on GitHub.
- *
- * The generated documentation maintains the testability of examples while providing
- * comprehensive documentation that's always up-to-date with the source code.
+ * This script implements a tutorial-first documentation generator that:
+ * - Parses TypeScript examples using AST analysis
+ * - Extracts narrative prose from comments with Markdown support
+ * - Renders code in source order with tests integrated as narrative
+ * - Supports @include directives and header depth controls
+ * - Maps test results from Vitest JSON reports
  */
 
 import {
@@ -22,32 +23,50 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, dirname, extname, join } from 'node:path'
+import { basename, dirname, extname, join, resolve } from 'node:path'
+import ts from 'typescript'
+
+// =============================================================================
+// Type Definitions
+// =============================================================================
+
+interface DocumentMetadata {
+  title?: string
+  description?: string
+  keywords?: string[]
+  difficulty?: string
+}
 
 interface ExampleInfo {
   name: string
   path: string
-  description: string
-  keyConcepts: string[]
-  prerequisites?: string[]
-  githubUrl: string
+  entryFile: string
+  referencedFiles: string[]
   isDirectory: boolean
-  subExamples?: ExampleInfo[]
-  sourceFiles: string[]
+}
+
+interface TutorialSection {
+  type: 'prose' | 'code' | 'test' | 'jsdoc' | 'include'
+  content: string
+  heading?: string
+  headingLevel?: number
+  language?: string
+  testTitle?: string
   testStatus?: TestStatus
-  docFile: string
+  filePath?: string
+  jsDocInfo?: JSDocInfo
+}
+
+interface JSDocInfo {
+  description: string
+  params?: Array<{ name: string, type?: string, description: string }>
+  returns?: { type?: string, description: string }
+  throws?: string[]
 }
 
 interface TestStatus {
   status: 'passed' | 'failed' | 'unknown'
-  total: number
-  passed: number
-  failed: number
-  examples: Array<{
-    title: string
-    status: 'passed' | 'failed'
-    failureMessages: string[]
-  }>
+  message?: string
 }
 
 interface VitestAssertionResult {
@@ -66,116 +85,23 @@ interface VitestJsonReport {
   testResults: VitestFileResult[]
 }
 
-const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/examples'
-
-/**
- * Extract metadata from a TypeScript file
- */
-function extractMetadata(filePath: string): Partial<ExampleInfo> & { files?: string[] } {
-  const content = readFileSync(filePath, 'utf-8')
-
-  // Extract description from JSDoc comments (first comment block)
-  const descriptionMatch = content.match(
-    /\/\*\*[\t\v\f\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*\n\s*\*\s*([^*\n]+)/,
-  )
-  const description = descriptionMatch ? descriptionMatch[1].trim() : ''
-
-  // Extract key concepts from comments
-  const keyConceptsMatch = content.match(/Key Concepts?:[\s\S]*?(- [^\n]+)/g)
-  const keyConcepts: string[] = []
-  if (keyConceptsMatch) {
-    keyConceptsMatch.forEach((match) => {
-      const concepts = match.match(/- ([^\n]+)/g)
-      if (concepts) {
-        concepts.forEach((concept) => {
-          keyConcepts.push(concept.replace('- ', '').trim())
-        })
-      }
-    })
-  }
-
-  // Extract key takeaways as additional concepts (simplified regex)
-  const takeawaysSection = content.match(/Key Takeaways?:[\s\S]*?(?=\n\n|\n\*\*|$)/)
-  if (takeawaysSection) {
-    const takeaways = takeawaysSection[0].match(/\d+\.\s+([^\n]+)/g)
-    if (takeaways) {
-      takeaways.forEach((takeaway) => {
-        keyConcepts.push(takeaway.replace(/\d+\.\s+/, '').trim())
-      })
-    }
-  }
-
-  // Extract prerequisites
-  const prerequisitesMatch = content.match(/Prerequisites?:[\s\S]*?(- [^\n]+)/g)
-  const prerequisites: string[] = []
-  if (prerequisitesMatch) {
-    prerequisitesMatch.forEach((match) => {
-      const prereqs = match.match(/- ([^\n]+)/g)
-      if (prereqs) {
-        prereqs.forEach((prereq) => {
-          prerequisites.push(prereq.replace('- ', '').trim())
-        })
-      }
-    })
-  }
-
-  // Extract referenced files from @file comments
-  // Pattern 1: @file axioms/email.ts - In block comments
-  // Pattern 2: // @file axioms/email.ts - Description - Standalone
-  const filesMatch = content.match(/@file\s+(\S+)(?:\s+-\s+(.+))?/g)
-  const files: string[] = []
-  if (filesMatch) {
-    filesMatch.forEach((match) => {
-      const fileMatch = match.match(/@file\s+(\S+)/)
-      if (fileMatch) {
-        files.push(fileMatch[1])
-      }
-    })
-  }
-
-  return {
-    description,
-    keyConcepts,
-    prerequisites: prerequisites.length > 0 ? prerequisites : undefined,
-    files: files.length > 0 ? files : undefined,
-  }
+interface HeaderDepthState {
+  currentDepth: number
 }
 
-function formatTitle(slug: string): string {
-  return slug
-    .replace(/-/g, ' ')
-    .replace(/\.ts$/u, '')
-    .replace(/\b\w/gu, match => match.toUpperCase())
-}
-
-function determineCodeFenceLanguage(filePath: string): string {
-  const extension = extname(filePath).toLowerCase()
-  if (extension === '.ts') {
-    return 'typescript'
-  }
-  if (extension === '.js') {
-    return 'javascript'
-  }
-  if (extension === '.json') {
-    return 'json'
-  }
-  if (extension === '.md') {
-    return 'markdown'
-  }
-  return ''
-}
+// =============================================================================
+// Utilities
+// =============================================================================
 
 function normalizeRelativePath(pathValue: string): string {
   return pathValue.replace(/\\/g, '/')
 }
 
-function resolveExamplesFilePath(examplesDir: string, relativeFile: string): string {
-  const segments = relativeFile.split('/').filter(Boolean)
-  return join(examplesDir, ...segments)
-}
-
 function loadTestResults(reportPath: string): VitestJsonReport | null {
   try {
+    if (!existsSync(reportPath)) {
+      return null
+    }
     const raw = readFileSync(reportPath, 'utf-8')
     const data = JSON.parse(raw) as VitestJsonReport
     if (!Array.isArray(data.testResults)) {
@@ -188,521 +114,888 @@ function loadTestResults(reportPath: string): VitestJsonReport | null {
     return null
   }
 }
-function collectSourceFiles(baseDir: string, relativeDir: string): string[] {
-  const fullDirPath = join(baseDir, relativeDir)
-  if (!existsSync(fullDirPath)) {
-    return []
+
+function findTestStatus(
+  report: VitestJsonReport | null,
+  filePath: string,
+  testTitle: string,
+): TestStatus {
+  if (!report) {
+    return { status: 'unknown' }
   }
 
-  const stats = statSync(fullDirPath)
-  if (!stats.isDirectory()) {
-    return [normalizeRelativePath(relativeDir)]
-  }
+  const normalizedPath = normalizeRelativePath(filePath)
 
-  const entries = readdirSync(fullDirPath).sort()
-  const collected: string[] = []
-
-  entries.forEach((entry) => {
-    const fsRelativePath = join(relativeDir, entry)
-    const normalizedRelativePath = normalizeRelativePath(fsRelativePath)
-    const entryFullPath = join(baseDir, fsRelativePath)
-    const entryStats = statSync(entryFullPath)
-
-    if (entryStats.isDirectory()) {
-      collected.push(...collectSourceFiles(baseDir, normalizedRelativePath))
-      return
-    }
-
-    if (entryStats.isFile() && entry.endsWith('.ts')) {
-      collected.push(normalizedRelativePath)
-    }
+  // Find matching file in test results
+  const fileResult = report.testResults.find((result) => {
+    const resultPath = normalizeRelativePath(result.name)
+    return resultPath.includes(normalizedPath) || normalizedPath.includes(resultPath)
   })
 
-  return collected
-}
+  if (!fileResult) {
+    return { status: 'unknown' }
+  }
 
-function aggregateTestStatus(assertions: VitestAssertionResult[]): TestStatus {
-  const relevantAssertions = assertions.filter(assertion =>
-    assertion.status === 'passed' || assertion.status === 'failed',
+  // Find matching test by title
+  const assertion = fileResult.assertionResults.find(
+    a => a.title === testTitle || a.title.includes(testTitle),
   )
 
-  if (relevantAssertions.length === 0) {
+  if (!assertion) {
+    return { status: 'unknown' }
+  }
+
+  if (assertion.status === 'failed') {
     return {
-      status: 'unknown',
-      total: 0,
-      passed: 0,
-      failed: 0,
-      examples: [],
+      status: 'failed',
+      message: assertion.failureMessages.join('\n'),
     }
   }
 
-  const failedAssertions = relevantAssertions.filter(assertion => assertion.status === 'failed')
-  const passedAssertions = relevantAssertions.length - failedAssertions.length
-
-  return {
-    status: failedAssertions.length > 0 ? 'failed' : 'passed',
-    total: relevantAssertions.length,
-    passed: passedAssertions,
-    failed: failedAssertions.length,
-    examples: relevantAssertions.map(assertion => ({
-      title: assertion.title,
-      status: assertion.status === 'failed' ? 'failed' : 'passed',
-      failureMessages: assertion.failureMessages,
-    })),
-  }
+  return { status: assertion.status === 'passed' ? 'passed' : 'unknown' }
 }
 
-function augmentExampleWithTestResults(example: ExampleInfo, report: VitestJsonReport): ExampleInfo {
-  const cwdPrefix = `${process.cwd()}/`
-  const matchingResults = report.testResults.filter((result) => {
-    const normalizedName = normalizeRelativePath(result.name.replace(cwdPrefix, ''))
-    const possibleMatches = new Set<string>([normalizedName])
-    if (normalizedName.startsWith('examples/')) {
-      possibleMatches.add(normalizedName.slice('examples/'.length))
-    }
-    return Array.from(possibleMatches).some((candidate) => {
-      if (candidate === example.path) {
+// =============================================================================
+// Example Discovery
+// =============================================================================
+
+function discoverExamples(examplesDir: string): ExampleInfo[] {
+  const entries = readdirSync(examplesDir)
+    .filter((entry) => {
+      const fullPath = join(examplesDir, entry)
+      const stat = statSync(fullPath)
+
+      // Single-file .ts examples
+      if (stat.isFile() && entry.endsWith('.ts') && !entry.includes('README') && !entry.includes('CONTRIBUTING')) {
         return true
       }
-      return example.sourceFiles.includes(candidate)
+
+      // Folder examples with index.ts or usage.ts
+      if (stat.isDirectory()) {
+        const indexPath = join(fullPath, 'index.ts')
+        const usagePath = join(fullPath, 'usage.ts')
+        return existsSync(indexPath) || existsSync(usagePath)
+      }
+
+      return false
     })
+    .sort()
+
+  return entries.map((entry) => {
+    const fullPath = join(examplesDir, entry)
+    const stat = statSync(fullPath)
+    const name = basename(entry, extname(entry))
+
+    if (stat.isFile()) {
+      // Single-file example
+      return {
+        name,
+        path: normalizeRelativePath(entry),
+        entryFile: normalizeRelativePath(entry),
+        referencedFiles: [],
+        isDirectory: false,
+      }
+    }
+    else {
+      // Folder example
+      const indexPath = join(fullPath, 'index.ts')
+      const entryFileName = existsSync(indexPath) ? 'index.ts' : 'usage.ts'
+      const entryFile = normalizeRelativePath(join(entry, entryFileName))
+
+      return {
+        name,
+        path: normalizeRelativePath(entry),
+        entryFile,
+        referencedFiles: [],
+        isDirectory: true,
+      }
+    }
   })
+}
 
-  if (matchingResults.length === 0) {
-    return {
-      ...example,
-      testStatus: { status: 'unknown', total: 0, passed: 0, failed: 0, examples: [] },
+// =============================================================================
+// AST Parser
+// =============================================================================
+
+interface ParsedElement {
+  type: 'comment' | 'code' | 'test-block'
+  content: string
+  start: number
+  end: number
+  isBlockComment?: boolean
+  isJSDoc?: boolean
+  node?: ts.Node
+}
+
+class ExampleParser {
+  private sourceFile: ts.SourceFile
+  private sourceText: string
+  private exampleRoot: string
+  private depthState: HeaderDepthState
+  private referencedFiles: Set<string>
+
+  constructor(
+    filePath: string,
+    exampleRoot: string,
+  ) {
+    this.sourceText = readFileSync(filePath, 'utf-8')
+    this.sourceFile = ts.createSourceFile(
+      filePath,
+      this.sourceText,
+      ts.ScriptTarget.Latest,
+      true,
+    )
+    this.exampleRoot = exampleRoot
+    this.depthState = { currentDepth: 1 }
+    this.referencedFiles = new Set()
+  }
+
+  /**
+   * Extract document metadata from the file-level JSDoc comment
+   */
+  extractMetadata(): DocumentMetadata {
+    const metadata: DocumentMetadata = {}
+
+    const fullText = this.sourceFile.getFullText()
+    const commentRanges = ts.getLeadingCommentRanges(fullText, 0)
+
+    if (!commentRanges || commentRanges.length === 0) {
+      return metadata
     }
-  }
 
-  const assertionResults = matchingResults.flatMap(result => result.assertionResults)
-  const testStatus = aggregateTestStatus(assertionResults)
-  return { ...example, testStatus }
-}
+    const firstComment = commentRanges[0]
+    const commentText = fullText.substring(firstComment.pos, firstComment.end)
 
-function formatTestStatus(testStatus: TestStatus | undefined): string | null {
-  if (!testStatus) {
-    return null
-  }
+    // Parse @document.* tags
+    const titleMatch = commentText.match(/@document\.title\s+(.+)/i)
+    const descMatch = commentText.match(/@document\.description\s+(.+)/i)
+    const keywordsMatch = commentText.match(/@document\.keywords\s+(.+)/i)
+    const difficultyMatch = commentText.match(/@document\.difficulty\s+(.+)/i)
 
-  const { status, total, passed, failed } = testStatus
-
-  if (status === 'unknown' || total === 0) {
-    return '⚠️ Tests: status unknown (run `npm run check:test:json` to update)'
-  }
-
-  if (status === 'passed') {
-    return `✅ Tests: ${passed}/${total} passed`
-  }
-
-  return `❌ Tests: ${passed}/${total} passed (${failed} failing)`
-}
-
-function formatTestStatusSummary(testStatus: TestStatus | undefined): string | null {
-  if (!testStatus) {
-    return null
-  }
-
-  const { status, total, passed, failed } = testStatus
-
-  if (status === 'unknown' || total === 0) {
-    return '_Tests:_ ⚠️ status unknown (run `npm run check:test:json` to update)'
-  }
-
-  if (status === 'passed') {
-    return `_Tests:_ ✅ ${passed}/${total} passed`
-  }
-
-  return `_Tests:_ ❌ ${passed}/${total} passed (${failed} failing)`
-}
-
-function formatFailureMessage(message: string): string {
-  const normalized = message.trim()
-  if (normalized.length === 0) {
-    return '(no failure message provided)'
-  }
-  return normalized.replace(/\r?\n/g, '\n    ')
-}
-
-/**
- * Process a single example file or directory
- */
-function processExample(examplePath: string, relativePath: string, baseDir: string): ExampleInfo {
-  const fullPath = join(baseDir, examplePath)
-  const stat = statSync(fullPath)
-  const isDirectory = stat.isDirectory()
-
-  const name = basename(examplePath, extname(examplePath))
-  const normalizedRelativePath = normalizeRelativePath(relativePath)
-  const githubUrl = `${GITHUB_BASE_URL}/${normalizedRelativePath}`
-  const docFile = `${name}.md`
-
-  const exampleInfo: ExampleInfo = {
-    name,
-    path: normalizedRelativePath,
-    description: '',
-    keyConcepts: [],
-    githubUrl,
-    isDirectory,
-    sourceFiles: [],
-    docFile,
-  }
-
-  if (isDirectory) {
-    // Process directory - look for index.ts, usage.ts, or README.md as entry point
-    const indexPath = join(fullPath, 'index.ts')
-    const usagePath = join(fullPath, 'usage.ts')
-    const readmePath = join(fullPath, 'README.md')
-
-    // Try to get metadata from index.ts first, then usage.ts, then README.md
-    let metadata: Partial<ExampleInfo> & { files?: string[] } = {}
-    let entryFileRelative: string | undefined
-
-    if (existsSync(indexPath) && statSync(indexPath).isFile()) {
-      metadata = extractMetadata(indexPath)
-      entryFileRelative = normalizeRelativePath(join(normalizedRelativePath, 'index.ts'))
+    if (titleMatch) {
+      metadata.title = titleMatch[1].trim()
     }
-    else if (existsSync(usagePath) && statSync(usagePath).isFile()) {
-      metadata = extractMetadata(usagePath)
-      entryFileRelative = normalizeRelativePath(join(normalizedRelativePath, 'usage.ts'))
+    if (descMatch) {
+      metadata.description = descMatch[1].trim()
     }
-    else if (existsSync(readmePath) && statSync(readmePath).isFile()) {
-      const readmeContent = readFileSync(readmePath, 'utf-8')
-      const descriptionMatch = readmeContent.match(/^#\s+([^\n]+)/)
-      if (descriptionMatch) {
-        metadata.description = descriptionMatch[1].trim()
+    if (keywordsMatch) {
+      metadata.keywords = keywordsMatch[1].split(',').map(k => k.trim())
+    }
+    if (difficultyMatch) {
+      metadata.difficulty = difficultyMatch[1].trim()
+    }
+
+    // Fallback: extract title from first JSDoc line
+    if (!metadata.title) {
+      const lines = commentText.split('\n')
+      if (lines.length > 1) {
+        const firstLine = lines[1].replace(/^\s*\*\s?/, '').trim()
+        if (firstLine) {
+          metadata.title = firstLine
+        }
       }
     }
 
-    exampleInfo.description = metadata.description || ''
-    exampleInfo.keyConcepts = metadata.keyConcepts || []
-    exampleInfo.prerequisites = metadata.prerequisites
-
-    // Process referenced files from @file comments
-    if (metadata.files && metadata.files.length > 0) {
-      const subFiles = metadata.files
-        .map((file) => {
-          const nestedExamplePath = join(examplePath, file)
-          const nestedRelativePath = normalizeRelativePath(join(normalizedRelativePath, file))
-          const nestedFullPath = join(baseDir, nestedExamplePath)
-          if (existsSync(nestedFullPath) && statSync(nestedFullPath).isFile()) {
-            return processExample(nestedExamplePath, nestedRelativePath, baseDir)
-          }
-          return null
-        })
-        .filter((f): f is ExampleInfo => f !== null)
-
-      if (subFiles.length > 0) {
-        exampleInfo.subExamples = subFiles
+    // Fallback: use second line as description if no @document.description
+    if (!metadata.description) {
+      const lines = commentText.split('\n').map(l => l.replace(/^\s*\*\s?/, '').trim()).filter(Boolean)
+      if (lines.length > 1) {
+        metadata.description = lines[1]
       }
     }
 
-    const referencedFiles = metadata.files?.map(file =>
-      normalizeRelativePath(join(normalizedRelativePath, file)),
-    ) ?? []
-    const discoveredFiles = referencedFiles.length > 0
-      ? referencedFiles
-      : collectSourceFiles(baseDir, normalizedRelativePath)
-
-    const sourceFiles = new Set<string>(discoveredFiles)
-    if (entryFileRelative) {
-      sourceFiles.add(entryFileRelative)
-    }
-
-    exampleInfo.sourceFiles = Array.from(sourceFiles).sort()
-  }
-  else {
-    // Process single file
-    const metadata = extractMetadata(fullPath)
-    exampleInfo.description = metadata.description || ''
-    exampleInfo.keyConcepts = metadata.keyConcepts || []
-    exampleInfo.prerequisites = metadata.prerequisites
-    exampleInfo.sourceFiles = [normalizedRelativePath]
+    return metadata
   }
 
-  return exampleInfo
-}
-
-function generateExamplePage(example: ExampleInfo, examplesDir: string): string {
-  const lines: string[] = []
-  lines.push(`# ${formatTitle(example.name)}`)
-  lines.push('')
-
-  if (example.description) {
-    lines.push(example.description)
-    lines.push('')
+  /**
+   * Parse the entire file and extract tutorial sections in source order
+   */
+  parse(): TutorialSection[] {
+    const elements = this.extractElements()
+    return this.buildSections(elements)
   }
 
-  if (example.keyConcepts.length > 0) {
-    lines.push('## Key Concepts')
-    lines.push('')
-    example.keyConcepts.forEach((concept) => {
-      lines.push(`- ${concept}`)
-    })
-    lines.push('')
+  getReferencedFiles(): string[] {
+    return Array.from(this.referencedFiles)
   }
 
-  if (example.prerequisites && example.prerequisites.length > 0) {
-    lines.push('## Prerequisites')
-    lines.push('')
-    example.prerequisites.forEach((prerequisite) => {
-      lines.push(`- ${prerequisite}`)
-    })
-    lines.push('')
-  }
+  /**
+   * Extract all elements (comments, code, tests) in source order
+   */
+  private extractElements(): ParsedElement[] {
+    const elements: ParsedElement[] = []
+    const fullText = this.sourceFile.getFullText()
+    let lastPos = 0
+    let isFirstStatement = true
 
-  lines.push(`**Pattern:** ${example.isDirectory ? 'Multi-file example with modular structure' : 'Single-file example'}`)
-  lines.push('')
-  lines.push(`**Source:** [View on GitHub](${example.githubUrl})`)
-  lines.push('')
+    // Walk through all statements in source order
+    const statements = this.sourceFile.statements
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i]
 
-  if (example.subExamples && example.subExamples.length > 0) {
-    lines.push('## Supporting Files')
-    lines.push('')
-    example.subExamples.forEach((subExample) => {
-      const details = subExample.description ? ` - ${subExample.description}` : ''
-      lines.push(`- [\`${subExample.path}\`](${subExample.githubUrl})${details}`)
-    })
-    lines.push('')
-  }
+      // Skip test blocks - handle them specially
+      if (this.isVitestTestBlock(statement)) {
+        const testElement: ParsedElement = {
+          type: 'test-block',
+          content: statement.getText(this.sourceFile),
+          start: statement.getStart(this.sourceFile),
+          end: statement.getEnd(),
+          node: statement,
+        }
+        elements.push(testElement)
+        lastPos = statement.getEnd()
+        continue
+      }
 
-  const formattedTestStatus = formatTestStatus(example.testStatus)
-  if (formattedTestStatus) {
-    lines.push('## Test Status')
-    lines.push('')
-    lines.push(formattedTestStatus)
-    lines.push('')
+      // Get leading comments
+      const commentRanges = ts.getLeadingCommentRanges(fullText, statement.getFullStart())
+      if (commentRanges) {
+        for (const range of commentRanges) {
+          if (range.pos >= lastPos) {
+            const text = fullText.substring(range.pos, range.end)
+            const isBlockComment = text.startsWith('/*')
+            const isJSDoc = text.startsWith('/**')
 
-    if (example.testStatus && example.testStatus.status === 'failed') {
-      lines.push('### Failing Assertions')
-      lines.push('')
-      example.testStatus.examples
-        .filter(assertion => assertion.status === 'failed')
-        .forEach((assertion) => {
-          lines.push(`- **${assertion.title}**`)
-          if (assertion.failureMessages.length === 0) {
-            lines.push('  - (no failure message provided)')
-          }
-          else {
-            assertion.failureMessages.forEach((message) => {
-              const formattedMessage = formatFailureMessage(message)
-              lines.push(`  - ${formattedMessage}`)
+            // Skip the first file-level JSDoc comment (it's for metadata)
+            if (isFirstStatement && isJSDoc) {
+              isFirstStatement = false
+              lastPos = range.end
+              continue
+            }
+
+            elements.push({
+              type: 'comment',
+              content: text,
+              start: range.pos,
+              end: range.end,
+              isBlockComment,
+              isJSDoc,
             })
+            lastPos = range.end
           }
-        })
-      lines.push('')
-    }
-  }
-
-  if (example.sourceFiles.length > 0) {
-    lines.push('## Files')
-    lines.push('')
-    example.sourceFiles.forEach((file) => {
-      lines.push(`- \`${file}\``)
-    })
-    lines.push('')
-  }
-
-  example.sourceFiles.forEach((relativeFile) => {
-    const absolutePath = resolveExamplesFilePath(examplesDir, relativeFile)
-    if (!existsSync(absolutePath)) {
-      return
-    }
-
-    const code = readFileSync(absolutePath, 'utf-8').trimEnd()
-    const language = determineCodeFenceLanguage(relativeFile)
-
-    lines.push(`## File: \`${relativeFile}\``)
-    lines.push('')
-    lines.push(`\`\`\`${language}`)
-    lines.push(code)
-    lines.push('```')
-  })
-
-  while (lines.length > 0 && lines[lines.length - 1] === '') {
-    lines.pop()
-  }
-
-  const content = lines.join('\n').replace(/\n{3,}/g, '\n\n')
-  return `${content.trimEnd()}\n`
-}
-
-function writeExampleDocumentation(example: ExampleInfo, examplesDir: string, outputRoot: string) {
-  const docPath = join(outputRoot, example.docFile)
-  const pageContent = generateExamplePage(example, examplesDir)
-  writeFileSync(docPath, pageContent)
-}
-
-/**
- * Generate the main examples documentation
- */
-function generateExamplesDocumentation(examples: ExampleInfo[]): string {
-  const header = `# Examples
-
-This directory contains practical examples demonstrating how to use the @relational-fabric/canon package and its configurations.
-
-## Available Examples
-
-`
-
-  const examplesContent = examples
-    .map((example) => {
-      const docLink = `./${example.docFile}`
-      let content = `### [${example.name}](${docLink})\n`
-
-      if (example.description) {
-        content += `${example.description}\n\n`
-      }
-
-      if (example.keyConcepts.length > 0) {
-        content += '**Key Concepts:**\n'
-        example.keyConcepts.forEach((concept) => {
-          content += `- ${concept}\n`
-        })
-        content += '\n'
-      }
-
-      if (example.prerequisites && example.prerequisites.length > 0) {
-        content += '**Prerequisites:**\n'
-        example.prerequisites.forEach((prereq) => {
-          content += `- ${prereq}\n`
-        })
-        content += '\n'
-      }
-
-      content += `**Pattern:** ${example.isDirectory ? 'Multi-file example with modular structure' : 'Single-file example'}\n\n`
-      content += `**Source:** [View on GitHub](${example.githubUrl})\n\n`
-
-      const testStatusSummary = formatTestStatusSummary(example.testStatus)
-      if (testStatusSummary) {
-        content += `${testStatusSummary}\n\n`
-        if (example.testStatus && example.testStatus.status === 'failed') {
-          content += '**Failing Assertions:**\n'
-          example.testStatus.examples
-            .filter(assertion => assertion.status === 'failed')
-            .forEach((assertion) => {
-              content += `- ${assertion.title}\n`
-            })
-          content += '\n'
         }
       }
 
-      if (example.subExamples && example.subExamples.length > 0) {
-        content += '**Supporting Files:**\n'
-        example.subExamples.forEach((subExample) => {
-          content += `- [\`${subExample.path}\`](${subExample.githubUrl})`
-          if (subExample.description) {
-            content += ` - ${subExample.description}`
+      isFirstStatement = false
+
+      // Add the statement itself as code
+      const codeElement: ParsedElement = {
+        type: 'code',
+        content: statement.getText(this.sourceFile),
+        start: statement.getStart(this.sourceFile),
+        end: statement.getEnd(),
+        node: statement,
+      }
+      elements.push(codeElement)
+      lastPos = statement.getEnd()
+    }
+
+    return elements
+  }
+
+  /**
+   * Build tutorial sections from parsed elements
+   */
+  private buildSections(elements: ParsedElement[]): TutorialSection[] {
+    const sections: TutorialSection[] = []
+    let i = 0
+
+    while (i < elements.length) {
+      const element = elements[i]
+
+      if (element.type === 'comment') {
+        // Check for @include directive
+        if (element.content.includes('@include')) {
+          this.processIncludeDirective(element.content, sections)
+          i++
+          continue
+        }
+
+        // Check for header control directives
+        if (element.content.includes('// #+') || element.content.includes('// #-') || element.content.includes('// #!')) {
+          this.processHeaderControl(element.content)
+          i++
+          continue
+        }
+
+        // Skip section divider comments (lines of =, -, etc.)
+        if (/^\/\/\s*[=\-]{5,}/.test(element.content)) {
+          i++
+          continue
+        }
+
+        // Skip single-line comments entirely (they stay with code)
+        if (element.content.startsWith('//')) {
+          i++
+          continue
+        }
+
+        // Check if this is JSDoc for a declaration (next element is code)
+        const nextElement = elements[i + 1]
+        if (element.isJSDoc && nextElement && nextElement.type === 'code') {
+          const jsDocInfo = this.parseJSDoc(element.content)
+          if (jsDocInfo) {
+            // Add JSDoc section
+            sections.push({
+              type: 'jsdoc',
+              content: jsDocInfo.description,
+              jsDocInfo,
+            })
+            i++
+            continue
           }
-          content += '\n'
+        }
+
+        // Process block comments as prose
+        if (element.isBlockComment) {
+          const prose = this.extractProseFromBlockComment(element.content)
+          if (prose.trim().length > 0) {
+            sections.push({
+              type: 'prose',
+              content: prose,
+            })
+          }
+        }
+
+        i++
+      }
+      else if (element.type === 'code') {
+        // Group consecutive code statements together
+        const codeStatements: string[] = [element.content]
+        let j = i + 1
+
+        while (j < elements.length && elements[j].type === 'code') {
+          codeStatements.push(elements[j].content)
+          j++
+        }
+
+        // Add grouped code block
+        sections.push({
+          type: 'code',
+          content: codeStatements.join('\n\n'),
+          language: 'typescript',
         })
-        content += '\n'
+
+        i = j
+      }
+      else if (element.type === 'test-block') {
+        // Extract individual test cases from the block
+        this.extractTestsFromBlock(element.node as ts.IfStatement, sections)
+        i++
+      }
+      else {
+        i++
+      }
+    }
+
+    return sections
+  }
+
+  private extractProseFromBlockComment(commentText: string): string {
+    // Remove comment markers
+    const content = commentText
+      .replace(/^\/\*\*?/, '') // Remove opening
+      .replace(/\*\/$/, '') // Remove closing
+      .split('\n')
+      .map((line) => {
+        // Remove leading asterisks and whitespace
+        return line.replace(/^\s*\*\s?/, '')
+      })
+      .join('\n')
+      .trim()
+
+    return content
+  }
+
+  /**
+   * Parse JSDoc comment into structured information
+   */
+  private parseJSDoc(commentText: string): JSDocInfo | null {
+    const prose = this.extractProseFromBlockComment(commentText)
+
+    // Check if this has JSDoc tags
+    if (!prose.includes('@param') && !prose.includes('@returns') && !prose.includes('@throws')) {
+      return null
+    }
+
+    const lines = prose.split('\n')
+    let description = ''
+    const params: Array<{ name: string, type?: string, description: string }> = []
+    let returns: { type?: string, description: string } | undefined
+    const throws: string[] = []
+
+    let currentSection = 'description'
+    let currentParam: { name: string, type?: string, description: string } | null = null
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+
+      // @param tag
+      const paramMatch = trimmed.match(/^@param\s+(?:\{([^}]+)\}\s+)?(\w+)\s+(.+)/)
+      if (paramMatch) {
+        if (currentParam) {
+          params.push(currentParam)
+        }
+        currentParam = {
+          name: paramMatch[2],
+          type: paramMatch[1],
+          description: paramMatch[3],
+        }
+        currentSection = 'param'
+        continue
       }
 
-      return content
+      // @returns tag
+      const returnsMatch = trimmed.match(/^@returns?\s+(?:\{([^}]+)\}\s+)?(.+)/)
+      if (returnsMatch) {
+        if (currentParam) {
+          params.push(currentParam)
+          currentParam = null
+        }
+        returns = {
+          type: returnsMatch[1],
+          description: returnsMatch[2],
+        }
+        currentSection = 'returns'
+        continue
+      }
+
+      // @throws tag
+      const throwsMatch = trimmed.match(/^@throws\s+(.+)/)
+      if (throwsMatch) {
+        if (currentParam) {
+          params.push(currentParam)
+          currentParam = null
+        }
+        throws.push(throwsMatch[1])
+        currentSection = 'throws'
+        continue
+      }
+
+      // Continuation of current section
+      if (currentSection === 'description' && trimmed.length > 0) {
+        description += (description ? '\n' : '') + trimmed
+      }
+      else if (currentSection === 'param' && currentParam && trimmed.length > 0 && !trimmed.startsWith('@')) {
+        currentParam.description += ` ${trimmed}`
+      }
+      else if (currentSection === 'returns' && returns && trimmed.length > 0 && !trimmed.startsWith('@')) {
+        returns.description += ` ${trimmed}`
+      }
+    }
+
+    if (currentParam) {
+      params.push(currentParam)
+    }
+
+    return {
+      description,
+      params: params.length > 0 ? params : undefined,
+      returns,
+      throws: throws.length > 0 ? throws : undefined,
+    }
+  }
+
+  private processIncludeDirective(commentText: string, sections: TutorialSection[]): void {
+    const match = commentText.match(/@include\s+(.+)/)
+    if (!match) {
+      return
+    }
+
+    const includePath = match[1].trim()
+    const resolvedPath = resolve(this.exampleRoot, includePath)
+
+    if (!existsSync(resolvedPath)) {
+      console.warn(`⚠️ Include file not found: ${includePath}`)
+      return
+    }
+
+    this.referencedFiles.add(includePath)
+
+    const content = readFileSync(resolvedPath, 'utf-8')
+    const language = this.getLanguageFromPath(includePath)
+
+    sections.push({
+      type: 'include',
+      content,
+      language,
+      filePath: includePath,
     })
-    .join('')
+  }
 
-  const footer = `## Example Patterns
+  private processHeaderControl(commentText: string): void {
+    if (commentText.includes('// #+')) {
+      this.depthState.currentDepth++
+    }
+    else if (commentText.includes('// #-')) {
+      this.depthState.currentDepth = Math.max(1, this.depthState.currentDepth - 1)
+    }
+    else if (commentText.includes('// #!')) {
+      this.depthState.currentDepth = 1
+    }
+  }
 
-### Single-File Examples
-- **Use case**: Simple, focused examples
-- **Pattern**: All code in a single file with narrative flow
-- **Structure**: \`01-basic-id-axiom\`
-- **Benefits**: Easy to understand, quick to read, perfect for learning one concept
+  private isVitestTestBlock(statement: ts.Statement): boolean {
+    if (!ts.isIfStatement(statement)) {
+      return false
+    }
 
-### Folder-Based Examples
-- **Use case**: Complex examples with custom axioms or multiple canons
-- **Pattern**: Organized into focused files
-- **Structure**:
-  - \`usage.ts\` - Main entry point with narrative and tests (legacy examples may still use \`index.ts\`)
-  - \`axioms/{concept}.ts\` - Custom axiom definitions (type + API)
-  - \`canons/{notation}.ts\` - Canon definitions (type + runtime)
-  - Supporting files as needed for clarity
-- **Benefits**: Clear separation, easy to navigate, demonstrates real-world architecture
+    const condition = statement.expression
 
-### Understanding Axioms vs Canons
+    // Check if condition is: import.meta.vitest
+    // Structure: PropertyAccessExpression { name: "vitest", expression: MetaProperty }
+    if (ts.isPropertyAccessExpression(condition) && condition.name.text === 'vitest') {
+      const expr = condition.expression
+      if (ts.isMetaProperty(expr) && expr.keywordToken === ts.SyntaxKind.ImportKeyword) {
+        return true
+      }
+    }
+    return false
+  }
 
-**Axioms** define semantic concepts (Id, Email, Currency) and their APIs:
-- Each axiom file contains both the type definition AND the API functions (\`emailOf\`, \`currencyOf\`)
-- Example: \`axioms/email.ts\` defines EmailAxiom type and exports \`emailOf()\` function
+  private extractTestsFromBlock(node: ts.IfStatement, sections: TutorialSection[]): void {
+    const thenBlock = node.thenStatement
 
-**Canons** aggregate axioms and map them to specific notations:
-- REST API canon: maps axioms to \`id\`, \`type\`, \`email\`
-- MongoDB canon: maps axioms to \`_id\`, \`_type\`, \`email\`
-- JSON-LD canon: maps axioms to \`@id\`, \`@type\`, \`email\`
+    if (!ts.isBlock(thenBlock)) {
+      return
+    }
 
-Canons don't have APIs - they configure how axiom APIs work with different data formats
+    // Look for it() and describe() calls
+    for (const statement of thenBlock.statements) {
+      this.extractTestCases(statement, sections)
+    }
+  }
 
-## Getting Started
+  private extractTestCases(node: ts.Node, sections: TutorialSection[]): void {
+    if (ts.isExpressionStatement(node)) {
+      const expr = node.expression
 
-Each example includes:
-- **Narrative documentation** that teaches concepts through prose
-- **Complete code samples** with full TypeScript typing
-- **In-source tests** that demonstrate and validate behavior
-- **Real-world scenarios** showing practical applications
-- **Live source code** linked directly to GitHub
+      if (ts.isCallExpression(expr)) {
+        const callee = expr.expression
 
-## Prerequisites
+        if (ts.isIdentifier(callee) && callee.text === 'it') {
+          // Extract test title and body
+          const args = expr.arguments
+          if (args.length >= 2) {
+            const titleArg = args[0]
+            const bodyArg = args[1]
 
-Before running these examples, ensure you have:
+            if (ts.isStringLiteral(titleArg)) {
+              const title = titleArg.text
 
-- Node.js 22.0.0 or higher
-- TypeScript 5.0.0 or higher
-- ESLint 9.0.0 or higher
+              // Extract body content (handle arrow functions and regular functions)
+              let body = ''
+              if (ts.isArrowFunction(bodyArg) || ts.isFunctionExpression(bodyArg)) {
+                const fnBody = bodyArg.body
+                if (ts.isBlock(fnBody)) {
+                  // Get statements inside function body
+                  body = fnBody.statements.map(s => s.getText(this.sourceFile)).join('\n')
+                }
+                else {
+                  // Arrow function with expression body
+                  body = fnBody.getText(this.sourceFile)
+                }
+              }
 
-## Installation
+              sections.push({
+                type: 'test',
+                testTitle: title,
+                content: body,
+                language: 'typescript',
+                testStatus: { status: 'unknown' },
+              })
+            }
+          }
+        }
+        else if (ts.isIdentifier(callee) && callee.text === 'describe') {
+          // Recurse into describe block
+          const args = expr.arguments
+          if (args.length >= 2) {
+            const bodyArg = args[1]
+            if (ts.isArrowFunction(bodyArg) || ts.isFunctionExpression(bodyArg)) {
+              const body = bodyArg.body
+              if (ts.isBlock(body)) {
+                for (const statement of body.statements) {
+                  this.extractTestCases(statement, sections)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
-\`\`\`bash
-npm install @relational-fabric/canon
-\`\`\`
-
-## Usage
-
-Each example can be run independently. Copy the code samples and adapt them to your specific use case. The examples are designed to work with the TypeScript and ESLint configurations provided by this package.
-
-For more information about the package configurations, see the main [documentation](../README.md).
-
-## Running Examples
-
-You can run examples directly using tsx:
-
-\`\`\`bash
-# Run a single-file example
-npx tsx examples/01-basic-id-axiom.ts
-
-# Run a folder example
-npx tsx examples/02-module-style-canon/usage.ts
-
-# Run multiple examples
-npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon/usage.ts
-\`\`\`
-
-## Testing
-
-Examples use Vitest's in-source testing pattern in their entry points. The examples serve as:
-1. **Living documentation** - Narrative code that teaches concepts
-2. **Integration tests** - Verify complete workflows work correctly
-3. **Regression tests** - Ensure changes don't break functionality
-
-Run the tests with:
-\`\`\`bash
-npm test
-\`\`\`
-
-## Writing New Examples
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) in the examples directory for guidelines on:
-- Structuring examples as narrative documentation
-- When to use single-file vs folder-based examples
-- Naming conventions for axioms, canons, and supporting files
-- Writing tests that teach
-`
-
-  return header + examplesContent + footer
+  private getLanguageFromPath(path: string): string {
+    const ext = extname(path).toLowerCase()
+    const languageMap: Record<string, string> = {
+      '.ts': 'typescript',
+      '.js': 'javascript',
+      '.json': 'json',
+      '.md': 'markdown',
+      '.yaml': 'yaml',
+      '.yml': 'yaml',
+    }
+    return languageMap[ext] || ''
+  }
 }
 
-function replaceDirectory(tempDir: string, targetDir: string) {
+// =============================================================================
+// Markdown Rendering
+// =============================================================================
+
+function renderTutorialSections(
+  sections: TutorialSection[],
+  metadata: DocumentMetadata,
+  report: VitestJsonReport | null,
+  examplePath: string,
+): string {
+  const lines: string[] = []
+
+  // Title (H1) - only inferred header
+  const title = metadata.title || formatTitle(basename(examplePath))
+  lines.push(`# ${title}`)
+  lines.push('')
+
+  // Description (only if it's different from title)
+  if (metadata.description && metadata.description !== title) {
+    lines.push(metadata.description)
+    lines.push('')
+  }
+
+  // Render sections in order
+  for (const section of sections) {
+    switch (section.type) {
+      case 'prose':
+        // Prose with potential explicit Markdown headings
+        if (section.content.trim().length > 0) {
+          lines.push(section.content)
+          lines.push('')
+        }
+        break
+
+      case 'code':
+        // Code block
+        lines.push(`\`\`\`${section.language || 'typescript'}`)
+        lines.push(section.content)
+        lines.push('```')
+        lines.push('')
+        break
+
+      case 'jsdoc':
+        // JSDoc with description and optional tables
+        if (section.jsDocInfo) {
+          const info = section.jsDocInfo
+
+          // Description
+          if (info.description.trim().length > 0) {
+            lines.push(info.description)
+            lines.push('')
+          }
+
+          // Parameters table
+          if (info.params && info.params.length > 0) {
+            lines.push('**Parameters:**')
+            lines.push('')
+            lines.push('| Parameter | Type | Description |')
+            lines.push('|-----------|------|-------------|')
+            for (const param of info.params) {
+              const type = param.type ? `\`${param.type}\`` : '-'
+              lines.push(`| \`${param.name}\` | ${type} | ${param.description} |`)
+            }
+            lines.push('')
+          }
+
+          // Returns
+          if (info.returns) {
+            const type = info.returns.type ? ` \`${info.returns.type}\`` : ''
+            lines.push(`**Returns:**${type}`)
+            lines.push('')
+            lines.push(info.returns.description)
+            lines.push('')
+          }
+
+          // Throws
+          if (info.throws && info.throws.length > 0) {
+            lines.push('**Throws:**')
+            lines.push('')
+            for (const throwInfo of info.throws) {
+              lines.push(`- ${throwInfo}`)
+            }
+            lines.push('')
+          }
+        }
+        else if (section.content.trim().length > 0) {
+          // Fallback for non-structured JSDoc
+          lines.push(section.content)
+          lines.push('')
+        }
+        break
+
+      case 'test':
+        // Test as narrative (bold title + status)
+        if (section.testTitle) {
+          const status = section.testStatus || { status: 'unknown' }
+          const statusIcon = status.status === 'passed' ? '✅' : status.status === 'failed' ? '❌' : '⚠️'
+
+          lines.push(`**Test: ${section.testTitle}** ${statusIcon}`)
+          lines.push('')
+          if (section.content.trim().length > 0) {
+            lines.push(`\`\`\`${section.language || 'typescript'}`)
+            lines.push(section.content)
+            lines.push('```')
+            lines.push('')
+          }
+        }
+        break
+
+      case 'include':
+        // Include as wrapped section
+        lines.push('---')
+        lines.push('')
+        lines.push(`Supporting File (\`${section.filePath}\`)`)
+        lines.push('')
+        lines.push(`\`\`\`${section.language || ''}`)
+        lines.push(section.content)
+        lines.push('```')
+        lines.push('')
+        lines.push('---')
+        lines.push('')
+        break
+    }
+  }
+
+  return `${lines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd()}\n`
+}
+
+function renderFooter(
+  metadata: DocumentMetadata,
+  entryFile: string,
+  referencedFiles: string[],
+): string {
+  const lines: string[] = []
+
+  lines.push('---')
+  lines.push('')
+  lines.push('## References')
+  lines.push('')
+  lines.push(`**Source:** \`${entryFile}\``)
+
+  if (referencedFiles.length > 0) {
+    lines.push('')
+    lines.push('**Referenced files:**')
+    referencedFiles.forEach((file) => {
+      lines.push(`- \`${file}\``)
+    })
+  }
+
+  if (metadata.keywords && metadata.keywords.length > 0) {
+    lines.push('')
+    lines.push(`**Keywords:** ${metadata.keywords.join(', ')}`)
+  }
+
+  if (metadata.difficulty) {
+    lines.push('')
+    lines.push(`**Difficulty:** ${metadata.difficulty}`)
+  }
+
+  lines.push('')
+
+  return lines.join('\n')
+}
+
+// =============================================================================
+// Document Generation
+// =============================================================================
+
+function generateExampleDocument(
+  example: ExampleInfo,
+  examplesDir: string,
+  report: VitestJsonReport | null,
+): string {
+  const entryFilePath = join(examplesDir, example.entryFile)
+  const exampleRoot = example.isDirectory ? join(examplesDir, example.path) : examplesDir
+
+  const parser = new ExampleParser(entryFilePath, exampleRoot)
+
+  const metadata = parser.extractMetadata()
+  const sections = parser.parse()
+  const referencedFiles = parser.getReferencedFiles()
+
+  // Update referenced files in example info
+  example.referencedFiles = referencedFiles
+
+  // Fill in test statuses from report
+  for (const section of sections) {
+    if (section.type === 'test' && section.testTitle) {
+      section.testStatus = findTestStatus(report, example.entryFile, section.testTitle)
+    }
+  }
+
+  const body = renderTutorialSections(sections, metadata, report, example.path)
+  const footer = renderFooter(metadata, example.entryFile, referencedFiles)
+
+  return `${body}\n${footer}`
+}
+
+function generateIndexPage(examples: ExampleInfo[], examplesWithMeta: Array<{ example: ExampleInfo, metadata: DocumentMetadata, testsPassed: number, testsTotal: number }>): string {
+  const lines: string[] = []
+
+  lines.push('# Examples')
+  lines.push('')
+  lines.push('This directory contains practical examples demonstrating how to use the @relational-fabric/canon package.')
+  lines.push('')
+  lines.push('## Available Examples')
+  lines.push('')
+
+  for (const item of examplesWithMeta) {
+    const { example, metadata, testsPassed, testsTotal } = item
+    const docLink = `./${example.name}.md`
+    const title = metadata.title || formatTitle(example.name)
+
+    lines.push(`### [${title}](${docLink})`)
+    lines.push('')
+
+    if (metadata.description) {
+      lines.push(metadata.description)
+      lines.push('')
+    }
+
+    lines.push(`**Pattern:** ${example.isDirectory ? 'Multi-file example' : 'Single-file example'}`)
+    lines.push('')
+
+    if (testsTotal > 0) {
+      const statusIcon = testsPassed === testsTotal ? '✅' : testsPassed > 0 ? '⚠️' : '❌'
+      lines.push(`**Tests:** ${testsPassed}/${testsTotal} passed ${statusIcon}`)
+      lines.push('')
+    }
+
+    if (metadata.keywords && metadata.keywords.length > 0) {
+      lines.push(`**Keywords:** ${metadata.keywords.join(', ')}`)
+      lines.push('')
+    }
+
+    if (metadata.difficulty) {
+      lines.push(`**Difficulty:** ${metadata.difficulty}`)
+      lines.push('')
+    }
+  }
+
+  return lines.join('\n')
+}
+
+// =============================================================================
+// Utilities
+// =============================================================================
+
+function formatTitle(slug: string): string {
+  return slug
+    .replace(/-/g, ' ')
+    .replace(/\.ts$/u, '')
+    .replace(/\b\w/gu, match => match.toUpperCase())
+}
+
+function replaceDirectory(tempDir: string, targetDir: string): void {
   const parentDir = dirname(targetDir)
   mkdirSync(parentDir, { recursive: true })
 
@@ -728,10 +1021,11 @@ function replaceDirectory(tempDir: string, targetDir: string) {
   }
 }
 
-/**
- * Main function
- */
-function main() {
+// =============================================================================
+// Main
+// =============================================================================
+
+function main(): void {
   console.log('🔍 Scanning examples directory...')
 
   const rootDir = process.cwd()
@@ -743,89 +1037,74 @@ function main() {
     return
   }
 
-  const files = readdirSync(examplesDir)
-    .filter((file) => {
-      const fullPath = join(examplesDir, file)
-      const stat = statSync(fullPath)
+  const examples = discoverExamples(examplesDir)
+  console.log(`📁 Found ${examples.length} examples`)
 
-      // Include *.ts files at root level (single-file examples)
-      if (stat.isFile() && file.endsWith('.ts') && !file.includes('README') && !file.includes('CONTRIBUTING')) {
-        return true
-      }
-
-      // Include directories that have index.ts or usage.ts (folder examples)
-      if (stat.isDirectory()) {
-        const indexPath = join(fullPath, 'index.ts')
-        const usagePath = join(fullPath, 'usage.ts') // Backwards compatibility
-        return existsSync(indexPath) || existsSync(usagePath)
-      }
-
-      return false
-    })
-    .sort()
-
-  console.log(`📁 Found ${files.length} examples`)
-
-  const examples = files.map((file) => {
-    console.log(`📄 Processing: ${file}`)
-    return processExample(file, file, examplesDir)
-  })
-
-  console.log('📝 Generating documentation...')
-
+  // Load test report
   const testReportPath = join(rootDir, '.scratch', 'vitest-report.json')
-  const tests = existsSync(testReportPath) && statSync(testReportPath).isFile()
-    ? loadTestResults(testReportPath)
-    : null
+  const report = loadTestResults(testReportPath)
 
-  if (!tests) {
-    console.warn('⚠️ No Vitest JSON report found. Example status information will be omitted.')
+  if (!report) {
+    console.warn('⚠️ No Vitest JSON report found. Test status will be marked as unknown.')
     console.warn('   Run `npm run check:test:json` before generating documentation to include test status.')
   }
 
-  const examplesWithTests = examples.map((example) => {
-    if (!tests) {
-      return { ...example }
-    }
-    return augmentExampleWithTestResults(example, tests)
-  })
-
-  const documentation = generateExamplesDocumentation(examplesWithTests)
-  const outputDir = join(rootDir, 'docs', 'examples')
-
+  // Create staging directory
   const tmpBaseDir = mkdtempSync(join(tmpdir(), 'canon-examples-'))
   const tmpOutputDir = join(tmpBaseDir, 'examples-docs')
   mkdirSync(tmpOutputDir, { recursive: true })
 
   try {
-    writeFileSync(join(tmpOutputDir, 'README.md'), documentation)
+    // Generate individual example pages and collect metadata
+    const examplesWithMeta: Array<{ example: ExampleInfo, metadata: DocumentMetadata, testsPassed: number, testsTotal: number }> = []
 
-    examplesWithTests.forEach((example) => {
-      console.log(`🧾 Writing documentation for: ${example.name}`)
-      writeExampleDocumentation(example, examplesDir, tmpOutputDir)
-    })
+    for (const example of examples) {
+      console.log(`📄 Generating documentation for: ${example.name}`)
 
+      // Parse to get metadata and test counts
+      const entryFilePath = join(examplesDir, example.entryFile)
+      const exampleRoot = example.isDirectory ? join(examplesDir, example.path) : examplesDir
+      const parser = new ExampleParser(entryFilePath, exampleRoot)
+      const metadata = parser.extractMetadata()
+      const sections = parser.parse()
+
+      // Count tests and passed tests
+      let testsTotal = 0
+      let testsPassed = 0
+      for (const section of sections) {
+        if (section.type === 'test' && section.testTitle) {
+          testsTotal++
+          section.testStatus = findTestStatus(report, example.entryFile, section.testTitle)
+          if (section.testStatus.status === 'passed') {
+            testsPassed++
+          }
+        }
+      }
+
+      examplesWithMeta.push({ example, metadata, testsPassed, testsTotal })
+
+      // Generate document
+      const docContent = generateExampleDocument(example, examplesDir, report)
+      const docPath = join(tmpOutputDir, `${example.name}.md`)
+      writeFileSync(docPath, docContent)
+    }
+
+    // Generate index page
+    const indexContent = generateIndexPage(examples, examplesWithMeta)
+    writeFileSync(join(tmpOutputDir, 'README.md'), indexContent)
+
+    // Atomically replace docs/examples/
+    const outputDir = join(rootDir, 'docs', 'examples')
     replaceDirectory(tmpOutputDir, outputDir)
+
+    console.log(`✅ Documentation generated: ${outputDir}`)
+    console.log(`📊 Processed ${examples.length} examples`)
   }
   finally {
     if (existsSync(tmpBaseDir)) {
       rmSync(tmpBaseDir, { recursive: true, force: true })
     }
   }
-
-  console.log(`✅ Documentation generated: ${join(outputDir, 'README.md')}`)
-  console.log(`📊 Processed ${examples.length} examples`)
-
-  // Print summary
-  examples.forEach((example) => {
-    const description = example.description || 'No description'
-    console.log(`  - ${example.name}: ${description}`)
-    if (example.subExamples) {
-      example.subExamples.forEach((sub) => {
-        console.log(`    └─ ${sub.name}`)
-      })
-    }
-  })
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
