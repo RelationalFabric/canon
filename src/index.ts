@@ -25,3 +25,6 @@ export * from './types/index.js'
 // Utilities
 export * from './utils/guards.js'
 export * from './utils/objects.js'
+
+// Opinionated kit exports
+export * from './kit.js'

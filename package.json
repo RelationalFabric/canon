@@ -24,10 +24,6 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
-    "./kit": {
-      "types": "./src/kit.ts",
-      "import": "./src/kit.ts"
-    },
     "./_/*": {
       "types": "./src/_/*.ts",
       "import": "./src/_/*.ts"
