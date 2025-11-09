@@ -6,10 +6,10 @@ on:
       - main
       - develop
     paths:
-      - 'examples/**'
+      - examples/**
       - scripts/generate-examples-docs.ts
       - package.json
-      - 'tsconfig*.json'
+      - tsconfig*.json
       - .github/workflows/examples.yml
   workflow_dispatch:
 
