@@ -6,7 +6,7 @@ import type { CsvRow, QuadrantKey, RadarData, RingKey } from '../types/radar.js'
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import process from 'node:process'
-import { parse } from 'yaml'
+import { parseYaml } from '../kit.js'
 
 // Quadrant mapping for CSV output
 const QUADRANT_MAP: Record<QuadrantKey, string> = {
@@ -28,7 +28,7 @@ const RING_MAP: Record<RingKey, string> = {
  * Convert YAML radar data to CSV format
  */
 export function convertYamlToCsv(yamlContent: string): string {
-  const data = parse(yamlContent) as RadarData
+  const data = parseYaml(yamlContent) as RadarData
 
   // Generate CSV content
   const csvRows: string[] = ['name,ring,quadrant,isNew,description']
@@ -112,7 +112,7 @@ function escapeCsvField(field: string): string {
  * Parse YAML radar data
  */
 export function parseRadarYaml(yamlContent: string): RadarData {
-  return parse(yamlContent) as RadarData
+  return parseYaml(yamlContent) as RadarData
 }
 
 /**
