@@ -17,17 +17,13 @@ type InternalCanon = Canon<{
     $meta: { type: string }
   }
 }>
-```
 
-```typescript
 declare module '@relational-fabric/canon' {
   interface Canons {
     Internal: InternalCanon
   }
 }
-```
 
-```typescript
 declareCanon('Internal', {
   axioms: {
     Id: {
@@ -79,7 +75,6 @@ declare module '@relational-fabric/canon' {
 declareCanon('JsonLd', {
   axioms: {
     Id: {
-      // Clean type guard for JSON-LD '@id' field
       $basis: pojoWithOfType('@id', 'string'),
       key: '@id',
       $meta: { type: 'uri', format: 'iri' },
@@ -118,15 +113,11 @@ function displayEntity(entity: any): string {
   const id = idOf(entity)
   return `Entity with ID: ${id}`
 }
-```
 
-```typescript
 const internalProduct = { id: 'product-789', name: 'Widget' }
 
 const internalDisplay = displayEntity(internalProduct)
-```
 
-```typescript
 const jsonLdProduct = {
   '@id': 'https://example.com/products/gadget-999',
   '@type': 'Product',

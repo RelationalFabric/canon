@@ -9,10 +9,6 @@
 import type { Canon } from '@relational-fabric/canon'
 import { declareCanon, idOf, pojoWithOfType } from '@relational-fabric/canon'
 
-// =============================================================================
-// STEP 1: Define Your Internal Data Format
-// =============================================================================
-
 /**
  * Most applications have their own internal data format. Here we define
  * a canon for data that uses the standard 'id' field.
@@ -25,14 +21,12 @@ type InternalCanon = Canon<{
   }
 }>
 
-// Register the type globally so TypeScript knows about it
 declare module '@relational-fabric/canon' {
   interface Canons {
     Internal: InternalCanon
   }
 }
 
-// Register the runtime behavior - how to actually find and extract IDs
 declareCanon('Internal', {
   axioms: {
     Id: {
@@ -53,19 +47,14 @@ const user = {
   email: 'john@example.com',
 }
 
-const userId = idOf(user) // Returns: "user-123"
+const userId = idOf(user)
 
-// Let's verify this works as expected
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
   it('extracts ID from internal format using standard "id" field', () => {
     expect(userId).toBe('user-123')
   })
 }
-
-// =============================================================================
-// STEP 2: Add Support for External Data (JSON-LD)
-// =============================================================================
 
 /**
  * Often you'll receive data from external APIs that use different conventions.
@@ -88,7 +77,6 @@ declare module '@relational-fabric/canon' {
 declareCanon('JsonLd', {
   axioms: {
     Id: {
-      // Clean type guard for JSON-LD '@id' field
       $basis: pojoWithOfType('@id', 'string'),
       key: '@id',
       $meta: { type: 'uri', format: 'iri' },
@@ -108,7 +96,7 @@ const jsonLdPerson = {
   'email': 'jane@example.com',
 }
 
-const personId = idOf(jsonLdPerson) // Returns: "https://example.com/users/jane-456"
+const personId = idOf(jsonLdPerson)
 
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
@@ -117,34 +105,25 @@ if (import.meta.vitest) {
   })
 }
 
-// =============================================================================
-// STEP 3: Write Universal Code
-// =============================================================================
-
 /**
  * The real power: write functions that work with ANY format.
  * You don't need to check which format the data is in or write
  * conditional logic. Canon handles it for you.
  */
-
 function displayEntity(entity: any): string {
   const id = idOf(entity)
   return `Entity with ID: ${id}`
 }
 
-// Works with internal format
 const internalProduct = { id: 'product-789', name: 'Widget' }
 const internalDisplay = displayEntity(internalProduct)
-// Returns: "Entity with ID: product-789"
 
-// Works with JSON-LD format
 const jsonLdProduct = {
   '@id': 'https://example.com/products/gadget-999',
   '@type': 'Product',
   'name': 'Gadget',
 }
 const jsonLdDisplay = displayEntity(jsonLdProduct)
-// Returns: "Entity with ID: https://example.com/products/gadget-999"
 
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
