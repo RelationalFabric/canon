@@ -1,5 +1,4 @@
-import * as Immutable from '@relational-fabric/canon/_/immutable'
-
+import Immutable from '@relational-fabric/canon/_/immutable'
 import { describe, expect, it } from 'vitest'
 
 describe('transparent immutable export', () => {

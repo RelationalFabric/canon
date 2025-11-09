@@ -77,7 +77,7 @@ import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@rel
 ```typescript
 import antfu from '@relational-fabric/canon/_/antfu'
 import { defu } from '@relational-fabric/canon/_/defu'
-import * as Immutable from '@relational-fabric/canon/_/immutable'
+import Immutable from '@relational-fabric/canon/_/immutable'
 import objectHash from '@relational-fabric/canon/_/object-hash'
 import * as yaml from '@relational-fabric/canon/_/yaml'
 // Direct access to third-party libraries with original API contracts preserved
@@ -108,7 +108,7 @@ import * as yaml from '@relational-fabric/canon/_/yaml'
 **Persistent Data Structures:**
 
 - **Opinionated**: `Immutable` (namespace re-export of [immutable.js](https://github.com/immutable-js/immutable-js))
-- **Transparent**: `@relational-fabric/canon/_/immutable` (direct access to all exports from [immutable.js](https://github.com/immutable-js/immutable-js))
+- **Transparent**: `@relational-fabric/canon/_/immutable` (direct access to the namespace from [immutable.js](https://github.com/immutable-js/immutable-js))
 
 **Version Management**: The package uses both `dependencies` and `optionalDependencies` to ensure consumers get the exact same version used internally, preventing version conflicts and ensuring predictable behavior.
 

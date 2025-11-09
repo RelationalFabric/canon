@@ -1,5 +1,4 @@
 import { defu } from '@relational-fabric/canon/_/defu'
-
 import { describe, expect, it } from 'vitest'
 
 describe('transparent defu export', () => {

@@ -1,5 +1,4 @@
 import objectHash, { sha1 as objectHashSha1 } from '@relational-fabric/canon/_/object-hash'
-
 import { describe, expect, it } from 'vitest'
 
 describe('transparent object-hash export', () => {

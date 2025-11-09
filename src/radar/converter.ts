@@ -4,9 +4,12 @@
 
 import type { CsvRow, QuadrantKey, RadarData, RingKey } from '../types/radar.js'
 
+import { Console } from 'node:console'
 import { readFileSync, writeFileSync } from 'node:fs'
 import process from 'node:process'
 import { parseYaml } from '../kit.js'
+
+const logger = new Console(process.stdout, process.stderr)
 
 // Quadrant mapping for CSV output
 const QUADRANT_MAP: Record<QuadrantKey, string> = {
@@ -72,7 +75,7 @@ export function convertYamlFileToCsv(yamlPath: string, csvPath: string): void {
     writeFileSync(csvPath, csvContent)
     // Success: Converted YAML to CSV
   } catch (error) {
-    console.error(
+    logger.error(
       '❌ Error converting YAML to CSV:',
       error instanceof Error ? error.message : 'Unknown error',
     )

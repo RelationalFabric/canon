@@ -1,8 +1,7 @@
 import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@relational-fabric/canon'
-
 import { describe, expect, it } from 'vitest'
 
-describe('canon Kit exports', () => {
+describe('canon kit exports', () => {
   it('exposes createEslintConfig as a function', () => {
     expect(typeof createEslintConfig).toBe('function')
     const config = createEslintConfig()

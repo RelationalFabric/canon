@@ -1,5 +1,4 @@
 import * as yaml from '@relational-fabric/canon/_/yaml'
-
 import { describe, expect, it } from 'vitest'
 
 describe('transparent yaml export', () => {
