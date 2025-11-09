@@ -44,48 +44,51 @@ const productEntity = {
 }
 ```
 
-**Test: analyzes user entity correctly** ✅
-
 ```typescript
-const analysis = analyzeEntity(userEntity)
-expect(analysis.id).toBe('user-123')
-expect(analysis.type).toBe('user')
-expect(analysis.version).toBe(5)
-expect(analysis.timestamps).toHaveLength(2)
-expect(analysis.references).toHaveLength(1)
-```
+if (import.meta.vitest) {
+  const { it, expect, describe } = import.meta.vitest
 
-**Test: analyzes product entity correctly** ✅
+  describe('Multi-Axiom Canon Examples', () => {
+    it('analyzes user entity correctly', () => {
+      const analysis = analyzeEntity(userEntity)
 
-```typescript
-const analysis = analyzeEntity(productEntity)
-expect(analysis.id).toBe('product-456')
-expect(analysis.type).toBe('product')
-expect(analysis.version).toBe(12)
-expect(analysis.timestamps).toHaveLength(2)
-expect(analysis.references).toHaveLength(1)
-```
+      expect(analysis.id).toBe('user-123')
+      expect(analysis.type).toBe('user')
+      expect(analysis.version).toBe(5)
+      expect(analysis.timestamps).toHaveLength(2)
+      expect(analysis.references).toHaveLength(1)
+    })
 
-**Test: processes entity updates with version increment** ✅
+    it('analyzes product entity correctly', () => {
+      const analysis = analyzeEntity(productEntity)
 
-```typescript
-const update = processEntityUpdate(productEntity)
-expect(update.id).toBe('product-456')
-expect(update.oldVersion).toBe(12)
-expect(update.newVersion).toBe(13)
-expect(update.updatedAt).toBeInstanceOf(Date)
-```
+      expect(analysis.id).toBe('product-456')
+      expect(analysis.type).toBe('product')
+      expect(analysis.version).toBe(12)
+      expect(analysis.timestamps).toHaveLength(2)
+      expect(analysis.references).toHaveLength(1)
+    })
 
-**Test: demonstrates timestamp conversion** ✅
+    it('processes entity updates with version increment', () => {
+      const update = processEntityUpdate(productEntity)
 
-```typescript
-expect(() => demonstrateTimestampConversion()).not.toThrow()
-```
+      expect(update.id).toBe('product-456')
+      expect(update.oldVersion).toBe(12)
+      expect(update.newVersion).toBe(13)
+      expect(update.updatedAt).toBeInstanceOf(Date)
+    })
 
-**Test: demonstrates reference conversion** ✅
+    it('demonstrates timestamp conversion', () => {
+      // This test just ensures the function runs without error
+      expect(() => demonstrateTimestampConversion()).not.toThrow()
+    })
 
-```typescript
-expect(() => demonstrateReferenceConversion()).not.toThrow()
+    it('demonstrates reference conversion', () => {
+      // This test just ensures the function runs without error
+      expect(() => demonstrateReferenceConversion()).not.toThrow()
+    })
+  })
+}
 ```
 
 ```typescript

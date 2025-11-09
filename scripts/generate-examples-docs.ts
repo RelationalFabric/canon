@@ -218,7 +218,7 @@ function discoverExamples(examplesDir: string): ExampleInfo[] {
 // =============================================================================
 
 interface ParsedElement {
-  type: 'comment' | 'code' | 'test-block'
+  type: 'comment' | 'code'
   content: string
   start: number
   end: number
@@ -320,7 +320,7 @@ class ExampleParser {
   }
 
   /**
-   * Extract all elements (comments, code, tests) in source order
+   * Extract all elements (comments, code) in source order
    */
   private extractElements(): ParsedElement[] {
     const elements: ParsedElement[] = []
@@ -332,20 +332,9 @@ class ExampleParser {
     const statements = this.sourceFile.statements
     for (let i = 0; i < statements.length; i++) {
       const statement = statements[i]
-
-      // Skip test blocks - handle them specially
-      if (this.isVitestTestBlock(statement)) {
-        const testElement: ParsedElement = {
-          type: 'test-block',
-          content: statement.getText(this.sourceFile),
-          start: statement.getStart(this.sourceFile),
-          end: statement.getEnd(),
-          node: statement,
-        }
-        elements.push(testElement)
-        lastPos = statement.getEnd()
-        continue
-      }
+      
+      // Tests are just code - don't extract them separately
+      // They stay inline as part of the narrative flow
 
       // Get leading comments
       const commentRanges = ts.getLeadingCommentRanges(fullText, statement.getFullStart())
@@ -460,10 +449,10 @@ class ExampleParser {
         i++
       }
       else if (element.type === 'code') {
-        // Group consecutive code statements together
+        // Group consecutive code statements together (including tests)
         const codeStatements: string[] = [element.content]
         let j = i + 1
-
+        
         while (j < elements.length && elements[j].type === 'code') {
           codeStatements.push(elements[j].content)
           j++
@@ -475,13 +464,8 @@ class ExampleParser {
           content: codeStatements.join('\n\n'),
           language: 'typescript',
         })
-
+        
         i = j
-      }
-      else if (element.type === 'test-block') {
-        // Extract individual test cases from the block
-        this.extractTestsFromBlock(element.node as ts.IfStatement, sections)
-        i++
       }
       else {
         i++
@@ -833,20 +817,8 @@ function renderTutorialSections(
         break
 
       case 'test':
-        // Test as narrative (bold title + status)
-        if (section.testTitle) {
-          const status = section.testStatus || { status: 'unknown' }
-          const statusIcon = status.status === 'passed' ? '✅' : status.status === 'failed' ? '❌' : '⚠️'
-
-          lines.push(`**Test: ${section.testTitle}** ${statusIcon}`)
-          lines.push('')
-          if (section.content.trim().length > 0) {
-            lines.push(`\`\`\`${section.language || 'typescript'}`)
-            lines.push(section.content)
-            lines.push('```')
-            lines.push('')
-          }
-        }
+        // Tests should not be rendered separately - they're part of code flow
+        // This case should never be reached with the updated parser
         break
 
       case 'include':

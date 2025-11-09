@@ -87,119 +87,120 @@ const nestedObject = {
 }
 ```
 
-**Test: handles valid entities correctly** ✅
-
 ```typescript
-const id = safeIdOf(validEntity)
-const type = safeTypeOf(validEntity)
-const version = safeVersionOf(validEntity)
-expect(id).toBe('user-123')
-expect(type).toBe('user')
-expect(version).toBe(5)
-```
+if (import.meta.vitest) {
+  const { it, expect, describe } = import.meta.vitest
 
-**Test: handles missing fields gracefully** ✅
+  describe('Error Handling and Edge Cases', () => {
+    it('handles valid entities correctly', () => {
+      const id = safeIdOf(validEntity)
+      const type = safeTypeOf(validEntity)
+      const version = safeVersionOf(validEntity)
 
-```typescript
-const id = safeIdOf(missingFields)
-const type = safeTypeOf(missingFields)
-const version = safeVersionOf(missingFields)
-expect(id).toBeUndefined()
-expect(type).toBeUndefined()
-expect(version).toBeUndefined()
-```
+      expect(id).toBe('user-123')
+      expect(type).toBe('user')
+      expect(version).toBe(5)
+    })
 
-**Test: handles wrong field types gracefully** ✅
+    it('handles missing fields gracefully', () => {
+      const id = safeIdOf(missingFields)
+      const type = safeTypeOf(missingFields)
+      const version = safeVersionOf(missingFields)
 
-```typescript
-const id = safeIdOf(wrongTypes)
-const type = safeTypeOf(wrongTypes)
-const version = safeVersionOf(wrongTypes)
-expect(id).toBeUndefined()
-expect(type).toBeUndefined()
-expect(version).toBeUndefined()
-```
+      expect(id).toBeUndefined()
+      expect(type).toBeUndefined()
+      expect(version).toBeUndefined()
+    })
 
-**Test: handles null and undefined values** ✅
+    it('handles wrong field types gracefully', () => {
+      const id = safeIdOf(wrongTypes)
+      const type = safeTypeOf(wrongTypes)
+      const version = safeVersionOf(wrongTypes)
 
-```typescript
-const id = safeIdOf(nullValues)
-const type = safeTypeOf(nullValues)
-const version = safeVersionOf(nullValues)
-expect(id).toBeUndefined()
-expect(type).toBeUndefined()
-expect(version).toBe(0)
-```
+      expect(id).toBeUndefined()
+      expect(type).toBeUndefined()
+      // versionOf returns the actual value when it's not a number, safeVersionOf returns undefined
+      expect(version).toBeUndefined()
+    })
 
-**Test: handles empty objects** ✅
+    it('handles null and undefined values', () => {
+      const id = safeIdOf(nullValues)
+      const type = safeTypeOf(nullValues)
+      const version = safeVersionOf(nullValues)
 
-```typescript
-const id = safeIdOf(emptyObject)
-const type = safeTypeOf(emptyObject)
-const version = safeVersionOf(emptyObject)
-expect(id).toBeUndefined()
-expect(type).toBeUndefined()
-expect(version).toBeUndefined()
-```
+      expect(id).toBeUndefined()
+      expect(type).toBeUndefined()
+      // The nullValues object has version: 0, which is a valid number, so safeVersionOf returns 0
+      expect(version).toBe(0)
+    })
 
-**Test: handles non-object values** ✅
+    it('handles empty objects', () => {
+      const id = safeIdOf(emptyObject)
+      const type = safeTypeOf(emptyObject)
+      const version = safeVersionOf(emptyObject)
 
-```typescript
-const id = safeIdOf(nonObject)
-const type = safeTypeOf(nonObject)
-const version = safeVersionOf(nonObject)
-expect(id).toBeUndefined()
-expect(type).toBeUndefined()
-expect(version).toBeUndefined()
-```
+      expect(id).toBeUndefined()
+      expect(type).toBeUndefined()
+      expect(version).toBeUndefined()
+    })
 
-**Test: validates entities correctly** ✅
+    it('handles non-object values', () => {
+      const id = safeIdOf(nonObject)
+      const type = safeTypeOf(nonObject)
+      const version = safeVersionOf(nonObject)
 
-```typescript
-const validResult = validateEntity(validEntity)
-const invalidResult = validateEntity(missingFields)
-expect(validResult.isValid).toBe(true)
-expect(validResult.errors).toHaveLength(0)
-expect(invalidResult.isValid).toBe(false)
-expect(invalidResult.errors.length).toBeGreaterThan(0)
-```
+      expect(id).toBeUndefined()
+      expect(type).toBeUndefined()
+      expect(version).toBeUndefined()
+    })
 
-**Test: processes entities safely** ✅
+    it('validates entities correctly', () => {
+      const validResult = validateEntity(validEntity)
+      const invalidResult = validateEntity(missingFields)
 
-```typescript
-const validResult = processEntitySafely(validEntity)
-const invalidResult = processEntitySafely(missingFields)
-expect(validResult.success).toBe(true)
-expect(validResult.result?.id).toBe('user-123')
-expect(invalidResult.success).toBe(false)
-expect(invalidResult.errors.length).toBeGreaterThan(0)
-```
+      expect(validResult.isValid).toBe(true)
+      expect(validResult.errors).toHaveLength(0)
 
-**Test: processes batch entities correctly** ✅
+      expect(invalidResult.isValid).toBe(false)
+      expect(invalidResult.errors.length).toBeGreaterThan(0)
+    })
 
-```typescript
-const batchResult = processBatchSafely([validEntity, missingFields, wrongTypes, nullValues])
-expect(batchResult.successful).toBe(1)
-expect(batchResult.failed).toBe(3)
-expect(batchResult.results).toHaveLength(4)
-```
+    it('processes entities safely', () => {
+      const validResult = processEntitySafely(validEntity)
+      const invalidResult = processEntitySafely(missingFields)
 
-**Test: handles timestamp conversion errors** ✅
+      expect(validResult.success).toBe(true)
+      expect(validResult.result?.id).toBe('user-123')
 
-```typescript
-const validTimestamp = safeTimestampConversion('2024-01-15T10:30:00Z')
-const invalidTimestamp = safeTimestampConversion('not a date')
-expect(validTimestamp).toBeInstanceOf(Date)
-expect(invalidTimestamp).toBeUndefined()
-```
+      expect(invalidResult.success).toBe(false)
+      expect(invalidResult.errors.length).toBeGreaterThan(0)
+    })
 
-**Test: handles reference conversion errors** ✅
+    it('processes batch entities correctly', () => {
+      const batchResult = processBatchSafely([validEntity, missingFields, wrongTypes, nullValues])
 
-```typescript
-const validReference = safeReferenceConversion('user-123')
-const invalidReference = safeReferenceConversion(123)
-expect(validReference).toEqual({ ref: 'user-123', resolved: false })
-expect(invalidReference).toBeUndefined()
+      expect(batchResult.successful).toBe(1)
+      expect(batchResult.failed).toBe(3)
+      expect(batchResult.results).toHaveLength(4)
+    })
+
+    it('handles timestamp conversion errors', () => {
+      const validTimestamp = safeTimestampConversion('2024-01-15T10:30:00Z')
+      const invalidTimestamp = safeTimestampConversion('not a date')
+
+      expect(validTimestamp).toBeInstanceOf(Date)
+      expect(invalidTimestamp).toBeUndefined()
+    })
+
+    it('handles reference conversion errors', () => {
+      const validReference = safeReferenceConversion('user-123')
+      const invalidReference = safeReferenceConversion(123)
+
+      expect(validReference).toEqual({ ref: 'user-123', resolved: false })
+      expect(invalidReference).toBeUndefined()
+    })
+  })
+}
 ```
 
 ```typescript

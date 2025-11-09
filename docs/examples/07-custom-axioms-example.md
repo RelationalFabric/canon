@@ -78,92 +78,94 @@ const orderWithCustomFields = {
 }
 ```
 
-**Test: extracts email from customer entity** ✅
-
 ```typescript
-const email = emailOf(customerWithCustomFields)
-expect(email).toBe('alice@example.com')
-```
+if (import.meta.vitest) {
+  const { it, expect, describe } = import.meta.vitest
 
-**Test: validates email format** ✅
+  describe('Custom Axioms Examples', () => {
+    it('extracts email from customer entity', () => {
+      const email = emailOf(customerWithCustomFields)
+      expect(email).toBe('alice@example.com')
+    })
 
-```typescript
-const invalidCustomer = { ...customerWithCustomFields, email: 'invalid-email' }
-expect(() => emailOf(invalidCustomer)).toThrow('Invalid email format')
-```
+    it('validates email format', () => {
+      const invalidCustomer = { ...customerWithCustomFields, email: 'invalid-email' }
+      expect(() => emailOf(invalidCustomer)).toThrow('Invalid email format')
+    })
 
-**Test: converts currency from different formats** ✅
+    it('converts currency from different formats', () => {
+      // Test number conversion
+      const currency1 = currencyOf(99.99)
+      expect(currency1).toEqual({ amount: 99.99, currency: 'USD' })
 
-```typescript
-const currency1 = currencyOf(99.99)
-expect(currency1).toEqual({ amount: 99.99, currency: 'USD' })
-const currency2 = currencyOf('$150.50 USD')
-expect(currency2).toEqual({ amount: 150.5, currency: 'USD' })
-const currency3 = currencyOf({ amount: 200, currency: 'EUR' })
-expect(currency3).toEqual({ amount: 200, currency: 'EUR' })
-```
+      // Test string conversion
+      const currency2 = currencyOf('$150.50 USD')
+      expect(currency2).toEqual({ amount: 150.5, currency: 'USD' })
 
-**Test: extracts and validates status** ✅
+      // Test object (already canonical)
+      const currency3 = currencyOf({ amount: 200, currency: 'EUR' })
+      expect(currency3).toEqual({ amount: 200, currency: 'EUR' })
+    })
 
-```typescript
-const status = statusOf(customerWithCustomFields)
-expect(status).toBe('active')
-```
+    it('extracts and validates status', () => {
+      const status = statusOf(customerWithCustomFields)
+      expect(status).toBe('active')
+    })
 
-**Test: validates status transitions** ✅
+    it('validates status transitions', () => {
+      const invalidStatus = { ...customerWithCustomFields, status: 'invalid' }
+      expect(() => statusOf(invalidStatus)).toThrow('Invalid status')
+    })
 
-```typescript
-const invalidStatus = { ...customerWithCustomFields, status: 'invalid' }
-expect(() => statusOf(invalidStatus)).toThrow('Invalid status')
-```
+    it('converts priority from different formats', () => {
+      // Test string conversion
+      const priority1 = priorityOf('high')
+      expect(priority1).toEqual({ level: 3, label: 'high' })
 
-**Test: converts priority from different formats** ✅
+      // Test number conversion
+      const priority2 = priorityOf(2)
+      expect(priority2).toEqual({ level: 2, label: 'medium' })
 
-```typescript
-const priority1 = priorityOf('high')
-expect(priority1).toEqual({ level: 3, label: 'high' })
-const priority2 = priorityOf(2)
-expect(priority2).toEqual({ level: 2, label: 'medium' })
-const priority3 = priorityOf({ level: 4, label: 'critical' })
-expect(priority3).toEqual({ level: 4, label: 'critical' })
-```
+      // Test object (already canonical)
+      const priority3 = priorityOf({ level: 4, label: 'critical' })
+      expect(priority3).toEqual({ level: 4, label: 'critical' })
+    })
 
-**Test: processes customer registration with custom validation** ✅
+    it('processes customer registration with custom validation', () => {
+      const result = processCustomerRegistration(customerWithCustomFields)
 
-```typescript
-const result = processCustomerRegistration(customerWithCustomFields)
-expect(result.success).toBe(true)
-expect(result.customerId).toBe('cust-123')
-expect(result.email).toBe('alice@example.com')
-expect(result.status).toBe('active')
-expect(result.priority.level).toBe(3)
-```
+      expect(result.success).toBe(true)
+      expect(result.customerId).toBe('cust-123')
+      expect(result.email).toBe('alice@example.com')
+      expect(result.status).toBe('active')
+      expect(result.priority.level).toBe(3)
+    })
 
-**Test: calculates order total with currency conversion** ✅
+    it('calculates order total with currency conversion', () => {
+      const result = calculateOrderTotalWithCurrency(orderWithCustomFields)
 
-```typescript
-const result = calculateOrderTotalWithCurrency(orderWithCustomFields)
-expect(result.subtotal.amount).toBe(199.98)
-expect(result.tax.amount).toBeCloseTo(15.998, 2)
-expect(result.total.amount).toBeCloseTo(215.978, 2)
-expect(result.subtotal.currency).toBe('USD')
-```
+      expect(result.subtotal.amount).toBe(199.98)
+      expect(result.tax.amount).toBeCloseTo(15.998, 2)
+      expect(result.total.amount).toBeCloseTo(215.978, 2)
+      expect(result.subtotal.currency).toBe('USD')
+    })
 
-**Test: validates status transitions** ✅
+    it('validates status transitions', () => {
+      const result = updateEntityStatus(customerWithCustomFields, 'inactive')
 
-```typescript
-const result = updateEntityStatus(customerWithCustomFields, 'inactive')
-expect(result.success).toBe(true)
-expect(result.oldStatus).toBe('active')
-expect(result.newStatus).toBe('inactive')
-```
+      expect(result.success).toBe(true)
+      expect(result.oldStatus).toBe('active')
+      expect(result.newStatus).toBe('inactive')
+    })
 
-**Test: rejects invalid status transitions** ✅
+    it('rejects invalid status transitions', () => {
+      const result = updateEntityStatus(customerWithCustomFields, 'draft')
 
-```typescript
-const result = updateEntityStatus(customerWithCustomFields, 'draft')
-expect(result.success).toBe(false)
-expect(result.error).toContain('Invalid transition')
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('Invalid transition')
+    })
+  })
+}
 ```
 
 ```typescript

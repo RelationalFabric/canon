@@ -12,81 +12,82 @@ import {
 import { sampleCustomer, sampleOrder } from './domain-models.js'
 ```
 
-**Test: calculates order total correctly** ✅
-
 ```typescript
-const totals = calculateOrderTotal(sampleOrder)
-expect(totals.subtotal).toBe(199.98)
-expect(totals.discount).toBeCloseTo(19.998, 2)
-expect(totals.tax).toBeCloseTo(14.398, 2)
-expect(totals.total).toBeCloseTo(194.38, 2)
-expect(totals.currency).toBe('USD')
-```
+if (import.meta.vitest) {
+  const { it, expect, describe } = import.meta.vitest
 
-**Test: updates order status with version control** ✅
+  describe('Real-World Business Scenarios', () => {
+    it('calculates order total correctly', () => {
+      const totals = calculateOrderTotal(sampleOrder)
 
-```typescript
-const result = updateOrderStatus(sampleOrder, 'shipped')
-expect(result.success).toBe(true)
-expect(result.oldStatus).toBe('processing')
-expect(result.newVersion).toBe(3)
-```
+      expect(totals.subtotal).toBe(199.98)
+      expect(totals.discount).toBeCloseTo(19.998, 2)
+      expect(totals.tax).toBeCloseTo(14.398, 2)
+      expect(totals.total).toBeCloseTo(194.38, 2)
+      expect(totals.currency).toBe('USD')
+    })
 
-**Test: rejects invalid status transitions** ✅
+    it('updates order status with version control', () => {
+      const result = updateOrderStatus(sampleOrder, 'shipped')
 
-```typescript
-const result = updateOrderStatus(sampleOrder, 'pending')
-expect(result.success).toBe(false)
-expect(result.error).toContain('Invalid status transition')
-```
+      expect(result.success).toBe(true)
+      expect(result.oldStatus).toBe('processing')
+      expect(result.newVersion).toBe(3)
+    })
 
-**Test: generates order summary correctly** ✅
+    it('rejects invalid status transitions', () => {
+      const result = updateOrderStatus(sampleOrder, 'pending')
 
-```typescript
-const summary = generateOrderSummary(sampleOrder)
-expect(summary.orderId).toBe('order-789')
-expect(summary.status).toBe('processing')
-expect(summary.total).toBe(194.38)
-expect(summary.currency).toBe('USD')
-expect(summary.itemCount).toBe(1)
-expect(summary.customerId).toBe('cust-123')
-```
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('Invalid status transition')
+    })
 
-**Test: validates customer for order** ✅
+    it('generates order summary correctly', () => {
+      const summary = generateOrderSummary(sampleOrder)
 
-```typescript
-const validation = validateCustomerForOrder(sampleCustomer)
-expect(validation.valid).toBe(true)
-expect(validation.warnings).toHaveLength(0)
-expect(validation.errors).toHaveLength(0)
-```
+      expect(summary.orderId).toBe('order-789')
+      expect(summary.status).toBe('processing')
+      expect(summary.total).toBe(194.38)
+      expect(summary.currency).toBe('USD')
+      expect(summary.itemCount).toBe(1)
+      expect(summary.customerId).toBe('cust-123')
+    })
 
-**Test: validates customer with missing payment methods** ✅
+    it('validates customer for order', () => {
+      const validation = validateCustomerForOrder(sampleCustomer)
 
-```typescript
-const customerWithoutPayment = { ...sampleCustomer, paymentMethods: [] }
-const validation = validateCustomerForOrder(customerWithoutPayment)
-expect(validation.valid).toBe(true)
-expect(validation.warnings).toContain('Customer has no payment methods')
-```
+      expect(validation.valid).toBe(true)
+      expect(validation.warnings).toHaveLength(0)
+      expect(validation.errors).toHaveLength(0)
+    })
 
-**Test: processes complete order workflow** ✅
+    it('validates customer with missing payment methods', () => {
+      const customerWithoutPayment = { ...sampleCustomer, paymentMethods: [] }
+      const validation = validateCustomerForOrder(customerWithoutPayment)
 
-```typescript
-const pendingOrder = { ...sampleOrder, status: 'pending' }
-const workflow = processOrderWorkflow(sampleCustomer, pendingOrder)
-expect(workflow.success).toBe(true)
-expect(workflow.steps).toHaveLength(4)
-expect(workflow.steps.every(step => step.success)).toBe(true)
-```
+      expect(validation.valid).toBe(true)
+      expect(validation.warnings).toContain('Customer has no payment methods')
+    })
 
-**Test: handles workflow errors gracefully** ✅
+    it('processes complete order workflow', () => {
+      // Create a new order with 'pending' status for the workflow test
+      const pendingOrder = { ...sampleOrder, status: 'pending' }
+      const workflow = processOrderWorkflow(sampleCustomer, pendingOrder)
 
-```typescript
-const invalidCustomer = { id: 'invalid' }
-const workflow = processOrderWorkflow(invalidCustomer, sampleOrder)
-expect(workflow.success).toBe(false)
-expect(workflow.steps.some(step => !step.success)).toBe(true)
+      expect(workflow.success).toBe(true)
+      expect(workflow.steps).toHaveLength(4)
+      expect(workflow.steps.every(step => step.success)).toBe(true)
+    })
+
+    it('handles workflow errors gracefully', () => {
+      const invalidCustomer = { id: 'invalid' }
+      const workflow = processOrderWorkflow(invalidCustomer, sampleOrder)
+
+      expect(workflow.success).toBe(false)
+      expect(workflow.steps.some(step => !step.success)).toBe(true)
+    })
+  })
+}
 ```
 
 ```typescript

@@ -41,21 +41,24 @@ const userDocument = {
 const userId = idOf(userDocument)
 ```
 
-**Test: extracts _id from MongoDB documents** ✅
-
 ```typescript
-expect(userId).toBe('507f1f77bcf86cd799439011')
-```
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
 
-**Test: works with any MongoDB document structure** ✅
+  it('extracts _id from MongoDB documents', () => {
+    expect(userId).toBe('507f1f77bcf86cd799439011')
+  })
 
-```typescript
-const productDocument = {
+  it('works with any MongoDB document structure', () => {
+    const productDocument = {
       _id: 'abc123def456',
       title: 'Product Name',
       price: 29.99,
     }
-expect(idOf(productDocument)).toBe('abc123def456')
+
+    expect(idOf(productDocument)).toBe('abc123def456')
+  })
+}
 ```
 
 ---

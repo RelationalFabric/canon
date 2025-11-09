@@ -46,12 +46,13 @@ const user = {
 }
 
 const userId = idOf(user)
-```
 
-**Test: extracts ID from internal format using standard "id" field** ✅
-
-```typescript
-expect(userId).toBe('user-123')
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('extracts ID from internal format using standard "id" field', () => {
+    expect(userId).toBe('user-123')
+  })
+}
 ```
 
 Often you'll receive data from external APIs that use different conventions.
@@ -96,12 +97,13 @@ const jsonLdPerson = {
 }
 
 const personId = idOf(jsonLdPerson)
-```
 
-**Test: extracts ID from JSON-LD format using "@id" field** ✅
-
-```typescript
-expect(personId).toBe('https://example.com/users/jane-456')
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('extracts ID from JSON-LD format using "@id" field', () => {
+    expect(personId).toBe('https://example.com/users/jane-456')
+  })
+}
 ```
 
 The real power: write functions that work with ANY format.
@@ -125,13 +127,14 @@ const jsonLdProduct = {
 }
 
 const jsonLdDisplay = displayEntity(jsonLdProduct)
-```
 
-**Test: writes universal functions that work across both formats** ✅
-
-```typescript
-expect(internalDisplay).toBe('Entity with ID: product-789')
-expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
+if (import.meta.vitest) {
+  const { it, expect } = import.meta.vitest
+  it('writes universal functions that work across both formats', () => {
+    expect(internalDisplay).toBe('Entity with ID: product-789')
+    expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
+  })
+}
 ```
 
 ---
