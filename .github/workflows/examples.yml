@@ -6,10 +6,10 @@ on:
       - main
       - develop
     paths:
-      - 'examples/**'
+      - "examples/**"
       - scripts/generate-examples-docs.ts
       - package.json
-      - 'tsconfig*.json'
+      - "tsconfig*.json"
   workflow_dispatch:
 
 permissions:
@@ -34,10 +34,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linting and type checking
-        run: npm run check:all
       - name: Generate examples documentation
         run: npm run build:docs:examples
+
+      - name: Run linting and type checking
+        run: npm run check:all
 
       - name: Check for documentation changes
         id: verify-changed-files
