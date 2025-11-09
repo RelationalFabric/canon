@@ -80,6 +80,13 @@ Universal APIs provide **the interface** your application code uses:
 - Foundation for building data-centric applications
 - Type-safe operations and proven patterns
 
+#### Type Testing Utilities
+
+- Zero-runtime-cost compile-time type assertions
+- Guard against type regressions with `Expect<A, B>`
+- Document type expectations directly in code
+- Positive and negative type checks with `IsTrue` and `IsFalse`
+
 #### Curated Library Ecosystem
 
 Canon serves as a **canonical starting point** by providing:
@@ -302,6 +309,7 @@ Canon provides comprehensive documentation to help you understand and use the sy
 - **[API Reference](reference/api.md)** - Complete API documentation
 - **[Core Axioms](reference/axioms.md)** - Detailed axiom specifications
 - **[Canons Reference](reference/canons.md)** - Canon implementation guide
+- **[Type Testing Utilities](docs/type-testing/)** - Compile-time type assertions and invariants
 - **[Third-Party Integrations](reference/third-party.md)** - External library integrations
 
 ### Examples
