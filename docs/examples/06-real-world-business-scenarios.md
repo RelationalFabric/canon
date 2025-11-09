@@ -14,8 +14,6 @@ expect(totals.total).toBeCloseTo(194.38, 2)
 expect(totals.currency).toBe('USD')
 ```
 
-_Status:_ ✅ pass
-
 **updates order status with version control:**
 
 ```ts
@@ -26,8 +24,6 @@ expect(result.oldStatus).toBe('processing')
 expect(result.newVersion).toBe(3)
 ```
 
-_Status:_ ✅ pass
-
 **rejects invalid status transitions:**
 
 ```ts
@@ -36,8 +32,6 @@ const result = updateOrderStatus(sampleOrder, 'pending')
 expect(result.success).toBe(false)
 expect(result.error).toContain('Invalid status transition')
 ```
-
-_Status:_ ✅ pass
 
 **generates order summary correctly:**
 
@@ -52,8 +46,6 @@ expect(summary.itemCount).toBe(1)
 expect(summary.customerId).toBe('cust-123')
 ```
 
-_Status:_ ✅ pass
-
 **validates customer for order:**
 
 ```ts
@@ -64,8 +56,6 @@ expect(validation.warnings).toHaveLength(0)
 expect(validation.errors).toHaveLength(0)
 ```
 
-_Status:_ ✅ pass
-
 **validates customer with missing payment methods:**
 
 ```ts
@@ -75,8 +65,6 @@ const validation = validateCustomerForOrder(customerWithoutPayment)
 expect(validation.valid).toBe(true)
 expect(validation.warnings).toContain('Customer has no payment methods')
 ```
-
-_Status:_ ✅ pass
 
 **processes complete order workflow:**
 
@@ -90,8 +78,6 @@ expect(workflow.steps).toHaveLength(4)
 expect(workflow.steps.every(step => step.success)).toBe(true)
 ```
 
-_Status:_ ✅ pass
-
 **handles workflow errors gracefully:**
 
 ```ts
@@ -102,13 +88,11 @@ expect(workflow.success).toBe(false)
 expect(workflow.steps.some(step => !step.success)).toBe(true)
 ```
 
-_Status:_ ✅ pass
-
 ---
 
 ## References
 
-**Source:** `/Users/bahulneel/Projects/RelationalFabric/canon/examples/06-real-world-business-scenarios/index.ts`
+**Source:** `/home/runner/work/canon/canon/examples/06-real-world-business-scenarios/index.ts`
 
 ## Metadata
 

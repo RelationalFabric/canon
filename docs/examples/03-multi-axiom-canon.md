@@ -66,8 +66,6 @@ expect(userAnalysis.timestamps).toHaveLength(2)
 expect(userAnalysis.references).toHaveLength(1)
 ```
 
-_Status:_ ✅ pass
-
 **The product analysis also extracts all axioms.:**
 
 ```ts
@@ -77,8 +75,6 @@ expect(productAnalysis.version).toBe(12)
 expect(productAnalysis.timestamps).toHaveLength(2)
 expect(productAnalysis.references).toHaveLength(1)
 ```
-
-_Status:_ ✅ pass
 
 ## Processing Updates
 
@@ -97,8 +93,6 @@ expect(update.newVersion).toBe(13)
 expect(update.updatedAt).toBeInstanceOf(Date)
 ```
 
-_Status:_ ✅ pass
-
 ## Working with Timestamps and References
 
 Canon provides flexible conversion utilities for timestamps and references.
@@ -109,15 +103,11 @@ Canon provides flexible conversion utilities for timestamps and references.
 expect(() => demonstrateTimestampConversion()).not.toThrow()
 ```
 
-_Status:_ ✅ pass
-
 **The reference utilities demonstrate conversion patterns.:**
 
 ```ts
 expect(() => demonstrateReferenceConversion()).not.toThrow()
 ```
-
-_Status:_ ✅ pass
 
 ## Key Takeaways
 
@@ -131,7 +121,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/Users/bahulneel/Projects/RelationalFabric/canon/examples/03-multi-axiom-canon/index.ts`
+**Source:** `/home/runner/work/canon/canon/examples/03-multi-axiom-canon/index.ts`
 
 ## Metadata
 
