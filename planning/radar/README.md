@@ -45,4 +45,4 @@ if (!result.isValid) {
 
 ## Radar Methodology
 
-See [../../radar-methodology.md](../../radar-methodology.md) for detailed information about how we maintain and update the radar.
+See [./methodology.md](./methodology.md) for detailed information about how we maintain and update the radar.

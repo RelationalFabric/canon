@@ -322,7 +322,7 @@ Canon provides comprehensive documentation to help you understand and use the sy
 ### Architecture
 
 - **[ADRs](docs/adrs/)** - Architecture Decision Records
-- **[Technology Radar](docs/radar-methodology.md)** - Technology assessment methodology
+- **[Technology Radar](planning/radar/methodology.md)** - Technology assessment methodology
 
 ## License
 
