@@ -1,8 +1,8 @@
 /**
- * Real-World Business Scenarios Usage Examples
- *
- * This file demonstrates practical business scenarios using Canon's
- * universal type system in real-world applications.
+ * @document.title Real-World Business Scenarios
+ * @document.description Practical business logic implementation using Canon for order processing, customer management, and workflows
+ * @document.keywords business-logic, order-processing, workflow, e-commerce, domain-models
+ * @document.difficulty advanced
  */
 
 import {

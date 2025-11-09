@@ -37,13 +37,16 @@ export const mongoDbCanon = defineCanon({
   },
 })
 
-// Test: defineCanon creates the expected structure
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
 
-  it('creates a reusable MongoDB canon configuration', () => {
+  it('The canon uses "_id" as the Id key.', () => {
     expect(mongoDbCanon.axioms.Id.key).toBe('_id')
-    expect((mongoDbCanon.axioms.Id.$meta as any).type).toBe('objectid')
-    expect((mongoDbCanon.axioms.Id.$meta as any).format).toBe('hex')
+  })
+
+  it('The canon metadata specifies objectid type and hex format.', () => {
+    const meta = mongoDbCanon.axioms.Id.$meta as Record<string, unknown>
+    expect(meta.type).toBe('objectid')
+    expect(meta.format).toBe('hex')
   })
 }

@@ -10,6 +10,13 @@ on:
       - reopened
       - synchronize
       - ready_for_review
+  workflow_run:
+    workflows: [Examples Build and Deploy, Update ADR Index]
+    types:
+      - completed
+    branches-ignore:
+      - main
+      - develop
 
 permissions:
   contents: read
@@ -22,19 +29,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if PR context
+        id: pr-check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            # Check if the commit is part of an open PR
+            PR_COUNT=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '. | length')
+            if [ "$PR_COUNT" -eq "0" ]; then
+              echo "skip=true" >> $GITHUB_OUTPUT
+              echo "No open PR for this branch, skipping checks"
+            else
+              echo "skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout code
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
 
       - name: Install dependencies
+        if: steps.pr-check.outputs.skip != 'true'
         run: npm ci
 
       - name: Run TypeScript type checking
+        if: steps.pr-check.outputs.skip != 'true'
         run: npx tsc --noEmit --pretty false 2>&1 | tee typescript.log || true
 
       - name: Setup reviewdog for TypeScript
@@ -65,22 +94,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if PR context
+        id: pr-check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            PR_COUNT=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '. | length')
+            if [ "$PR_COUNT" -eq "0" ]; then
+              echo "skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout code
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
 
       - name: Install dependencies
+        if: steps.pr-check.outputs.skip != 'true'
         run: npm ci
 
       - name: Check for outdated dependencies
+        if: steps.pr-check.outputs.skip != 'true'
         run: npm outdated || true
 
       - name: Check for unused dependencies
+        if: steps.pr-check.outputs.skip != 'true'
         run: npx depcheck --ignores="@types/*,vitest,tsx,chokidar-cli,npm-run-all,adr-tools,vitepress" || true
 
   test:
@@ -88,19 +138,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if PR context
+        id: pr-check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            PR_COUNT=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '. | length')
+            if [ "$PR_COUNT" -eq "0" ]; then
+              echo "skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout code
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
 
       - name: Install dependencies
+        if: steps.pr-check.outputs.skip != 'true'
         run: npm ci
 
       - name: Run tests
+        if: steps.pr-check.outputs.skip != 'true'
         run: npm test
 
   coverage:
@@ -108,24 +178,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if PR context
+        id: pr-check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            PR_COUNT=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '. | length')
+            if [ "$PR_COUNT" -eq "0" ]; then
+              echo "skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout code
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        if: steps.pr-check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
 
       - name: Install dependencies
+        if: steps.pr-check.outputs.skip != 'true'
         run: npm ci
 
       - name: Run tests with coverage
+        if: steps.pr-check.outputs.skip != 'true'
         run: npm run check:test:coverage
 
       - name: Upload coverage reports
+        if: steps.pr-check.outputs.skip != 'true'
         uses: codecov/codecov-action@v4
-        if: always()
         continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

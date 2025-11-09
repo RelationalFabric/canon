@@ -6,10 +6,12 @@ on:
       - main
       - develop
     paths:
-      - 'examples/**'
+      - examples/**
       - scripts/generate-examples-docs.ts
+      - scripts/examples/**
       - package.json
-      - 'tsconfig*.json'
+      - tsconfig*.json
+      - .github/workflows/examples.yml
   workflow_dispatch:
 
 permissions:
@@ -34,10 +36,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linting and type checking
-        run: npm run check:all
+      - name: Generate JSON test report
+        run: npm run check:test:json || true
+
       - name: Generate examples documentation
         run: npm run build:docs:examples
+
+      - name: Run linting and type checking
+        run: npm run check:all:fix
 
       - name: Check for documentation changes
         id: verify-changed-files
@@ -55,7 +61,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add docs/examples/README.md
+          git add -A
           git commit -m "docs: auto-update examples documentation
 
           - Updated examples documentation from source files
