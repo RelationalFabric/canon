@@ -1,8 +1,8 @@
 /**
- * Format Conversion Usage Examples
- *
- * This file demonstrates how to use Canon's format conversion capabilities
- * with real-world examples across different data formats.
+ * @document.title Format Conversion Examples
+ * @document.description Converting data between different formats (REST API, MongoDB, JSON-LD) using Canon's universal type system
+ * @document.keywords format-conversion, rest-api, mongodb, json-ld, transformation
+ * @document.difficulty intermediate
  */
 
 import { idOf, typeOf, versionOf } from '@relational-fabric/canon'

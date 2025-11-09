@@ -1,8 +1,8 @@
 /**
- * Custom Axioms Usage Examples
- *
- * This file demonstrates how to use custom axioms in real-world scenarios
- * with comprehensive examples and testing.
+ * @document.title Custom Axioms
+ * @document.description Creating and using custom axioms (Email, Currency, Status, Priority) for domain-specific requirements
+ * @document.keywords custom-axioms, domain-specific, email, currency, status, priority
+ * @document.difficulty advanced
  */
 
 import {
