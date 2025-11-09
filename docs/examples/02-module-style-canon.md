@@ -122,8 +122,6 @@ const userId = idOf(userDocument) // Returns: "507f1f77bcf86cd799439011"
 expect(userId).toBe('507f1f77bcf86cd799439011')
 ```
 
-_Status:_ ✅ pass
-
 **The function works with any MongoDB document structure.:**
 
 ```ts
@@ -135,8 +133,6 @@ const productDocument = {
 
 expect(idOf(productDocument)).toBe('abc123def456')
 ```
-
-_Status:_ ✅ pass
 
 ## Key Takeaways
 
@@ -151,7 +147,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/Users/bahulneel/Projects/RelationalFabric/canon/examples/02-module-style-canon/index.ts`
+**Source:** `/home/runner/work/canon/canon/examples/02-module-style-canon/index.ts`
 
 **Referenced files:**
 - `./mongodb-canon.ts`

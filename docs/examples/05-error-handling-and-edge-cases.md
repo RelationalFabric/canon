@@ -68,8 +68,6 @@ expect(type).toBe('user')
 expect(version).toBe(5)
 ```
 
-_Status:_ ✅ pass
-
 **handles missing fields gracefully:**
 
 ```ts
@@ -81,8 +79,6 @@ expect(id).toBeUndefined()
 expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
-
-_Status:_ ✅ pass
 
 **handles wrong field types gracefully:**
 
@@ -97,8 +93,6 @@ expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
 
-_Status:_ ✅ pass
-
 **handles null and undefined values:**
 
 ```ts
@@ -112,8 +106,6 @@ expect(type).toBeUndefined()
 expect(version).toBe(0)
 ```
 
-_Status:_ ✅ pass
-
 **handles empty objects:**
 
 ```ts
@@ -126,8 +118,6 @@ expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
 
-_Status:_ ✅ pass
-
 **handles non-object values:**
 
 ```ts
@@ -139,8 +129,6 @@ expect(id).toBeUndefined()
 expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
-
-_Status:_ ✅ pass
 
 **validates entities correctly:**
 
@@ -155,8 +143,6 @@ expect(invalidResult.isValid).toBe(false)
 expect(invalidResult.errors.length).toBeGreaterThan(0)
 ```
 
-_Status:_ ✅ pass
-
 **processes entities safely:**
 
 ```ts
@@ -170,8 +156,6 @@ expect(invalidResult.success).toBe(false)
 expect(invalidResult.errors.length).toBeGreaterThan(0)
 ```
 
-_Status:_ ✅ pass
-
 **processes batch entities correctly:**
 
 ```ts
@@ -181,8 +165,6 @@ expect(batchResult.successful).toBe(1)
 expect(batchResult.failed).toBe(3)
 expect(batchResult.results).toHaveLength(4)
 ```
-
-_Status:_ ✅ pass
 
 **handles timestamp conversion errors:**
 
@@ -194,8 +176,6 @@ expect(validTimestamp).toBeInstanceOf(Date)
 expect(invalidTimestamp).toBeUndefined()
 ```
 
-_Status:_ ✅ pass
-
 **handles reference conversion errors:**
 
 ```ts
@@ -206,13 +186,11 @@ expect(validReference).toEqual({ ref: 'user-123', resolved: false })
 expect(invalidReference).toBeUndefined()
 ```
 
-_Status:_ ✅ pass
-
 ---
 
 ## References
 
-**Source:** `/Users/bahulneel/Projects/RelationalFabric/canon/examples/05-error-handling-and-edge-cases/index.ts`
+**Source:** `/home/runner/work/canon/canon/examples/05-error-handling-and-edge-cases/index.ts`
 
 ## Metadata
 

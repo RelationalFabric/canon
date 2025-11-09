@@ -64,8 +64,6 @@ const userId = idOf(user)
 expect(userId).toBe('user-123')
 ```
 
-_Status:_ ✅ pass
-
 ## Supporting External Data Formats
 
 Often you'll receive data from external APIs that use different conventions. JSON-LD, for example, uses `@id` instead of `id`. Let's add support for it.
@@ -115,8 +113,6 @@ const personId = idOf(jsonLdPerson)
 expect(personId).toBe('https://example.com/users/jane-456')
 ```
 
-_Status:_ ✅ pass
-
 ## Writing Universal Code
 
 The real power: write functions that work with **any** format. You don't need to check which format the data is in or write conditional logic. Canon handles it for you.
@@ -146,15 +142,11 @@ const jsonLdDisplay = displayEntity(jsonLdProduct)
 expect(internalDisplay).toBe('Entity with ID: product-789')
 ```
 
-_Status:_ ✅ pass
-
 **The same function returns the full IRI for the JSON-LD format.:**
 
 ```ts
 expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
 ```
-
-_Status:_ ✅ pass
 
 ## Key Takeaways
 
@@ -168,7 +160,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/Users/bahulneel/Projects/RelationalFabric/canon/examples/01-basic-id-axiom.ts`
+**Source:** `/home/runner/work/canon/canon/examples/01-basic-id-axiom.ts`
 
 ## Metadata
 
