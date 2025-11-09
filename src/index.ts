@@ -26,5 +26,8 @@ export * from './types/index.js'
 export * from './utils/guards.js'
 export * from './utils/objects.js'
 
+// Metadata helpers
+export * from './meta.js'
+
 // Opinionated kit exports
 export * from './kit.js'

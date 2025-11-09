@@ -96,6 +96,7 @@
     "@antfu/eslint-config": "^3.0.0",
     "@tsconfig/node-lts": "^20.0.0",
     "object-hash": "^3.0.0",
+    "reflect-metadata": "^0.1.13",
     "yaml": "^2.4.1"
   },
   "optionalDependencies": {
