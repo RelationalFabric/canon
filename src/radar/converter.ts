@@ -71,8 +71,7 @@ export function convertYamlFileToCsv(yamlPath: string, csvPath: string): void {
     // Write CSV file
     writeFileSync(csvPath, csvContent)
     // Success: Converted YAML to CSV
-  }
-  catch (error) {
+  } catch (error) {
     console.error(
       '❌ Error converting YAML to CSV:',
       error instanceof Error ? error.message : 'Unknown error',

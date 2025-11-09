@@ -62,8 +62,7 @@ export function loadTestReport(reportPath: string): VitestReport | null {
     }
 
     return report as VitestReport
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       `⚠️ Failed to load Vitest report at ${reportPath}:`,
       error instanceof Error ? error.message : String(error),

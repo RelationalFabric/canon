@@ -255,8 +255,7 @@ function replaceDirectory(tempDir: string, targetDir: string): void {
     if (existsSync(backupDir)) {
       rmSync(backupDir, { recursive: true, force: true })
     }
-  }
-  catch (error) {
+  } catch (error) {
     if (!existsSync(targetDir) && existsSync(backupDir)) {
       renameSync(backupDir, targetDir)
     }
@@ -291,6 +290,8 @@ async function main(): Promise<void> {
   if (!testReport) {
     console.warn('⚠️ No Vitest JSON report found. Test status will be omitted.')
     console.warn('   Run `npm run check:test:json` before generating documentation to include test status.')
+  } else {
+    console.log('🔍 Vitest JSON report found.')
   }
 
   // Create temporary staging directory
@@ -339,8 +340,7 @@ async function main(): Promise<void> {
       const description = example.description || 'No description'
       console.log(`  - ${example.name}: ${description}`)
     }
-  }
-  finally {
+  } finally {
     if (existsSync(tmpBaseDir)) {
       rmSync(tmpBaseDir, { recursive: true, force: true })
     }

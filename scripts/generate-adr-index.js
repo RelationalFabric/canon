@@ -70,8 +70,7 @@ function extractAdrInfo(filePath) {
       color: statusColors[status],
       label: statusLabels[status],
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error(`Error reading ${filePath}:`, error.message)
     return null
   }
@@ -113,8 +112,7 @@ function updateReadme(adrTable) {
 
   try {
     readmeContent = readFileSync(readmePath, 'utf-8')
-  }
-  catch (readError) {
+  } catch (readError) {
     console.warn(
       'ℹ️  ADR README not found, generating a fresh one.',
       readError instanceof Error ? readError.message : String(readError),
@@ -183,8 +181,7 @@ function main() {
     Object.entries(statusCounts).forEach(([status, count]) => {
       console.log(`  ${statusColors[status]} ${statusLabels[status]}: ${count}`)
     })
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error:', error.message)
     process.exit(1)
   }

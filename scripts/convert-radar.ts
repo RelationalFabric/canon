@@ -9,8 +9,7 @@ function main() {
       './planning/radar/data.yaml',
       './.vitepress/public/planning/radar/data.csv',
     )
-  }
-  catch (error) {
+  } catch (error) {
     console.error(
       '❌ Error converting radar data:',
       error instanceof Error ? error.message : 'Unknown error',

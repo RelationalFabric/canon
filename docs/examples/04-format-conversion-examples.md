@@ -4,37 +4,37 @@ Converting data between different formats (REST API, MongoDB, JSON-LD) using Can
 
 ```ts
 const restApiUser = {
-  id: 'user-123',
-  type: 'user',
-  version: 5,
-  createdAt: new Date('2024-01-15T10:30:00Z'),
-  updatedAt: new Date('2024-01-20T14:45:00Z'),
-  profile: { name: 'Alice Johnson', email: 'alice@example.com' },
-  createdBy: 'admin-456',
+id: 'user-123',
+type: 'user',
+version: 5,
+createdAt: new Date('2024-01-15T10:30:00Z'),
+updatedAt: new Date('2024-01-20T14:45:00Z'),
+profile: { name: 'Alice Johnson', email: 'alice@example.com' },
+createdBy: 'admin-456',
 }
 ```
 
 ```ts
 const mongoDbUser = {
-  _id: '507f1f77bcf86cd799439011',
-  _type: 'User',
-  _version: 6,
-  created_at: 1705314600000,
-  updated_at: 1705761900000,
-  profile: { name: 'Bob Smith', email: 'bob@example.com' },
-  createdBy: 'admin-789',
+_id: '507f1f77bcf86cd799439011',
+_type: 'User',
+_version: 6,
+created_at: 1705314600000,
+updated_at: 1705761900000,
+profile: { name: 'Bob Smith', email: 'bob@example.com' },
+createdBy: 'admin-789',
 }
 ```
 
 ```ts
 const jsonLdUser = {
-  '@id': 'https://api.example.com/users/user-123',
-  '@type': 'https://schema.org/Person',
-  '@version': '5-updated',
-  'created_at': '2024-01-15T10:30:00Z',
-  'updated_at': '2024-01-20T14:45:00Z',
-  'profile': { name: 'Carol Davis', email: 'carol@example.com' },
-  'createdBy': 'admin-123',
+'@id': 'https://api.example.com/users/user-123',
+'@type': 'https://schema.org/Person',
+'@version': '5-updated',
+'created_at': '2024-01-15T10:30:00Z',
+'updated_at': '2024-01-20T14:45:00Z',
+'profile': { name: 'Carol Davis', email: 'carol@example.com' },
+'createdBy': 'admin-123',
 }
 ```
 
@@ -159,7 +159,7 @@ _Status:_ ✅ pass
 
 ## References
 
-**Source:** `/home/runner/work/canon/canon/examples/04-format-conversion-examples/index.ts`
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/04-format-conversion-examples/index.ts)
 
 ## Metadata
 

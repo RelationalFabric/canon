@@ -231,8 +231,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
         if (range.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
           if (commentText.startsWith('/*') && !commentText.startsWith('/**'))
             items.push({ line: lineStart, type: 'block-comment', data: { text: commentText, range } })
-        }
-        else if (range.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
+        } else if (range.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
           items.push({ line: lineStart, type: 'line-comment', data: { text: commentText, line: lineStart } })
         }
       }
@@ -258,8 +257,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
     if (item.type === 'fence-start') {
       inFence = true
       processedLines.add(item.line)
-    }
-    else if (item.type === 'fence-end') {
+    } else if (item.type === 'fence-end') {
       const { start, end } = item.data as { start: number, end: number }
       const code = lines.slice(start + 1, end).join('\n').trim()
       if (code) {
@@ -268,8 +266,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
           processedLines.add(i)
       }
       inFence = false
-    }
-    else if (!inFence) {
+    } else if (!inFence) {
       if (item.type === 'block-comment') {
         const { text, range } = item.data as { text: string, range: ts.CommentRange }
         const lineStart = sourceFile.getLineAndCharacterOfPosition(range.pos).line
@@ -282,8 +279,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
           sections.push({ type: 'prose', content })
 
         processedLines.add(lineStart)
-      }
-      else if (item.type === 'line-comment') {
+      } else if (item.type === 'line-comment') {
         const { line: lineNum } = item.data as { text: string, line: number }
         if (processedLines.has(lineNum))
           continue
@@ -304,8 +300,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
           processedLines.add(lineNum)
           continue
         }
-      }
-      else if (item.type === 'node') {
+      } else if (item.type === 'node') {
         const node = item.data as ts.Node
         const nodeLine = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line
 

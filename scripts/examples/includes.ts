@@ -102,8 +102,7 @@ export function loadIncludedFile(absolutePath: string): string | null {
 
   try {
     return readFileSync(absolutePath, 'utf-8')
-  }
-  catch (error) {
+  } catch (error) {
     console.warn(
       `⚠️ Failed to read included file ${absolutePath}:`,
       error instanceof Error ? error.message : String(error),
