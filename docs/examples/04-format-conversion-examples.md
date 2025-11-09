@@ -61,6 +61,8 @@ expect(version).toBe(5)
 expect(timestamps).toHaveLength(2)
 ```
 
+_Status:_ ✅ pass
+
 **processes MongoDB user correctly:**
 
 ```ts
@@ -83,6 +85,8 @@ expect(type).toBe('User')
 expect(version).toBe(6)
 expect(timestamps).toHaveLength(2)
 ```
+
+_Status:_ ✅ pass
 
 **processes JSON-LD user correctly:**
 
@@ -107,6 +111,8 @@ expect(version).toBe('5-updated')
 expect(timestamps).toHaveLength(2)
 ```
 
+_Status:_ ✅ pass
+
 **handles invalid data gracefully:**
 
 ```ts
@@ -118,6 +124,8 @@ expect(() => idOf(invalidData)).toThrow('Expected string ID, got undefined')
 expect(() => typeOf(invalidData)).toThrow('Expected string type, got undefined')
 ```
 
+_Status:_ ✅ pass
+
 **handles partial data gracefully:**
 
 ```ts
@@ -127,6 +135,8 @@ const partialData = { id: 'user-123' }
 expect(() => typeOf(partialData)).toThrow('Expected string type, got undefined')
 ```
 
+_Status:_ ✅ pass
+
 **demonstrates format conversion:**
 
 ```ts
@@ -134,12 +144,16 @@ expect(() => typeOf(partialData)).toThrow('Expected string type, got undefined')
 expect(() => demonstrateFormatConversion()).not.toThrow()
 ```
 
+_Status:_ ✅ pass
+
 **demonstrates error handling:**
 
 ```ts
 // This test just ensures the function runs without error
 expect(() => demonstrateErrorHandling()).not.toThrow()
 ```
+
+_Status:_ ✅ pass
 
 ---
 
