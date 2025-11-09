@@ -2,7 +2,8 @@
  * Object type definitions for Canon
  */
 
-import { type Expect, invariant } from '../testing.js'
+import type { Expect } from '../testing.js'
+import { invariant } from '../testing.js'
 
 /**
  * Plain old JavaScript object type

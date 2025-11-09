@@ -110,6 +110,6 @@ The solution includes:
 
 ## References
 
-- [Generated Examples Documentation](/docs/examples/README.md)
+- [Generated Examples Documentation](/docs/examples/)
 - [Documentation Generation Script](/scripts/generate-examples-docs.ts)
 - [Example Files](/examples/)

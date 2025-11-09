@@ -3,6 +3,7 @@
  */
 
 import type { QuadrantKey, RadarData, RingKey } from '../types/radar.js'
+import { parseYaml } from '../kit.js'
 
 const VALID_QUADRANTS: QuadrantKey[] = [
   'tools-libraries',
@@ -288,10 +289,9 @@ function validateRadarEntry(
 export async function validateRadarFile(filePath: string): Promise<ValidationResult> {
   try {
     const fs = await import('node:fs')
-    const yaml = await import('yaml')
 
     const yamlContent = fs.readFileSync(filePath, 'utf8')
-    const data = yaml.parse(yamlContent) as RadarData
+    const data = parseYaml(yamlContent) as RadarData
 
     return validateRadarData(data)
   } catch (error) {

@@ -177,3 +177,45 @@ interface Axiom<T extends AxiomDefinition, C extends AxiomConfig> {
 ```
 
 Axiom type that pairs axiom definition with configuration.
+
+## Kit Utilities
+
+### `createEslintConfig(options?, ...configs)`
+
+```typescript
+function createEslintConfig(options?: Record<string, unknown>, ...configs: object[]): object
+```
+
+Factory that wraps `@antfu/eslint-config`, applying Canon defaults and merging any additional configuration.
+
+### `defu`
+
+```typescript
+import { defu } from '@relational-fabric/canon'
+```
+
+Re-export of [`defu`](https://github.com/unjs/defu) for deep configuration merging.
+
+### `parseYaml`
+
+```typescript
+import { parseYaml } from '@relational-fabric/canon'
+```
+
+Alias for [`yaml.parse`](https://github.com/eemeli/yaml) used for Canon's radar tooling.
+
+### `objectHash(value, options?)`
+
+```typescript
+import { objectHash } from '@relational-fabric/canon'
+```
+
+Re-export of the default export from [`object-hash`](https://github.com/puleos/object-hash), providing stable hash generation.
+
+### `Immutable`
+
+```typescript
+import { Immutable } from '@relational-fabric/canon'
+```
+
+Namespace export of [`immutable`](https://github.com/immutable-js/immutable-js), exposing persistent data structures through the Kit surface.

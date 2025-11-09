@@ -68,11 +68,11 @@ export function updateOrderStatus(
   order: unknown,
   newStatus: string,
 ): {
-    success: boolean
-    oldStatus?: string
-    newVersion?: number | string
-    error?: string
-  } {
+  success: boolean
+  oldStatus?: string
+  newVersion?: number | string
+  error?: string
+} {
   try {
     const orderId = idOf(order as Satisfies<'Id'>)
     const currentVersion = versionOf(order as Satisfies<'Version'>)
@@ -233,14 +233,14 @@ export function processOrderWorkflow(
   customer: unknown,
   order: unknown,
 ): {
+  success: boolean
+  steps: Array<{
+    step: string
     success: boolean
-    steps: Array<{
-      step: string
-      success: boolean
-      message: string
-    }>
-    finalOrder?: unknown
-  } {
+    message: string
+  }>
+  finalOrder?: unknown
+} {
   const steps: Array<{ step: string, success: boolean, message: string }> = []
 
   try {

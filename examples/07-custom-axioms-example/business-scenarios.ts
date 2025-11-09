@@ -161,11 +161,11 @@ export function updateEntityStatus(
   entity: unknown,
   newStatus: string,
 ): {
-    success: boolean
-    oldStatus?: string
-    newStatus?: string
-    error?: string
-  } {
+  success: boolean
+  oldStatus?: string
+  newStatus?: string
+  error?: string
+} {
   try {
     const currentStatus = statusOf(entity as Satisfies<'Status'>)
     const entityId = idOf(entity as Satisfies<'Id'>)

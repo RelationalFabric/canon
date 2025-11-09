@@ -2,7 +2,8 @@
  * Type guard utilities for Canon type system
  */
 
-import { type Expect, invariant } from '../testing.js'
+import type { Expect } from '../testing.js'
+import { invariant } from '../testing.js'
 
 /**
  * Type guard pattern that preserves specific types when narrowing

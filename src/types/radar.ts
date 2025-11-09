@@ -2,7 +2,8 @@
  * Technology Radar data structures and types
  */
 
-import { type Expect, invariant } from '../testing.js'
+import type { Expect } from '../testing.js'
+import { invariant } from '../testing.js'
 
 export interface RadarEntry {
   /** The name of the technology or practice */
@@ -83,11 +84,11 @@ export interface CsvRow {
   description: string
 }
 
-export type QuadrantKey =
-  | 'tools-libraries'
-  | 'techniques-patterns'
-  | 'features-capabilities'
-  | 'data-structures-formats'
+export type QuadrantKey
+  = | 'tools-libraries'
+    | 'techniques-patterns'
+    | 'features-capabilities'
+    | 'data-structures-formats'
 export type RingKey = 'adopt' | 'trial' | 'assess' | 'hold'
 
 // ---------------------------------------------------------------------------

@@ -5,8 +5,9 @@
  * (like ID, type, version) that can be found in different data structures.
  */
 
+import type { Expect } from '../testing.js'
 import type { TypeGuard } from './guards.js'
-import { type Expect, invariant } from '../testing.js'
+import { invariant } from '../testing.js'
 
 /**
  * Base axiom type that merges configuration with metadata
