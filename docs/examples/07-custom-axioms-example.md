@@ -66,7 +66,7 @@ const orderWithCustomFields = {
 
 ```ts
 const email = emailOf(customerWithCustomFields)
-      expect(email).toBe('alice@example.com')
+expect(email).toBe('alice@example.com')
 ```
 
 _Status:_ ✅ pass
@@ -75,7 +75,7 @@ _Status:_ ✅ pass
 
 ```ts
 const invalidCustomer = { ...customerWithCustomFields, email: 'invalid-email' }
-      expect(() => emailOf(invalidCustomer)).toThrow('Invalid email format')
+expect(() => emailOf(invalidCustomer)).toThrow('Invalid email format')
 ```
 
 _Status:_ ✅ pass
@@ -84,16 +84,16 @@ _Status:_ ✅ pass
 
 ```ts
 // Test number conversion
-      const currency1 = currencyOf(99.99)
-      expect(currency1).toEqual({ amount: 99.99, currency: 'USD' })
+const currency1 = currencyOf(99.99)
+expect(currency1).toEqual({ amount: 99.99, currency: 'USD' })
 
-      // Test string conversion
-      const currency2 = currencyOf('$150.50 USD')
-      expect(currency2).toEqual({ amount: 150.5, currency: 'USD' })
+// Test string conversion
+const currency2 = currencyOf('$150.50 USD')
+expect(currency2).toEqual({ amount: 150.5, currency: 'USD' })
 
-      // Test object (already canonical)
-      const currency3 = currencyOf({ amount: 200, currency: 'EUR' })
-      expect(currency3).toEqual({ amount: 200, currency: 'EUR' })
+// Test object (already canonical)
+const currency3 = currencyOf({ amount: 200, currency: 'EUR' })
+expect(currency3).toEqual({ amount: 200, currency: 'EUR' })
 ```
 
 _Status:_ ✅ pass
@@ -102,7 +102,7 @@ _Status:_ ✅ pass
 
 ```ts
 const status = statusOf(customerWithCustomFields)
-      expect(status).toBe('active')
+expect(status).toBe('active')
 ```
 
 _Status:_ ✅ pass
@@ -111,7 +111,7 @@ _Status:_ ✅ pass
 
 ```ts
 const invalidStatus = { ...customerWithCustomFields, status: 'invalid' }
-      expect(() => statusOf(invalidStatus)).toThrow('Invalid status')
+expect(() => statusOf(invalidStatus)).toThrow('Invalid status')
 ```
 
 _Status:_ ✅ pass
@@ -120,16 +120,16 @@ _Status:_ ✅ pass
 
 ```ts
 // Test string conversion
-      const priority1 = priorityOf('high')
-      expect(priority1).toEqual({ level: 3, label: 'high' })
+const priority1 = priorityOf('high')
+expect(priority1).toEqual({ level: 3, label: 'high' })
 
-      // Test number conversion
-      const priority2 = priorityOf(2)
-      expect(priority2).toEqual({ level: 2, label: 'medium' })
+// Test number conversion
+const priority2 = priorityOf(2)
+expect(priority2).toEqual({ level: 2, label: 'medium' })
 
-      // Test object (already canonical)
-      const priority3 = priorityOf({ level: 4, label: 'critical' })
-      expect(priority3).toEqual({ level: 4, label: 'critical' })
+// Test object (already canonical)
+const priority3 = priorityOf({ level: 4, label: 'critical' })
+expect(priority3).toEqual({ level: 4, label: 'critical' })
 ```
 
 _Status:_ ✅ pass
@@ -139,11 +139,11 @@ _Status:_ ✅ pass
 ```ts
 const result = processCustomerRegistration(customerWithCustomFields)
 
-      expect(result.success).toBe(true)
-      expect(result.customerId).toBe('cust-123')
-      expect(result.email).toBe('alice@example.com')
-      expect(result.status).toBe('active')
-      expect(result.priority.level).toBe(3)
+expect(result.success).toBe(true)
+expect(result.customerId).toBe('cust-123')
+expect(result.email).toBe('alice@example.com')
+expect(result.status).toBe('active')
+expect(result.priority.level).toBe(3)
 ```
 
 _Status:_ ✅ pass
@@ -153,10 +153,10 @@ _Status:_ ✅ pass
 ```ts
 const result = calculateOrderTotalWithCurrency(orderWithCustomFields)
 
-      expect(result.subtotal.amount).toBe(199.98)
-      expect(result.tax.amount).toBeCloseTo(15.998, 2)
-      expect(result.total.amount).toBeCloseTo(215.978, 2)
-      expect(result.subtotal.currency).toBe('USD')
+expect(result.subtotal.amount).toBe(199.98)
+expect(result.tax.amount).toBeCloseTo(15.998, 2)
+expect(result.total.amount).toBeCloseTo(215.978, 2)
+expect(result.subtotal.currency).toBe('USD')
 ```
 
 _Status:_ ✅ pass
@@ -166,9 +166,9 @@ _Status:_ ✅ pass
 ```ts
 const result = updateEntityStatus(customerWithCustomFields, 'inactive')
 
-      expect(result.success).toBe(true)
-      expect(result.oldStatus).toBe('active')
-      expect(result.newStatus).toBe('inactive')
+expect(result.success).toBe(true)
+expect(result.oldStatus).toBe('active')
+expect(result.newStatus).toBe('inactive')
 ```
 
 _Status:_ ✅ pass
@@ -178,8 +178,8 @@ _Status:_ ✅ pass
 ```ts
 const result = updateEntityStatus(customerWithCustomFields, 'draft')
 
-      expect(result.success).toBe(false)
-      expect(result.error).toContain('Invalid transition')
+expect(result.success).toBe(false)
+expect(result.error).toContain('Invalid transition')
 ```
 
 _Status:_ ✅ pass

@@ -38,7 +38,7 @@ jobs:
         run: npm run build:docs:examples
 
       - name: Run linting and type checking
-        run: npm run check:all
+        run: npm run check:all:fix
 
       - name: Check for documentation changes
         id: verify-changed-files

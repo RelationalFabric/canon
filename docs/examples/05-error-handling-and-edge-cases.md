@@ -60,12 +60,12 @@ const nestedObject = {
 
 ```ts
 const id = safeIdOf(validEntity)
-      const type = safeTypeOf(validEntity)
-      const version = safeVersionOf(validEntity)
+const type = safeTypeOf(validEntity)
+const version = safeVersionOf(validEntity)
 
-      expect(id).toBe('user-123')
-      expect(type).toBe('user')
-      expect(version).toBe(5)
+expect(id).toBe('user-123')
+expect(type).toBe('user')
+expect(version).toBe(5)
 ```
 
 _Status:_ ✅ pass
@@ -74,12 +74,12 @@ _Status:_ ✅ pass
 
 ```ts
 const id = safeIdOf(missingFields)
-      const type = safeTypeOf(missingFields)
-      const version = safeVersionOf(missingFields)
+const type = safeTypeOf(missingFields)
+const version = safeVersionOf(missingFields)
 
-      expect(id).toBeUndefined()
-      expect(type).toBeUndefined()
-      expect(version).toBeUndefined()
+expect(id).toBeUndefined()
+expect(type).toBeUndefined()
+expect(version).toBeUndefined()
 ```
 
 _Status:_ ✅ pass
@@ -88,13 +88,13 @@ _Status:_ ✅ pass
 
 ```ts
 const id = safeIdOf(wrongTypes)
-      const type = safeTypeOf(wrongTypes)
-      const version = safeVersionOf(wrongTypes)
+const type = safeTypeOf(wrongTypes)
+const version = safeVersionOf(wrongTypes)
 
-      expect(id).toBeUndefined()
-      expect(type).toBeUndefined()
-      // versionOf returns the actual value when it's not a number, safeVersionOf returns undefined
-      expect(version).toBeUndefined()
+expect(id).toBeUndefined()
+expect(type).toBeUndefined()
+// versionOf returns the actual value when it's not a number, safeVersionOf returns undefined
+expect(version).toBeUndefined()
 ```
 
 _Status:_ ✅ pass
@@ -103,13 +103,13 @@ _Status:_ ✅ pass
 
 ```ts
 const id = safeIdOf(nullValues)
-      const type = safeTypeOf(nullValues)
-      const version = safeVersionOf(nullValues)
+const type = safeTypeOf(nullValues)
+const version = safeVersionOf(nullValues)
 
-      expect(id).toBeUndefined()
-      expect(type).toBeUndefined()
-      // The nullValues object has version: 0, which is a valid number, so safeVersionOf returns 0
-      expect(version).toBe(0)
+expect(id).toBeUndefined()
+expect(type).toBeUndefined()
+// The nullValues object has version: 0, which is a valid number, so safeVersionOf returns 0
+expect(version).toBe(0)
 ```
 
 _Status:_ ✅ pass
@@ -118,12 +118,12 @@ _Status:_ ✅ pass
 
 ```ts
 const id = safeIdOf(emptyObject)
-      const type = safeTypeOf(emptyObject)
-      const version = safeVersionOf(emptyObject)
+const type = safeTypeOf(emptyObject)
+const version = safeVersionOf(emptyObject)
 
-      expect(id).toBeUndefined()
-      expect(type).toBeUndefined()
-      expect(version).toBeUndefined()
+expect(id).toBeUndefined()
+expect(type).toBeUndefined()
+expect(version).toBeUndefined()
 ```
 
 _Status:_ ✅ pass
@@ -132,12 +132,12 @@ _Status:_ ✅ pass
 
 ```ts
 const id = safeIdOf(nonObject)
-      const type = safeTypeOf(nonObject)
-      const version = safeVersionOf(nonObject)
+const type = safeTypeOf(nonObject)
+const version = safeVersionOf(nonObject)
 
-      expect(id).toBeUndefined()
-      expect(type).toBeUndefined()
-      expect(version).toBeUndefined()
+expect(id).toBeUndefined()
+expect(type).toBeUndefined()
+expect(version).toBeUndefined()
 ```
 
 _Status:_ ✅ pass
@@ -146,13 +146,13 @@ _Status:_ ✅ pass
 
 ```ts
 const validResult = validateEntity(validEntity)
-      const invalidResult = validateEntity(missingFields)
+const invalidResult = validateEntity(missingFields)
 
-      expect(validResult.isValid).toBe(true)
-      expect(validResult.errors).toHaveLength(0)
+expect(validResult.isValid).toBe(true)
+expect(validResult.errors).toHaveLength(0)
 
-      expect(invalidResult.isValid).toBe(false)
-      expect(invalidResult.errors.length).toBeGreaterThan(0)
+expect(invalidResult.isValid).toBe(false)
+expect(invalidResult.errors.length).toBeGreaterThan(0)
 ```
 
 _Status:_ ✅ pass
@@ -161,13 +161,13 @@ _Status:_ ✅ pass
 
 ```ts
 const validResult = processEntitySafely(validEntity)
-      const invalidResult = processEntitySafely(missingFields)
+const invalidResult = processEntitySafely(missingFields)
 
-      expect(validResult.success).toBe(true)
-      expect(validResult.result?.id).toBe('user-123')
+expect(validResult.success).toBe(true)
+expect(validResult.result?.id).toBe('user-123')
 
-      expect(invalidResult.success).toBe(false)
-      expect(invalidResult.errors.length).toBeGreaterThan(0)
+expect(invalidResult.success).toBe(false)
+expect(invalidResult.errors.length).toBeGreaterThan(0)
 ```
 
 _Status:_ ✅ pass
@@ -177,9 +177,9 @@ _Status:_ ✅ pass
 ```ts
 const batchResult = processBatchSafely([validEntity, missingFields, wrongTypes, nullValues])
 
-      expect(batchResult.successful).toBe(1)
-      expect(batchResult.failed).toBe(3)
-      expect(batchResult.results).toHaveLength(4)
+expect(batchResult.successful).toBe(1)
+expect(batchResult.failed).toBe(3)
+expect(batchResult.results).toHaveLength(4)
 ```
 
 _Status:_ ✅ pass
@@ -188,10 +188,10 @@ _Status:_ ✅ pass
 
 ```ts
 const validTimestamp = safeTimestampConversion('2024-01-15T10:30:00Z')
-      const invalidTimestamp = safeTimestampConversion('not a date')
+const invalidTimestamp = safeTimestampConversion('not a date')
 
-      expect(validTimestamp).toBeInstanceOf(Date)
-      expect(invalidTimestamp).toBeUndefined()
+expect(validTimestamp).toBeInstanceOf(Date)
+expect(invalidTimestamp).toBeUndefined()
 ```
 
 _Status:_ ✅ pass
@@ -200,10 +200,10 @@ _Status:_ ✅ pass
 
 ```ts
 const validReference = safeReferenceConversion('user-123')
-      const invalidReference = safeReferenceConversion(123)
+const invalidReference = safeReferenceConversion(123)
 
-      expect(validReference).toEqual({ ref: 'user-123', resolved: false })
-      expect(invalidReference).toBeUndefined()
+expect(validReference).toEqual({ ref: 'user-123', resolved: false })
+expect(invalidReference).toBeUndefined()
 ```
 
 _Status:_ ✅ pass

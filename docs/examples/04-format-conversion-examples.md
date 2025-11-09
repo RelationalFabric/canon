@@ -42,23 +42,23 @@ const jsonLdUser = {
 
 ```ts
 const id = idOf(restApiUser)
-      const type = typeOf(restApiUser)
-      const version = versionOf(restApiUser)
+const type = typeOf(restApiUser)
+const version = versionOf(restApiUser)
 
-      // Handle timestamps manually since the canon doesn't know about createdAt/updatedAt
-      const timestamps: Date[] = []
-      if (typeof restApiUser === 'object' && restApiUser !== null) {
-        const obj = restApiUser as Record<string, unknown>
-        if (obj.createdAt instanceof Date)
-          timestamps.push(obj.createdAt)
-        if (obj.updatedAt instanceof Date)
-          timestamps.push(obj.updatedAt)
-      }
+// Handle timestamps manually since the canon doesn't know about createdAt/updatedAt
+const timestamps: Date[] = []
+if (typeof restApiUser === 'object' && restApiUser !== null) {
+  const obj = restApiUser as Record<string, unknown>
+  if (obj.createdAt instanceof Date)
+    timestamps.push(obj.createdAt)
+  if (obj.updatedAt instanceof Date)
+    timestamps.push(obj.updatedAt)
+}
 
-      expect(id).toBe('user-123')
-      expect(type).toBe('user')
-      expect(version).toBe(5)
-      expect(timestamps).toHaveLength(2)
+expect(id).toBe('user-123')
+expect(type).toBe('user')
+expect(version).toBe(5)
+expect(timestamps).toHaveLength(2)
 ```
 
 _Status:_ ✅ pass
@@ -67,23 +67,23 @@ _Status:_ ✅ pass
 
 ```ts
 const id = idOf(mongoDbUser)
-      const type = typeOf(mongoDbUser)
-      const version = versionOf(mongoDbUser)
+const type = typeOf(mongoDbUser)
+const version = versionOf(mongoDbUser)
 
-      // Handle timestamps manually since the canon doesn't know about created_at/updated_at
-      const timestamps: Date[] = []
-      if (typeof mongoDbUser === 'object' && mongoDbUser !== null) {
-        const obj = mongoDbUser as Record<string, unknown>
-        if (typeof obj.created_at === 'number')
-          timestamps.push(new Date(obj.created_at))
-        if (typeof obj.updated_at === 'number')
-          timestamps.push(new Date(obj.updated_at))
-      }
+// Handle timestamps manually since the canon doesn't know about created_at/updated_at
+const timestamps: Date[] = []
+if (typeof mongoDbUser === 'object' && mongoDbUser !== null) {
+  const obj = mongoDbUser as Record<string, unknown>
+  if (typeof obj.created_at === 'number')
+    timestamps.push(new Date(obj.created_at))
+  if (typeof obj.updated_at === 'number')
+    timestamps.push(new Date(obj.updated_at))
+}
 
-      expect(id).toBe('507f1f77bcf86cd799439011')
-      expect(type).toBe('User')
-      expect(version).toBe(6)
-      expect(timestamps).toHaveLength(2)
+expect(id).toBe('507f1f77bcf86cd799439011')
+expect(type).toBe('User')
+expect(version).toBe(6)
+expect(timestamps).toHaveLength(2)
 ```
 
 _Status:_ ✅ pass
@@ -92,23 +92,23 @@ _Status:_ ✅ pass
 
 ```ts
 const id = idOf(jsonLdUser)
-      const type = typeOf(jsonLdUser)
-      const version = versionOf(jsonLdUser)
+const type = typeOf(jsonLdUser)
+const version = versionOf(jsonLdUser)
 
-      // Handle timestamps manually since the canon doesn't know about created_at/updated_at
-      const timestamps: Date[] = []
-      if (typeof jsonLdUser === 'object' && jsonLdUser !== null) {
-        const obj = jsonLdUser as Record<string, unknown>
-        if (typeof obj.created_at === 'string')
-          timestamps.push(new Date(obj.created_at))
-        if (typeof obj.updated_at === 'string')
-          timestamps.push(new Date(obj.updated_at))
-      }
+// Handle timestamps manually since the canon doesn't know about created_at/updated_at
+const timestamps: Date[] = []
+if (typeof jsonLdUser === 'object' && jsonLdUser !== null) {
+  const obj = jsonLdUser as Record<string, unknown>
+  if (typeof obj.created_at === 'string')
+    timestamps.push(new Date(obj.created_at))
+  if (typeof obj.updated_at === 'string')
+    timestamps.push(new Date(obj.updated_at))
+}
 
-      expect(id).toBe('https://api.example.com/users/user-123')
-      expect(type).toBe('https://schema.org/Person')
-      expect(version).toBe('5-updated')
-      expect(timestamps).toHaveLength(2)
+expect(id).toBe('https://api.example.com/users/user-123')
+expect(type).toBe('https://schema.org/Person')
+expect(version).toBe('5-updated')
+expect(timestamps).toHaveLength(2)
 ```
 
 _Status:_ ✅ pass
@@ -118,10 +118,10 @@ _Status:_ ✅ pass
 ```ts
 const invalidData = { name: 'Invalid User' }
 
-      // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
-      expect(() => idOf(invalidData)).toThrow('Expected string ID, got undefined')
-      // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
-      expect(() => typeOf(invalidData)).toThrow('Expected string type, got undefined')
+// @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
+expect(() => idOf(invalidData)).toThrow('Expected string ID, got undefined')
+// @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
+expect(() => typeOf(invalidData)).toThrow('Expected string type, got undefined')
 ```
 
 _Status:_ ✅ pass
@@ -131,8 +131,8 @@ _Status:_ ✅ pass
 ```ts
 const partialData = { id: 'user-123' }
 
-      // @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
-      expect(() => typeOf(partialData)).toThrow('Expected string type, got undefined')
+// @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
+expect(() => typeOf(partialData)).toThrow('Expected string type, got undefined')
 ```
 
 _Status:_ ✅ pass
@@ -141,7 +141,7 @@ _Status:_ ✅ pass
 
 ```ts
 // This test just ensures the function runs without error
-      expect(() => demonstrateFormatConversion()).not.toThrow()
+expect(() => demonstrateFormatConversion()).not.toThrow()
 ```
 
 _Status:_ ✅ pass
@@ -150,7 +150,7 @@ _Status:_ ✅ pass
 
 ```ts
 // This test just ensures the function runs without error
-      expect(() => demonstrateErrorHandling()).not.toThrow()
+expect(() => demonstrateErrorHandling()).not.toThrow()
 ```
 
 _Status:_ ✅ pass
