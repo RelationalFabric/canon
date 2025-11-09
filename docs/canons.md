@@ -148,9 +148,10 @@ export default defineCanon<MyCanon>({
 ```
 
 ```typescript
+import type { MyCanon } from 'my-module/canon'
 import { registerCanons } from '@relationalfabric/canon'
 // main.ts - Import and register
-import myCanon, { type MyCanon } from 'my-module/canon'
+import myCanon from 'my-module/canon'
 
 declare module '@relationalfabric/canon' {
   interface Canons {

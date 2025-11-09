@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
-
 import objectHash, { sha1 as objectHashSha1 } from '@relational-fabric/canon/_/object-hash'
 
-describe('Transparent object-hash export', () => {
+import { describe, expect, it } from 'vitest'
+
+describe('transparent object-hash export', () => {
   it('exposes default hash function', () => {
     expect(typeof objectHash).toBe('function')
     const hash = objectHash({ foo: 'bar' })

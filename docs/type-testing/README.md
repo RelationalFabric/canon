@@ -5,7 +5,8 @@ Canon provides zero-runtime-cost helpers for asserting type relationships at com
 ## Quick Start
 
 ```ts
-import { type Expect, invariant, type IsFalse, type IsTrue } from '@relational-fabric/canon'
+import type { Expect, IsFalse, IsTrue } from '@relational-fabric/canon'
+import { invariant } from '@relational-fabric/canon'
 
 interface User {
   id: string
@@ -41,7 +42,8 @@ void invariant<Expect<CanonicalRole, User['role']>>()
 ## Self-Validation Patterns
 
 ```ts
-import { type Expect, invariant, type IsFalse, type IsTrue } from '@relational-fabric/canon'
+import type { Expect, IsFalse, IsTrue } from '@relational-fabric/canon'
+import { invariant } from '@relational-fabric/canon'
 
 void invariant<Expect<true, true>>()
 void invariant<Expect<'value', string>>()
@@ -68,7 +70,8 @@ void invariant<IsFalse<true>>()
 ### Domain-Specific Helpers
 
 ```ts
-import { type Expect, invariant } from '@relational-fabric/canon'
+import type { Expect } from '@relational-fabric/canon'
+import { invariant } from '@relational-fabric/canon'
 
 type ElementType<T> = T extends Array<infer E> ? E : never
 
@@ -79,7 +82,8 @@ void invariant<Expect<ElementType<Array<{ id: string }>>, { id: string }>>()
 ### Conditional Assertions
 
 ```ts
-import { type Expect, invariant } from '@relational-fabric/canon'
+import type { Expect } from '@relational-fabric/canon'
+import { invariant } from '@relational-fabric/canon'
 
 type NonEmptyArray<T> = T extends [unknown, ...unknown[]] ? true : false
 

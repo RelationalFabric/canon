@@ -1,6 +1,6 @@
-import 'reflect-metadata'
-
 import type { Metadata } from './types/metadata.js'
+
+import 'reflect-metadata'
 
 const METADATA_KEY = Symbol.for('@relational-fabric/canon:meta')
 

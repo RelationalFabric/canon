@@ -40,6 +40,7 @@ The Kit provides the following configuration helpers for consumers:
 
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
+
 export default createEslintConfig()
 ```
 
@@ -51,6 +52,7 @@ export default createEslintConfig()
 
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
+
 export default createEslintConfig({
   ignores: ['custom-ignore'],
   rules: {
@@ -66,7 +68,7 @@ The Kit provides utility libraries through a dual export strategy, offering both
 ### Opinionated Access (Recommended)
 
 ```typescript
-import { Immutable, createEslintConfig, defu, objectHash, parseYaml } from '@relational-fabric/canon'
+import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@relational-fabric/canon'
 // Curated Canon Kit selection with our preferred API surface
 ```
 
@@ -75,8 +77,8 @@ import { Immutable, createEslintConfig, defu, objectHash, parseYaml } from '@rel
 ```typescript
 import antfu from '@relational-fabric/canon/_/antfu'
 import { defu } from '@relational-fabric/canon/_/defu'
-import objectHash from '@relational-fabric/canon/_/object-hash'
 import * as Immutable from '@relational-fabric/canon/_/immutable'
+import objectHash from '@relational-fabric/canon/_/object-hash'
 import * as yaml from '@relational-fabric/canon/_/yaml'
 // Direct access to third-party libraries with original API contracts preserved
 ```

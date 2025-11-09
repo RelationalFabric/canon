@@ -57,6 +57,7 @@ Chosen option: "Create abstraction with defu merging capabilities", because it p
 
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
+
 export default createEslintConfig()
 ```
 
@@ -64,6 +65,7 @@ export default createEslintConfig()
 
 ```javascript
 import createEslintConfig from '@relational-fabric/canon/eslint'
+
 export default createEslintConfig({
   ignores: ['custom-ignore'],
   rules: {
@@ -77,6 +79,7 @@ export default createEslintConfig({
 ```javascript
 // eslint.config.js
 import createEslintConfig from './eslint.js'
+
 export default createEslintConfig()
 ```
 

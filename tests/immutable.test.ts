@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
-
 import * as Immutable from '@relational-fabric/canon/_/immutable'
 
-describe('Transparent immutable export', () => {
+import { describe, expect, it } from 'vitest'
+
+describe('transparent immutable export', () => {
   it('provides persistent data structure constructors', () => {
     expect(typeof Immutable.Map).toBe('function')
     const map = Immutable.Map({ foo: 'bar' })

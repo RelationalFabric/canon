@@ -85,7 +85,7 @@ interface NativeTypes {
 ```typescript
 declare module '@relational-fabric/canon' {
   interface NativeTypes {
-    'Node.js': import('buffer').Buffer | URL | URLSearchParams
+    'Node.js': import('node:buffer').Buffer | URL | URLSearchParams
   }
 }
 ```

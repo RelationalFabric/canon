@@ -6,8 +6,9 @@
  * different formats.
  */
 
+import type { Expect } from '../testing.js'
 import type { AxiomConfig, Axioms } from './axioms.js'
-import { type Expect, invariant } from '../testing.js'
+import { invariant } from '../testing.js'
 
 /**
  * Canon type that maps axiom labels to their type-level configurations
