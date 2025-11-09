@@ -31,9 +31,8 @@ export default createEslintConfig()
 
 - **[Canons](./canons.md)** - Core principles and guidelines
 - **[Axioms](./axioms.md)** - Fundamental assumptions and rules
-- **[Examples](./examples/README.md)** - Practical usage examples
-- **[Type Testing](./type-testing/README.md)** - Compile-time invariants and assertion helpers
-- **[Radar Methodology](./radar-methodology.md)** - Technology assessment approach
+- **[Examples](./examples/)** - Practical usage examples
+- **[Type Testing](./type-testing/)** - Compile-time invariants and assertion helpers
 
 ## Architecture Decisions
 
@@ -41,8 +40,9 @@ export default createEslintConfig()
 
 ## Planning & Strategy
 
-- **[Technology Radar](../planning/radar/README.md)** - Technology recommendations and assessments
-- **[Planning Overview](../planning/README.md)** - Strategic direction and roadmap
+- **[Technology Radar](../planning/radar/)** - Technology recommendations and assessments
+- **[Planning Overview](../planning/)** - Strategic direction and roadmap
+- **[Radar Methodology](./planning/radar/methodology.md)** - Technology assessment approach
 
 ## Development Notes
 
