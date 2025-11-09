@@ -1,0 +1,30 @@
+// Core Canon exports
+export * from './axiom.js'
+export * from './axioms/id.js'
+export * from './axioms/references.js'
+export * from './axioms/timestamps.js'
+export * from './axioms/type.js'
+export * from './axioms/version.js'
+
+export * from './canon.js'
+
+// Radar
+export * from './radar/index.js'
+
+// Registry and Shell
+export * from './registry.js'
+export * from './shell.js'
+
+// Type testing utilities (compile-time helpers only)
+export * from './testing.js'
+
+// Type system (includes defineAxiom, defineCanon)
+export * from './types/index.js'
+
+// Utilities
+export * from './utils/guards.js'
+export * from './utils/objects.js'
+
+// Opinionated wrappers for curated utilities
+export { default as createEslintConfig } from '../eslint.js'
+export { default as mergeConfigs } from 'defu'
