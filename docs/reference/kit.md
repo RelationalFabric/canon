@@ -1,6 +1,6 @@
-# Third-Party Libraries and Dependencies
+# Canon Kit & Third-Party Utilities
 
-This document catalogs the third-party libraries that consumers can leverage when using the `@relational-fabric/canon` package configurations.
+The Canon Kit is the curated, opinionated surface exposed from the default `@relational-fabric/canon` entry point. It highlights the third-party tooling we endorse while still allowing transparent access to the underlying libraries.
 
 ## Required Peer Dependencies
 
@@ -20,9 +20,9 @@ When using `@relational-fabric/canon`, consumers must install these peer depende
   - Used for code quality and consistency enforcement
   - Must be installed as a peer dependency
 
-## Available Configurations
+## Kit Configuration Exports
 
-The package provides the following configurations for consumers:
+The Kit provides the following configuration helpers for consumers:
 
 ### TypeScript Configuration
 
@@ -59,15 +59,15 @@ export default createEslintConfig({
 })
 ```
 
-## Available Utilities
+## Kit Utility Catalog
 
-The package provides utility libraries through a dual export strategy, offering both opinionated and transparent access patterns.
+The Kit provides utility libraries through a dual export strategy, offering both opinionated and transparent access patterns.
 
 ### Opinionated Access (Recommended)
 
 ```typescript
 import { createEslintConfig, defu, parseYaml } from '@relational-fabric/canon'
-// Curated, opinionated selection with Canon's preferred API surface
+// Curated Canon Kit selection with our preferred API surface
 ```
 
 ### Transparent Access (Advanced)

@@ -310,7 +310,7 @@ Canon provides comprehensive documentation to help you understand and use the sy
 - **[Core Axioms](docs/reference/axioms.md)** - Detailed axiom specifications
 - **[Canons Reference](docs/reference/canons.md)** - Canon implementation guide
 - **[Type Testing Utilities](docs/type-testing/)** - Compile-time type assertions and invariants
-- **[Third-Party Integrations](docs/reference/third-party.md)** - External library integrations
+- **[Canon Kit & Third-Party Utilities](docs/reference/kit.md)** - Curated third-party surface and transparent access paths
 
 ### Examples
 
