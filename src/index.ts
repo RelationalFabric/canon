@@ -25,9 +25,3 @@ export * from './types/index.js'
 // Utilities
 export * from './utils/guards.js'
 export * from './utils/objects.js'
-
-// Re-export utility libraries used internally
-export { defu } from 'defu'
-
-// Opinionated catalogue
-export * from './kit.js'
