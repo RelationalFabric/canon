@@ -8,6 +8,7 @@ on:
     paths:
       - examples/**
       - scripts/generate-examples-docs.ts
+      - scripts/examples/**
       - package.json
       - tsconfig*.json
       - .github/workflows/examples.yml

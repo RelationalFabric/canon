@@ -98,7 +98,7 @@ Follow the conventions outlined in [CONTRIBUTING.md](./CONTRIBUTING.md):
 ### Code Quality Standards
 
 - **❌ NEVER use the TypeScript `any` type** (see Critical Rule above)
-- All code must pass `npm run check:all` validation (linting, type checking, and tests)
+- All code must pass `npm run check:all:fix` validation (linting, type checking, and tests)
 - Follow the established patterns in [src/](./src/) directory
 - Prefer `unknown` over `any` for truly unknown types
 - Use type guards and type narrowing for type safety
@@ -146,6 +146,7 @@ Use these npm scripts for development tasks:
 - `npm run check:test` - Run tests only
 - `npm run check:radar` - Validate radar configuration
 - `npm run check:all` - Run all checks (lint, types, tests)
+- `npm run check:all:fix` - Run all checks (lint:fix, types, tests)
 - `npm run checks` - Alias for check:all
 
 ### Development
