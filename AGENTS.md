@@ -54,7 +54,7 @@ Canon is a modern TypeScript package that provides universal type primitives and
 
 Before making any changes, read these documents in order:
 
-1. **[README.md](./README.md)** - Project overview, installation, and quick start
+1. **[Project README](./)** - Project overview, installation, and quick start
 2. **[docs/axioms.md](./docs/axioms.md)** - Fundamental building blocks and type system
 3. **[docs/canons.md](./docs/canons.md)** - Universal type blueprints and implementation patterns
 4. **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Conventions, naming patterns, and development workflow
