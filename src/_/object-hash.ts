@@ -3,19 +3,19 @@
 import objectHashRuntime from 'object-hash'
 
 export type {
+  ExcludeKeysPredicate,
+  Hashable,
   HashAlgorithm,
   HashEncoding,
-  Replacer,
-  ExcludeKeysPredicate,
-  Options,
-  StreamOptions,
-  Hashable,
-  ObjectHashFunction,
   ObjectHash,
+  ObjectHashFunction,
+  Options,
+  Replacer,
+  StreamOptions,
 } from 'object-hash'
 
 const objectHash = objectHashRuntime
 const { sha1, keys, writeToStream } = objectHash
 
 export default objectHash
-export { sha1, keys, writeToStream }
+export { keys, sha1, writeToStream }

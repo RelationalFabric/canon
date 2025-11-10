@@ -77,7 +77,7 @@ import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@rel
 ```typescript
 import { defu } from '@relational-fabric/canon/_/defu'
 import Immutable from '@relational-fabric/canon/_/immutable'
-import objectHash, { sha1, keys } from '@relational-fabric/canon/_/object-hash'
+import objectHash, { keys, sha1 } from '@relational-fabric/canon/_/object-hash'
 import * as yaml from '@relational-fabric/canon/_/yaml'
 // Direct access to third-party libraries with original API contracts preserved
 ```

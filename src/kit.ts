@@ -1,17 +1,17 @@
-export type {
-  HashAlgorithm as ObjectHashAlgorithm,
-  HashEncoding as ObjectHashEncoding,
-  Replacer as ObjectHashReplacer,
-  ExcludeKeysPredicate as ObjectHashExcludeKeysPredicate,
-  Options as ObjectHashOptions,
-  StreamOptions as ObjectHashStreamOptions,
-  Hashable as ObjectHashInput,
-  ObjectHashFunction,
-  ObjectHash,
-} from './_/object-hash.js'
-
 import ImmutableNamespace from 'immutable'
 import * as eslintModule from '../eslint.js'
+
+export type {
+  ObjectHash,
+  HashAlgorithm as ObjectHashAlgorithm,
+  HashEncoding as ObjectHashEncoding,
+  ExcludeKeysPredicate as ObjectHashExcludeKeysPredicate,
+  ObjectHashFunction,
+  Hashable as ObjectHashInput,
+  Options as ObjectHashOptions,
+  Replacer as ObjectHashReplacer,
+  StreamOptions as ObjectHashStreamOptions,
+} from './_/object-hash.js'
 
 type EslintConfigInput = Record<string, unknown>
 type FlatEslintConfig = Record<string, unknown>
@@ -27,10 +27,10 @@ const createEslintConfigExport = (
   moduleDefault ?? (eslintModule as unknown as CreateEslintConfig)
 ) as CreateEslintConfig
 
+export { keys, default as objectHash, sha1, writeToStream } from './_/object-hash.js'
+export const Immutable = ImmutableNamespace
 // Third-party dependencies blessed for consumer use
 export { defu } from 'defu'
-export const Immutable = ImmutableNamespace
-export { default as objectHash, sha1, keys, writeToStream } from './_/object-hash.js'
 export { parse as parseYaml } from 'yaml'
 
 export const createEslintConfig = createEslintConfigExport
