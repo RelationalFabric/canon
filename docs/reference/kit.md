@@ -75,10 +75,9 @@ import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@rel
 ### Transparent Access (Advanced)
 
 ```typescript
-import antfu from '@relational-fabric/canon/_/antfu'
 import { defu } from '@relational-fabric/canon/_/defu'
 import Immutable from '@relational-fabric/canon/_/immutable'
-import objectHash from '@relational-fabric/canon/_/object-hash'
+import objectHash, { sha1, keys } from '@relational-fabric/canon/_/object-hash'
 import * as yaml from '@relational-fabric/canon/_/yaml'
 // Direct access to third-party libraries with original API contracts preserved
 ```
@@ -92,8 +91,8 @@ import * as yaml from '@relational-fabric/canon/_/yaml'
 
 **ESLint Configuration:**
 
-- **Opinionated**: `createEslintConfig` (wrapper function)
-- **Transparent**: `antfu` (direct re-export)
+- **Opinionated**: `createEslintConfig` (async wrapper function)
+- **Transparent**: _Not provided_ (import `@antfu/eslint-config` directly when the full surface area is required)
 
 **YAML Processing:**
 

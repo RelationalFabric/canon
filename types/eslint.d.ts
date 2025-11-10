@@ -3,13 +3,18 @@ declare module '../eslint.js' {
 
   const createEslintConfig: (
     options?: EslintConfig,
-    ...configs: Record<string, unknown>[]
-  ) => Record<string, unknown>
+    ...configs: EslintConfig[]
+  ) => Promise<ReadonlyArray<EslintConfig>>
 
   export default createEslintConfig
 }
 
 declare module '../eslint' {
+  export { default } from '../eslint.js'
+}
+
+declare module '@relational-fabric/canon/eslint' {
+  export type { EslintConfig } from '../eslint.js'
   export { default } from '../eslint.js'
 }
 

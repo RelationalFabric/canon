@@ -48,13 +48,14 @@ Chosen option: "Dual export strategy with opinionated and transparent paths", be
 
 ```
 src/
-  kit.ts              # Opinionated catalogue
+  kit.ts            # Opinionated catalogue
   _/
-    defu.ts          # Direct re-export
-    antfu.ts         # Direct re-export
-    typescript.ts     # Direct re-export
-  types/
-    index.ts         # Internal types
+    defu.ts        # Direct re-export
+    immutable.ts   # Direct re-export
+    object-hash.ts # Direct re-export
+    yaml.ts        # Direct re-export
+types/
+  index.ts         # Internal types
 ```
 
 ### Package Exports
@@ -63,15 +64,30 @@ src/
 {
   "exports": {
     ".": {
-      "types": "./src/kit.ts",
-      "import": "./src/kit.ts"
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
     },
-    "./_/*": {
-      "types": "./src/_/*.ts",
-      "import": "./src/_/*.ts"
+    "./_/defu": {
+      "types": "./src/_/defu.ts",
+      "import": "./src/_/defu.ts"
+    },
+    "./_/immutable": {
+      "types": "./src/_/immutable.ts",
+      "import": "./src/_/immutable.ts"
+    },
+    "./_/object-hash": {
+      "types": "./src/_/object-hash.ts",
+      "import": "./src/_/object-hash.ts"
+    },
+    "./_/yaml": {
+      "types": "./src/_/yaml.ts",
+      "import": "./src/_/yaml.ts"
     },
     "./tsconfig": "./tsconfig.base.json",
-    "./eslint": "./eslint.js"
+    "./eslint": {
+      "types": "./types/eslint.d.ts",
+      "import": "./eslint.js"
+    }
   }
 }
 ```
@@ -87,7 +103,6 @@ import { createEslintConfig, mergeConfigs } from '@relational-fabric/canon'
 **Transparent (\_/):**
 
 ```typescript
-import antfu from '@relational-fabric/canon/_/antfu'
 import { defu } from '@relational-fabric/canon/_/defu'
 ```
 

@@ -16,6 +16,7 @@
 | [ADR-0010](./0010-vitepress-documentation-solution.md) | VitePress Documentation Solution | 🟢 Accepted | 2025-01-26 |
 | [ADR-0011](./0011-examples-documentation-generation-from-source-files.md) | Examples Documentation Generation from Source Files | 🟢 Accepted | 2025-01-26 |
 | [ADR-0012](./0012-type-testing-framework.md) | Type Testing Framework | 🟢 Accepted | 2025-11-04 |
+| [ADR-0013](./0013-dependency-export-refinement.md) | Dependency Export Refinement | 🟢 Accepted | 2025-11-10 |
 
 ## ADR Process
 

@@ -2,10 +2,11 @@ import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@rel
 import { describe, expect, it } from 'vitest'
 
 describe('canon kit exports', () => {
-  it('exposes createEslintConfig as a function', () => {
+  it('exposes createEslintConfig as a function', async () => {
     expect(typeof createEslintConfig).toBe('function')
-    const config = createEslintConfig()
-    expect(config).toBeTypeOf('object')
+    const config = await createEslintConfig()
+    expect(Array.isArray(config)).toBe(true)
+    expect(config.length).toBeGreaterThan(0)
   })
 
   it('re-exports defu as a function', () => {

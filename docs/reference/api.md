@@ -183,10 +183,13 @@ Axiom type that pairs axiom definition with configuration.
 ### `createEslintConfig(options?, ...configs)`
 
 ```typescript
-function createEslintConfig(options?: Record<string, unknown>, ...configs: object[]): object
+function createEslintConfig(
+  options?: Record<string, unknown>,
+  ...configs: Record<string, unknown>[]
+): Promise<ReadonlyArray<Record<string, unknown>>>
 ```
 
-Factory that wraps `@antfu/eslint-config`, applying Canon defaults and merging any additional configuration.
+Async factory that wraps `@antfu/eslint-config`, applying Canon defaults and merging any additional configuration.
 
 ### `defu`
 
