@@ -24,6 +24,7 @@ interface InitFlags {
   scripts?: boolean
   devDeps?: boolean
   workflows?: boolean
+  ciTool?: 'github'
 }
 
 interface HygenPrompter {
@@ -79,6 +80,12 @@ export default class InitCommand extends OclifCommand {
       allowNo: true,
       default: true,
     }),
+    ciTool: OclifFlags.string({
+      description: 'Continuous integration provider to scaffold',
+      options: ['github'],
+      default: 'github',
+      allowNo: false,
+    }),
   }
 
   async run(): Promise<void> {
@@ -91,7 +98,12 @@ export default class InitCommand extends OclifCommand {
     const templatesEnabled = resolvedFlags.templates !== false
     const scriptsEnabled = resolvedFlags.scripts !== false
     const devDependenciesEnabled = resolvedFlags.devDeps !== false
-    const workflowsEnabled = resolvedFlags.workflows !== false
+    const ciTool = resolvedFlags.ciTool ?? 'github'
+    const workflowsEnabled = resolvedFlags.workflows !== false && ciTool === 'github'
+
+    if (resolvedFlags.workflows !== false && ciTool !== 'github') {
+      throw new Error(`Unsupported CI provider "${ciTool}". Supported options: github.`)
+    }
 
     if (workflowsEnabled && !scriptsEnabled) {
       throw new Error('Cannot enable GitHub workflows when scripts are disabled. Re-enable scripts or disable workflows.')
