@@ -5,6 +5,7 @@
  * @document.difficulty advanced
  */
 
+import { createLogger } from '@relational-fabric/canon'
 import {
   calculateOrderTotalWithCurrency,
   processCustomerRegistration,
@@ -172,36 +173,38 @@ if (import.meta.vitest) {
   })
 }
 
+const logger = createLogger('examples:custom-axioms:index')
+
 // Run the examples
-console.log('=== Custom Axioms Examples ===')
+logger.info('=== Custom Axioms Examples ===')
 
-console.log('\n1. Customer Registration:')
+logger.info('\n1. Customer Registration:')
 const customerResult = processCustomerRegistration(customerWithCustomFields)
-console.log('Customer registration result:', customerResult)
+logger.log('Customer registration result:', customerResult)
 
-console.log('\n2. Order Total Calculation:')
+logger.info('\n2. Order Total Calculation:')
 const orderTotal = calculateOrderTotalWithCurrency(orderWithCustomFields)
-console.log('Order total:', orderTotal)
+logger.log('Order total:', orderTotal)
 
-console.log('\n3. Status Update:')
+logger.info('\n3. Status Update:')
 const statusUpdate = updateEntityStatus(customerWithCustomFields, 'inactive')
-console.log('Status update result:', statusUpdate)
+logger.log('Status update result:', statusUpdate)
 
-console.log('\n4. Currency Conversion Examples:')
+logger.info('\n4. Currency Conversion Examples:')
 const currencyExamples = [
   currencyOf(99.99),
   currencyOf('$150.50 USD'),
   currencyOf({ amount: 200, currency: 'EUR' }),
 ]
-console.log('Currency conversions:', currencyExamples)
+logger.log('Currency conversions:', currencyExamples)
 
-console.log('\n5. Priority Conversion Examples:')
+logger.info('\n5. Priority Conversion Examples:')
 const priorityExamples = [
   priorityOf('high'),
   priorityOf(2),
   priorityOf({ level: 4, label: 'critical' }),
 ]
-console.log('Priority conversions:', priorityExamples)
+logger.log('Priority conversions:', priorityExamples)
 
 /**
  * Key Takeaways:

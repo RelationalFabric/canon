@@ -1,8 +1,20 @@
-import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@relational-fabric/canon'
+import {
+  createLogger,
+  defu,
+  Files,
+  Hygen,
+  Immutable,
+  Jsonc,
+  objectHash,
+  Oclif,
+  Parse,
+  parseYaml,
+} from '@relational-fabric/canon'
+import createEslintConfig from '@relational-fabric/canon/eslint'
 import { describe, expect, it } from 'vitest'
 
 describe('canon kit exports', () => {
-  it('exposes createEslintConfig as a function', () => {
+  it('exposes createEslintConfig via eslint entry', () => {
     expect(typeof createEslintConfig).toBe('function')
     const config = createEslintConfig()
     expect(config).toBeTypeOf('object')
@@ -32,5 +44,31 @@ describe('canon kit exports', () => {
     expect(typeof parseYaml).toBe('function')
     const result = parseYaml('foo: bar')
     expect(result).toEqual({ foo: 'bar' })
+  })
+
+  it('provides grouped Oclif helpers', () => {
+    expect(typeof Oclif.run).toBe('function')
+    expect(typeof Oclif.flush).toBe('function')
+  })
+
+  it('exposes Hygen utilities', () => {
+    expect(typeof Hygen.run).toBe('function')
+    expect(typeof Hygen.createLogger).toBe('function')
+  })
+
+  it('exposes filesystem helpers', () => {
+    expect(typeof Files.pathExists).toBe('function')
+  })
+
+  it('groups parse helpers', () => {
+    expect(typeof Parse.yaml).toBe('function')
+    expect(typeof Jsonc.parse).toBe('function')
+    expect(typeof Jsonc.modify).toBe('function')
+  })
+
+  it('creates tagged loggers', () => {
+    const logger = createLogger('test:kit')
+    expect(typeof logger.log).toBe('function')
+    expect(typeof logger.info).toBe('function')
   })
 })

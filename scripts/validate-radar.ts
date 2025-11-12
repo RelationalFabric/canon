@@ -1,32 +1,35 @@
 #!/usr/bin/env tsx
 
 import process from 'node:process'
+import consola from 'consola'
 import { validateRadarFile } from '../src/radar/validator.js'
+
+const logger = consola.withTag('radar')
 
 async function main() {
   try {
     const result = await validateRadarFile('./planning/radar/data.yaml')
 
     if (result.isValid) {
-      console.log('✅ Radar data is valid')
+      logger.success('✅ Radar data is valid')
       if (result.warnings.length > 0) {
-        console.log('⚠️  Warnings:')
-        result.warnings.forEach(warning => console.log(`  - ${warning}`))
+        logger.warn('⚠️  Warnings:')
+        result.warnings.forEach(warning => logger.warn(`  - ${warning}`))
       }
       process.exit(0)
     } else {
-      console.log('❌ Radar data has errors:')
+      logger.error('❌ Radar data has errors:')
       result.errors.forEach((error) => {
-        console.log(`  - ${error.path ? `${error.path}: ` : ''}${error.message}`)
+        logger.error(`  - ${error.path ? `${error.path}: ` : ''}${error.message}`)
       })
       if (result.warnings.length > 0) {
-        console.log('⚠️  Warnings:')
-        result.warnings.forEach(warning => console.log(`  - ${warning}`))
+        logger.warn('⚠️  Warnings:')
+        result.warnings.forEach(warning => logger.warn(`  - ${warning}`))
       }
       process.exit(1)
     }
   } catch (error) {
-    console.error(
+    logger.error(
       '❌ Error validating radar data:',
       error instanceof Error ? error.message : 'Unknown error',
     )

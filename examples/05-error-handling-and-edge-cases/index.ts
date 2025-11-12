@@ -5,6 +5,7 @@
  * @document.difficulty intermediate
  */
 
+import { createLogger } from '@relational-fabric/canon'
 import {
   safeIdOf,
   safeReferenceConversion,
@@ -203,8 +204,10 @@ if (import.meta.vitest) {
   })
 }
 
+const logger = createLogger('examples:error-handling:index')
+
 // Run the examples
-console.log('=== Error Handling and Edge Cases ===')
+logger.info('=== Error Handling and Edge Cases ===')
 
 // Test different edge cases
 const testCases = [
@@ -217,37 +220,37 @@ const testCases = [
   { name: 'nestedObject', data: nestedObject },
 ]
 
-console.log('=== Edge Case Examples ===\n')
+logger.info('=== Edge Case Examples ===\n')
 
 testCases.forEach(({ name, data }) => {
-  console.log(`--- ${name} ---`)
-  console.log('Data:', JSON.stringify(data, null, 2))
+  logger.info(`--- ${name} ---`)
+  logger.log('Data:', JSON.stringify(data, null, 2))
 
   const validation = validateEntity(data)
-  console.log('Validation:', validation)
+  logger.log('Validation:', validation)
 
   const id = safeIdOf(data)
   const type = safeTypeOf(data)
   const version = safeVersionOf(data)
 
-  console.log('Extracted values:')
-  console.log(`  ID: ${id}`)
-  console.log(`  Type: ${type}`)
-  console.log(`  Version: ${version}`)
+  logger.log('Extracted values:')
+  logger.log(`  ID: ${id}`)
+  logger.log(`  Type: ${type}`)
+  logger.log(`  Version: ${version}`)
 
   const canon = findMatchingCanon(data)
-  console.log(`  Canon match: ${canon ? `Found matching canon` : 'No matching canon'}`)
-  console.log()
+  logger.log(`  Canon match: ${canon ? 'Found matching canon' : 'No matching canon'}`)
+  logger.log('')
 })
 
 // Test batch processing
-console.log('=== Batch Processing Example ===')
+logger.info('=== Batch Processing Example ===')
 const batchResult = processBatchSafely([validEntity, missingFields, wrongTypes, nullValues])
-console.log('Batch processing results:')
-console.log(`  Successful: ${batchResult.successful}`)
-console.log(`  Failed: ${batchResult.failed}`)
-console.log('  Results:', batchResult.results)
-console.log()
+logger.log('Batch processing results:')
+logger.log(`  Successful: ${batchResult.successful}`)
+logger.log(`  Failed: ${batchResult.failed}`)
+logger.log('  Results:', batchResult.results)
+logger.log('')
 
 /**
  * Key Takeaways:

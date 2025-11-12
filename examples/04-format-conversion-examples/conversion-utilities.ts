@@ -6,7 +6,7 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { createLogger, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Format Conversion Functions
@@ -116,9 +116,11 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
 /**
  * Process users from different data sources
  */
+const logger = createLogger('examples:format-conversion:utilities')
+
 export function processUsersFromDifferentSources(): void {
-  console.log('=== Mixed Data Sources Example ===')
-  console.log('\nProcessing users from different sources:\n')
+  logger.info('=== Mixed Data Sources Example ===')
+  logger.log('\nProcessing users from different sources:\n')
 
   // REST API user
   const restUser = {
@@ -176,17 +178,17 @@ export function processUsersFromDifferentSources(): void {
         }
       }
 
-      console.log(`User ${index + 1}:`)
-      console.log(`  ID: ${id}`)
-      console.log(`  Type: ${type}`)
-      console.log(`  Version: ${version}`)
-      console.log(`  Updated: ${updated.toISOString()}`)
-      console.log()
+      logger.info(`User ${index + 1}:`)
+      logger.log(`  ID: ${id}`)
+      logger.log(`  Type: ${type}`)
+      logger.log(`  Version: ${version}`)
+      logger.log(`  Updated: ${updated.toISOString()}`)
+      logger.log('')
     } catch (error) {
-      console.log(
+      logger.error(
         `User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
-      console.log()
+      logger.log('')
     }
   })
 }
@@ -195,8 +197,8 @@ export function processUsersFromDifferentSources(): void {
  * Demonstrate format conversion
  */
 export function demonstrateFormatConversion(): void {
-  console.log('=== Format Conversion Example ===')
-  console.log('\nConverting REST API user to different formats:\n')
+  logger.info('=== Format Conversion Example ===')
+  logger.log('\nConverting REST API user to different formats:\n')
 
   const restUser = {
     id: 'user-123',
@@ -209,24 +211,24 @@ export function demonstrateFormatConversion(): void {
   }
 
   // Convert to MongoDB format
-  console.log('MongoDB format:')
+  logger.info('MongoDB format:')
   const mongoFormat = convertToMongoDb(restUser)
-  console.log(JSON.stringify(mongoFormat, null, 2))
-  console.log()
+  logger.log(JSON.stringify(mongoFormat, null, 2))
+  logger.log('')
 
   // Convert to JSON-LD format
-  console.log('JSON-LD format:')
+  logger.info('JSON-LD format:')
   const jsonLdFormat = convertToJsonLd(restUser)
-  console.log(JSON.stringify(jsonLdFormat, null, 2))
-  console.log()
+  logger.log(JSON.stringify(jsonLdFormat, null, 2))
+  logger.log('')
 }
 
 /**
  * Demonstrate error handling with format conversion
  */
 export function demonstrateErrorHandling(): void {
-  console.log('=== Error Handling Example ===')
-  console.log()
+  logger.info('=== Error Handling Example ===')
+  logger.log('')
 
   // Test with invalid data
   const invalidData = { name: 'Invalid User' }
@@ -235,7 +237,7 @@ export function demonstrateErrorHandling(): void {
     // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
     idOf(invalidData)
   } catch (error) {
-    console.log(
+    logger.error(
       `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
     )
   }
@@ -247,7 +249,7 @@ export function demonstrateErrorHandling(): void {
     // @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
     typeOf(partialData)
   } catch (error) {
-    console.log(
+    logger.error(
       `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
     )
   }

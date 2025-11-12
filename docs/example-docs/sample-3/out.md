@@ -7,7 +7,7 @@ Shows how to combine // #+, // #-, and // #! markers with file includes.
 We begin at the document’s root. This is our base heading level.
 
 ```ts
-console.log('Root section logic')
+logger.info('Root section logic')
 ```
 
 --
@@ -25,7 +25,7 @@ console.log('Root section logic')
 We’ll now demonstrate how to go *one level deeper* before including the next file.
 
 ```ts
-console.log('Entering nested section')
+logger.info('Entering nested section')
 ```
 
 --
@@ -43,7 +43,7 @@ console.log('Entering nested section')
 No header adjustment this time — we stay at the current depth.
 
 ```ts
-console.log('At the same nested depth')
+logger.info('At the same nested depth')
 ```
 
 --
@@ -61,7 +61,7 @@ console.log('At the same nested depth')
 We’ll move back one level (from H3 → H2) before the next include.
 
 ```ts
-console.log('Climbing back up after deep section')
+logger.info('Climbing back up after deep section')
 ```
 
 --
@@ -79,7 +79,7 @@ console.log('Climbing back up after deep section')
 Here we reset the header level back to the document’s base — for example, when adding appendices.
 
 ```ts
-console.log('Global conclusion')
+logger.info('Global conclusion')
 ```
 
 --

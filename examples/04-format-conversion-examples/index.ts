@@ -5,7 +5,7 @@
  * @document.difficulty intermediate
  */
 
-import { idOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { createLogger, idOf, typeOf, versionOf } from '@relational-fabric/canon'
 import {
   demonstrateErrorHandling,
   demonstrateFormatConversion,
@@ -155,8 +155,10 @@ if (import.meta.vitest) {
   })
 }
 
+const logger = createLogger('examples:format-conversion:index')
+
 // Run the examples
-console.log('=== Format Conversion Examples ===')
+logger.info('=== Format Conversion Examples ===')
 
 processUsersFromDifferentSources()
 demonstrateFormatConversion()
