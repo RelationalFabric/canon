@@ -1,7 +1,9 @@
 import { createConsola } from 'consola'
 import type { ConsolaInstance } from 'consola'
 
-const canonLogger = createConsola().withTag('canon')
+const consolaConfig: Parameters<typeof createConsola>[0] = {}
+
+const canonLogger = createConsola(consolaConfig).withTag('canon')
 
 export const logger = canonLogger
 
