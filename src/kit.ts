@@ -1,6 +1,6 @@
+import type { ObjectHash } from 'object-hash'
 import ImmutableNamespace from 'immutable'
 import objectHashDefault from 'object-hash'
-import type { ObjectHash } from 'object-hash'
 
 // Third-party dependencies blessed for consumer use
 export { defu } from 'defu'
