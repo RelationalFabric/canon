@@ -1,7 +1,10 @@
 import { createConsola } from 'consola'
 import type { ConsolaInstance } from 'consola'
 
-const consolaConfig: Parameters<typeof createConsola>[0] = {}
+const consolaConfig = {
+  level: undefined,
+  reporters: undefined,
+} satisfies Parameters<typeof createConsola>[0]
 
 const canonLogger = createConsola(consolaConfig).withTag('canon')
 
