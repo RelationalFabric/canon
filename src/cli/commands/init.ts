@@ -20,6 +20,10 @@ interface InitFlags {
   directory?: string
   force?: boolean
   name?: string
+  templates?: boolean
+  scripts?: boolean
+  devDeps?: boolean
+  workflows?: boolean
 }
 
 interface HygenPrompter {
@@ -55,6 +59,26 @@ export default class InitCommand extends OclifCommand {
       char: 'n',
       description: 'Project name for generated files (defaults to directory name)',
     }),
+    templates: OclifFlags.boolean({
+      description: 'Generate starter source and configuration files',
+      allowNo: true,
+      default: true,
+    }),
+    scripts: OclifFlags.boolean({
+      description: 'Add Canon workflow scripts to package.json',
+      allowNo: true,
+      default: true,
+    }),
+    devDeps: OclifFlags.boolean({
+      description: 'Ensure Canon, ESLint, and TypeScript are listed in devDependencies',
+      allowNo: true,
+      default: true,
+    }),
+    workflows: OclifFlags.boolean({
+      description: 'Generate GitHub Actions workflow for Canon checks',
+      allowNo: true,
+      default: true,
+    }),
   }
 
   async run(): Promise<void> {
@@ -64,13 +88,26 @@ export default class InitCommand extends OclifCommand {
     await fsExtra.ensureDir(directory)
 
     const projectName = this.normalizeName(resolvedFlags.name ?? this.deriveName(directory))
+    const templatesEnabled = resolvedFlags.templates !== false
+    const scriptsEnabled = resolvedFlags.scripts !== false
+    const devDependenciesEnabled = resolvedFlags.devDeps !== false
+    const workflowsEnabled = resolvedFlags.workflows !== false
+
+    if (workflowsEnabled && !scriptsEnabled) {
+      throw new Error('Cannot enable GitHub workflows when scripts are disabled. Re-enable scripts or disable workflows.')
+    }
 
     await this.generateTemplates(directory, {
       force: resolvedFlags.force ?? false,
       name: projectName,
+      templates: templatesEnabled,
+      workflows: workflowsEnabled,
     })
 
-    await this.updatePackageJson(directory, projectName)
+    await this.updatePackageJson(directory, projectName, {
+      scripts: scriptsEnabled,
+      devDependencies: devDependenciesEnabled,
+    })
 
     const relativePath = relative(process.cwd(), directory) || '.'
     this.log(`✅ Canon project ready at ${relativePath}`)
@@ -87,8 +124,24 @@ export default class InitCommand extends OclifCommand {
     return normalized === '' ? 'canon-project' : normalized
   }
 
-  private async generateTemplates(directory: string, context: { force: boolean; name: string }): Promise<void> {
-    const args = ['init', 'project', '--name', context.name]
+  private async generateTemplates(
+    directory: string,
+    context: { force: boolean; name: string; templates: boolean; workflows: boolean },
+  ): Promise<void> {
+    if (!context.templates && !context.workflows) {
+      return
+    }
+
+    const args = [
+      'init',
+      'project',
+      '--name',
+      context.name,
+      '--templates',
+      String(context.templates),
+      '--workflows',
+      String(context.workflows),
+    ]
     if (context.force) {
       args.push('--force')
     }
@@ -116,7 +169,11 @@ export default class InitCommand extends OclifCommand {
     })
   }
 
-  private async updatePackageJson(directory: string, name: string): Promise<void> {
+  private async updatePackageJson(
+    directory: string,
+    name: string,
+    options: { scripts: boolean; devDependencies: boolean },
+  ): Promise<void> {
     const packageJsonPath = resolve(directory, 'package.json')
     let contents = '{\n}\n'
 
@@ -129,38 +186,42 @@ export default class InitCommand extends OclifCommand {
     contents = this.ensureJsonValue(contents, ['type'], 'module')
     contents = this.ensureJsonValue(contents, ['engines', 'node'], '>=22.0.0')
 
-    const scripts: Record<string, string> = {
-      'check:lint': 'eslint .',
-      'check:lint:fix': 'eslint . --fix',
-      'check:types': 'tsc --noEmit',
-      'check:test': 'vitest run',
-      'check:test:watch': 'vitest run --watch',
-      'check:test:coverage': 'vitest run --coverage',
-      'check:radar': 'tsx scripts/validate-radar.ts',
-      'check:all': 'npm-run-all check:lint check:types check:test check:radar',
-      'check:all:fix': 'npm-run-all check:lint:fix check:types check:test',
-      'build:docs:examples': 'tsx scripts/generate-examples-docs.ts',
-      'build:docs': 'npm run build:docs:examples && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh',
-      'build:radar': 'tsx scripts/convert-radar.ts',
-      'build:adr': 'npm-run-all build:adr:toc build:adr:index',
-      'build:adr:index': 'node scripts/generate-adr-index.js',
-      'build:adr:toc': 'cd docs/adrs && npx adr generate toc',
-      dev: 'tsx --watch src/index.ts',
-      test: 'npm run check:test',
+    if (options.scripts) {
+      const scripts: Record<string, string> = {
+        'check:lint': 'eslint .',
+        'check:lint:fix': 'eslint . --fix',
+        'check:types': 'tsc --noEmit',
+        'check:test': 'vitest run',
+        'check:test:watch': 'vitest run --watch',
+        'check:test:coverage': 'vitest run --coverage',
+        'check:radar': 'tsx scripts/validate-radar.ts',
+        'check:all': 'npm-run-all check:lint check:types check:test check:radar',
+        'check:all:fix': 'npm-run-all check:lint:fix check:types check:test',
+        'build:docs:examples': 'tsx scripts/generate-examples-docs.ts',
+        'build:docs': 'npm run build:docs:examples && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh',
+        'build:radar': 'tsx scripts/convert-radar.ts',
+        'build:adr': 'npm-run-all build:adr:toc build:adr:index',
+        'build:adr:index': 'node scripts/generate-adr-index.js',
+        'build:adr:toc': 'cd docs/adrs && npx adr generate toc',
+        dev: 'tsx --watch src/index.ts',
+        test: 'npm run check:test',
+      }
+
+      for (const [script, command] of Object.entries(scripts)) {
+        contents = this.ensureJsonValue(contents, ['scripts', script], command)
+      }
     }
 
-    for (const [script, command] of Object.entries(scripts)) {
-      contents = this.ensureJsonValue(contents, ['scripts', script], command)
-    }
+    if (options.devDependencies) {
+      const devDependencies: Record<string, string> = {
+        '@relational-fabric/canon': `^${canonPackage.version}`,
+        eslint: '^9.0.0',
+        typescript: '^5.0.0',
+      }
 
-    const devDependencies: Record<string, string> = {
-      '@relational-fabric/canon': `^${canonPackage.version}`,
-      eslint: '^9.0.0',
-      typescript: '^5.0.0',
-    }
-
-    for (const [dependency, version] of Object.entries(devDependencies)) {
-      contents = this.ensureJsonValue(contents, ['devDependencies', dependency], version)
+      for (const [dependency, version] of Object.entries(devDependencies)) {
+        contents = this.ensureJsonValue(contents, ['devDependencies', dependency], version)
+      }
     }
 
     await fsExtra.writeFile(packageJsonPath, this.ensureTrailingNewline(contents), 'utf8')
