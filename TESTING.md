@@ -151,18 +151,20 @@ Create new examples in the `examples/` directory:
  * Demonstrates specific feature or pattern
  */
 
-import { feature } from '../src/index.js'
+import { createLogger, feature } from '../src/index.js'
+
+const logger = createLogger('docs:testing:feature')
 
 function exampleUsage() {
-  console.log('=== Example ===\n')
+  logger.info('=== Example ===\n')
   // Show feature usage
-  console.log('Result:', feature())
+  logger.log('Result:', feature())
 }
 
 function main() {
-  console.log('Canon Framework: Feature Example\n')
+  logger.info('Canon Framework: Feature Example\n')
   exampleUsage()
-  console.log('\n✅ Example completed!')
+  logger.info('\n✅ Example completed!')
 }
 
 // Run if executed directly

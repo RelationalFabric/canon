@@ -28,9 +28,12 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, extname, join } from 'node:path'
+import consola from 'consola'
 import { parseExampleFile } from './examples/parser.js'
 import { generateExampleDoc } from './examples/renderer.js'
 import { getTestStatusForFile, loadTestReport } from './examples/test-status.js'
+
+const logger = consola.withTag('examples-docs')
 
 const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/examples'
 
@@ -268,30 +271,30 @@ function replaceDirectory(tempDir: string, targetDir: string): void {
  * Main function
  */
 async function main(): Promise<void> {
-  console.log('🔍 Scanning examples directory...')
+  logger.info('🔍 Scanning examples directory...')
 
   const rootDir = process.cwd()
   const examplesDir = join(rootDir, 'examples')
 
   if (!existsSync(examplesDir) || !statSync(examplesDir).isDirectory()) {
-    console.error('❌ Examples directory not found.')
+    logger.error('❌ Examples directory not found.')
     process.exitCode = 1
     return
   }
 
   // Discover examples
   const examplePaths = discoverExamples(examplesDir)
-  console.log(`📁 Found ${examplePaths.length} examples`)
+  logger.info(`📁 Found ${examplePaths.length} examples`)
 
   // Load test report
   const testReportPath = join(rootDir, '.scratch', 'vitest-report.json')
   const testReport = existsSync(testReportPath) ? loadTestReport(testReportPath) : null
 
   if (!testReport) {
-    console.warn('⚠️ No Vitest JSON report found. Test status will be omitted.')
-    console.warn('   Run `npm run check:test:json` before generating documentation to include test status.')
+    logger.warn('⚠️ No Vitest JSON report found. Test status will be omitted.')
+    logger.warn('   Run `npm run check:test:json` before generating documentation to include test status.')
   } else {
-    console.log('🔍 Vitest JSON report found.')
+    logger.info('🔍 Vitest JSON report found.')
   }
 
   // Create temporary staging directory
@@ -304,7 +307,7 @@ async function main(): Promise<void> {
     const examples: ExampleInfo[] = []
 
     for (const examplePath of examplePaths) {
-      console.log(`📄 Processing: ${examplePath}`)
+      logger.info(`📄 Processing: ${examplePath}`)
 
       const info = await generateExampleInfo(examplePath, examplesDir, rootDir, testReport)
       examples.push(info)
@@ -319,26 +322,26 @@ async function main(): Promise<void> {
       const docPath = join(tmpOutputDir, info.docFile)
 
       writeFileSync(docPath, docContent)
-      console.log(`  ✅ Generated: ${info.docFile}`)
+      logger.success(`  ✅ Generated: ${info.docFile}`)
     }
 
     // Generate index page
-    console.log('📝 Generating index page...')
+    logger.info('📝 Generating index page...')
     const indexContent = generateIndexPage(examples)
     writeFileSync(join(tmpOutputDir, 'README.md'), indexContent)
 
     // Atomically replace docs/examples/
     const outputDir = join(rootDir, 'docs', 'examples')
-    console.log('📦 Publishing documentation...')
+    logger.info('📦 Publishing documentation...')
     replaceDirectory(tmpOutputDir, outputDir)
 
-    console.log(`✅ Documentation generated: ${outputDir}`)
-    console.log(`📊 Processed ${examples.length} examples`)
+    logger.success(`✅ Documentation generated: ${outputDir}`)
+    logger.info(`📊 Processed ${examples.length} examples`)
 
     // Print summary
     for (const example of examples) {
       const description = example.description || 'No description'
-      console.log(`  - ${example.name}: ${description}`)
+      logger.info(`  - ${example.name}: ${description}`)
     }
   } finally {
     if (existsSync(tmpBaseDir)) {
@@ -349,7 +352,7 @@ async function main(): Promise<void> {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    console.error('❌ Error generating documentation:', error)
+    logger.error('❌ Error generating documentation:', error)
     process.exitCode = 1
   })
 }

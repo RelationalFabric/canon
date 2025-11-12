@@ -117,14 +117,18 @@ function typeOf<T extends Satisfies<'Type'>>(x: T): AxiomValue<'Type'> {
 **Usage Example**:
 
 ```typescript
+import { createLogger, typeOf } from '@relational-fabric/canon'
+
+const logger = createLogger('docs:axioms:type')
+
 // Works with different data formats
 const restData = { type: 'user' }
 const mongoData = { _type: 'User' }
 const jsonLdData = { '@type': 'Person' }
 
-console.log(typeOf(restData)) // "user"
-console.log(typeOf(mongoData)) // "User"
-console.log(typeOf(jsonLdData)) // "Person"
+logger.info(typeOf(restData)) // "user"
+logger.info(typeOf(mongoData)) // "User"
+logger.info(typeOf(jsonLdData)) // "Person"
 ```
 
 ### 3. Version Axiom
@@ -166,14 +170,18 @@ function versionOf<T extends Satisfies<'Version'>>(x: T): AxiomValue<'Version'> 
 **Usage Example**:
 
 ```typescript
+import { createLogger, versionOf } from '@relational-fabric/canon'
+
+const logger = createLogger('docs:axioms:version')
+
 // Works with different data formats
 const restData = { version: 5 }
 const mongoData = { _version: 3 }
 const jsonLdData = { '@version': '2.1' }
 
-console.log(versionOf(restData)) // 5
-console.log(versionOf(mongoData)) // 3
-console.log(versionOf(jsonLdData)) // "2.1"
+logger.info(versionOf(restData)) // 5
+logger.info(versionOf(mongoData)) // 3
+logger.info(versionOf(jsonLdData)) // "2.1"
 ```
 
 ### 4. Timestamps Axiom
@@ -227,14 +235,18 @@ function isCanonicalTimestamp(value: number | string | Date | TypeGuard<unknown>
 **Usage Example**:
 
 ```typescript
+import { createLogger, timestampsOf } from '@relational-fabric/canon'
+
+const logger = createLogger('docs:axioms:timestamps')
+
 // Works with different timestamp value types
 const unixTimestamp = 1640995200000
 const isoTimestamp = '2022-01-01T00:00:00Z'
 const dateTimestamp = new Date('2022-01-01')
 
-console.log(timestampsOf(unixTimestamp)) // Converted to canonical Date
-console.log(timestampsOf(isoTimestamp)) // Converted to canonical Date
-console.log(timestampsOf(dateTimestamp)) // Converted to canonical Date
+logger.info(timestampsOf(unixTimestamp)) // Converted to canonical Date
+logger.info(timestampsOf(isoTimestamp)) // Converted to canonical Date
+logger.info(timestampsOf(dateTimestamp)) // Converted to canonical Date
 ```
 
 ### 5. References Axiom
@@ -298,12 +310,16 @@ function isCanonicalReference(
 **Usage Example**:
 
 ```typescript
+import { createLogger, referencesOf } from '@relational-fabric/canon'
+
+const logger = createLogger('docs:axioms:references')
+
 // Works with different reference value types
 const stringRef = 'user-123'
 const entityRef = { ref: 'user-123', resolved: false }
 
-console.log(referencesOf(stringRef)) // Converted to EntityReference
-console.log(referencesOf(entityRef)) // Already canonical EntityReference
+logger.info(referencesOf(stringRef)) // Converted to EntityReference
+logger.info(referencesOf(entityRef)) // Already canonical EntityReference
 ```
 
 ## Conversion Types

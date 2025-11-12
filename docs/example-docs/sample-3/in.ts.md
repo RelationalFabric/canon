@@ -1,4 +1,8 @@
 ````ts
+import { createLogger } from '@relational-fabric/canon'
+
+const logger = createLogger('docs:sample-3:scaffolding')
+
 /**
  * @document.title Demonstrating Header-Level Controls and Includes
  * @document.description Shows how to combine // #+, // #-, and // #! markers with file includes.
@@ -12,7 +16,7 @@
 We begin at the document’s root. This is our base heading level.
 */
 
-console.log('Root section logic')
+logger.info('Root section logic')
 
 // @include ./supporting/root-helper.ts
 
@@ -23,7 +27,7 @@ We’ll now demonstrate how to go *one level deeper* before including the next f
 */
 
 // #+
-console.log('Entering nested section')
+logger.info('Entering nested section')
 
 // @include ./supporting/deep-helper.ts
 
@@ -33,7 +37,7 @@ console.log('Entering nested section')
 No header adjustment this time — we stay at the current depth.
 */
 
-console.log('At the same nested depth')
+logger.info('At the same nested depth')
 
 // @include ./supporting/parallel-helper.ts
 
@@ -44,7 +48,7 @@ We’ll move back one level (from H3 → H2) before the next include.
 */
 
 // #-
-console.log('Climbing back up after deep section')
+logger.info('Climbing back up after deep section')
 
 // @include ./supporting/summary-helper.ts
 
@@ -55,7 +59,7 @@ Here we reset the header level back to the document’s base — for example, wh
 */
 
 // #!
-console.log('Global conclusion')
+logger.info('Global conclusion')
 
 // @include ./supporting/final-helper.ts
 ````

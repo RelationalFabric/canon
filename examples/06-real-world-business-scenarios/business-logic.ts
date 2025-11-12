@@ -6,7 +6,9 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { idOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { createLogger, idOf, typeOf, versionOf } from '@relational-fabric/canon'
+
+const logger = createLogger('examples:business-logic')
 
 // =============================================================================
 // Order Processing Functions
@@ -26,7 +28,7 @@ export function calculateOrderTotal(order: unknown): {
   const orderType = typeOf(order as Satisfies<'Type'>)
   const orderVersion = versionOf(order as Satisfies<'Version'>)
 
-  console.log(`Calculating total for ${orderType} ${orderId} (v${orderVersion})`)
+  logger.info(`Calculating total for ${orderType} ${orderId} (v${orderVersion})`)
 
   if (typeof order !== 'object' || order === null) {
     throw new Error('Order must be an object')
@@ -104,7 +106,7 @@ export function updateOrderStatus(
       }
     }
 
-    console.log(`Updated order ${orderId} to status "${newStatus}" (v${newVersion})`)
+    logger.success(`Updated order ${orderId} to status "${newStatus}" (v${newVersion})`)
 
     return {
       success: true,

@@ -1,7 +1,10 @@
 #!/usr/bin/env tsx
 
 import process from 'node:process'
+import consola from 'consola'
 import { convertYamlFileToCsv } from '../src/radar/converter.js'
+
+const logger = consola.withTag('radar')
 
 function main() {
   try {
@@ -10,7 +13,7 @@ function main() {
       './.vitepress/public/planning/radar/data.csv',
     )
   } catch (error) {
-    console.error(
+    logger.error(
       '❌ Error converting radar data:',
       error instanceof Error ? error.message : 'Unknown error',
     )

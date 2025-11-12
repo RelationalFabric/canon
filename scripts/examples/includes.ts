@@ -8,6 +8,9 @@
 import type { HeaderControl, HeaderDepthState } from './types.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
+import consola from 'consola'
+
+const logger = consola.withTag('includes')
 
 /**
  * Parse header control marker from comment line
@@ -96,14 +99,14 @@ export function resolveIncludePath(
  */
 export function loadIncludedFile(absolutePath: string): string | null {
   if (!existsSync(absolutePath)) {
-    console.warn(`⚠️ Included file not found: ${absolutePath}`)
+    logger.warn(`⚠️ Included file not found: ${absolutePath}`)
     return null
   }
 
   try {
     return readFileSync(absolutePath, 'utf-8')
   } catch (error) {
-    console.warn(
+    logger.warn(
       `⚠️ Failed to read included file ${absolutePath}:`,
       error instanceof Error ? error.message : String(error),
     )

@@ -6,8 +6,11 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { idOf, inferAxiom } from '@relational-fabric/canon'
+import { createLogger, idOf, inferAxiom } from '@relational-fabric/canon'
+
 import { currencyOf, emailOf, statusOf } from './custom-functions.js'
+
+const logger = createLogger('examples:custom-axioms:scenarios')
 
 // =============================================================================
 // Sample Data
@@ -137,7 +140,7 @@ export function calculateOrderTotalWithCurrency(order: unknown): {
   const orderId = idOf(order as Satisfies<'Id'>)
   const status = statusOf(order as Satisfies<'Status'>)
 
-  console.log(`Calculating total for ${status} order ${orderId}`)
+  logger.info(`Calculating total for ${status} order ${orderId}`)
 
   if (typeof order !== 'object' || order === null) {
     throw new Error('Order must be an object')
@@ -184,7 +187,7 @@ export function updateEntityStatus(
       }
     }
 
-    console.log(`Updating ${entityId} status from ${currentStatus} to ${newStatus}`)
+    logger.success(`Updating ${entityId} status from ${currentStatus} to ${newStatus}`)
 
     return {
       success: true,
