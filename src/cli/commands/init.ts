@@ -4,17 +4,7 @@ import { fileURLToPath } from 'node:url'
 import process from 'node:process'
 
 import type { JsonFormattingOptions, JsonParseError } from '../../kit.js'
-import {
-  HygenLogger,
-  OclifCommand,
-  OclifFlags,
-  applyJsonEdits,
-  fsExtra,
-  hygenRunner,
-  modifyJsonContent,
-  parseJsonWithComments,
-  printParseErrorCode,
-} from '../../kit.js'
+import { Files, Hygen, Jsonc, Oclif } from '../../kit.js'
 
 interface InitFlags {
   directory?: string
@@ -35,52 +25,61 @@ const require = createRequire(import.meta.url)
 const canonPackage = require('../../../package.json') as { readonly version: string }
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const templatesDirectory = resolve(packageRoot, 'cli/templates/_templates')
-const formattingOptions: JsonFormattingOptions = {
+  const formattingOptions: JsonFormattingOptions = {
   insertSpaces: true,
   tabSize: 2,
   eol: '\n',
 }
 
-export default class InitCommand extends OclifCommand {
+const { command: CanonCommand, flags: CanonFlags } = Oclif
+const { runner: hygenRunner, Logger: HygenLogger } = Hygen
+const {
+  applyEdits: applyJsonEdits,
+  modify: modifyJsonContent,
+  parse: parseJsonWithComments,
+  printError: printParseErrorCode,
+} = Jsonc
+
+export default class InitCommand extends CanonCommand {
   static summary = 'Initialize a new project with Canon scaffolding'
 
   static description = 'Creates configuration files, starter source, and Canon-aligned package scripts.'
 
   static flags = {
-    directory: OclifFlags.string({
+    directory: CanonFlags.string({
       char: 'd',
       description: 'Target directory for the new project',
       default: '.',
     }),
-    force: OclifFlags.boolean({
+    force: CanonFlags.boolean({
       description: 'Overwrite existing files when templates already exist',
       default: false,
     }),
-    name: OclifFlags.string({
+    name: CanonFlags.string({
       char: 'n',
       description: 'Project name for generated files (defaults to directory name)',
     }),
-    templates: OclifFlags.boolean({
+    templates: CanonFlags.boolean({
       description: 'Generate starter source and configuration files',
       allowNo: true,
       default: true,
     }),
-    scripts: OclifFlags.boolean({
+    scripts: CanonFlags.boolean({
       description: 'Add Canon workflow scripts to package.json',
       allowNo: true,
       default: true,
     }),
-    devDeps: OclifFlags.boolean({
+    devDeps: CanonFlags.boolean({
       description: 'Ensure Canon, ESLint, and TypeScript are listed in devDependencies',
       allowNo: true,
       default: true,
     }),
-    workflows: OclifFlags.boolean({
+    workflows: CanonFlags.boolean({
       description: 'Generate GitHub Actions workflow for Canon checks',
       allowNo: true,
       default: true,
     }),
-    ciTool: OclifFlags.string({
+    ciTool: CanonFlags.string({
       description: 'Continuous integration provider to scaffold',
       options: ['github'],
       default: 'github',
@@ -92,7 +91,7 @@ export default class InitCommand extends OclifCommand {
     const { flags } = await this.parse(InitCommand)
     const resolvedFlags = flags as InitFlags
     const directory = resolve(process.cwd(), resolvedFlags.directory ?? '.')
-    await fsExtra.ensureDir(directory)
+    await Files.ensureDir(directory)
 
     const projectName = this.normalizeName(resolvedFlags.name ?? this.deriveName(directory))
     const templatesEnabled = resolvedFlags.templates !== false
@@ -189,8 +188,8 @@ export default class InitCommand extends OclifCommand {
     const packageJsonPath = resolve(directory, 'package.json')
     let contents = '{\n}\n'
 
-    if (await fsExtra.pathExists(packageJsonPath)) {
-      contents = await fsExtra.readFile(packageJsonPath, 'utf8')
+    if (await Files.pathExists(packageJsonPath)) {
+      contents = await Files.readFile(packageJsonPath, 'utf8')
       this.assertPackageJsonValid(contents)
     }
 
@@ -236,7 +235,7 @@ export default class InitCommand extends OclifCommand {
       }
     }
 
-    await fsExtra.writeFile(packageJsonPath, this.ensureTrailingNewline(contents), 'utf8')
+    await Files.writeFile(packageJsonPath, this.ensureTrailingNewline(contents), 'utf8')
   }
 
   private ensureJsonValue(source: string, path: Array<string | number>, value: unknown): string {

@@ -1,13 +1,13 @@
 import process from 'node:process'
 
-import { oclifFlush, oclifRun } from '../kit.js'
+import { Oclif } from '../kit.js'
 
 export async function runCli(argv: string[] = process.argv.slice(2)): Promise<void> {
   try {
-    await oclifRun(argv, import.meta.url)
-    await oclifFlush()
+    await Oclif.run(argv, import.meta.url)
+    await Oclif.flush()
   } catch (error) {
-    await oclifFlush()
+    await Oclif.flush()
     if (error instanceof Error) {
       // eslint-disable-next-line no-console
       console.error(error.message)

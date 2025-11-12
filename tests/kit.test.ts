@@ -1,11 +1,12 @@
 import {
   defu,
-  fsExtra,
-  hygenRunner,
+  Files,
+  Hygen,
   Immutable,
+  Jsonc,
   objectHash,
-  oclifRun,
-  parseJsonWithComments,
+  Oclif,
+  Parse,
   parseYaml,
 } from '@relational-fabric/canon'
 import createEslintConfig from '@relational-fabric/canon/eslint'
@@ -44,19 +45,23 @@ describe('canon kit exports', () => {
     expect(result).toEqual({ foo: 'bar' })
   })
 
-  it('exposes oclif run helper', () => {
-    expect(typeof oclifRun).toBe('function')
+  it('provides grouped Oclif helpers', () => {
+    expect(typeof Oclif.run).toBe('function')
+    expect(typeof Oclif.flush).toBe('function')
   })
 
-  it('exposes hygen runner', () => {
-    expect(typeof hygenRunner).toBe('function')
+  it('exposes Hygen utilities', () => {
+    expect(typeof Hygen.runner).toBe('function')
+    expect(typeof Hygen.Logger).toBe('function')
   })
 
-  it('exposes fs-extra utilities', () => {
-    expect(typeof fsExtra.pathExists).toBe('function')
+  it('exposes filesystem helpers', () => {
+    expect(typeof Files.pathExists).toBe('function')
   })
 
-  it('exposes jsonc parser helpers', () => {
-    expect(typeof parseJsonWithComments).toBe('function')
+  it('groups parse helpers', () => {
+    expect(typeof Parse.yaml).toBe('function')
+    expect(typeof Jsonc.parse).toBe('function')
+    expect(typeof Jsonc.modify).toBe('function')
   })
 })

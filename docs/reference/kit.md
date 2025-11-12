@@ -70,12 +70,13 @@ The Kit provides utility libraries through a dual export strategy, offering both
 ```typescript
 import {
   defu,
-  fsExtra,
-  hygenRunner,
+  Files,
+  Hygen,
   Immutable,
+  Jsonc,
   objectHash,
-  oclifRun,
-  parseJsonWithComments,
+  Oclif,
+  Parse,
   parseYaml,
 } from '@relational-fabric/canon'
 import createEslintConfig from '@relational-fabric/canon/eslint'
@@ -123,11 +124,12 @@ import * as yaml from '@relational-fabric/canon/_/yaml'
 **CLI & Scaffolding:**
 
 - **Opinionated**:
-  - `oclifRun`, `oclifFlush`, `OclifCommand`, `OclifFlags` (wrappers around [@oclif/core](https://github.com/oclif/oclif))
-  - `hygenRunner`, `HygenLogger` (programmatic access to [Hygen](https://www.hygen.io))
-  - `fsExtra` (filesystem helpers from [fs-extra](https://github.com/jprichardson/node-fs-extra))
-  - `parseJsonWithComments`, `modifyJsonContent`, `applyJsonEdits` (JSONC utilities from [jsonc-parser](https://github.com/microsoft/node-jsonc-parser))
-  - `TsMorphProject`, `TsMorphSourceFile`, `TsMorphQuoteKind`, `TsMorphStructureKind` (strongly typed access to [ts-morph](https://github.com/dsherret/ts-morph))
+  - `Oclif` object exposing `run`, `flush`, `command`, and `flags` (wrappers around [@oclif/core](https://github.com/oclif/oclif))
+  - `Hygen` object exposing `runner` and `Logger` (programmatic access to [Hygen](https://www.hygen.io))
+  - `Files` (filesystem helpers from [fs-extra](https://github.com/jprichardson/node-fs-extra))
+  - `Parse` (grouped parsers such as `Parse.yaml`)
+  - `Jsonc` (JSONC helpers `parse`, `modify`, `applyEdits`, `printError`)
+  - `TsMorph` (exposes `Project`, `QuoteKind`, `StructureKind` for [ts-morph](https://github.com/dsherret/ts-morph))
 - **Transparent**: Import directly through the `_` namespace (`@relational-fabric/canon/_/oclif`, `@relational-fabric/canon/_/hygen`, `@relational-fabric/canon/_/fs-extra`, `@relational-fabric/canon/_/jsonc-parser`, `@relational-fabric/canon/_/ts-morph`)
 
 **Version Management**: The package uses both `dependencies` and `optionalDependencies` to ensure consumers get the exact same version used internally, preventing version conflicts and ensuring predictable behavior.
