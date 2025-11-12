@@ -69,6 +69,7 @@ The Kit provides utility libraries through a dual export strategy, offering both
 
 ```typescript
 import {
+  Consola,
   defu,
   Files,
   Hygen,
@@ -126,6 +127,7 @@ import * as yaml from '@relational-fabric/canon/_/yaml'
 - **Opinionated**:
   - `Oclif` object exposing `run`, `flush`, `command`, and `flags` (wrappers around [@oclif/core](https://github.com/oclif/oclif))
   - `Hygen` object exposing `runner` and `Logger` (programmatic access to [Hygen](https://www.hygen.io))
+  - `Consola` (structured logging via [consola](https://github.com/unjs/consola))
   - `Files` (filesystem helpers from [fs-extra](https://github.com/jprichardson/node-fs-extra))
   - `Parse` (grouped parsers such as `Parse.yaml`)
   - `Jsonc` (JSONC helpers `parse`, `modify`, `applyEdits`, `printError`)

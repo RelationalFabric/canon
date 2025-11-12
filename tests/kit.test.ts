@@ -1,4 +1,5 @@
 import {
+  Consola,
   defu,
   Files,
   Hygen,
@@ -63,5 +64,10 @@ describe('canon kit exports', () => {
     expect(typeof Parse.yaml).toBe('function')
     expect(typeof Jsonc.parse).toBe('function')
     expect(typeof Jsonc.modify).toBe('function')
+  })
+
+  it('exposes Consola logger', () => {
+    expect(typeof Consola.log).toBe('function')
+    expect(typeof Consola.info).toBe('function')
   })
 })

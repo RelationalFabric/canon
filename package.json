@@ -103,6 +103,7 @@
     "@vitest/coverage-v8": "^4.0.8",
     "adr-tools": "^2.0.4",
     "dedent": "^1.7.0",
+    "consola": "^3.3.2",
     "fs-extra": "^11.2.0",
     "hygen": "^6.2.11",
     "immutable": "^5.1.4",
