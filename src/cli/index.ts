@@ -1,6 +1,7 @@
 import process from 'node:process'
 
-import { Oclif, createLogger } from '../kit.js'
+import { Oclif } from '../kit.js'
+import { createLogger } from '../log.js'
 
 const logger = createLogger('canon:cli')
 
