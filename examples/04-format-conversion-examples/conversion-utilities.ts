@@ -178,17 +178,17 @@ export function processUsersFromDifferentSources(): void {
         }
       }
 
-        logger.info(`User ${index + 1}:`)
-        logger.log(`  ID: ${id}`)
-        logger.log(`  Type: ${type}`)
-        logger.log(`  Version: ${version}`)
-        logger.log(`  Updated: ${updated.toISOString()}`)
-        logger.log('')
+      logger.info(`User ${index + 1}:`)
+      logger.log(`  ID: ${id}`)
+      logger.log(`  Type: ${type}`)
+      logger.log(`  Version: ${version}`)
+      logger.log(`  Updated: ${updated.toISOString()}`)
+      logger.log('')
     } catch (error) {
-        logger.error(
+      logger.error(
         `User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
-        logger.log('')
+      logger.log('')
     }
   })
 }
@@ -236,10 +236,10 @@ export function demonstrateErrorHandling(): void {
   try {
     // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
     idOf(invalidData)
-    } catch (error) {
-      logger.error(
-        `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
+  } catch (error) {
+    logger.error(
+      `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 
   // Test with partial data
@@ -248,9 +248,9 @@ export function demonstrateErrorHandling(): void {
   try {
     // @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
     typeOf(partialData)
-    } catch (error) {
-      logger.error(
-        `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
+  } catch (error) {
+    logger.error(
+      `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 }

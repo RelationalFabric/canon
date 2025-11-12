@@ -6,7 +6,7 @@
  */
 
 import type { EntityReference, Satisfies } from '@relational-fabric/canon'
-import { Consola, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { createLogger, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 type MultiAxiomEntity = Satisfies<'Id'> & Satisfies<'Type'> & Satisfies<'Version'> & Satisfies<'References'> & {
   createdAt?: Date
@@ -16,6 +16,8 @@ type MultiAxiomEntity = Satisfies<'Id'> & Satisfies<'Type'> & Satisfies<'Version
 function ensureEntity(entity: unknown): MultiAxiomEntity {
   return entity as MultiAxiomEntity
 }
+
+const logger = createLogger('examples:multi-axiom:utilities')
 
 // =============================================================================
 // Entity Analysis Functions
@@ -61,41 +63,41 @@ export function analyzeEntity(input: unknown): {
  * Demonstrate timestamp conversion from different formats
  */
 export function demonstrateTimestampConversion(): void {
-  Consola.info('=== Timestamp Conversion Examples ===')
+  logger.info('=== Timestamp Conversion Examples ===')
 
   // Unix timestamp
   const unixTimestamp = 1640995200000
   const unixConverted = new Date(unixTimestamp)
-  Consola.log(`Unix timestamp ${unixTimestamp} -> ${unixConverted.toISOString()}`)
+  logger.log(`Unix timestamp ${unixTimestamp} -> ${unixConverted.toISOString()}`)
 
   // ISO string
   const isoString = '2024-01-15T10:30:00Z'
   const isoConverted = new Date(isoString)
-  Consola.log(`ISO string "${isoString}" -> ${isoConverted.toISOString()}`)
+  logger.log(`ISO string "${isoString}" -> ${isoConverted.toISOString()}`)
 
   // Date object
   const dateObject = new Date('2024-01-15T10:30:00Z')
-  Consola.log(`Date object -> ${dateObject.toISOString()}`)
+  logger.log(`Date object -> ${dateObject.toISOString()}`)
 }
 
 /**
  * Demonstrate reference conversion from different formats
  */
 export function demonstrateReferenceConversion(): void {
-  Consola.info('=== Reference Conversion Examples ===')
+  logger.info('=== Reference Conversion Examples ===')
 
   // String reference
   const stringRef = 'user-123'
   const stringConverted = { ref: stringRef, resolved: false }
-  Consola.log(`String reference "${stringRef}" ->`, stringConverted)
+  logger.log(`String reference "${stringRef}" ->`, stringConverted)
 
   // Object reference
   const objectRef = { ref: 'product-456', resolved: false }
-  Consola.log('Object reference ->', objectRef)
+  logger.log('Object reference ->', objectRef)
 
   // Complex object
   const complexRef = { ref: 'order-789', resolved: false, value: undefined }
-  Consola.log('Complex object ->', complexRef)
+  logger.log('Complex object ->', complexRef)
 }
 
 /**
@@ -115,10 +117,10 @@ export function processEntityUpdate(input: unknown): {
   const newVersion = oldVersion + 1
   const updatedAt = new Date()
 
-  Consola.info(`\n=== Processing Update for ${typeOf(entity as Satisfies<'Type'>)} ${id} ===`)
-  Consola.log(`Current version: ${oldVersion}`)
-  Consola.log(`New version: ${newVersion}`)
-  Consola.log(`Updated at: ${updatedAt.toISOString()}`)
+  logger.info(`\n=== Processing Update for ${typeOf(entity as Satisfies<'Type'>)} ${id} ===`)
+  logger.log(`Current version: ${oldVersion}`)
+  logger.log(`New version: ${newVersion}`)
+  logger.log(`Updated at: ${updatedAt.toISOString()}`)
 
   return {
     id,

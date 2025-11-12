@@ -7,8 +7,8 @@
 
 import type { Satisfies } from '@relational-fabric/canon'
 import { createLogger, idOf, typeOf, versionOf } from '@relational-fabric/canon'
-const logger = createLogger('examples:business-logic')
 
+const logger = createLogger('examples:business-logic')
 
 // =============================================================================
 // Order Processing Functions

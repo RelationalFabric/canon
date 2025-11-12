@@ -7,9 +7,10 @@
 
 import type { Satisfies } from '@relational-fabric/canon'
 import { createLogger, idOf, inferAxiom } from '@relational-fabric/canon'
-const logger = createLogger('examples:custom-axioms:scenarios')
 
 import { currencyOf, emailOf, statusOf } from './custom-functions.js'
+
+const logger = createLogger('examples:custom-axioms:scenarios')
 
 // =============================================================================
 // Sample Data

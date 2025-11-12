@@ -1,5 +1,5 @@
-import { createConsola } from 'consola'
 import type { ConsolaInstance } from 'consola'
+import { createConsola } from 'consola'
 
 const config = {
   level: undefined,

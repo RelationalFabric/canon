@@ -1,5 +1,5 @@
 import {
-  Consola,
+  createLogger,
   defu,
   Files,
   Hygen,
@@ -52,8 +52,8 @@ describe('canon kit exports', () => {
   })
 
   it('exposes Hygen utilities', () => {
-    expect(typeof Hygen.runner).toBe('function')
-    expect(typeof Hygen.Logger).toBe('function')
+    expect(typeof Hygen.run).toBe('function')
+    expect(typeof Hygen.createLogger).toBe('function')
   })
 
   it('exposes filesystem helpers', () => {
@@ -66,8 +66,9 @@ describe('canon kit exports', () => {
     expect(typeof Jsonc.modify).toBe('function')
   })
 
-  it('exposes Consola logger', () => {
-    expect(typeof Consola.log).toBe('function')
-    expect(typeof Consola.info).toBe('function')
+  it('creates tagged loggers', () => {
+    const logger = createLogger('test:kit')
+    expect(typeof logger.log).toBe('function')
+    expect(typeof logger.info).toBe('function')
   })
 })

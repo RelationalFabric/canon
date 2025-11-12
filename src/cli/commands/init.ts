@@ -33,7 +33,7 @@ const formattingOptions: JsonFormattingOptions = {
 }
 
 const { command: CanonCommand, flags: CanonFlags } = Oclif
-const { runner: hygenRunner, Logger: HygenLogger } = Hygen
+const { run: hygenRun, createLogger: createHygenLogger } = Hygen
 const {
   applyEdits: applyJsonEdits,
   modify: modifyJsonContent,
@@ -158,7 +158,7 @@ export default class InitCommand extends CanonCommand {
       args.push('--force')
     }
 
-    const logger = new HygenLogger((message: string) => {
+    const logger = createHygenLogger((message: string) => {
       const trimmed = message.trim()
       if (trimmed.length > 0) {
         this.log(trimmed)
@@ -171,7 +171,7 @@ export default class InitCommand extends CanonCommand {
       },
     })
 
-    await hygenRunner(args, {
+    await hygenRun(args, {
       cwd: directory,
       templates: templatesDirectory,
       logger,

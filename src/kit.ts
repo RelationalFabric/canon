@@ -1,3 +1,4 @@
+import type { ConsolaInstance } from 'consola'
 import type { FormattingOptions as JsonFormattingOptions, ParseError as JsonParseError } from 'jsonc-parser'
 import type { ObjectHash } from 'object-hash'
 import type { SourceFile as TsMorphSourceFile } from 'ts-morph'
@@ -19,7 +20,6 @@ import {
   StructureKind as TsMorphStructureKindEnum,
 } from 'ts-morph'
 import { parse as yamlParse } from 'yaml'
-import type { ConsolaInstance } from 'consola'
 import { createLogger as createCanonLogger } from './log.js'
 
 // Third-party dependencies blessed for consumer use
