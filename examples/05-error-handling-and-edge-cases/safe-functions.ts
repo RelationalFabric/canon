@@ -6,7 +6,8 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { Consola, idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { Logging, idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational-fabric/canon'
+const logger = Logging.create('examples:error-handling:safe-functions')
 
 // =============================================================================
 // Safe Wrapper Functions
@@ -19,7 +20,7 @@ export function safeIdOf(entity: unknown): string | undefined {
   try {
     return idOf(entity as Satisfies<'Id'>)
   } catch (error) {
-    Consola.warn('Failed to extract ID:', error instanceof Error ? error.message : 'Unknown error')
+    logger.warn('Failed to extract ID:', error instanceof Error ? error.message : 'Unknown error')
     return undefined
   }
 }
@@ -31,7 +32,7 @@ export function safeTypeOf(entity: unknown): string | undefined {
   try {
     return typeOf(entity as Satisfies<'Type'>)
   } catch (error) {
-    Consola.warn(
+    logger.warn(
       'Failed to extract type:',
       error instanceof Error ? error.message : 'Unknown error',
     )
@@ -45,13 +46,12 @@ export function safeTypeOf(entity: unknown): string | undefined {
 export function safeVersionOf(entity: unknown): number | undefined {
   try {
     const version = versionOf(entity as Satisfies<'Version'>)
-    // Additional validation to ensure it's actually a number
     if (typeof version !== 'number') {
       return undefined
     }
     return version
   } catch (error) {
-    Consola.warn(
+    logger.warn(
       'Failed to extract version:',
       error instanceof Error ? error.message : 'Unknown error',
     )
@@ -66,7 +66,7 @@ export function safeTimestampsOf(entity: unknown): Date | undefined {
   try {
     return timestampsOf(entity as Satisfies<'Timestamps'>)
   } catch (error) {
-    Consola.warn(
+    logger.warn(
       'Failed to extract timestamps:',
       error instanceof Error ? error.message : 'Unknown error',
     )
@@ -83,7 +83,7 @@ export function safeReferencesOf(
   try {
     return referencesOf(entity as Satisfies<'References'>)
   } catch (error) {
-    Consola.warn(
+    logger.warn(
       'Failed to extract references:',
       error instanceof Error ? error.message : 'Unknown error',
     )
@@ -118,7 +118,7 @@ export function safeTimestampConversion(value: unknown): Date | undefined {
 
     throw new Error(`Unsupported timestamp type: ${typeof value}`)
   } catch (error) {
-    Consola.warn(
+    logger.warn(
       'Failed to convert timestamp:',
       error instanceof Error ? error.message : 'Unknown error',
     )
@@ -150,7 +150,7 @@ export function safeReferenceConversion(
 
     throw new Error(`Expected string or object, got ${typeof value}`)
   } catch (error) {
-    Consola.warn(
+    logger.warn(
       'Failed to convert reference:',
       error instanceof Error ? error.message : 'Unknown error',
     )

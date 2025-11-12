@@ -5,7 +5,7 @@
  * @document.difficulty advanced
  */
 
-import { Consola } from '@relational-fabric/canon'
+import { Logging } from '@relational-fabric/canon'
 import {
   calculateOrderTotal,
   generateOrderSummary,
@@ -95,47 +95,49 @@ if (import.meta.vitest) {
   })
 }
 
+const logger = Logging.create('examples:real-world:index')
+
 // Run the examples
-Consola.info('=== Real-World Business Scenarios ===')
+logger.info('=== Real-World Business Scenarios ===')
 
 // 1. Order Total Calculation
-Consola.info('\n1. Order Total Calculation:')
+logger.info('\n1. Order Total Calculation:')
 const totals = calculateOrderTotal(sampleOrder)
-Consola.log(totals)
+logger.log(totals)
 
 // 2. Order Status Update
-Consola.info('\n2. Order Status Update:')
+logger.info('\n2. Order Status Update:')
 const statusUpdate = updateOrderStatus(sampleOrder, 'shipped')
-Consola.log(`Status update result: ${statusUpdate.success ? 'Success' : 'Failed'}`)
+logger.log(`Status update result: ${statusUpdate.success ? 'Success' : 'Failed'}`)
 if (statusUpdate.success) {
-  Consola.log(`New version: ${statusUpdate.newVersion}`)
+  logger.log(`New version: ${statusUpdate.newVersion}`)
 } else {
-  Consola.error(`Error: ${statusUpdate.error}`)
+  logger.error(`Error: ${statusUpdate.error}`)
 }
 
 // 3. Order Summary
-Consola.info('\n3. Order Summary:')
+logger.info('\n3. Order Summary:')
 const summary = generateOrderSummary(sampleOrder)
-Consola.log(summary)
+logger.log(summary)
 
 // 4. Customer Validation
-Consola.info('\n4. Customer Validation:')
+logger.info('\n4. Customer Validation:')
 const customerValidation = validateCustomerForOrder(sampleCustomer)
-Consola.log(`Customer valid: ${customerValidation.valid}`)
+logger.log(`Customer valid: ${customerValidation.valid}`)
 if (customerValidation.warnings.length > 0) {
-  Consola.warn(`Warnings: ${JSON.stringify(customerValidation.warnings)}`)
+  logger.warn(`Warnings: ${JSON.stringify(customerValidation.warnings)}`)
 }
 if (customerValidation.errors.length > 0) {
-  Consola.error(`Errors: ${JSON.stringify(customerValidation.errors)}`)
+  logger.error(`Errors: ${JSON.stringify(customerValidation.errors)}`)
 }
 
 // 5. Complete Workflow
-Consola.info('\n5. Complete Order Workflow:')
+logger.info('\n5. Complete Order Workflow:')
 const workflow = processOrderWorkflow(sampleCustomer, sampleOrder)
-Consola.log(`Workflow success: ${workflow.success}`)
+logger.log(`Workflow success: ${workflow.success}`)
 workflow.steps.forEach((step, index) => {
-  Consola.log(`  Step ${index + 1}: ${step.step} - ${step.success ? 'Success' : 'Failed'}`)
-  Consola.log(`    ${step.message}`)
+  logger.log(`  Step ${index + 1}: ${step.step} - ${step.success ? 'Success' : 'Failed'}`)
+  logger.log(`    ${step.message}`)
 })
 
 /**

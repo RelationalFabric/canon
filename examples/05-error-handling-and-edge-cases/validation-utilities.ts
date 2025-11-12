@@ -5,7 +5,7 @@
  * in a robust manner.
  */
 
-import { Consola } from '@relational-fabric/canon'
+import { Logging } from '@relational-fabric/canon'
 import {
   safeIdOf,
   safeReferencesOf,
@@ -14,6 +14,7 @@ import {
   safeVersionOf,
 } from './safe-functions.js'
 
+const logger = Logging.create('examples:error-handling:validation')
 // =============================================================================
 // Validation Functions
 // =============================================================================
@@ -96,7 +97,7 @@ export function findMatchingCanon(entity: unknown): string | undefined {
 
     return undefined
   } catch (error) {
-    Consola.warn(
+    logger.warn(
       'Failed to find matching canon:',
       error instanceof Error ? error.message : 'Unknown error',
     )

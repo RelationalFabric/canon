@@ -6,7 +6,7 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { Consola, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { Logging, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Format Conversion Functions
@@ -116,9 +116,11 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
 /**
  * Process users from different data sources
  */
+const logger = Logging.create('examples:format-conversion:utilities')
+
 export function processUsersFromDifferentSources(): void {
-  Consola.info('=== Mixed Data Sources Example ===')
-  Consola.log('\nProcessing users from different sources:\n')
+  logger.info('=== Mixed Data Sources Example ===')
+  logger.log('\nProcessing users from different sources:\n')
 
   // REST API user
   const restUser = {
@@ -176,17 +178,17 @@ export function processUsersFromDifferentSources(): void {
         }
       }
 
-      Consola.info(`User ${index + 1}:`)
-      Consola.log(`  ID: ${id}`)
-      Consola.log(`  Type: ${type}`)
-      Consola.log(`  Version: ${version}`)
-      Consola.log(`  Updated: ${updated.toISOString()}`)
-      Consola.log('')
+        logger.info(`User ${index + 1}:`)
+        logger.log(`  ID: ${id}`)
+        logger.log(`  Type: ${type}`)
+        logger.log(`  Version: ${version}`)
+        logger.log(`  Updated: ${updated.toISOString()}`)
+        logger.log('')
     } catch (error) {
-      Consola.error(
+        logger.error(
         `User ${index + 1}: Error processing - ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
-      Consola.log('')
+        logger.log('')
     }
   })
 }
@@ -195,8 +197,8 @@ export function processUsersFromDifferentSources(): void {
  * Demonstrate format conversion
  */
 export function demonstrateFormatConversion(): void {
-  Consola.info('=== Format Conversion Example ===')
-  Consola.log('\nConverting REST API user to different formats:\n')
+  logger.info('=== Format Conversion Example ===')
+  logger.log('\nConverting REST API user to different formats:\n')
 
   const restUser = {
     id: 'user-123',
@@ -209,24 +211,24 @@ export function demonstrateFormatConversion(): void {
   }
 
   // Convert to MongoDB format
-  Consola.info('MongoDB format:')
+  logger.info('MongoDB format:')
   const mongoFormat = convertToMongoDb(restUser)
-  Consola.log(JSON.stringify(mongoFormat, null, 2))
-  Consola.log('')
+  logger.log(JSON.stringify(mongoFormat, null, 2))
+  logger.log('')
 
   // Convert to JSON-LD format
-  Consola.info('JSON-LD format:')
+  logger.info('JSON-LD format:')
   const jsonLdFormat = convertToJsonLd(restUser)
-  Consola.log(JSON.stringify(jsonLdFormat, null, 2))
-  Consola.log('')
+  logger.log(JSON.stringify(jsonLdFormat, null, 2))
+  logger.log('')
 }
 
 /**
  * Demonstrate error handling with format conversion
  */
 export function demonstrateErrorHandling(): void {
-  Consola.info('=== Error Handling Example ===')
-  Consola.log('')
+  logger.info('=== Error Handling Example ===')
+  logger.log('')
 
   // Test with invalid data
   const invalidData = { name: 'Invalid User' }
@@ -234,10 +236,10 @@ export function demonstrateErrorHandling(): void {
   try {
     // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
     idOf(invalidData)
-  } catch (error) {
-    Consola.error(
-      `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    )
+    } catch (error) {
+      logger.error(
+        `Expected error for invalid data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
   }
 
   // Test with partial data
@@ -246,9 +248,9 @@ export function demonstrateErrorHandling(): void {
   try {
     // @ts-expect-error - Demonstrating type system correctly rejects partial data missing required fields
     typeOf(partialData)
-  } catch (error) {
-    Consola.error(
-      `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    )
+    } catch (error) {
+      logger.error(
+        `Error with partial data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
   }
 }

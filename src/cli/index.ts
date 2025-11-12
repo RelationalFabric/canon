@@ -1,15 +1,17 @@
 import process from 'node:process'
 
-import { Consola, Oclif } from '../kit.js'
+import { Logging, Oclif } from '../kit.js'
+
+const logger = Logging.create('canon:cli')
 
 export async function runCli(argv: string[] = process.argv.slice(2)): Promise<void> {
   try {
     await Oclif.run(argv, import.meta.url)
-    await Oclif.flush()
-  } catch (error) {
-    await Oclif.flush()
-    if (error instanceof Error)
-      Consola.error(error.message)
+      await Oclif.flush()
+    } catch (error) {
+      await Oclif.flush()
+      if (error instanceof Error)
+        logger.error(error.message)
     process.exitCode = 1
   }
 }
