@@ -138,4 +138,3 @@ Status is **proposed**. Once accepted, we will:
 - Design templates for base project structure, examples, and docs using Hygen directories.
 - Define safety checks for file overrides (prompt before overwriting, support `--force`).
 - Document how consumers can extend Canon via Hygen templates or Oclif plugins.
-

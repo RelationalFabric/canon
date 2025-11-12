@@ -10,7 +10,7 @@ declare module 'hygen' {
   }
 
   interface HygenPrompter {
-    prompt<T>(questions: T): Promise<Record<string, unknown>>
+    readonly prompt: <T>(questions: T) => Promise<Record<string, unknown>>
   }
 
   interface RunnerConfig {

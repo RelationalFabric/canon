@@ -11,7 +11,7 @@ const entryPoint = resolve(currentDir, '../src/cli/index.ts')
 const module = await import(entryPoint)
 
 if (typeof module.runCli !== 'function') {
-  throw new Error('Canon CLI entry point did not expose runCli()')
+  throw new TypeError('Canon CLI entry point did not expose runCli()')
 }
 
 await module.runCli(process.argv.slice(2))

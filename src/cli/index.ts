@@ -9,7 +9,6 @@ export async function runCli(argv: string[] = process.argv.slice(2)): Promise<vo
   } catch (error) {
     await Oclif.flush()
     if (error instanceof Error) {
-      // eslint-disable-next-line no-console
       console.error(error.message)
     }
     process.exitCode = 1

@@ -1,9 +1,9 @@
-import { basename, relative, resolve } from 'node:path'
+import type { JsonFormattingOptions, JsonParseError } from '../../kit.js'
 import { createRequire } from 'node:module'
-import { fileURLToPath } from 'node:url'
+import { basename, relative, resolve } from 'node:path'
 import process from 'node:process'
 
-import type { JsonFormattingOptions, JsonParseError } from '../../kit.js'
+import { fileURLToPath } from 'node:url'
 import { Files, Hygen, Jsonc, Oclif } from '../../kit.js'
 
 interface InitFlags {
@@ -18,14 +18,15 @@ interface InitFlags {
 }
 
 interface HygenPrompter {
-  prompt<T>(questions: T): Promise<Record<string, unknown>>
+  prompt: <T>(questions: T) => Promise<Record<string, unknown>>
 }
 
 const require = createRequire(import.meta.url)
 const canonPackage = require('../../../package.json') as { readonly version: string }
+
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const templatesDirectory = resolve(packageRoot, 'cli/templates/_templates')
-  const formattingOptions: JsonFormattingOptions = {
+const formattingOptions: JsonFormattingOptions = {
   insertSpaces: true,
   tabSize: 2,
   eol: '\n',
@@ -131,13 +132,13 @@ export default class InitCommand extends CanonCommand {
 
   private normalizeName(name: string): string {
     const trimmed = name.trim().toLowerCase()
-    const normalized = trimmed.replace(/[^a-z0-9-]+/g, '-').replace(/--+/g, '-').replace(/^-|-$/g, '')
+    const normalized = trimmed.replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-').replace(/^-|-$/g, '')
     return normalized === '' ? 'canon-project' : normalized
   }
 
   private async generateTemplates(
     directory: string,
-    context: { force: boolean; name: string; templates: boolean; workflows: boolean },
+    context: { force: boolean, name: string, templates: boolean, workflows: boolean },
   ): Promise<void> {
     if (!context.templates && !context.workflows) {
       return
@@ -183,7 +184,7 @@ export default class InitCommand extends CanonCommand {
   private async updatePackageJson(
     directory: string,
     name: string,
-    options: { scripts: boolean; devDependencies: boolean },
+    options: { scripts: boolean, devDependencies: boolean },
   ): Promise<void> {
     const packageJsonPath = resolve(directory, 'package.json')
     let contents = '{\n}\n'
@@ -214,8 +215,8 @@ export default class InitCommand extends CanonCommand {
         'build:adr': 'npm-run-all build:adr:toc build:adr:index',
         'build:adr:index': 'node scripts/generate-adr-index.js',
         'build:adr:toc': 'cd docs/adrs && npx adr generate toc',
-        dev: 'tsx --watch src/index.ts',
-        test: 'npm run check:test',
+        'dev': 'tsx --watch src/index.ts',
+        'test': 'npm run check:test',
       }
 
       for (const [script, command] of Object.entries(scripts)) {
@@ -226,8 +227,8 @@ export default class InitCommand extends CanonCommand {
     if (options.devDependencies) {
       const devDependencies: Record<string, string> = {
         '@relational-fabric/canon': `^${canonPackage.version}`,
-        eslint: '^9.0.0',
-        typescript: '^5.0.0',
+        'eslint': '^9.0.0',
+        'typescript': '^5.0.0',
       }
 
       for (const [dependency, version] of Object.entries(devDependencies)) {
@@ -255,7 +256,7 @@ export default class InitCommand extends CanonCommand {
     }
 
     const details = errors
-      .map((error) => `- ${printParseErrorCode(error.error)} at offset ${error.offset}`)
+      .map(error => `- ${printParseErrorCode(error.error)} at offset ${error.offset}`)
       .join('\n')
     throw new Error(`Unable to update package.json due to existing syntax errors:\n${details}`)
   }
