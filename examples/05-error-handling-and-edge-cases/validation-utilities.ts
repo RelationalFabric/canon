@@ -5,6 +5,7 @@
  * in a robust manner.
  */
 
+import { Consola } from '@relational-fabric/canon'
 import {
   safeIdOf,
   safeReferencesOf,
@@ -95,7 +96,7 @@ export function findMatchingCanon(entity: unknown): string | undefined {
 
     return undefined
   } catch (error) {
-    console.warn(
+    Consola.warn(
       'Failed to find matching canon:',
       error instanceof Error ? error.message : 'Unknown error',
     )

@@ -2,6 +2,7 @@ import type { FormattingOptions as JsonFormattingOptions, ParseError as JsonPars
 import type { ObjectHash } from 'object-hash'
 import type { SourceFile as TsMorphSourceFile } from 'ts-morph'
 import { Command as OclifCommand, Flags as OclifFlags, flush as oclifFlush, run as oclifRun } from '@oclif/core'
+import consola from 'consola'
 import fsExtra from 'fs-extra'
 import { runner as hygenRunner } from 'hygen'
 import HygenLoggerModule from 'hygen/dist/logger'

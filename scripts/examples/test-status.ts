@@ -8,6 +8,9 @@
 import type { TestStatusMap } from './types.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { normalize } from 'node:path'
+import consola from 'consola'
+
+const logger = consola.withTag('test-status')
 
 /**
  * Vitest JSON report structure
@@ -55,15 +58,15 @@ export function loadTestReport(reportPath: string): VitestReport | null {
       !report
       || typeof report !== 'object'
       || !('testResults' in report)
-      || !Array.isArray(report.testResults)
+      || !Array.isArray((report as { testResults?: unknown }).testResults)
     ) {
-      console.warn(`⚠️ Invalid Vitest report structure at ${reportPath}`)
+      logger.warn(`⚠️ Invalid Vitest report structure at ${reportPath}`)
       return null
     }
 
     return report as VitestReport
   } catch (error) {
-    console.warn(
+    logger.warn(
       `⚠️ Failed to load Vitest report at ${reportPath}:`,
       error instanceof Error ? error.message : String(error),
     )
