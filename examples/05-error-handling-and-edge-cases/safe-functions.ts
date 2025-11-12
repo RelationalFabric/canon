@@ -6,8 +6,8 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { Logging, idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational-fabric/canon'
-const logger = Logging.create('examples:error-handling:safe-functions')
+import { createLogger, idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational-fabric/canon'
+const logger = createLogger('examples:error-handling:safe-functions')
 
 // =============================================================================
 // Safe Wrapper Functions

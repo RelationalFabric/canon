@@ -5,7 +5,7 @@
  * @document.difficulty advanced
  */
 
-import { Logging } from '@relational-fabric/canon'
+import { createLogger } from '@relational-fabric/canon'
 import {
   calculateOrderTotalWithCurrency,
   processCustomerRegistration,
@@ -173,7 +173,7 @@ if (import.meta.vitest) {
   })
 }
 
-const logger = Logging.create('examples:custom-axioms:index')
+const logger = createLogger('examples:custom-axioms:index')
 
 // Run the examples
 logger.info('=== Custom Axioms Examples ===')

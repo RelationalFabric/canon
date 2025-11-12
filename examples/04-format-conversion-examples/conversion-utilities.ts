@@ -6,7 +6,7 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { Logging, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { createLogger, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Format Conversion Functions
@@ -116,7 +116,7 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
 /**
  * Process users from different data sources
  */
-const logger = Logging.create('examples:format-conversion:utilities')
+const logger = createLogger('examples:format-conversion:utilities')
 
 export function processUsersFromDifferentSources(): void {
   logger.info('=== Mixed Data Sources Example ===')

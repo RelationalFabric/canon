@@ -1,8 +1,8 @@
 import process from 'node:process'
 
-import { Logging, Oclif } from '../kit.js'
+import { Oclif, createLogger } from '../kit.js'
 
-const logger = Logging.create('canon:cli')
+const logger = createLogger('canon:cli')
 
 export async function runCli(argv: string[] = process.argv.slice(2)): Promise<void> {
   try {

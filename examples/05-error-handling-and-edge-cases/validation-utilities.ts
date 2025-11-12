@@ -5,7 +5,7 @@
  * in a robust manner.
  */
 
-import { Logging } from '@relational-fabric/canon'
+import { createLogger } from '@relational-fabric/canon'
 import {
   safeIdOf,
   safeReferencesOf,
@@ -14,7 +14,7 @@ import {
   safeVersionOf,
 } from './safe-functions.js'
 
-const logger = Logging.create('examples:error-handling:validation')
+const logger = createLogger('examples:error-handling:validation')
 // =============================================================================
 // Validation Functions
 // =============================================================================

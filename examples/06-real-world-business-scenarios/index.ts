@@ -5,7 +5,7 @@
  * @document.difficulty advanced
  */
 
-import { Logging } from '@relational-fabric/canon'
+import { createLogger } from '@relational-fabric/canon'
 import {
   calculateOrderTotal,
   generateOrderSummary,
@@ -95,7 +95,7 @@ if (import.meta.vitest) {
   })
 }
 
-const logger = Logging.create('examples:real-world:index')
+const logger = createLogger('examples:real-world:index')
 
 // Run the examples
 logger.info('=== Real-World Business Scenarios ===')

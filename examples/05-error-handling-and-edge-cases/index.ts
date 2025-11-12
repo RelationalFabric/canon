@@ -5,7 +5,7 @@
  * @document.difficulty intermediate
  */
 
-import { Logging } from '@relational-fabric/canon'
+import { createLogger } from '@relational-fabric/canon'
 import {
   safeIdOf,
   safeReferenceConversion,
@@ -204,7 +204,7 @@ if (import.meta.vitest) {
   })
 }
 
-const logger = Logging.create('examples:error-handling:index')
+const logger = createLogger('examples:error-handling:index')
 
 // Run the examples
 logger.info('=== Error Handling and Edge Cases ===')

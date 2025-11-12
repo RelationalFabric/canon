@@ -6,8 +6,8 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { Logging, idOf, inferAxiom } from '@relational-fabric/canon'
-const logger = Logging.create('examples:custom-axioms:scenarios')
+import { createLogger, idOf, inferAxiom } from '@relational-fabric/canon'
+const logger = createLogger('examples:custom-axioms:scenarios')
 
 import { currencyOf, emailOf, statusOf } from './custom-functions.js'
 
