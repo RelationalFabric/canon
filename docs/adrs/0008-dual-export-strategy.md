@@ -81,7 +81,8 @@ src/
 **Opinionated (kit.ts):**
 
 ```typescript
-import { createEslintConfig, mergeConfigs } from '@relational-fabric/canon'
+import { mergeConfigs } from '@relational-fabric/canon'
+import createEslintConfig from '@relational-fabric/canon/eslint'
 ```
 
 **Transparent (\_/):**

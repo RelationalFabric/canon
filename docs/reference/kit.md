@@ -68,7 +68,8 @@ The Kit provides utility libraries through a dual export strategy, offering both
 ### Opinionated Access (Recommended)
 
 ```typescript
-import { createEslintConfig, defu, Immutable, objectHash, parseYaml } from '@relational-fabric/canon'
+import { defu, Immutable, objectHash, parseYaml } from '@relational-fabric/canon'
+import createEslintConfig from '@relational-fabric/canon/eslint'
 // Curated Canon Kit selection with our preferred API surface
 ```
 
@@ -92,7 +93,7 @@ import * as yaml from '@relational-fabric/canon/_/yaml'
 
 **ESLint Configuration:**
 
-- **Opinionated**: `createEslintConfig` (wrapper function)
+- **Opinionated**: `createEslintConfig` (`@relational-fabric/canon/eslint`)
 - **Transparent**: `antfu` (direct re-export)
 
 **YAML Processing:**

@@ -4,6 +4,8 @@ Welcome to the @relational-fabric/canon documentation. This package provides mod
 
 ## Getting Started
 
+- **[Project Setup](./project-setup/)** — Step-by-step guide to bootstrap a new project with Canon as the initial dependency
+
 ### Installation
 
 ```bash
