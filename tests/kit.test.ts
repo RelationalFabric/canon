@@ -1,4 +1,13 @@
-import { defu, Immutable, objectHash, parseYaml } from '@relational-fabric/canon'
+import {
+  defu,
+  fsExtra,
+  hygenRunner,
+  Immutable,
+  objectHash,
+  oclifRun,
+  parseJsonWithComments,
+  parseYaml,
+} from '@relational-fabric/canon'
 import createEslintConfig from '@relational-fabric/canon/eslint'
 import { describe, expect, it } from 'vitest'
 
@@ -33,5 +42,21 @@ describe('canon kit exports', () => {
     expect(typeof parseYaml).toBe('function')
     const result = parseYaml('foo: bar')
     expect(result).toEqual({ foo: 'bar' })
+  })
+
+  it('exposes oclif run helper', () => {
+    expect(typeof oclifRun).toBe('function')
+  })
+
+  it('exposes hygen runner', () => {
+    expect(typeof hygenRunner).toBe('function')
+  })
+
+  it('exposes fs-extra utilities', () => {
+    expect(typeof fsExtra.pathExists).toBe('function')
+  })
+
+  it('exposes jsonc parser helpers', () => {
+    expect(typeof parseJsonWithComments).toBe('function')
   })
 })
