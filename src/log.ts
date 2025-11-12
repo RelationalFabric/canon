@@ -1,11 +1,7 @@
 import { createConsola } from 'consola'
 import type { ConsolaInstance } from 'consola'
 
-const canonLogger = createConsola({
-  defaults: {
-    tag: 'canon',
-  },
-})
+const canonLogger = createConsola().withTag('canon')
 
 export const logger = canonLogger
 
