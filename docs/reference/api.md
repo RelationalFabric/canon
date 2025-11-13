@@ -272,10 +272,11 @@ Canonical reference object returned by `referencesOf`.
 #### `AxiomValue`
 
 ```ts
-type AxiomValue<TLabel extends keyof Axioms> =
-  Axioms[TLabel] extends { $basis: infer TBasis }
-    ? TBasis extends TypeGuard<infer T> ? T : TBasis
-    : never
+type AxiomValue<TLabel extends keyof Axioms> = Axioms[TLabel] extends { $basis: infer TBasis }
+  ? TBasis extends TypeGuard<infer T>
+    ? T
+    : TBasis
+  : never
 ```
 
 Extracts the input type accepted by the `$basis` guard for a given axiom.
@@ -323,10 +324,11 @@ type Satisfies<
   TAxiomLabel extends keyof Axioms,
   TCanonLabel extends keyof Canons = keyof Canons,
 > = {
-  [K in keyof Canons]:
-    TAxiomLabel extends keyof Canons[K]
-      ? Canons[K][TAxiomLabel] extends { $basis: infer TBasis } ? TBasis : never
+  [K in keyof Canons]: TAxiomLabel extends keyof Canons[K]
+    ? Canons[K][TAxiomLabel] extends { $basis: infer TBasis }
+      ? TBasis
       : never
+    : never
 }[TCanonLabel]
 ```
 
@@ -369,8 +371,7 @@ type Pojo = Record<string, unknown>
 #### `PojoWith`
 
 ```ts
-type PojoWith<T extends Pojo, K extends string, V = unknown> =
-  T & { [P in K]: V }
+type PojoWith<T extends Pojo, K extends string, V = unknown> = T & { [P in K]: V }
 ```
 
 ### JavaScript type metadata
@@ -429,4 +430,3 @@ type Metadata = Record<PropertyKey, unknown>
 ### Technology Radar utilities
 
 The radar conversion and validation helpers exported from `@relational-fabric/canon/radar` primarily support the build scripts. For detailed signatures and usage patterns, see [Technology Radar Utilities](./radar.md).
-
