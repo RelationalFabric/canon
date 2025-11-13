@@ -91,20 +91,20 @@ When making architectural decisions that affect the project structure, configura
 
 1. **Read existing ADRs** to understand current decisions and context
 2. **Use adr-tools to create a new ADR:**
-   ```bash
-   cd docs/adrs && npx adr new "Descriptive Title of Your Decision"
-   ```
+    ```bash
+    cd docs/adrs && npx adr-tools new "Descriptive Title of Your Decision"
+    ```
 3. **Edit the generated ADR file** with your decision details
 4. **Follow the ADR format** with clear context, decision drivers, and consequences
 5. **Reference related ADRs** when applicable
 
 #### ADR Management Commands
 
-- **List all ADRs:** `cd docs/adrs && npx adr list`
-- **Create new ADR:** `cd docs/adrs && npx adr new "Title"`
+- **List all ADRs:** `cd docs/adrs && npx adr-tools list`
+- **Create new ADR:** `cd docs/adrs && npx adr-tools new "Title"`
 - **Build ADR artifacts:** `npm run build:adr` (generates TOC + index)
-- **Link ADRs:** `cd docs/adrs && npx adr link <from> <to> <relationship>`
-- **Help:** `cd docs/adrs && npx adr help`
+- **Link ADRs:** `cd docs/adrs && npx adr-tools link <from> <to> <relationship>`
+- **Help:** `cd docs/adrs && npx adr-tools help`
 
 For more details, see the [ADR Documentation](./docs/adrs.md).
 

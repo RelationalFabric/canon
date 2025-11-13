@@ -58,7 +58,7 @@
   "scripts": {
     "build:adr": "npm-run-all build:adr:toc build:adr:index",
     "build:adr:index": "node scripts/generate-adr-index.js",
-    "build:adr:toc": "cd docs/adrs && npx adr generate toc",
+    "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
     "build:docs": "npm run build:docs:examples && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
     "build:docs:examples": "tsx scripts/generate-examples-docs.ts",
     "build:docs:restore": "scripts/restore-readmes-from-build.sh",
