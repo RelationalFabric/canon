@@ -1,221 +1,270 @@
 # API Reference
 
-## Core
+Authoritative signatures and usage guidance for the exports surfaced from the `@relational-fabric/canon` entry point.
 
-### `ObjectKey`
+## Axiom and Canon Inference
 
-```typescript
-type ObjectKey = string | number | symbol
+### `inferAxiom`
+
+```ts
+function inferAxiom<Label extends keyof Axioms>(
+  axiomLabel: Label,
+  value: unknown,
+): AxiomConfig | undefined
 ```
 
-Union type representing all valid JavaScript object key types.
+Determines the runtime configuration for the requested axiom by locating the canon whose basis functions match the supplied value. Returns `undefined` when no registered canon satisfies the value.
 
-## Type Testing
+### `inferCanon`
 
-### `Expect<A, B>`
-
-```typescript
-type Expect<A, B> = A extends B ? true : false
+```ts
+function inferCanon(value: unknown): CanonConfig | undefined
 ```
 
-Resolves to `true` when `A` extends `B`; otherwise `false`.
+Inspects all registered canons and returns the configuration with the highest number of matching axiom basis checks. Falls back to `undefined` when nothing matches.
 
-### `IsTrue<A>`
+## Registry & Shell
 
-```typescript
-type IsTrue<A> = Expect<A, true>
+### `getRegistry`
+
+```ts
+function getRegistry(): Registry
 ```
 
-Convenience alias that verifies a type reduces to `true`.
+Provides access to the global registry singleton that backs canon discovery.
 
-### `IsFalse<A>`
+### `resetRegistry`
 
-```typescript
-type IsFalse<A> = A extends false ? true : false
+```ts
+function resetRegistry(): void
 ```
 
-Resolves to `true` only when the argument is exactly `false`.
-
-### `invariant<T extends true>()`
-
-```typescript
-function invariant<T extends true>(): void
-```
-
-Runtime no-op that fails to compile when `T` is not `true`.
-
-### `Pojo`
-
-```typescript
-interface Pojo {
-  [key: ObjectKey]: unknown
-}
-```
-
-Interface for Plain Old JavaScript Objects with ObjectKey keys and unknown values.
-
-### `isPojo`
-
-```typescript
-const isPojo: TypeGuard<Pojo>
-```
-
-Type guard that checks if a value is a Plain Old JavaScript Object.
-
-## Canons
-
-### `PojoWith<K extends ObjectKey>`
-
-```typescript
-interface PojoWith<K extends ObjectKey> {
-  [key in K]: unknown
-}
-```
-
-POJO interface with specific key types.
-
-### `PojoOf<O extends Pojo>`
-
-```typescript
-type PojoOf<O extends Pojo> = O
-```
-
-Extracts POJO structure from an object type.
-
-### `TypeGuard<T>`
-
-```typescript
-interface TypeGuard<T> {
-  <U extends T>(obj: U | unknown): obj is U
-  (obj: T | unknown): obj is T
-}
-```
-
-Type guard pattern that preserves specific types when narrowing.
-
-### `pojoHas<K extends ObjectKey, T extends PojoWith<K>>`
-
-```typescript
-function pojoHas<K extends ObjectKey, T extends PojoWith<K>>(obj: T | unknown, key: K): obj is T
-```
-
-Type guard that checks if an object has a specific key.
-
-### `pojoWith<K extends ObjectKey>`
-
-```typescript
-function pojoWith<K extends ObjectKey>(key: K): TypeGuard<PojoWith<K>>
-```
-
-Creates a type guard for checking if an object has a specific key.
-
-### `objectKeys<T extends Pojo>`
-
-```typescript
-function objectKeys<T extends Pojo>(obj: T): (keyof T)[]
-```
-
-Type-safe version of `Object.keys()` that preserves key types.
-
-### `objectEntries<T extends Pojo>`
-
-```typescript
-function objectEntries<T extends Pojo>(obj: T): [keyof T, T[keyof T]][]
-```
-
-Type-safe version of `Object.entries()` that preserves key-value pair types.
-
-### `objectValues<T extends Pojo>`
-
-```typescript
-function objectValues<T extends Pojo>(obj: T): T[keyof T][]
-```
-
-Type-safe version of `Object.values()` that preserves value types.
-
-### `inferAxiom<T extends keyof Axioms>`
-
-```typescript
-declare function inferAxiom<T extends keyof Axioms>(axiom: T, value: Satisfies<T>): Axioms[T]
-```
-
-Runtime axiom inference function that determines the axiom configuration for a given value.
+Clears the global registry. Helpful in tests and long‑running processes.
 
 ### `declareCanon`
 
-```typescript
-declare function declareCanon(name: string, config: CanonConfig): void
+```ts
+function declareCanon<Label extends keyof Canons>(
+  label: Label,
+  config: CanonConfig,
+): void
 ```
 
-Declarative function that registers both type and runtime configuration for a canon in one step.
+Registers a single canon configuration against the global registry. The config is wrapped with `defineCanon` to ensure type conformance.
 
 ### `registerCanons`
 
-```typescript
-declare function registerCanons(canons: Record<string, CanonConfig>): void
+```ts
+function registerCanons(canons: Record<string, CanonConfig>): void
 ```
 
-Registers multiple canons with their runtime configurations.
+Bulk registration helper for module‑style canons. Iterates the object and declares each entry.
 
-## Canon Types
+## Type System Helpers
 
-### `Canon<T extends CanonDefinition>`
+### `defineCanon`
 
-```typescript
-type Canon<T extends CanonDefinition> = T
+```ts
+function defineCanon(config: CanonConfig): CanonConfig
 ```
 
-Canon type that represents a universal type blueprint.
+Identity helper for authoring canons as re‑exportable modules. Provides an explicit place to enforce runtime typing when publishing derived packages.
 
-### `Axiom<T extends AxiomDefinition, C extends AxiomConfig>`
+### `CanonConfig`
 
-```typescript
-interface Axiom<T extends AxiomDefinition, C extends AxiomConfig> {
-  axiom: T
-  config: C
+```ts
+interface CanonConfig {
+  axioms: Record<string, AxiomConfig>
 }
 ```
 
-Axiom type that pairs axiom definition with configuration.
+Runtime shape that binds axiom labels to their configuration objects, including `$basis` guards.
 
-## Kit Utilities
+### `Canons`
 
-### `createEslintConfig(options?, ...configs)`
-
-```typescript
-function createEslintConfig(options?: Record<string, unknown>, ...configs: object[]): object
+```ts
+interface Canons {}
 ```
 
-Factory that wraps `@antfu/eslint-config`, applying Canon defaults and merging any additional configuration.
+Augmentation target for declaring the set of canons your application or library registers. Extend this interface using module augmentation:
 
-### `defu`
-
-```typescript
-import { defu } from '@relational-fabric/canon'
+```ts
+declare module '@relational-fabric/canon' {
+  interface Canons {
+    Internal: InternalCanon
+  }
+}
 ```
 
-Re-export of [`defu`](https://github.com/unjs/defu) for deep configuration merging.
+### `Satisfies`
 
-### `parseYaml`
-
-```typescript
-import { parseYaml } from '@relational-fabric/canon'
+```ts
+type Satisfies<
+  TAxiomLabel extends keyof Axioms,
+  TCanonLabel extends keyof Canons = keyof Canons,
+> = {
+  [K in keyof Canons]:
+    TAxiomLabel extends keyof Canons[K]
+      ? Canons[K][TAxiomLabel] extends { $basis: infer TBasis } ? TBasis : never
+      : never
+}[TCanonLabel]
 ```
 
-Alias for [`yaml.parse`](https://github.com/eemeli/yaml) used for Canon's radar tooling.
+Constraint that extracts the `$basis` input type for an axiom, ensuring caller values conform to at least one registered canon implementation.
 
-### `objectHash(value, options?)`
+## Guard & Predicate Utilities
 
-```typescript
-import { objectHash } from '@relational-fabric/canon'
+### `TypeGuard`
+
+```ts
+interface TypeGuard<T> {
+  <U extends T>(value: U | unknown): value is U
+  (value: T | unknown): value is T
+}
 ```
 
-Re-export of the default export from [`object-hash`](https://github.com/puleos/object-hash), providing stable hash generation.
+Preserves specific types when narrowing from `unknown`.
 
-### `Immutable`
+### `Predicate`
 
-```typescript
-import { Immutable } from '@relational-fabric/canon'
+```ts
+interface Predicate<T> {
+  (value: T | unknown): boolean
+  <U extends T>(value: U | unknown): boolean
+}
 ```
 
-Namespace export of [`immutable`](https://github.com/immutable-js/immutable-js), exposing persistent data structures through the Kit surface.
+Predicate signature that feeds `typeGuard`.
+
+### `typeGuard`
+
+```ts
+function typeGuard<T>(predicate: Predicate<T>): TypeGuard<T>
+```
+
+Upgrades a predicate into a fully typed guard while maintaining overload behaviour.
+
+## Object Utilities
+
+### `Pojo`
+
+```ts
+type Pojo = Record<string, unknown>
+```
+
+Canonical plain object definition used across Canon’s type system.
+
+### `PojoWith`
+
+```ts
+type PojoWith<T extends Pojo, K extends string, V = unknown> =
+  T & { [P in K]: V }
+```
+
+Captures a POJO that guarantees the presence of the given key with the specified value type.
+
+### `isPojo`
+
+```ts
+const isPojo: TypeGuard<Pojo>
+```
+
+Checks for plain objects (rejects arrays, `null`, and non–object values).
+
+### `pojoWith`
+
+```ts
+function pojoWith<K extends string>(key: K): TypeGuard<PojoWith<Pojo, K>>
+```
+
+Factory that creates a guard verifying the existence of a property on a POJO.
+
+### `pojoHas`
+
+```ts
+function pojoHas<T extends Pojo, K extends string>(
+  value: T | unknown,
+  key: K,
+): value is PojoWith<T, K>
+```
+
+Convenience wrapper around `pojoWith` for immediate checks.
+
+### `pojoWithOfType`
+
+```ts
+function pojoWithOfType<K extends string, V extends JsTypeName>(
+  key: K,
+  type: V,
+): TypeGuard<PojoWith<Pojo, K, JsType[V]>>
+```
+
+Ensures a key exists on a POJO and its value matches a JavaScript primitive type.
+
+### `pojoHasOfType`
+
+```ts
+function pojoHasOfType<T extends Pojo, K extends string, V extends JsTypeName>(
+  value: T | unknown,
+  key: K,
+  type: V,
+): value is PojoWith<T, K, JsType[V]>
+```
+
+Runtime helper that pairs `pojoHas` with primitive type assertions.
+
+### `objectKeys`
+
+```ts
+function objectKeys<T extends object>(value: T): Array<keyof T>
+```
+
+Typed wrapper around `Object.keys` that preserves key inference for objects and arrays.
+
+### `objectValues`
+
+```ts
+function objectValues<T extends object>(value: T): unknown[]
+```
+
+Typed wrapper around `Object.values`, returning array values while supporting arrays and objects.
+
+### `objectEntries`
+
+```ts
+function objectEntries<T extends object>(
+  value: T,
+): Array<[keyof T, T[keyof T]]>
+```
+
+Typed wrapper around `Object.entries` that preserves tuple relationships.
+
+## JavaScript Type Metadata
+
+### `JsType`
+
+```ts
+interface JsType {
+  string: string
+  number: number
+  boolean: boolean
+  object: object
+  array: unknown[]
+  null: null
+  undefined: undefined
+  symbol: symbol
+  bigint: bigint
+  function: (...args: any[]) => any
+}
+```
+
+Lookup interface mapping JavaScript primitive names to their runtime types. Used by POJO helpers to enforce type expectations.
+
+### `JsTypeName`
+
+```ts
+type JsTypeName = keyof JsType
+```
+
+Union of supported primitive type labels for POJO predicates.
+
