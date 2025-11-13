@@ -150,6 +150,38 @@ function isCanonicalReference(
 
 Predicate used by `referencesOf` to detect pre-normalised references.
 
+### Metadata utilities
+
+#### `metaOf`
+
+```ts
+function metaOf<T extends object, M extends Metadata = Metadata>(value: T): M
+```
+
+Reads the reflective metadata previously attached to the object. Returns an empty metadata object when nothing has been stored.
+
+#### `withMeta`
+
+```ts
+function withMeta<T extends object, M extends Metadata = Metadata>(
+  value: T,
+  metadata: M,
+): T
+```
+
+Stores metadata alongside the object (using `reflect-metadata`) and returns the same object for chaining.
+
+#### `updateMeta`
+
+```ts
+function updateMeta<T extends object, M extends Metadata = Metadata>(
+  value: T,
+  updater: (metadata?: M) => M | undefined,
+): T
+```
+
+Retrieves the current metadata, allows callers to return an updated payload, and persists the new value. Returning `undefined` removes the metadata.
+
 ### Type-testing runtime helper
 
 #### `invariant`
@@ -394,6 +426,56 @@ type IsFalse<A> = A extends false ? true : false
 type Metadata = Record<PropertyKey, unknown>
 ```
 
+### Technology Radar utilities
+
+#### `convertYamlToCsv`
+
+```ts
+function convertYamlToCsv(yamlContent: string): string
+```
+
+Transforms YAML radar data into CSV text using the canonical quadrant and ring labels.
+
+#### `convertYamlFileToCsv`
+
+```ts
+function convertYamlFileToCsv(yamlPath: string, csvPath: string): void
+```
+
+Reads a YAML file, converts it with `convertYamlToCsv`, and writes the CSV output to disk.
+
+#### `parseRadarYaml`
+
+```ts
+function parseRadarYaml(yamlContent: string): RadarData
+```
+
+Parses YAML radar content into the strongly typed `RadarData` object graph.
+
+#### `readRadarYaml`
+
+```ts
+function readRadarYaml(yamlPath: string): RadarData
+```
+
+Reads a YAML file from disk and returns the parsed `RadarData`.
+
+#### `validateRadarData`
+
+```ts
+function validateRadarData(data: unknown): ValidationResult
+```
+
+Performs structural validation on a `RadarData`-shaped object, reporting missing sections, invalid values, and duplicate entries.
+
+#### `validateRadarFile`
+
+```ts
+function validateRadarFile(filePath: string): Promise<ValidationResult>
+```
+
+Loads a YAML file and validates it, returning a `ValidationResult` with errors and warnings.
+
 ### Radar tooling types
 
 ```ts
@@ -410,7 +492,9 @@ type QuadrantKey =
   | 'features-capabilities'
   | 'data-structures-formats'
 type RingKey = 'adopt' | 'trial' | 'assess' | 'hold'
+interface ValidationError { /* ... */ }
+interface ValidationResult { /* ... */ }
 ```
 
-See `src/types/radar.ts` for field-level documentation of the Technology Radar data structures.
+See `src/types/radar.ts` and `src/radar/validator.ts` for field-level documentation of the Technology Radar data structures and validation results.
 
