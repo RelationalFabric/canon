@@ -1,10 +1,20 @@
 # API Reference
 
-Authoritative signatures and usage guidance for the exports surfaced from the `@relational-fabric/canon` entry point.
+Authoritative signatures and usage guidance for the exports surfaced from the `@relational-fabric/canon` entry point. Runtime behaviour and type-only surfaces are listed separately for clarity.
 
-## Axiom and Canon Inference
+## Runtime APIs
 
-### `inferAxiom`
+### Canon discovery
+
+#### `inferCanon`
+
+```ts
+function inferCanon(value: unknown): CanonConfig | undefined
+```
+
+Inspects every registered canon and returns the configuration whose `$basis` guards match the value most completely. Returns `undefined` when no canon matches.
+
+#### `inferAxiom`
 
 ```ts
 function inferAxiom<Label extends keyof Axioms>(
@@ -13,35 +23,51 @@ function inferAxiom<Label extends keyof Axioms>(
 ): AxiomConfig | undefined
 ```
 
-Determines the runtime configuration for the requested axiom by locating the canon whose basis functions match the supplied value. Returns `undefined` when no registered canon satisfies the value.
+Finds the canon that satisfies the provided value and returns the runtime configuration for the requested axiom label. Returns `undefined` when no canon matches.
 
-### `inferCanon`
+### Registry and shell
+
+#### `Registry`
 
 ```ts
-function inferCanon(value: unknown): CanonConfig | undefined
+class Registry {
+  register(label: string, config: CanonConfig): void
+  get(label: string): CanonConfig | undefined
+  values(): IterableIterator<CanonConfig>
+  has(label: string): boolean
+  get size(): number
+  clear(): void
+  [Symbol.iterator](): Iterator<CanonConfig>
+}
 ```
 
-Inspects all registered canons and returns the configuration with the highest number of matching axiom basis checks. Falls back to `undefined` when nothing matches.
+In-memory store backing canon discovery.
 
-## Registry & Shell
+#### `createRegistry`
 
-### `getRegistry`
+```ts
+function createRegistry(): Registry
+```
+
+Creates a fresh, empty registry instance.
+
+#### `getRegistry`
 
 ```ts
 function getRegistry(): Registry
 ```
 
-Provides access to the global registry singleton that backs canon discovery.
+Returns the global singleton registry used by `inferCanon` / `inferAxiom`.
 
-### `resetRegistry`
+#### `resetRegistry`
 
 ```ts
 function resetRegistry(): void
 ```
 
-Clears the global registry. Helpful in tests and long‑running processes.
+Clears the global registry. Handy for tests and long-lived processes.
 
-### `declareCanon`
+#### `declareCanon`
 
 ```ts
 function declareCanon<Label extends keyof Canons>(
@@ -50,27 +76,189 @@ function declareCanon<Label extends keyof Canons>(
 ): void
 ```
 
-Registers a single canon configuration against the global registry. The config is wrapped with `defineCanon` to ensure type conformance.
+Registers a single canon configuration on the global registry, wrapping the input with `defineCanon` for type safety.
 
-### `registerCanons`
+#### `registerCanons`
 
 ```ts
 function registerCanons(canons: Record<string, CanonConfig>): void
 ```
 
-Bulk registration helper for module‑style canons. Iterates the object and declares each entry.
+Bulk registration helper for module-style canon packages.
 
-## Type System Helpers
+### Axiom helpers
 
-### `defineCanon`
+All helpers throw when no matching canon is found or when the extracted data violates the axiom contract.
+
+#### `idOf`
 
 ```ts
-function defineCanon(config: CanonConfig): CanonConfig
+function idOf<T extends Satisfies<'Id'>>(value: T): string
 ```
 
-Identity helper for authoring canons as re‑exportable modules. Provides an explicit place to enforce runtime typing when publishing derived packages.
+Returns the identifier string declared by the Id axiom.
 
-### `CanonConfig`
+#### `typeOf`
+
+```ts
+function typeOf<T extends Satisfies<'Type'>>(value: T): string
+```
+
+Returns the classification string declared by the Type axiom.
+
+#### `versionOf`
+
+```ts
+function versionOf<T extends Satisfies<'Version'>>(value: T): string | number
+```
+
+Returns the version declared by the Version axiom, supporting numeric or string revisions.
+
+#### `timestampsOf`
+
+```ts
+function timestampsOf<T extends Satisfies<'Timestamps'>>(value: T): Date
+```
+
+Normalises timestamp representations to canonical `Date` instances.
+
+#### `isCanonicalTimestamp`
+
+```ts
+function isCanonicalTimestamp(value: number | string | Date): value is Date
+```
+
+Predicate used by `timestampsOf` to detect already canonical inputs.
+
+#### `referencesOf`
+
+```ts
+function referencesOf<T extends Satisfies<'References'>>(
+  value: T,
+): EntityReference<string, unknown>
+```
+
+Normalises reference values (strings, objects, canonical references) to the `EntityReference` shape.
+
+#### `isCanonicalReference`
+
+```ts
+function isCanonicalReference(
+  value: string | object,
+): value is EntityReference<string, unknown>
+```
+
+Predicate used by `referencesOf` to detect pre-normalised references.
+
+### Type-testing runtime helper
+
+#### `invariant`
+
+```ts
+function invariant<_ extends true>(): void
+```
+
+Runtime no-op used alongside the `Expect`, `IsTrue`, and `IsFalse` type utilities to enforce compile-time assertions.
+
+### Kit surface
+
+The curated runtime utilities (filesystem helpers, logging, third-party bridges, etc.) are covered in detail under [Canon Kit & Third-Party Utilities](./kit.md). Refer to that document for signatures exposed from `@relational-fabric/canon`.
+
+## Type-only APIs
+
+### Axiom type system
+
+#### `Axioms`
+
+```ts
+interface Axioms {}
+```
+
+Module-augmentation surface for declaring available axioms.
+
+#### `Axiom`
+
+```ts
+type Axiom<TConfig, TMeta> = TConfig & { $meta: TMeta }
+```
+
+Base shape applied by axiom definitions.
+
+#### `KeyNameAxiom`
+
+```ts
+type KeyNameAxiom = Axiom<{
+  $basis: Record<string, unknown>
+  key: string
+}, Record<string, unknown>>
+```
+
+Standard pattern for key-based concepts (Id, Type, Version).
+
+#### `RepresentationAxiom`
+
+```ts
+type RepresentationAxiom<T, C = unknown> = Axiom<{
+  $basis: T | TypeGuard<unknown>
+  isCanonical: (value: unknown) => value is C
+}, Record<string, unknown>>
+```
+
+Used by axioms that convert between multiple representations (timestamps, references).
+
+#### `AxiomConfig`
+
+```ts
+interface AxiomConfig {
+  $basis: TypeGuard<unknown>
+  [key: string]: unknown
+}
+```
+
+Runtime configuration shape returned by `inferAxiom`.
+
+#### `defineAxiom`
+
+```ts
+function defineAxiom(config: AxiomConfig): AxiomConfig
+```
+
+Identity helper for publishing reusable axiom configurations.
+
+#### `EntityReference`
+
+```ts
+interface EntityReference<R, T = unknown> {
+  ref: R
+  value?: T
+  resolved: boolean
+}
+```
+
+Canonical reference object returned by `referencesOf`.
+
+#### `AxiomValue`
+
+```ts
+type AxiomValue<TLabel extends keyof Axioms> =
+  Axioms[TLabel] extends { $basis: infer TBasis }
+    ? TBasis extends TypeGuard<infer T> ? T : TBasis
+    : never
+```
+
+Extracts the input type accepted by the `$basis` guard for a given axiom.
+
+### Canon type system
+
+#### `Canons`
+
+```ts
+interface Canons {}
+```
+
+Module-augmentation surface for declaring available canons.
+
+#### `CanonConfig`
 
 ```ts
 interface CanonConfig {
@@ -78,25 +266,25 @@ interface CanonConfig {
 }
 ```
 
-Runtime shape that binds axiom labels to their configuration objects, including `$basis` guards.
+Runtime description of a canon (used by registry operations).
 
-### `Canons`
-
-```ts
-interface Canons {}
-```
-
-Augmentation target for declaring the set of canons your application or library registers. Extend this interface using module augmentation:
+#### `defineCanon`
 
 ```ts
-declare module '@relational-fabric/canon' {
-  interface Canons {
-    Internal: InternalCanon
-  }
-}
+function defineCanon(config: CanonConfig): CanonConfig
 ```
 
-### `Satisfies`
+Identity helper that affirms a runtime configuration satisfies the canon contract.
+
+#### `Canon`
+
+```ts
+type Canon<TAxioms extends Partial<Axioms>> = TAxioms
+```
+
+Type-level representation mapping axiom labels to their configurations.
+
+#### `Satisfies`
 
 ```ts
 type Satisfies<
@@ -110,11 +298,11 @@ type Satisfies<
 }[TCanonLabel]
 ```
 
-Constraint that extracts the `$basis` input type for an axiom, ensuring caller values conform to at least one registered canon implementation.
+Constraint used by runtime helpers (`idOf`, `typeOf`, etc.) to demand inputs that are covered by at least one registered canon.
 
-## Guard & Predicate Utilities
+### Guard and predicate types
 
-### `TypeGuard`
+#### `TypeGuard`
 
 ```ts
 interface TypeGuard<T> {
@@ -122,8 +310,6 @@ interface TypeGuard<T> {
   (value: T | unknown): value is T
 }
 ```
-
-Preserves specific types when narrowing from `unknown`.
 
 ### `Predicate`
 
@@ -134,114 +320,30 @@ interface Predicate<T> {
 }
 ```
 
-Predicate signature that feeds `typeGuard`.
-
-### `typeGuard`
+#### `typeGuard`
 
 ```ts
 function typeGuard<T>(predicate: Predicate<T>): TypeGuard<T>
 ```
 
-Upgrades a predicate into a fully typed guard while maintaining overload behaviour.
+### Object utility types
 
-## Object Utilities
-
-### `Pojo`
+#### `Pojo`
 
 ```ts
 type Pojo = Record<string, unknown>
 ```
 
-Canonical plain object definition used across Canon’s type system.
-
-### `PojoWith`
+#### `PojoWith`
 
 ```ts
 type PojoWith<T extends Pojo, K extends string, V = unknown> =
   T & { [P in K]: V }
 ```
 
-Captures a POJO that guarantees the presence of the given key with the specified value type.
+### JavaScript type metadata
 
-### `isPojo`
-
-```ts
-const isPojo: TypeGuard<Pojo>
-```
-
-Checks for plain objects (rejects arrays, `null`, and non–object values).
-
-### `pojoWith`
-
-```ts
-function pojoWith<K extends string>(key: K): TypeGuard<PojoWith<Pojo, K>>
-```
-
-Factory that creates a guard verifying the existence of a property on a POJO.
-
-### `pojoHas`
-
-```ts
-function pojoHas<T extends Pojo, K extends string>(
-  value: T | unknown,
-  key: K,
-): value is PojoWith<T, K>
-```
-
-Convenience wrapper around `pojoWith` for immediate checks.
-
-### `pojoWithOfType`
-
-```ts
-function pojoWithOfType<K extends string, V extends JsTypeName>(
-  key: K,
-  type: V,
-): TypeGuard<PojoWith<Pojo, K, JsType[V]>>
-```
-
-Ensures a key exists on a POJO and its value matches a JavaScript primitive type.
-
-### `pojoHasOfType`
-
-```ts
-function pojoHasOfType<T extends Pojo, K extends string, V extends JsTypeName>(
-  value: T | unknown,
-  key: K,
-  type: V,
-): value is PojoWith<T, K, JsType[V]>
-```
-
-Runtime helper that pairs `pojoHas` with primitive type assertions.
-
-### `objectKeys`
-
-```ts
-function objectKeys<T extends object>(value: T): Array<keyof T>
-```
-
-Typed wrapper around `Object.keys` that preserves key inference for objects and arrays.
-
-### `objectValues`
-
-```ts
-function objectValues<T extends object>(value: T): unknown[]
-```
-
-Typed wrapper around `Object.values`, returning array values while supporting arrays and objects.
-
-### `objectEntries`
-
-```ts
-function objectEntries<T extends object>(
-  value: T,
-): Array<[keyof T, T[keyof T]]>
-```
-
-Typed wrapper around `Object.entries` that preserves tuple relationships.
-
-## JavaScript Type Metadata
-
-### `JsType`
+#### `JsType`
 
 ```ts
 interface JsType {
@@ -258,13 +360,57 @@ interface JsType {
 }
 ```
 
-Lookup interface mapping JavaScript primitive names to their runtime types. Used by POJO helpers to enforce type expectations.
-
-### `JsTypeName`
+#### `JsTypeName`
 
 ```ts
 type JsTypeName = keyof JsType
 ```
 
-Union of supported primitive type labels for POJO predicates.
+### Type-testing utilities
+
+#### `Expect`
+
+```ts
+type Expect<A, B> = A extends B ? true : false
+```
+
+#### `IsTrue`
+
+```ts
+type IsTrue<A> = Expect<A, true>
+```
+
+#### `IsFalse`
+
+```ts
+type IsFalse<A> = A extends false ? true : false
+```
+
+### Metadata helpers
+
+#### `Metadata`
+
+```ts
+type Metadata = Record<PropertyKey, unknown>
+```
+
+### Radar tooling types
+
+```ts
+interface RadarEntry { /* ... */ }
+interface Quadrant { /* ... */ }
+interface Ring { /* ... */ }
+interface RadarMetadata { /* ... */ }
+interface RadarData { /* ... */ }
+interface RadarConfig { /* ... */ }
+interface CsvRow { /* ... */ }
+type QuadrantKey =
+  | 'tools-libraries'
+  | 'techniques-patterns'
+  | 'features-capabilities'
+  | 'data-structures-formats'
+type RingKey = 'adopt' | 'trial' | 'assess' | 'hold'
+```
+
+See `src/types/radar.ts` for field-level documentation of the Technology Radar data structures.
 
