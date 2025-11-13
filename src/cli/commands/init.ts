@@ -214,7 +214,7 @@ export default class InitCommand extends CanonCommand {
         'build:radar': 'tsx scripts/convert-radar.ts',
         'build:adr': 'npm-run-all build:adr:toc build:adr:index',
         'build:adr:index': 'node scripts/generate-adr-index.js',
-        'build:adr:toc': 'cd docs/adrs && npx adr generate toc',
+        'build:adr:toc': 'cd docs/adrs && npx adr-tools generate toc',
         'dev': 'tsx --watch src/index.ts',
         'test': 'npm run check:test',
       }

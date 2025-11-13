@@ -1,4 +1,4 @@
-# ADR-013: Canon CLI Foundation
+# ADR-0013: Canon CLI Foundation
 
 - Status: proposed
 - Date: 2025-11-12
