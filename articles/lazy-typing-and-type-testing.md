@@ -140,7 +140,7 @@ This enables **lazy typing** (or late-bound typing). The library doesn't need to
 
 I could define semantic concepts ("there exists a notion of identity") and let individual projects bind those concepts to their specific shapes. The same `idOf()` function could work with `id`, `@id`, or `_id` depending on what canons were registered.
 
-Canon became Relational Fabric's canonical starting point. And "canonical types" (types bound through interface augmentation) became the mechanism for working with semantic concepts across different data shapes.
+Canon will become Relational Fabric's canonical starting point. And "canonical types" (types bound through interface augmentation) became the mechanism for working with semantic concepts across different data shapes.
 
 ---
 
