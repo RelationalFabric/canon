@@ -114,7 +114,7 @@ Canon provides:
 - **Type testing utilities**: Compile-time assertions that exploit Curry-Howard at the type level
 - **Lazy typing**: Late-bound types through interface augmentation
 
-The Kit means you're not just getting configurations; you're getting a known-good set of dependencies with consistent versioning and a thoughtfully curated API. The transparent access paths (`@relational-fabric/canon/_/immutable`, etc.) ensure you can always reach the full library when the opinionated surface isn't enough.
+The Kit means you're not just getting configurations; you're getting a known-good set of dependencies with consistent versioning and a thoughtfully curated API. Canon itself uses the Kit internally whenever it needs these capabilities, so you're getting what we actually use, not just what we think might be useful. The transparent access paths (`@relational-fabric/canon/_/immutable`, etc.) ensure you can always reach the full library when the opinionated surface isn't enough.
 
 But for this article, the focus is on lazy typing and type testing. That's where the conceptual weight lies.
 
