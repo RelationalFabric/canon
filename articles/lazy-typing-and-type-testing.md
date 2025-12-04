@@ -337,6 +337,8 @@ function process<T extends Satisfies<'Id'>>(entity: T) {
 
 # What's Next
 
+To see lazy typing and type testing in action, explore the [Canon examples](https://relationalfabric.github.io/canon/docs/examples/).
+
 Canon is the foundation, but it's part of a larger vision.
 
 [Howard](https://github.com/RelationalFabric/howard) will be the logical engine: a computable truth engine where claims about data become first-class objects that can be composed, proven, and cached. It's Curry-Howard made practical for runtime logic.
