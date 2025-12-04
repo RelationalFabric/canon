@@ -134,8 +134,6 @@ I could define semantic concepts ("there exists a notion of identity") and let i
 
 Canon will become Relational Fabric's canonical starting point. And "canonical types" (types bound through interface augmentation) are the mechanism for working with semantic concepts across different data shapes.
 
----
-
 ### Type Testing: Assertions That Aren't Disposable
 
 If you've ever written complex types, you've probably done this:
