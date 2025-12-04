@@ -1,76 +1,89 @@
-# When Types Become Tests: A Journey from Assertions to Abstractions
+# When Types Become Tests: A Journey from Repetition to Abstraction
 
-*How documenting type expectations led me to rethink TypeScript's relationship with data*
-
----
-
-## Foreword
-
-I want to tell you about a rabbit hole. It started with a simple question — "how do I prove this type is correct?" — and ended with me building a library that changed how I think about TypeScript.
-
-The journey began during a code review. A colleague had changed an interface, and something downstream broke. Not at compile time. At runtime. In production. TypeScript had checked the types, but the *expectations* about those types — the implicit contracts scattered across our codebase — were invisible to the compiler.
-
-I wanted to write those expectations down. To make them explicit. To have the compiler enforce them.
-
-That desire led me to type testing. And type testing, somewhat unexpectedly, led me to lazy typing. This post traces that journey.
+*How years of building data systems led to Canon — a library for canonical types, lazy binding, and compile-time verification*
 
 ---
 
-## The Problem: A Migration Gone Wrong
+## The Long Road to Canon
 
-Let me show you the kind of code that started this. We had an entity system with a simple interface:
+Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions — ways of thinking about identity, types, relationships, and change over time.
 
-```typescript
-interface Entity {
-  id: string
-  type: string
-  createdAt: Date
-}
-```
+After building these abstractions across enough projects, I decided to give them a proper home. That became [Relational Fabric](https://github.com/RelationalFabric) — an ecosystem for building data-centric applications with consistent foundations.
 
-Scattered throughout the codebase were functions that depended on these types:
+The vision was ambitious: a layered system where each layer provided primitives for the next. At the base would be Filament, handling the fundamental data operations. Above it, higher-level abstractions for working with relational data, graphs, and knowledge systems.
 
-```typescript
-function logEntity(entity: Entity) {
-  console.log(`[${entity.type}] ${entity.id} created at ${entity.createdAt.toISOString()}`)
-}
+But when I sat down to build Filament, I realized I was missing something more fundamental. Much of what Relational Fabric needed to do was *metaprogramming* — reasoning about types at compile time, transforming type structures, enforcing constraints through the type system itself.
 
-function findById(entities: Entity[], id: string): Entity | undefined {
-  return entities.find(e => e.id === id)
-}
+This led me to an idea: what if I built a library specifically for exploiting the [Curry-Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) — the deep connection between type systems and logic? Types are propositions. Programs are proofs. A type that compiles is a theorem that holds.
 
-function sortByCreation(entities: Entity[]): Entity[] {
-  return [...entities].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-}
-```
+Since "Curry" has already been immortalized in programming (via currying), I named this library [Howard](https://github.com/RelationalFabric/howard). It would provide tools for type-level programming, compile-time assertions, and logical reasoning through types.
 
-One day, we migrated to a new backend. The new system returned timestamps as ISO strings, not Date objects. Someone updated the interface:
-
-```typescript
-interface Entity {
-  id: string
-  type: string
-  createdAt: string  // Changed from Date
-}
-```
-
-TypeScript caught some errors. But `sortByCreation` still compiled — `getTime()` doesn't exist on strings, but the error only surfaced at runtime. The implicit expectation that `createdAt` was a Date with methods like `getTime()` and `toISOString()` wasn't written anywhere the compiler could check.
+And then I noticed something else entirely.
 
 ---
 
-## The First Insight: Type Testing
+## The Empty Room Problem
 
-What if we could write down our type expectations explicitly?
+Every time I started a new TypeScript project, I did the same things:
 
-I built a small utility:
+- Set up the same TypeScript configuration
+- Install the same ESLint setup
+- Add the same utility types
+- Define the same base interfaces
+- Wire up the same scripts
+
+I was solving the same "empty room" problem repeatedly. And more than that, I kept defining the same *semantic concepts* — identity, type classification, versioning, timestamps — just with slightly different field names depending on the context.
+
+What if there was a canonical starting point? A foundation that provided these common elements so every project didn't start from scratch?
+
+That question birthed Canon.
+
+---
+
+## The Insight: Interface Augmentation and Lazy Types
+
+The technical insight came from TypeScript's module augmentation feature. You can extend interfaces across module boundaries:
+
+```typescript
+// In library code
+export interface Canons {}
+
+// In user code
+declare module '@relational-fabric/canon' {
+  interface Canons {
+    MyFormat: MyFormatType
+  }
+}
+```
+
+This pattern enables something powerful: **lazy typing** (or late-bound typing). The library doesn't need to know about your specific data shapes at compile time. You register them later, and the type system adapts.
+
+This was the missing piece. I could define semantic concepts — "there exists a notion of identity" — and let individual projects bind those concepts to their specific shapes. The same `idOf()` function could work with `id`, `@id`, or `_id` depending on what canons were registered.
+
+Canon became Relational Fabric's canonical starting point: a curated set of configurations, types, and patterns that every project in the ecosystem would share. And "canonical types" — types bound through interface augmentation — became the mechanism for working with semantic concepts across different data shapes.
+
+---
+
+## Type Testing Finds Its Home
+
+Meanwhile, I had been carrying around type testing utilities for years. Simple helpers for asserting type relationships at compile time:
 
 ```typescript
 type Expect<A, B> = A extends B ? true : false
-
 function invariant<_ extends true>(): void {}
 ```
 
-That's it. `Expect<A, B>` returns `true` if A extends B. `invariant` requires its type parameter to be `true`, or it won't compile. Together, they let you write assertions about types:
+These utilities were my way of exploiting the Curry-Howard correspondence in everyday code. A type assertion that compiles is a proof that holds. An invariant that fails is a theorem that's false.
+
+When I was building Canon, these helpers found their natural home. They were too useful to leave scattered across projects, and they aligned perfectly with Canon's mission: providing canonical tools that every TypeScript project needs but few bother to set up properly.
+
+---
+
+## Type Testing in Practice
+
+Let me show you why these utilities matter.
+
+Consider a simple interface:
 
 ```typescript
 interface Entity {
@@ -78,14 +91,27 @@ interface Entity {
   type: string
   createdAt: Date
 }
-
-// Document our expectations explicitly
-void invariant<Expect<Entity['id'], string>>()
-void invariant<Expect<Entity['type'], string>>()
-void invariant<Expect<Entity['createdAt'], Date>>()
 ```
 
-Now if someone changes `createdAt` to `string`, the invariant fails:
+Somewhere in your codebase, functions depend on these types. Maybe `createdAt.getTime()` is called. Maybe `id` is concatenated with a string. These expectations are implicit — they exist in the code's behavior but aren't written anywhere the compiler can verify intentionally.
+
+Now imagine someone changes `createdAt` to `string` (perhaps after a backend migration). TypeScript catches some errors. But if the dependency is indirect, you might not know until runtime.
+
+Type testing makes expectations explicit:
+
+```typescript
+import type { Expect, IsFalse } from '@relational-fabric/canon'
+import { invariant } from '@relational-fabric/canon'
+
+// These compile only if the expectations hold
+void invariant<Expect<Entity['id'], string>>()
+void invariant<Expect<Entity['createdAt'], Date>>()
+
+// Negative assertions work too
+void invariant<IsFalse<Expect<Entity['createdAt'], string>>>()
+```
+
+If someone changes `createdAt` to `string`, the invariant fails to compile:
 
 ```typescript
 // Error: Type 'false' does not satisfy the constraint 'true'
@@ -94,134 +120,43 @@ void invariant<Expect<Entity['createdAt'], Date>>()
 
 The expectation is visible. The compiler enforces it. The documentation cannot lie.
 
-### Zero Runtime Cost
+### Zero Cost
 
-Here's the beautiful part: `invariant` compiles to nothing. It's an empty function. Any decent bundler eliminates the call entirely. You're adding compile-time checks with zero runtime overhead.
-
-```typescript
-// What you write
-void invariant<Expect<Entity['id'], string>>()
-
-// What ships to production
-// (nothing)
-```
-
-### A Testing Vocabulary
-
-Canon (the library this became) provides a small vocabulary for type testing:
+The `invariant` function compiles to nothing:
 
 ```typescript
-import type { Expect, IsTrue, IsFalse } from '@relational-fabric/canon'
-import { invariant } from '@relational-fabric/canon'
-
-// Positive assertions
-void invariant<Expect<string, string>>()           // string extends string ✓
-void invariant<Expect<'hello', string>>()          // literal extends string ✓
-void invariant<IsTrue<Expect<number, number>>>()   // explicit "must be true"
-
-// Negative assertions  
-void invariant<IsFalse<Expect<string, number>>>()  // string does NOT extend number ✓
-void invariant<IsFalse<Expect<Date, string>>>()    // Date does NOT extend string ✓
+function invariant<_ extends true>(): void {}
 ```
 
-I started using these everywhere. Documenting API contracts. Verifying utility types worked correctly. Catching regressions before they reached runtime.
+It's an empty function with a constrained generic. At runtime, it does nothing. Any bundler eliminates the call. You're adding compile-time verification with zero runtime overhead.
 
 ---
 
-## The Second Problem: Same Expectations, Different Shapes
+## Lazy Typing in Practice
 
-Type testing solved my documentation problem. But it revealed a new pattern.
+Type testing is useful on its own. But combined with lazy typing, something more powerful emerges.
 
-Our system grew. We started consuming data from external sources. A JSON-LD API. A MongoDB database. A legacy REST endpoint. Each had entities with IDs, types, and timestamps — but expressed differently:
+The problem: you're integrating data from multiple sources, each with its own conventions.
 
 ```typescript
-// Our internal format
-interface InternalEntity {
-  id: string
-  type: string
-  createdAt: Date
-}
+// Your internal format
+{ id: 'user-123', type: 'User' }
 
-// JSON-LD from external API
-interface JsonLdEntity {
-  '@id': string
-  '@type': string
-  'dcterms:created': string
-}
+// JSON-LD from an external API
+{ '@id': 'https://example.com/users/123', '@type': 'Person' }
 
 // MongoDB documents
-interface MongoEntity {
-  _id: string
-  _type: string
-  created_at: number  // Unix timestamp
-}
+{ _id: '507f1f77bcf86cd799439011', _type: 'user' }
 ```
 
-I wrote type tests for each:
+The semantic concept — "this entity has an identity" — is the same. Only the shape differs. Traditional solutions involve adapter patterns, union types, or conditional logic. Each has drawbacks: rigidity, complexity, or scattered format-specific code.
 
-```typescript
-// Internal
-void invariant<Expect<InternalEntity['id'], string>>()
-void invariant<Expect<InternalEntity['type'], string>>()
-
-// JSON-LD
-void invariant<Expect<JsonLdEntity['@id'], string>>()
-void invariant<Expect<JsonLdEntity['@type'], string>>()
-
-// MongoDB
-void invariant<Expect<MongoEntity['_id'], string>>()
-void invariant<Expect<MongoEntity['_type'], string>>()
-```
-
-And then I wrote functions for each:
-
-```typescript
-function getInternalId(entity: InternalEntity): string {
-  return entity.id
-}
-
-function getJsonLdId(entity: JsonLdEntity): string {
-  return entity['@id']
-}
-
-function getMongoId(entity: MongoEntity): string {
-  return entity._id
-}
-```
-
-I was writing the same expectation three times. The same function three times. The *semantic concept* — "this entity has an identity" — was identical. Only the *shape* differed.
-
-My type tests were telling me something: these types share a deeper structure that TypeScript couldn't see.
-
----
-
-## The Second Insight: Lazy Typing
-
-What if I could express the semantic expectation once, and let the shape-specific details be configured separately?
-
-This is lazy typing. The term borrows from lazy evaluation — just as lazy evaluation defers computation until needed, lazy typing defers shape binding until runtime, while maintaining compile-time type safety.
-
-The idea has three parts:
-
-### 1. Axioms: Name the Concept
-
-First, declare that a semantic concept exists. Don't say how to find it — just name it.
-
-```typescript
-// "There exists a concept called 'Id' that represents identity"
-// "There exists a concept called 'Type' that represents classification"
-```
-
-Canon provides these as built-in axioms: `Id`, `Type`, `Version`, `Timestamps`, `References`. You can add your own.
-
-### 2. Canons: Teach Shapes the Vocabulary
-
-Next, teach each data shape how it implements the concepts:
+Lazy typing inverts the approach. You define the semantic concept once, then register shapes that implement it:
 
 ```typescript
 import { declareCanon, pojoWithOfType } from '@relational-fabric/canon'
 
-// Internal format: 'id' field
+// Register your internal format
 declareCanon('Internal', {
   axioms: {
     Id: { $basis: pojoWithOfType('id', 'string'), key: 'id' },
@@ -229,123 +164,64 @@ declareCanon('Internal', {
   },
 })
 
-// JSON-LD: '@id' field
+// Register JSON-LD
 declareCanon('JsonLd', {
   axioms: {
     Id: { $basis: pojoWithOfType('@id', 'string'), key: '@id' },
     Type: { $basis: pojoWithOfType('@type', 'string'), key: '@type' },
   },
 })
-
-// MongoDB: '_id' field
-declareCanon('Mongo', {
-  axioms: {
-    Id: { $basis: pojoWithOfType('_id', 'string'), key: '_id' },
-    Type: { $basis: pojoWithOfType('_type', 'string'), key: '_type' },
-  },
-})
 ```
 
-### 3. Universal Functions: Write Once
-
-Now write functions that work with the concept, not any specific shape:
+Now write universal functions:
 
 ```typescript
 import { idOf, typeOf } from '@relational-fabric/canon'
 
-// One function that works with ALL shapes
 function logEntity(entity) {
   console.log(`[${typeOf(entity)}] ${idOf(entity)}`)
 }
 
-logEntity({ id: 'user-1', type: 'User' })           // [User] user-1
-logEntity({ '@id': 'https://...', '@type': 'Person' })  // [Person] https://...
-logEntity({ _id: 'abc123', _type: 'Document' })     // [Document] abc123
+// Works with any registered shape
+logEntity({ id: 'user-1', type: 'User' })
+logEntity({ '@id': 'https://...', '@type': 'Person' })
+logEntity({ _id: 'abc123', _type: 'Document' })
 ```
 
-No conditionals. No adapters. Canon detects which shape you have and extracts values accordingly.
+One function. Multiple shapes. No conditionals.
 
 ---
 
-## The Connection: Type Tests for Lazy Types
+## The Connection
 
-Here's where it comes together. Type testing and lazy typing reinforce each other.
+Type testing and lazy typing reinforce each other.
 
-With lazy typing, you're building a system of type relationships — axioms that map to shapes, shapes that satisfy constraints. These relationships need verification. Type testing provides exactly that:
+Lazy typing builds a system of type relationships — axioms mapped to shapes, shapes satisfying constraints. These relationships need verification. Type testing provides that:
 
 ```typescript
 import type { Expect, Satisfies } from '@relational-fabric/canon'
 import { invariant } from '@relational-fabric/canon'
 
-// Verify that our shapes satisfy the Id axiom
+// Verify our shapes satisfy the Id axiom correctly
 void invariant<Expect<Satisfies<'Id', 'Internal'>, { id: string }>>()
 void invariant<Expect<Satisfies<'Id', 'JsonLd'>, { '@id': string }>>()
-void invariant<Expect<Satisfies<'Id', 'Mongo'>, { _id: string }>>()
-
-// Verify that idOf returns a string
-void invariant<Expect<ReturnType<typeof idOf>, string>>()
 ```
 
-The type tests document exactly what the lazy typing system guarantees. If someone misconfigures a canon or changes an axiom, the invariants catch it at compile time.
+Type tests document exactly what the lazy typing system guarantees. If someone misconfigures a canon, the invariants catch it at compile time.
+
+Both techniques exploit the same insight: **types are propositions, and compilation is proof**. Type testing makes propositions explicit. Lazy typing makes them configurable. Together, they let you build systems that are both flexible and provably correct.
 
 ---
 
-## Why "Canon"?
+## The Name
 
-The name comes from **canonical forms** — the authoritative representation of something. In mathematics, you reduce expressions to canonical form to compare them. In music, a canon is where multiple voices sing the same melody, offset in time — different voices, same underlying pattern.
+Why "Canon"?
 
-That's the core idea: different data shapes expressing the same semantic meaning, with a system that understands the equivalence.
+The word has two relevant meanings. A **canon** is an authoritative collection — the canonical works, the accepted foundation. Canon is exactly that: a canonical starting point for TypeScript projects, with curated configurations and common patterns.
 
----
+But "canonical" also means **the standard form** — the way something should properly be represented. Canonical types are the type-level expression of semantic concepts, independent of any particular shape. They're the standard against which specific implementations are measured.
 
-## Practical Patterns
-
-### Type Testing Without Lazy Typing
-
-You don't need lazy typing to benefit from type testing. Use it anywhere you have implicit type expectations:
-
-```typescript
-// API contract documentation
-interface UserResponse {
-  user: { id: string; email: string }
-  token: string
-}
-
-void invariant<Expect<UserResponse['token'], string>>()
-void invariant<Expect<UserResponse['user']['id'], string>>()
-
-// Utility type verification
-type NonEmpty<T> = [T, ...T[]]
-void invariant<Expect<NonEmpty<string>, [string, ...string[]]>>()
-
-// Guard against accidental 'any'
-type IsAny<T> = 0 extends 1 & T ? true : false
-void invariant<IsFalse<IsAny<UserResponse>>>()
-```
-
-### Lazy Typing for Integration Boundaries
-
-Lazy typing shines at integration boundaries — where your internal world meets external data:
-
-```typescript
-import { idOf, typeOf, Satisfies } from '@relational-fabric/canon'
-
-// This function works with data from ANY registered source
-async function syncEntity<T extends Satisfies<'Id'> & Satisfies<'Type'>>(
-  entity: T,
-  destination: Database
-) {
-  const id = idOf(entity)
-  const type = typeOf(entity)
-  
-  await destination.upsert(type, id, entity)
-}
-
-// Call it with any shape
-await syncEntity(internalUser, db)
-await syncEntity(jsonLdPerson, db)
-await syncEntity(mongoDocument, db)
-```
+(And in music, a canon is where multiple voices sing the same melody, offset in time. Different voices, same underlying pattern. Different shapes, same semantic meaning.)
 
 ---
 
@@ -366,7 +242,7 @@ interface Config {
   timeout: number
 }
 
-// Document and enforce expectations
+// Document and enforce type expectations
 void invariant<Expect<Config['apiUrl'], string>>()
 void invariant<Expect<Config['timeout'], number>>()
 void invariant<IsFalse<Expect<Config['timeout'], string>>>()
@@ -378,36 +254,57 @@ void invariant<IsFalse<Expect<Config['timeout'], string>>>()
 import type { Canon, Satisfies } from '@relational-fabric/canon'
 import { declareCanon, idOf, pojoWithOfType } from '@relational-fabric/canon'
 
+// Define your canon type
 type MyCanon = Canon<{
   Id: { $basis: { id: string }; key: 'id' }
 }>
 
+// Register with module augmentation
 declare module '@relational-fabric/canon' {
   interface Canons { My: MyCanon }
 }
 
+// Declare runtime configuration
 declareCanon('My', {
   axioms: {
     Id: { $basis: pojoWithOfType('id', 'string'), key: 'id' },
   },
 })
 
-// Now idOf works with your shape
-idOf({ id: 'user-123' })  // "user-123"
+// Write universal code
+function process<T extends Satisfies<'Id'>>(entity: T) {
+  return `Processing: ${idOf(entity)}`
+}
 ```
+
+---
+
+## What's Next
+
+Canon is the foundation, but it's part of a larger vision.
+
+[Howard](https://github.com/RelationalFabric/howard) will provide deeper type-level programming utilities — tools for working with the Curry-Howard correspondence more directly.
+
+[Relational Fabric](https://github.com/RelationalFabric/relational-fabric) will build on both, providing higher-level abstractions for data-centric applications: graphs, knowledge systems, and relational operations.
+
+Canon is where it starts. A canonical beginning.
 
 ---
 
 ## Conclusion
 
-This journey started with a runtime error that should have been caught at compile time. It led me to type testing — making type expectations explicit and verifiable. And type testing revealed a deeper pattern: semantic expectations repeated across different shapes, begging to be unified.
+Canon emerged from years of building the same foundations across different projects. It crystallized when I realized that interface augmentation could enable lazy typing — late-bound types that adapt to registered shapes while maintaining compile-time safety.
 
-Lazy typing is that unification. It separates what you mean (semantic concepts) from how data expresses it (shapes), letting you write universal code that works across all of them.
+Type testing came along because I'd been carrying those utilities for years, and they finally found their proper home. They're too useful to leave scattered, and they embody the same philosophy: make the implicit explicit, let the compiler prove your invariants.
 
-The two ideas reinforce each other. Type testing documents expectations. Lazy typing abstracts them. Together, they give you TypeScript code that's more honest about what it assumes and more flexible about what it accepts.
+The result is a library that provides two things every TypeScript project needs but few set up properly:
 
-That's Canon: a library born from wanting types that could be tested and abstractions that could adapt. I hope it proves useful in your own journey.
+1. **Type testing** — Write down your type expectations. Let the compiler enforce them. Zero runtime cost.
+
+2. **Lazy typing** — Define semantic concepts. Register shapes that implement them. Write universal code.
+
+Both exploit the same deep insight: types are propositions, and compilation is proof. Canon just makes that insight practical.
 
 ---
 
-*Canon is open source at [github.com/RelationalFabric/canon](https://github.com/RelationalFabric/canon). Feedback and contributions welcome.*
+*Canon is open source at [github.com/RelationalFabric/canon](https://github.com/RelationalFabric/canon). It's part of the [Relational Fabric](https://github.com/RelationalFabric) ecosystem. Feedback and contributions welcome.*
