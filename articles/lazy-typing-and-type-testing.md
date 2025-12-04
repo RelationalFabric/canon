@@ -1,4 +1,4 @@
-Late-Bound Types and Compile-Time Proofs: The Canon Way
+TypeScript's Hidden Superpowers: Types That Bind Late and Test Themselves
 
 *A canonical foundation for building data-centric applications*
 
