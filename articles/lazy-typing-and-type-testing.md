@@ -276,6 +276,24 @@ The names in Relational Fabric aren't arbitrary. They form a coherent metaphor:
 
 You'll be weaving a fabric of data relationships. Canon provides the starting thread.
 
+```
+@relational-fabric (the organization)
+│
+├── canon ← this article
+│   ├── Lazy types (interface augmentation, canonical APIs)
+│   ├── Type testing (compile-time assertions)
+│   └── Canon Kit (curated libraries, configurations, scripts)
+│
+├── howard (in progress)
+│   └── Claim-driven development (Curry-Howard at runtime)
+│
+└── relational-fabric (planned, main entry point)
+    ├── Filament (meta-level primitives)
+    ├── Weft (query and navigation)
+    ├── Warp (data at rest)
+    └── Shuttle (coordination and flow)
+```
+
 ---
 
 # Getting Started
