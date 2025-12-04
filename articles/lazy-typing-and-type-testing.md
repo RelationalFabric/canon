@@ -4,7 +4,7 @@ The End of Disposable Code: How I Built Universal APIs in TypeScript
 
 # The Long Road to Canon
 
-Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions: ways of thinking about identity, types, relationships, and change over time.
+Every developer has patterns they carry from project to project. Code that gets rewritten, refined, until it becomes habitual. For me, that pattern was a set of data abstractions: ways of thinking about identity, types, relationships, and change over time.
 
 After building these abstractions across enough projects, I decided to give them a proper home. That's becoming [Relational Fabric](https://github.com/RelationalFabric), an organisation dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
 
