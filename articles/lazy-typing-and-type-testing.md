@@ -111,7 +111,7 @@ Canon provides:
 
 - **Curated configurations**: TypeScript and ESLint setups that embody best practices
 - **Canon Kit**: A curated set of third-party libraries (object-hash, immutable.js, defu, consola, fs-extra, ts-morph, and more) with an opinionated API surface, plus transparent access to the underlying libraries when you need it
-- **Type testing utilities**: Compile-time assertions that exploit Curry-Howard at the type level
+- **Type testing utilities**: A foundation for type assertions that aren't disposable code
 - **Lazy typing**: Late-bound types through interface augmentation
 
 The Kit means you're not just getting configurations; you're getting a known-good set of dependencies with consistent versioning and a thoughtfully curated API. Canon itself uses the Kit internally whenever it needs these capabilities, so you're getting what we actually use, not just what we think might be useful. The transparent access paths (`@relational-fabric/canon/_/immutable`, etc.) ensure you can always reach the full library when the opinionated surface isn't enough.
