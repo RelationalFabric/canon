@@ -282,7 +282,7 @@ You'll be weaving a fabric of data relationships. Canon provides the starting th
 
 ```bash
 npm install @relational-fabric/canon
-npx canon init
+npx canon init # if you want the full "batteries-included" experience
 ```
 
 Full documentation and examples are available at [relationalfabric.github.io/canon](https://relationalfabric.github.io/canon/). For new projects, the [project setup guide](https://relationalfabric.github.io/canon/docs/project-setup/) walks through using `npx canon init` to scaffold a project with Canon's configurations, scripts, and tooling already wired up.
