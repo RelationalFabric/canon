@@ -8,14 +8,14 @@
 
 Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions: ways of thinking about identity, types, relationships, and change over time.
 
-After building these abstractions across enough projects, I decided to give them a proper home. That became [Relational Fabric](https://github.com/RelationalFabric), an organization dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
+After building these abstractions across enough projects, I decided to give them a proper home. That's becoming [Relational Fabric](https://github.com/RelationalFabric), an organization dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
 
 The vision crystallized around a metaphor: **weaving**. Just as fabric emerges from the interplay of threads, meaningful data systems emerge from the interplay of relationships. The plan is a family of libraries named for the parts of a loom:
 
-- **Filament**: the thin threads that form the basis, providing meta-level primitives for building domain-specific abstractions
-- **Weft**: the horizontal threads, handling navigation and query construction  
-- **Warp**: the vertical threads, managing data at rest
-- **Shuttle**: the device that carries thread through the loom, coordinating flow between systems
+- **Filament**: the thin threads that form the basis, to provide meta-level primitives for building domain-specific abstractions
+- **Weft**: the horizontal threads, to handle navigation and query construction  
+- **Warp**: the vertical threads, to manage data at rest
+- **Shuttle**: the device that carries thread through the loom, to coordinate flow between systems
 
 But when I sat down to start building Filament (the foundational layer) I realized I was missing something more fundamental.
 
@@ -23,15 +23,15 @@ But when I sat down to start building Filament (the foundational layer) I realiz
 
 ## The Missing Primitive: A Logical Engine
 
-Much of what Relational Fabric needed to do was *logical reasoning at runtime*: making claims about data, composing those claims, and verifying them. Filament's job was to provide primitives that preserve meaning, defer implementation decisions, and evolve gracefully. But that required a foundation for logical reasoning itself.
+Much of what Relational Fabric will need to do is *logical reasoning at runtime*: making claims about data, composing those claims, and verifying them. Filament's job will be to provide primitives that preserve meaning, defer implementation decisions, and evolve gracefully. But that requires a foundation for logical reasoning itself.
 
-This led me to [Howard](https://github.com/RelationalFabric/howard), named after William Alvin Howard, the mathematician who formalized the [Curry-Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) in his 1969 paper.
+This led me to start [Howard](https://github.com/RelationalFabric/howard), named after William Alvin Howard, the mathematician who formalized the [Curry-Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) in his 1969 paper.
 
 The Curry-Howard correspondence is a profound insight: **programs are proofs, and types are propositions**. Writing a program that satisfies a type is structurally identical to constructing a proof for a logical proposition. A type that compiles is a theorem that holds.
 
-Since "Curry" has already been immortalized in programming (via currying), naming the library after Howard felt right. Howard would be a computable truth engine: the logical backbone for making data meaningful.
+Since "Curry" has already been immortalized in programming (via currying), naming the library after Howard felt right. Howard will be a computable truth engine: the logical backbone for making data meaningful.
 
-But Howard isn't just about types. It's about **claims**: first-class objects that formalize assertions about data:
+Howard won't just be about types. It's about **claims**: first-class objects that formalize assertions about data:
 
 ```typescript
 // Howard lets you define claims that compose
@@ -44,7 +44,7 @@ console.log(proof.result)           // true or false
 console.log(proof.explanation.human()) // why
 ```
 
-Howard transforms simple boolean checks into verifiable, composable, cacheable proofs. When you prove a claim, you get an immutable record of the evaluation: not just the result, but the reasoning. This is Curry-Howard made practical for runtime logic.
+Howard will transform simple boolean checks into verifiable, composable, cacheable proofs. When you prove a claim, you'll get an immutable record of the evaluation: not just the result, but the reasoning. This is Curry-Howard made practical for runtime logic.
 
 But as I sketched Howard's foundations, I hit a problem.
 
@@ -140,7 +140,7 @@ This enables **lazy typing** (or late-bound typing). The library doesn't need to
 
 I could define semantic concepts ("there exists a notion of identity") and let individual projects bind those concepts to their specific shapes. The same `idOf()` function could work with `id`, `@id`, or `_id` depending on what canons were registered.
 
-Canon will become Relational Fabric's canonical starting point. And "canonical types" (types bound through interface augmentation) became the mechanism for working with semantic concepts across different data shapes.
+Canon will become Relational Fabric's canonical starting point. And "canonical types" (types bound through interface augmentation) are the mechanism for working with semantic concepts across different data shapes.
 
 ---
 
@@ -196,7 +196,7 @@ function invariant<_ extends true>(): void {}
 
 At runtime, it does nothing. Any bundler eliminates the call. You're adding compile-time verification with zero runtime overhead.
 
-This is the same Curry-Howard insight that drives Howard, but applied at the type level: types as propositions, compilation as proof.
+This is the same Curry-Howard insight that will drive Howard, but applied at the type level: types as propositions, compilation as proof.
 
 ---
 
@@ -284,15 +284,15 @@ The names in Relational Fabric aren't arbitrary. They form a coherent metaphor:
 
 **Canon**: the authoritative collection, the canonical starting point. Also the standard form against which variations are measured. And in music, multiple voices singing the same melody, offset in time. Different shapes, same semantic meaning.
 
-**Howard**: William Alvin Howard, who formalized the correspondence between logic and types. The logical engine that makes claims first-class.
+**Howard**: William Alvin Howard, who formalized the correspondence between logic and types. The logical engine that will make claims first-class.
 
-**Filament**: the thin threads that form the basis of fabric. The meta-level primitives everything else builds on.
+**Filament**: the thin threads that form the basis of fabric. The meta-level primitives everything else will build on.
 
 **Weft** and **Warp**: the horizontal and vertical threads in weaving. Query and storage.
 
 **Shuttle**: the device that carries thread through the loom. Coordination and flow.
 
-You're weaving a fabric of data relationships. Canon provides the starting thread.
+You'll be weaving a fabric of data relationships. Canon provides the starting thread.
 
 ---
 
@@ -354,11 +354,11 @@ function process<T extends Satisfies<'Id'>>(entity: T) {
 
 Canon is the foundation, but it's part of a larger vision.
 
-[Howard](https://github.com/RelationalFabric/howard) is the logical engine: a computable truth engine where claims about data become first-class objects that can be composed, proven, and cached. It's Curry-Howard made practical for runtime logic.
+[Howard](https://github.com/RelationalFabric/howard) will be the logical engine: a computable truth engine where claims about data become first-class objects that can be composed, proven, and cached. It's Curry-Howard made practical for runtime logic.
 
-[Relational Fabric](https://github.com/RelationalFabric/relational-fabric) weaves it all together: Filament for meta-level primitives, Weft for queries, Warp for storage, Shuttle for coordination. Each library handles its concerns while integrating naturally with the others.
+[Relational Fabric](https://github.com/RelationalFabric/relational-fabric) will weave it all together: Filament for meta-level primitives, Weft for queries, Warp for storage, Shuttle for coordination. Each library will handle its concerns while integrating naturally with the others.
 
-Canon is where it starts. The canonical thread from which the fabric is woven.
+Canon is where it starts. The canonical thread from which the fabric will be woven.
 
 ---
 
@@ -366,7 +366,7 @@ Canon is where it starts. The canonical thread from which the fabric is woven.
 
 Canon emerged from years of building the same foundations across different projects. It crystallized when I realized that interface augmentation could enable lazy typing: late-bound types that adapt to registered shapes while maintaining compile-time safety.
 
-Type testing came along because those utilities embody the same insight that drives Howard: types are propositions, and compilation is proof. They're the practical application of Curry-Howard at the type level.
+Type testing came along because those utilities embody the same insight that will drive Howard: types are propositions, and compilation is proof. They're the practical application of Curry-Howard at the type level.
 
 The result is a library that provides two things every TypeScript project needs:
 
