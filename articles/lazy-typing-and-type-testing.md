@@ -46,13 +46,40 @@ console.log(proof.explanation.human()) // why
 
 Howard transforms simple boolean checks into verifiable, composable, cacheable proofs. When you prove a claim, you get an immutable record of the evaluation: not just the result, but the reasoning. This is Curry-Howard made practical for runtime logic.
 
-And then, while sketching Howard's foundations, I noticed something else entirely.
+But as I sketched Howard's foundations, I hit a problem.
+
+---
+
+## The Reusable Claims Problem
+
+Consider writing an `isUser` claim that checks whether something has an identity and an email address:
+
+```typescript
+const isUser = hasIdentity.and(hasEmail)
+```
+
+Simple enough. But then you realize your system has multiple data representations:
+
+```typescript
+{ id: 'user-123', email: 'alice@example.com' }        // internal
+{ '@id': 'https://...', 'schema:email': 'alice@...' } // JSON-LD
+{ _id: '507f1f77bcf86c', email: 'alice@example.com' } // MongoDB
+```
+
+Now what? The `hasIdentity` claim needs to check for `id` in one format, `@id` in another, `_id` in a third. You have two options:
+
+1. Make the claims equivalent (write format-aware claims that handle all variations)
+2. Make the data equivalent (normalize to canonical concepts)
+
+Option one leads to claims riddled with conditionals, or separate claims for each format. Neither composes well. Option two means establishing canonical representations that claims can target uniformly.
+
+I chose the latter. And that choice pointed toward something Canon would need to provide.
 
 ---
 
 ## The Empty Room Problem
 
-Every time I started a new TypeScript project, whether for Relational Fabric or anything else, I did the same things:
+There was another frustration running in parallel. Every time I started a new TypeScript project, whether for Relational Fabric or anything else, I did the same things:
 
 - Set up the same TypeScript configuration
 - Install the same ESLint setup  
@@ -62,9 +89,9 @@ Every time I started a new TypeScript project, whether for Relational Fabric or 
 
 I was solving the same "empty room" problem repeatedly. And more than that, I kept defining the same *semantic concepts*: identity, type classification, versioning, timestamps. Just with slightly different field names depending on the project or data source.
 
-What if there was a canonical starting point? A foundation that provided these common elements so every project didn't start from scratch?
+The reusable claims problem and the empty room problem pointed to the same solution: a canonical starting point that established shared semantic concepts across different data shapes.
 
-That question birthed Canon.
+That's what birthed Canon.
 
 ---
 
