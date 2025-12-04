@@ -174,7 +174,7 @@ void invariant<Expect<Entity['createdAt'], Date>>()
 void invariant<IsFalse<Expect<Entity['createdAt'], string>>>()
 ```
 
-If someone changes `createdAt` to `string`, the invariant fails to compile. The expectation is visible. The compiler enforces it. The documentation cannot lie.
+If someone changes `createdAt` to `string`, the invariant fails to compile. There's no separate test run: type tests are types, and a failed assertion is simply a broken type. The expectation is visible. The compiler enforces it. The documentation cannot lie.
 
 ### Zero Cost
 
