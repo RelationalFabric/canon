@@ -1,6 +1,6 @@
 TypeScript's Hidden Superpowers: Types That Bind Late and Test Themselves
 
-*A canonical foundation for building data-centric applications*
+*How I learned to stop fighting my type system and learned to love type abstraction*
 
 # The Long Road to Canon
 
