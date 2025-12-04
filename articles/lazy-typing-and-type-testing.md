@@ -144,9 +144,19 @@ Canon became Relational Fabric's canonical starting point. And "canonical types"
 
 ---
 
-## Type Testing: Curry-Howard at Compile Time
+## Type Testing: Assertions That Aren't Disposable
 
-Howard applies Curry-Howard at runtime: claims about data become proofs you can inspect. Canon applies the same insight at compile time: type assertions become propositions the compiler proves.
+If you've ever written complex types, you've probably done this:
+
+```typescript
+type TestFoo = Foo<Bar>
+```
+
+Then you hover over `TestFoo` in your editor to see what it resolves to. It's a debugging technique. But now you have these test identifiers littering your codebase, upsetting the linter. So you comment them out. Or delete them.
+
+And then what happens when a change to one type breaks the expectations of another type? You've lost the test. The expectation was disposable.
+
+Canon's type testing utilities solve this. They give you a way to write type assertions that stay in your codebase, don't upset the linter, and catch regressions when types drift.
 
 The utilities are simple:
 
