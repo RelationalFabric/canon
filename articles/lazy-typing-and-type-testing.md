@@ -1,8 +1,8 @@
-# Late-Bound Types and Compile-Time Proofs: The Canon Way
+Late-Bound Types and Compile-Time Proofs: The Canon Way
 
 *A canonical foundation for building data-centric applications*
 
-## The Long Road to Canon
+# The Long Road to Canon
 
 Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions: ways of thinking about identity, types, relationships, and change over time.
 
@@ -17,7 +17,7 @@ The vision crystallized around a metaphor: **weaving**. Just as fabric emerges f
 
 But when I sat down to start building Filament (the foundational layer) I realized I was missing something more fundamental.
 
-### The Missing Primitive: A Logical Engine
+## The Missing Primitive: A Logical Engine
 
 Much of what Relational Fabric will need to do is *logical reasoning at runtime*: making claims about data, composing those claims, and verifying them. Filament's job will be to provide primitives that preserve meaning, defer implementation decisions, and evolve gracefully. But that requires a foundation for logical reasoning itself.
 
@@ -44,7 +44,7 @@ Howard will transform simple boolean checks into verifiable, composable, cacheab
 
 But as I sketched Howard's foundations, I hit a problem.
 
-### The Reusable Claims Problem
+## The Reusable Claims Problem
 
 Consider writing an `isUser` claim that checks whether something has an identity and an email address:
 
@@ -77,7 +77,7 @@ In some languages, function application and associative access are equivalent: `
 
 Canon takes the second path. It provides canonical APIs, not canonical forms. The data stays native to its source; only the access is unified.
 
-### The Empty Room Problem
+## The Empty Room Problem
 
 There was another frustration running in parallel. Every time I started a new TypeScript project, whether for Relational Fabric or anything else, I did the same things:
 
@@ -95,7 +95,7 @@ That's what birthed Canon.
 
 ---
 
-## Canon: The Canonical Starting Point
+# Canon: The Canonical Starting Point
 
 Canon's description says it plainly: *"The foundational library for a useful type ecosystem. A canonical source of truth that solves common design problems and enables seamless composition for any project."*
 
@@ -110,7 +110,7 @@ The Kit means you're not just getting configurations; you're getting a known-goo
 
 But for this article, the focus is on lazy typing and type testing. That's where the conceptual weight lies.
 
-### The Insight: Interface Augmentation and Lazy Types
+## The Insight: Interface Augmentation and Lazy Types
 
 TypeScript's module augmentation lets you extend interfaces across module boundaries:
 
@@ -132,7 +132,7 @@ I could define semantic concepts ("there exists a notion of identity") and let i
 
 Canon will become Relational Fabric's canonical starting point. And "canonical types" (types bound through interface augmentation) are the mechanism for working with semantic concepts across different data shapes.
 
-### Type Testing: Assertions That Aren't Disposable
+## Type Testing: Assertions That Aren't Disposable
 
 If you've ever written complex types, you've probably done this:
 
@@ -174,7 +174,7 @@ void invariant<IsFalse<Expect<Entity['createdAt'], string>>>()
 
 If someone changes `createdAt` to `string`, the invariant fails to compile. There's no separate test run: type tests are types, and a failed assertion is simply a broken type. The expectation is visible. The compiler enforces it. The documentation cannot lie.
 
-#### Zero Cost
+### Zero Cost
 
 The `invariant` function compiles to nothing:
 
@@ -184,9 +184,7 @@ function invariant<_ extends true>(): void {}
 
 At runtime, it does nothing. Any bundler eliminates the call. You're adding compile-time verification with zero runtime overhead.
 
----
-
-### Lazy Typing in Practice
+## Lazy Typing in Practice
 
 Type testing is useful on its own. But combined with lazy typing, something more powerful emerges.
 
@@ -243,9 +241,7 @@ logEntity({ '@id': 'https://...', '@type': 'Person' })
 
 One function. Multiple shapes. No conditionals.
 
----
-
-### The Connection
+## The Connection
 
 Type testing and lazy typing reinforce each other.
 
@@ -264,7 +260,7 @@ Type tests document exactly what the lazy typing system guarantees. If someone m
 
 ---
 
-## The Names Tell the Story
+# The Names Tell the Story
 
 The names in Relational Fabric aren't arbitrary. They form a coherent metaphor:
 
@@ -282,7 +278,7 @@ You'll be weaving a fabric of data relationships. Canon provides the starting th
 
 ---
 
-## Getting Started
+# Getting Started
 
 ```bash
 npm install @relational-fabric/canon
@@ -290,7 +286,7 @@ npm install @relational-fabric/canon
 
 Full documentation and examples are available at [relationalfabric.github.io/canon](https://relationalfabric.github.io/canon/). For new projects, the [project setup guide](https://relationalfabric.github.io/canon/docs/project-setup/) walks through using `npx canon init` to scaffold a project with Canon's configurations, scripts, and tooling already wired up.
 
-### Type Testing
+## Type Testing
 
 ```typescript
 import type { Expect, IsFalse } from '@relational-fabric/canon'
@@ -307,7 +303,7 @@ void invariant<Expect<Config['timeout'], number>>()
 void invariant<IsFalse<Expect<Config['timeout'], string>>>()
 ```
 
-### Lazy Typing
+## Lazy Typing
 
 ```typescript
 import type { Canon, Satisfies } from '@relational-fabric/canon'
@@ -338,7 +334,7 @@ function process<T extends Satisfies<'Id'>>(entity: T) {
 
 ---
 
-## What's Next
+# What's Next
 
 Canon is the foundation, but it's part of a larger vision.
 
@@ -350,7 +346,7 @@ Canon is where it starts. The canonical thread from which the fabric will be wov
 
 ---
 
-## Conclusion
+# Conclusion
 
 Canon emerged from years of building the same foundations across different projects. It crystallized when I realized that interface augmentation could enable lazy typing: late-bound types that adapt to registered shapes while maintaining compile-time safety.
 
