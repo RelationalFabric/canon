@@ -6,16 +6,16 @@ The End of Disposable Code: How I Built Universal APIs in TypeScript
 
 Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions: ways of thinking about identity, types, relationships, and change over time.
 
-After building these abstractions across enough projects, I decided to give them a proper home. That's becoming [Relational Fabric](https://github.com/RelationalFabric), an organization dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
+After building these abstractions across enough projects, I decided to give them a proper home. That's becoming [Relational Fabric](https://github.com/RelationalFabric), an organisation dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
 
-The vision crystallized around a metaphor: **weaving**. Just as fabric emerges from the interplay of threads, meaningful data systems emerge from the interplay of relationships. The plan is a family of libraries named for the parts of a loom:
+The vision crystallised around a metaphor: **weaving**. Just as fabric emerges from the interplay of threads, meaningful data systems emerge from the interplay of relationships. The plan is a family of libraries named for the parts of a loom:
 
 - **Filament**: the thin threads that form the basis, to provide meta-level primitives for building domain-specific abstractions
 - **Weft**: the horizontal threads, to handle navigation and query construction  
 - **Warp**: the vertical threads, to manage data at rest
 - **Shuttle**: the device that carries thread through the loom, to coordinate flow between systems
 
-But when I sat down to start building Filament (the foundational layer) I realized I was missing something more fundamental.
+But when I sat down to start building Filament (the foundational layer) I realised I was missing something more fundamental.
 
 ## The Missing Primitive: A Logical Engine
 
@@ -25,7 +25,7 @@ This led me to start [Howard](https://github.com/RelationalFabric/howard), named
 
 The Curry-Howard correspondence is a profound insight: **programs are proofs, and types are propositions**. Writing a program that satisfies a type is structurally identical to constructing a proof for a logical proposition. A type that compiles is a theorem that holds.
 
-Since "Curry" has already been immortalized in programming (via currying), naming the library after Howard felt right. Howard will be a computable truth engine: the logical backbone for making data meaningful.
+Since "Curry" has already been immortalised in programming (via currying), naming the library after Howard felt right. Howard will be a computable truth engine: the logical backbone for making data meaningful.
 
 Howard won't just be about types. It's about **claims**: first-class objects that formalize assertions about data:
 
@@ -52,7 +52,7 @@ Consider writing an `isUser` claim that checks whether something has an identity
 const isUser = hasIdentity.and(hasEmail)
 ```
 
-Simple enough. But then you realize your system has multiple data representations:
+Simple enough. But then you realise your system has multiple data representations:
 
 ```typescript
 { id: 'user-123', email: 'alice@example.com' }        // internal
@@ -63,7 +63,7 @@ Simple enough. But then you realize your system has multiple data representation
 Now what? The `hasIdentity` claim needs to check for `id` in one format, `@id` in another, `_id` in a third. You have two options:
 
 1. Make the claims equivalent (write format-aware claims that handle all variations)
-2. Make the data equivalent (normalize to canonical concepts)
+2. Make the data equivalent (normalise to canonical concepts)
 
 Option one leads to claims riddled with conditionals, or separate claims for each format. Neither composes well. Option two means establishing canonical representations that claims can target uniformly.
 
@@ -266,7 +266,7 @@ The names in Relational Fabric aren't arbitrary. They form a coherent metaphor:
 
 **Canon**: the authoritative collection, the canonical starting point. Also the standard form against which variations are measured. And in music, multiple voices singing the same melody, offset in time. Different shapes, same semantic meaning.
 
-**Howard**: William Alvin Howard, who formalized the correspondence between logic and types. The logical engine that will make claims first-class.
+**Howard**: William Alvin Howard, who formalised the correspondence between logic and types. The logical engine that will make claims first-class.
 
 **Filament**: the thin threads that form the basis of fabric. The meta-level primitives everything else will build on.
 
@@ -277,7 +277,7 @@ The names in Relational Fabric aren't arbitrary. They form a coherent metaphor:
 You'll be weaving a fabric of data relationships. Canon provides the starting thread.
 
 ```
-@relational-fabric (the organization)
+@relational-fabric (the organisation)
 │
 ├── canon ← this article
 │   ├── Lazy types (interface augmentation, canonical APIs)
@@ -369,7 +369,7 @@ Canon is where it starts. The canonical thread from which the fabric will be wov
 
 # Conclusion
 
-Canon emerged from years of building the same foundations across different projects. It crystallized when I realized that interface augmentation could enable lazy typing: late-bound types that adapt to registered shapes while maintaining compile-time safety.
+Canon emerged from years of building the same foundations across different projects. It crystallised when I realised that interface augmentation could enable lazy typing: late-bound types that adapt to registered shapes while maintaining compile-time safety.
 
 Type testing came along because I needed a way to write type assertions that wouldn't be thrown away. They stay in the codebase, the linter doesn't complain, and if a type drifts, the compiler catches it.
 
