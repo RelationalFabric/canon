@@ -300,6 +300,8 @@ You'll be weaving a fabric of data relationships. Canon provides the starting th
 npm install @relational-fabric/canon
 ```
 
+Full documentation and examples are available at [relationalfabric.github.io/canon](https://relationalfabric.github.io/canon/).
+
 ### Type Testing
 
 ```typescript
