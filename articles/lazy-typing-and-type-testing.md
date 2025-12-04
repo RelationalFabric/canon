@@ -6,32 +6,32 @@
 
 ## The Long Road to Canon
 
-Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions — ways of thinking about identity, types, relationships, and change over time.
+Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions: ways of thinking about identity, types, relationships, and change over time.
 
-After building these abstractions across enough projects, I decided to give them a proper home. That became [Relational Fabric](https://github.com/RelationalFabric) — an organization dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
+After building these abstractions across enough projects, I decided to give them a proper home. That became [Relational Fabric](https://github.com/RelationalFabric), an organization dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
 
 The vision crystallized around a metaphor: **weaving**. Just as fabric emerges from the interplay of threads, meaningful data systems emerge from the interplay of relationships. This led to a family of libraries named for the parts of a loom:
 
-- **Filament** — the thin threads that form the basis, providing meta-level primitives for building domain-specific abstractions
-- **Weft** — the horizontal threads, handling navigation and query construction  
-- **Warp** — the vertical threads, managing data at rest
-- **Shuttle** — the device that carries thread through the loom, coordinating flow between systems
+- **Filament**: the thin threads that form the basis, providing meta-level primitives for building domain-specific abstractions
+- **Weft**: the horizontal threads, handling navigation and query construction  
+- **Warp**: the vertical threads, managing data at rest
+- **Shuttle**: the device that carries thread through the loom, coordinating flow between systems
 
-But when I sat down to build Filament — the foundational layer — I realized I was missing something more fundamental.
+But when I sat down to build Filament (the foundational layer) I realized I was missing something more fundamental.
 
 ---
 
 ## The Missing Primitive: A Logical Engine
 
-Much of what Relational Fabric needed to do was *logical reasoning at runtime* — making claims about data, composing those claims, and verifying them. Filament's job was to provide primitives that preserve meaning, defer implementation decisions, and evolve gracefully. But that required a foundation for logical reasoning itself.
+Much of what Relational Fabric needed to do was *logical reasoning at runtime*: making claims about data, composing those claims, and verifying them. Filament's job was to provide primitives that preserve meaning, defer implementation decisions, and evolve gracefully. But that required a foundation for logical reasoning itself.
 
-This led me to [Howard](https://github.com/RelationalFabric/howard) — named after William Alvin Howard, the mathematician who formalized the [Curry-Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) in his 1969 paper.
+This led me to [Howard](https://github.com/RelationalFabric/howard), named after William Alvin Howard, the mathematician who formalized the [Curry-Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) in his 1969 paper.
 
 The Curry-Howard correspondence is a profound insight: **programs are proofs, and types are propositions**. Writing a program that satisfies a type is structurally identical to constructing a proof for a logical proposition. A type that compiles is a theorem that holds.
 
-Since "Curry" has already been immortalized in programming (via currying), naming the library after Howard felt right. Howard would be a computable truth engine — the logical backbone for making data meaningful.
+Since "Curry" has already been immortalized in programming (via currying), naming the library after Howard felt right. Howard would be a computable truth engine: the logical backbone for making data meaningful.
 
-But Howard isn't just about types. It's about **claims** — first-class objects that formalize assertions about data:
+But Howard isn't just about types. It's about **claims**: first-class objects that formalize assertions about data:
 
 ```typescript
 // Howard lets you define claims that compose
@@ -44,7 +44,7 @@ console.log(proof.result)           // true or false
 console.log(proof.explanation.human()) // why
 ```
 
-Howard transforms simple boolean checks into verifiable, composable, cacheable proofs. When you prove a claim, you get an immutable record of the evaluation — not just the result, but the reasoning. This is Curry-Howard made practical for runtime logic.
+Howard transforms simple boolean checks into verifiable, composable, cacheable proofs. When you prove a claim, you get an immutable record of the evaluation: not just the result, but the reasoning. This is Curry-Howard made practical for runtime logic.
 
 And then, while sketching Howard's foundations, I noticed something else entirely.
 
@@ -52,7 +52,7 @@ And then, while sketching Howard's foundations, I noticed something else entirel
 
 ## The Empty Room Problem
 
-Every time I started a new TypeScript project — whether for Relational Fabric or anything else — I did the same things:
+Every time I started a new TypeScript project, whether for Relational Fabric or anything else, I did the same things:
 
 - Set up the same TypeScript configuration
 - Install the same ESLint setup  
@@ -60,7 +60,7 @@ Every time I started a new TypeScript project — whether for Relational Fabric 
 - Define the same base interfaces
 - Wire up the same scripts
 
-I was solving the same "empty room" problem repeatedly. And more than that, I kept defining the same *semantic concepts* — identity, type classification, versioning, timestamps — just with slightly different field names depending on the project or data source.
+I was solving the same "empty room" problem repeatedly. And more than that, I kept defining the same *semantic concepts*: identity, type classification, versioning, timestamps. Just with slightly different field names depending on the project or data source.
 
 What if there was a canonical starting point? A foundation that provided these common elements so every project didn't start from scratch?
 
@@ -74,11 +74,11 @@ Canon's description says it plainly: *"The foundational library for a useful typ
 
 Canon provides three things:
 
-1. **Curated configurations** — TypeScript and ESLint setups that embody best practices
-2. **Type testing utilities** — Compile-time assertions that exploit Curry-Howard at the type level
-3. **Lazy typing** — Late-bound types through interface augmentation
+1. **Curated configurations**: TypeScript and ESLint setups that embody best practices
+2. **Type testing utilities**: Compile-time assertions that exploit Curry-Howard at the type level
+3. **Lazy typing**: Late-bound types through interface augmentation
 
-The third piece — lazy typing — is where things get interesting.
+The third piece, lazy typing, is where things get interesting.
 
 ---
 
@@ -100,15 +100,15 @@ declare module '@relational-fabric/canon' {
 
 This enables **lazy typing** (or late-bound typing). The library doesn't need to know about your specific data shapes at compile time. You register them later, and the type system adapts.
 
-I could define semantic concepts — "there exists a notion of identity" — and let individual projects bind those concepts to their specific shapes. The same `idOf()` function could work with `id`, `@id`, or `_id` depending on what canons were registered.
+I could define semantic concepts ("there exists a notion of identity") and let individual projects bind those concepts to their specific shapes. The same `idOf()` function could work with `id`, `@id`, or `_id` depending on what canons were registered.
 
-Canon became Relational Fabric's canonical starting point. And "canonical types" — types bound through interface augmentation — became the mechanism for working with semantic concepts across different data shapes.
+Canon became Relational Fabric's canonical starting point. And "canonical types" (types bound through interface augmentation) became the mechanism for working with semantic concepts across different data shapes.
 
 ---
 
 ## Type Testing: Curry-Howard at Compile Time
 
-Howard applies Curry-Howard at runtime — claims about data become proofs you can inspect. Canon applies the same insight at compile time — type assertions become propositions the compiler proves.
+Howard applies Curry-Howard at runtime: claims about data become proofs you can inspect. Canon applies the same insight at compile time: type assertions become propositions the compiler proves.
 
 The utilities are simple:
 
@@ -169,7 +169,7 @@ The problem: you're integrating data from multiple sources, each with its own co
 { _id: '507f1f77bcf86cd799439011', _type: 'user' }
 ```
 
-The semantic concept — "this entity has an identity" — is the same. Only the shape differs.
+The semantic concept ("this entity has an identity") is the same. Only the shape differs.
 
 Lazy typing lets you define the semantic concept once, then register shapes that implement it:
 
@@ -215,7 +215,7 @@ One function. Multiple shapes. No conditionals.
 
 Type testing and lazy typing reinforce each other.
 
-Lazy typing builds a system of type relationships — axioms mapped to shapes, shapes satisfying constraints. Type testing verifies those relationships:
+Lazy typing builds a system of type relationships: axioms mapped to shapes, shapes satisfying constraints. Type testing verifies those relationships:
 
 ```typescript
 import type { Expect, Satisfies } from '@relational-fabric/canon'
@@ -232,17 +232,17 @@ Type tests document exactly what the lazy typing system guarantees. If someone m
 
 ## The Names Tell the Story
 
-The names in Relational Fabric aren't arbitrary — they form a coherent metaphor:
+The names in Relational Fabric aren't arbitrary. They form a coherent metaphor:
 
-**Canon** — the authoritative collection, the canonical starting point. Also: the standard form against which variations are measured. And in music: multiple voices singing the same melody, offset in time. Different shapes, same semantic meaning.
+**Canon**: the authoritative collection, the canonical starting point. Also the standard form against which variations are measured. And in music, multiple voices singing the same melody, offset in time. Different shapes, same semantic meaning.
 
-**Howard** — William Alvin Howard, who formalized the correspondence between logic and types. The logical engine that makes claims first-class.
+**Howard**: William Alvin Howard, who formalized the correspondence between logic and types. The logical engine that makes claims first-class.
 
-**Filament** — the thin threads that form the basis of fabric. The meta-level primitives everything else builds on.
+**Filament**: the thin threads that form the basis of fabric. The meta-level primitives everything else builds on.
 
-**Weft** and **Warp** — the horizontal and vertical threads in weaving. Query and storage.
+**Weft** and **Warp**: the horizontal and vertical threads in weaving. Query and storage.
 
-**Shuttle** — the device that carries thread through the loom. Coordination and flow.
+**Shuttle**: the device that carries thread through the loom. Coordination and flow.
 
 You're weaving a fabric of data relationships. Canon provides the starting thread.
 
@@ -306,9 +306,9 @@ function process<T extends Satisfies<'Id'>>(entity: T) {
 
 Canon is the foundation, but it's part of a larger vision.
 
-[Howard](https://github.com/RelationalFabric/howard) is the logical engine — a computable truth engine where claims about data become first-class objects that can be composed, proven, and cached. It's Curry-Howard made practical for runtime logic.
+[Howard](https://github.com/RelationalFabric/howard) is the logical engine: a computable truth engine where claims about data become first-class objects that can be composed, proven, and cached. It's Curry-Howard made practical for runtime logic.
 
-[Relational Fabric](https://github.com/RelationalFabric/relational-fabric) weaves it all together — Filament for meta-level primitives, Weft for queries, Warp for storage, Shuttle for coordination. Each library handles its concerns while integrating naturally with the others.
+[Relational Fabric](https://github.com/RelationalFabric/relational-fabric) weaves it all together: Filament for meta-level primitives, Weft for queries, Warp for storage, Shuttle for coordination. Each library handles its concerns while integrating naturally with the others.
 
 Canon is where it starts. The canonical thread from which the fabric is woven.
 
@@ -316,15 +316,15 @@ Canon is where it starts. The canonical thread from which the fabric is woven.
 
 ## Conclusion
 
-Canon emerged from years of building the same foundations across different projects. It crystallized when I realized that interface augmentation could enable lazy typing — late-bound types that adapt to registered shapes while maintaining compile-time safety.
+Canon emerged from years of building the same foundations across different projects. It crystallized when I realized that interface augmentation could enable lazy typing: late-bound types that adapt to registered shapes while maintaining compile-time safety.
 
 Type testing came along because those utilities embody the same insight that drives Howard: types are propositions, and compilation is proof. They're the practical application of Curry-Howard at the type level.
 
 The result is a library that provides two things every TypeScript project needs:
 
-1. **Type testing** — Write down your type expectations. Let the compiler enforce them. Zero runtime cost.
+1. **Type testing**: Write down your type expectations. Let the compiler enforce them. Zero runtime cost.
 
-2. **Lazy typing** — Define semantic concepts. Register shapes that implement them. Write universal code.
+2. **Lazy typing**: Define semantic concepts. Register shapes that implement them. Write universal code.
 
 Both are expressions of the same philosophy that runs through Relational Fabric: good abstractions serve as [the UI of ideas](https://levelup.gitconnected.com/understanding-abstractions-baa3d5347b0d). They make complex systems feel natural. Canon is my attempt to provide that for TypeScript's type system.
 
