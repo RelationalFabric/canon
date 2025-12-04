@@ -107,13 +107,16 @@ That's what birthed Canon.
 
 Canon's description says it plainly: *"The foundational library for a useful type ecosystem. A canonical source of truth that solves common design problems and enables seamless composition for any project."*
 
-Canon provides three things:
+Canon provides:
 
-1. **Curated configurations**: TypeScript and ESLint setups that embody best practices
-2. **Type testing utilities**: Compile-time assertions that exploit Curry-Howard at the type level
-3. **Lazy typing**: Late-bound types through interface augmentation
+- **Curated configurations**: TypeScript and ESLint setups that embody best practices
+- **Canon Kit**: A curated set of third-party libraries (object-hash, immutable.js, defu, consola, fs-extra, ts-morph, and more) with an opinionated API surface, plus transparent access to the underlying libraries when you need it
+- **Type testing utilities**: Compile-time assertions that exploit Curry-Howard at the type level
+- **Lazy typing**: Late-bound types through interface augmentation
 
-The third piece, lazy typing, is where things get interesting.
+The Kit means you're not just getting configurations; you're getting a known-good set of dependencies with consistent versioning and a thoughtfully curated API. The transparent access paths (`@relational-fabric/canon/_/immutable`, etc.) ensure you can always reach the full library when the opinionated surface isn't enough.
+
+But for this article, the focus is on lazy typing and type testing. That's where the conceptual weight lies.
 
 ---
 
