@@ -2,8 +2,6 @@
 
 *A canonical foundation for building data-centric applications*
 
----
-
 ## The Long Road to Canon
 
 Every developer has patterns they carry from project to project. Code that gets rewritten, refined, and eventually ossified into muscle memory. For me, that pattern was a set of data abstractions: ways of thinking about identity, types, relationships, and change over time.
