@@ -2,7 +2,7 @@ import createEslintConfig from './eslint.js'
 
 export default createEslintConfig(
   {
-    ignores: ['docs/examples/**', 'blog/**'],
+    ignores: ['docs/examples/**', 'articles/**'],
   },
   {
     files: ['scripts/**/*'],
