@@ -1,6 +1,6 @@
-# When Types Become Tests: A Journey from Repetition to Abstraction
+# Late-Bound Types and Compile-Time Proofs: The Canon Way
 
-*How years of building data systems led to Canon — a library for canonical types, lazy binding, and compile-time verification*
+*A canonical foundation for building data-centric applications*
 
 ---
 
