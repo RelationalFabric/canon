@@ -127,15 +127,13 @@
   "devDependencies": {
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.10.0",
-    "axios": "^1.13.2",
     "chokidar-cli": "^3.0.0",
     "depcheck": "^1.4.7",
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "npm-check-updates": "^19.1.2",
-    "typescript": "^5.9.3",
-    "xml2js": "^0.6.2"
+    "typescript": "^5.9.3"
   },
   "oclif": {
     "bin": "canon",
