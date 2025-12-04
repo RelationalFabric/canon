@@ -196,8 +196,6 @@ function invariant<_ extends true>(): void {}
 
 At runtime, it does nothing. Any bundler eliminates the call. You're adding compile-time verification with zero runtime overhead.
 
-This is the same Curry-Howard insight that will drive Howard, but applied at the type level: types as propositions, compilation as proof.
-
 ---
 
 ## Lazy Typing in Practice
@@ -366,7 +364,7 @@ Canon is where it starts. The canonical thread from which the fabric will be wov
 
 Canon emerged from years of building the same foundations across different projects. It crystallized when I realized that interface augmentation could enable lazy typing: late-bound types that adapt to registered shapes while maintaining compile-time safety.
 
-Type testing came along because those utilities embody the same insight that will drive Howard: types are propositions, and compilation is proof. They're the practical application of Curry-Howard at the type level.
+Type testing came along because I needed a way to write type assertions that wouldn't be thrown away. They stay in the codebase, the linter doesn't complain, and if a type drifts, the compiler catches it.
 
 The result is a library that provides two things every TypeScript project needs:
 
