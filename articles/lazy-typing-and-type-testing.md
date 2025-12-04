@@ -136,7 +136,7 @@ Canon will become Relational Fabric's canonical starting point. And "canonical t
 
 ---
 
-## Type Testing: Assertions That Aren't Disposable
+### Type Testing: Assertions That Aren't Disposable
 
 If you've ever written complex types, you've probably done this:
 
@@ -190,7 +190,7 @@ At runtime, it does nothing. Any bundler eliminates the call. You're adding comp
 
 ---
 
-## Lazy Typing in Practice
+### Lazy Typing in Practice
 
 Type testing is useful on its own. But combined with lazy typing, something more powerful emerges.
 
@@ -249,7 +249,7 @@ One function. Multiple shapes. No conditionals.
 
 ---
 
-## The Connection
+### The Connection
 
 Type testing and lazy typing reinforce each other.
 
