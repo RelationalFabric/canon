@@ -1,6 +1,6 @@
-TypeScript's Hidden Superpowers: Types That Bind Late and Test Themselves
+The End of Disposable Code: How I Built Universal APIs in TypeScript
 
-*How I stopped fighting my type system and learned to love type abstraction*
+*Unlocking two of TypeScript's hidden superpowers: Lazy Types for late-binding data shapes. Type Testing for zero-cost assertions that stay.*
 
 # The Long Road to Canon
 
