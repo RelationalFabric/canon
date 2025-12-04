@@ -10,14 +10,14 @@ Every developer has patterns they carry from project to project. Code that gets 
 
 After building these abstractions across enough projects, I decided to give them a proper home. That became [Relational Fabric](https://github.com/RelationalFabric), an organization dedicated to unlocking the composable pieces that make sophisticated data systems accessible. The core belief: the true power of data lies in its relationships, its interconnectedness, and its ability to be composed into something greater.
 
-The vision crystallized around a metaphor: **weaving**. Just as fabric emerges from the interplay of threads, meaningful data systems emerge from the interplay of relationships. This led to a family of libraries named for the parts of a loom:
+The vision crystallized around a metaphor: **weaving**. Just as fabric emerges from the interplay of threads, meaningful data systems emerge from the interplay of relationships. The plan is a family of libraries named for the parts of a loom:
 
 - **Filament**: the thin threads that form the basis, providing meta-level primitives for building domain-specific abstractions
 - **Weft**: the horizontal threads, handling navigation and query construction  
 - **Warp**: the vertical threads, managing data at rest
 - **Shuttle**: the device that carries thread through the loom, coordinating flow between systems
 
-But when I sat down to build Filament (the foundational layer) I realized I was missing something more fundamental.
+But when I sat down to start building Filament (the foundational layer) I realized I was missing something more fundamental.
 
 ---
 
