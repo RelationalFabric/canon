@@ -73,7 +73,15 @@ Now what? The `hasIdentity` claim needs to check for `id` in one format, `@id` i
 
 Option one leads to claims riddled with conditionals, or separate claims for each format. Neither composes well. Option two means establishing canonical representations that claims can target uniformly.
 
-I chose the latter. And that choice pointed toward something Canon would need to provide.
+I chose the latter. But "make the data equivalent" can mean two different things:
+
+**Canonical form** (normalised notation): Transform all data to a single representation. Every object gets an `id` field, period. This requires conversion at system boundaries and loses information about origin.
+
+**Canonical API** (normalised access): Keep data in its original shape, but provide uniform access to semantically equivalent concepts. The data stays as `@id` or `_id`, but `idOf(obj)` works on all of them.
+
+In some languages, function application and associative access are equivalent: `(:id obj)` in Clojure, for instance, blurs the line between "get the id property" and "apply the id function." That equivalence hints at something deeper: if access can be a function, then normalising access is as good as normalising data.
+
+Canon takes the second path. It provides canonical APIs, not canonical forms. The data stays native to its source; only the access is unified.
 
 ---
 
