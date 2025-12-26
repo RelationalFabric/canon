@@ -17,6 +17,7 @@
 | [ADR-0011](./0011-examples-documentation-generation-from-source-files.md) | Examples Documentation Generation from Source Files | 🟢 Accepted | 2025-01-26 |
 | [ADR-0012](./0012-type-testing-framework.md) | Type Testing Framework | 🟢 Accepted | 2025-11-04 |
 | [ADR-0013](./0013-canon-cli-foundation.md) | Canon CLI Foundation | 🟡 Proposed | 2025-11-12 |
+| [ADR-0014](./0014-rollup-optional-dependencies-transparent-fix.md) | Rollup Optional Dependencies Transparent Fix | 🟢 Accepted | 2025-01-27 |
 
 ## ADR Process
 
