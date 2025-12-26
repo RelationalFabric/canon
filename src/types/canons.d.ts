@@ -6,9 +6,7 @@
  * different formats.
  */
 
-import type { Expect } from '../testing.js'
 import type { AxiomConfig, Axioms } from './axioms.js'
-import { invariant } from '../testing.js'
 
 /**
  * Canon type that maps axiom labels to their type-level configurations
@@ -59,21 +57,3 @@ export type Satisfies<
       : never
     : never
 }[TCanonLabel]
-
-/**
- * Define a canon runtime configuration (for module-style exports)
- *
- * Simply returns the config unchanged - useful for creating exportable canons.
- *
- * @param config - The runtime canon configuration
- * @returns The same config object
- */
-export function defineCanon(config: CanonConfig): CanonConfig {
-  return config
-}
-
-// ---------------------------------------------------------------------------
-// Compile-time invariants
-// ---------------------------------------------------------------------------
-
-void invariant<Expect<CanonConfig['axioms'], Record<string, AxiomConfig>>>()

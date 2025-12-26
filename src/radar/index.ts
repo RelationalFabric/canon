@@ -6,6 +6,5 @@
  * data manipulation.
  */
 
-export * from '../types/radar.js'
 export * from './converter.js'
 export * from './validator.js'
