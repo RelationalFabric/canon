@@ -3,10 +3,13 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
+import consola from 'consola'
 
 const rootDir = process.cwd()
 const adrsDir = join(rootDir, 'docs', 'adrs')
 const readmePath = join(adrsDir, 'README.md')
+
+const logger = consola.withTag('adr')
 
 // Status color mapping
 const statusColors = {
@@ -71,7 +74,7 @@ function extractAdrInfo(filePath) {
       label: statusLabels[status],
     }
   } catch (error) {
-    console.error(`Error reading ${filePath}:`, error.message)
+    logger.error(`Error reading ${filePath}:`, error instanceof Error ? error.message : 'Unknown error')
     return null
   }
 }
@@ -101,7 +104,7 @@ ${adrTable}
 
 ## ADR Process
 
-1. Use \`cd docs/adrs && npx adr new "Meaningful Decision Title"\` to draft a new record.
+1. Use \`cd docs/adrs && npx adr-tools new "Meaningful Decision Title"\` to draft a new record.
 2. Update the table with \`npm run build:adr\` so the index stays in sync.
 3. Commit the new ADR together with any code or documentation changes it describes.
 `
@@ -113,7 +116,7 @@ function updateReadme(adrTable) {
   try {
     readmeContent = readFileSync(readmePath, 'utf-8')
   } catch (readError) {
-    console.warn(
+    logger.warn(
       'ℹ️  ADR README not found, generating a fresh one.',
       readError instanceof Error ? readError.message : String(readError),
     )
@@ -121,7 +124,7 @@ function updateReadme(adrTable) {
 
   if (!readmeContent) {
     writeFileSync(readmePath, buildDefaultReadme(adrTable), 'utf-8')
-    console.log('✅ ADR README created with fresh index')
+    logger.success('✅ ADR README created with fresh index')
     return
   }
 
@@ -129,9 +132,9 @@ function updateReadme(adrTable) {
   const adrProcessStart = readmeContent.indexOf('## ADR Process')
 
   if (adrListStart === -1 || adrProcessStart === -1) {
-    console.warn('ℹ️  ADR README missing expected sections, regenerating full content.')
+    logger.warn('ℹ️  ADR README missing expected sections, regenerating full content.')
     writeFileSync(readmePath, buildDefaultReadme(adrTable), 'utf-8')
-    console.log('✅ ADR README regenerated with index and process guidance')
+    logger.success('✅ ADR README regenerated with index and process guidance')
     return
   }
 
@@ -145,11 +148,11 @@ ${adrTable}
 ${afterAdrProcess}`
 
   writeFileSync(readmePath, newContent, 'utf-8')
-  console.log('✅ ADR index updated successfully')
+  logger.success('✅ ADR index updated successfully')
 }
 
 function main() {
-  console.log('🔍 Scanning ADR files...')
+  logger.info('🔍 Scanning ADR files...')
 
   try {
     const files = readdirSync(adrsDir)
@@ -157,14 +160,14 @@ function main() {
       .map(file => join(adrsDir, file))
       .filter(file => statSync(file).isFile())
 
-    console.log(`📁 Found ${files.length} ADR files`)
+    logger.info(`📁 Found ${files.length} ADR files`)
 
     const adrs = files.map(extractAdrInfo).filter(adr => adr !== null)
 
-    console.log(`✅ Successfully parsed ${adrs.length} ADRs`)
+    logger.success(`✅ Successfully parsed ${adrs.length} ADRs`)
 
     if (adrs.length === 0) {
-      console.log('⚠️  No valid ADRs found')
+      logger.warn('⚠️  No valid ADRs found')
       return
     }
 
@@ -177,12 +180,12 @@ function main() {
       return acc
     }, {})
 
-    console.log('\n📊 ADR Status Summary:')
+    logger.info('\n📊 ADR Status Summary:')
     Object.entries(statusCounts).forEach(([status, count]) => {
-      console.log(`  ${statusColors[status]} ${statusLabels[status]}: ${count}`)
+      logger.info(`  ${statusColors[status]} ${statusLabels[status]}: ${count}`)
     })
   } catch (error) {
-    console.error('Error:', error.message)
+    logger.error('Error:', error instanceof Error ? error.message : 'Unknown error')
     process.exit(1)
   }
 }

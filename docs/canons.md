@@ -304,7 +304,9 @@ This approach enables **lazy typing** - your code can work with semantic concept
 The universal functions (provided by the axiom implementer) use **both** configurations:
 
 ```typescript
-import { idOf, timestampsOf, typeOf } from '@relational-fabric/canon'
+import { createLogger, idOf, timestampsOf, typeOf } from '@relational-fabric/canon'
+
+const logger = createLogger('docs:canons:internal-data')
 
 // Usage with your internal data format
 const internalData = {
@@ -313,9 +315,9 @@ const internalData = {
   createdAt: new Date('2022-01-01'),
 }
 
-console.log(idOf(internalData)) // "user-123" - runtime finds 'id' key
-console.log(typeOf(internalData)) // "user" - runtime finds 'type' key
-console.log(timestampsOf(internalData.createdAt)) // Date object - converts to canonical format
+logger.info(idOf(internalData)) // "user-123" - runtime finds 'id' key
+logger.info(typeOf(internalData)) // "user" - runtime finds 'type' key
+logger.info(timestampsOf(internalData.createdAt)) // Date object - converts to canonical format
 ```
 
 **The magic**: TypeScript ensures type safety at compile time, while the runtime system provides the actual field names and conversion logic at execution time.

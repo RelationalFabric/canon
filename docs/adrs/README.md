@@ -16,9 +16,10 @@
 | [ADR-0010](./0010-vitepress-documentation-solution.md) | VitePress Documentation Solution | 🟢 Accepted | 2025-01-26 |
 | [ADR-0011](./0011-examples-documentation-generation-from-source-files.md) | Examples Documentation Generation from Source Files | 🟢 Accepted | 2025-01-26 |
 | [ADR-0012](./0012-type-testing-framework.md) | Type Testing Framework | 🟢 Accepted | 2025-11-04 |
+| [ADR-0013](./0013-canon-cli-foundation.md) | Canon CLI Foundation | 🟡 Proposed | 2025-11-12 |
 
 ## ADR Process
 
-1. Use `cd docs/adrs && npx adr new "Meaningful Decision Title"` to draft a new record.
+1. Use `cd docs/adrs && npx adr-tools new "Meaningful Decision Title"` to draft a new record.
 2. Update the table with `npm run build:adr` so the index stays in sync.
 3. Commit the new ADR together with any code or documentation changes it describes.

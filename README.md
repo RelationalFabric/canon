@@ -107,6 +107,14 @@ This approach reduces decision fatigue and provides confidence in your technolog
 npm install @relational-fabric/canon
 ```
 
+### Scaffold via CLI
+
+```bash
+npx canon init
+```
+
+The CLI copies Canon’s starter templates, wires all workflows into `package.json`, and ensures `eslint` and `typescript` are present as dev dependencies. Use `--name`, `--directory`, and `--force` to control the output, or see [Project Setup](docs/project-setup/README.md) for a guided walk-through.
+
 ### Use TypeScript Configuration
 
 ```json
@@ -280,7 +288,7 @@ npm install
 
 **Architecture Decision Records:**
 
-- `cd docs/adrs && npx adr new "Title"` - Create a new ADR
+- `cd docs/adrs && npx adr-tools new "Title"` - Create a new ADR
 - `npm run build:adr` - Build all ADR artifacts (TOC + index)
 - `npm run build:adr:toc` - Generate table of contents
 - `npm run build:adr:index` - Generate ADR index in documentation
