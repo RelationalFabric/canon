@@ -56,6 +56,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "build": "echo \"This is a pure TypeScript library and has no code build process run check:all to verify your changes\" && exit 1",
     "build:adr": "npm-run-all build:adr:toc build:adr:index",
     "build:adr:index": "node scripts/generate-adr-index.js",
     "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
@@ -80,8 +81,8 @@
     "checks": "npm run check:all",
     "dev": "tsx --watch src/index.ts",
     "test": "npm run check:test",
-    "prepare": "husky",
-    "postinstall": "husky"
+    "prepare": "node -e \"try { require.resolve('husky'); require('child_process').execSync('husky', { stdio: 'ignore' }); } catch(e) {}\"",
+    "postinstall": "node -e \"try { require.resolve('husky'); require('child_process').execSync('husky', { stdio: 'ignore' }); } catch(e) {}\""
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
