@@ -81,7 +81,8 @@
     "dev": "tsx --watch src/index.ts",
     "test": "npm run check:test",
     "prepare": "husky",
-    "postinstall": "husky"
+    "postinstall": "husky && scripts/fix-rollup-deps.sh",
+    "fix:rollup-deps": "scripts/fix-rollup-deps.sh"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",

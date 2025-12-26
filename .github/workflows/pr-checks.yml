@@ -61,7 +61,8 @@ jobs:
 
       - name: Install dependencies
         if: steps.pr-check.outputs.skip != 'true'
-        run: npm ci
+        run: |
+          npm ci || (npm run fix:rollup-deps && npm ci)
 
       - name: Run TypeScript type checking
         if: steps.pr-check.outputs.skip != 'true'
@@ -124,7 +125,8 @@ jobs:
 
       - name: Install dependencies
         if: steps.pr-check.outputs.skip != 'true'
-        run: npm ci
+        run: |
+          npm ci || (npm run fix:rollup-deps && npm ci)
 
       - name: Check for outdated dependencies
         if: steps.pr-check.outputs.skip != 'true'
@@ -168,7 +170,8 @@ jobs:
 
       - name: Install dependencies
         if: steps.pr-check.outputs.skip != 'true'
-        run: npm ci
+        run: |
+          npm ci || (npm run fix:rollup-deps && npm ci)
 
       - name: Run tests
         if: steps.pr-check.outputs.skip != 'true'
@@ -208,7 +211,8 @@ jobs:
 
       - name: Install dependencies
         if: steps.pr-check.outputs.skip != 'true'
-        run: npm ci
+        run: |
+          npm ci || (npm run fix:rollup-deps && npm ci)
 
       - name: Run tests with coverage
         if: steps.pr-check.outputs.skip != 'true'

@@ -42,7 +42,8 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci || (npm run fix:rollup-deps && npm ci)
 
       - name: Validate tech radar data
         run: npm run check:radar
