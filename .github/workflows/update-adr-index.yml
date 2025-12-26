@@ -6,8 +6,8 @@ on:
       - main
       - develop
     paths:
-      - 'docs/adrs/*.md'
-      - '!docs/adrs/README.md'
+      - "docs/adrs/*.md"
+      - "!docs/adrs/README.md"
   workflow_dispatch:
 
 permissions:
@@ -29,8 +29,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: |
-          npm ci || (npm run fix:rollup-deps && npm ci)
+        run: npm ci
       - name: Generate ADR Index
         run: npm run build:adr
 

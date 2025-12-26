@@ -162,15 +162,15 @@ act push -W .github/workflows/ci.yml
 
 **Error**: `Error: Cannot find module @rollup/rollup-linux-x64-gnu`
 
-This is a known npm bug with optional dependencies (https://github.com/npm/cli/issues/4828). The package automatically handles this:
+This is a known npm bug with optional dependencies (https://github.com/npm/cli/issues/4828). The package handles this transparently:
 
-1. **Automatic fix**: The `postinstall` script automatically installs missing Rollup platform-specific packages after any successful `npm install` or `npm ci`
-2. **CI fallback**: If `npm ci` fails initially, workflows automatically retry after running the fix script
-3. **Transparent for consumers**: When other packages depend on canon, the postinstall script automatically fixes Rollup dependencies in their projects
+1. **Direct optionalDependencies**: All Rollup platform-specific packages are declared directly in `package.json` as `optionalDependencies`
+2. **Transparent for consumers**: When other packages depend on canon, npm automatically installs the appropriate platform packages during installation
+3. **No scripts needed**: No postinstall scripts or manual fixes required - npm handles it natively
 
-**For consumers of canon**: No action needed - the fix happens automatically during installation.
+**For consumers of canon**: No action needed - npm automatically installs the correct platform packages during `npm install` or `npm ci`.
 
-**Manual fix** (if needed): Run `npm run fix:rollup-deps` in your project.
+**Note**: This approach accepts a small performance cost (installing platform packages) to ensure 100% transparency and reliability across all architectures.
 
 ### TypeScript errors not showing in PR
 

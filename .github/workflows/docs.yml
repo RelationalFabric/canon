@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
-      - 'planning/**'
+      - "docs/**"
+      - "planning/**"
       - README.md
-      - '.vitepress/**'
+      - ".vitepress/**"
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -42,8 +42,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Install dependencies
-        run: |
-          npm ci || (npm run fix:rollup-deps && npm ci)
+        run: npm ci
 
       - name: Validate tech radar data
         run: npm run check:radar

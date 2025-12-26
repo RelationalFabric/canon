@@ -34,8 +34,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: |
-          npm ci || (npm run fix:rollup-deps && npm ci)
+        run: npm ci
 
       - name: Generate JSON test report
         run: npm run check:test:json || true

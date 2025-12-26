@@ -58,36 +58,54 @@ case "$(uname -s)" in
     ;;
 esac
 
-# Check if platform-specific package is already installed
-if [ -n "$PLATFORM_PKG" ] && [ -d "node_modules/$PLATFORM_PKG" ]; then
-  # Already installed, nothing to do
-  exit 0
+# Check if the required platform-specific package is already installed and working
+NEEDS_INSTALL=true
+if [ -n "$PLATFORM_PKG" ]; then
+  if [ -d "node_modules/$PLATFORM_PKG" ]; then
+    # Verify the package is actually loadable (not just a directory)
+    if node -e "require('$PLATFORM_PKG')" >/dev/null 2>&1; then
+      # Check if it's the right version
+      if [ -n "$ROLLUP_VERSION" ] && [ -f "node_modules/$PLATFORM_PKG/package.json" ]; then
+        INSTALLED_VERSION=$(node -p "require('./node_modules/$PLATFORM_PKG/package.json').version" 2>/dev/null || echo "")
+        if [ "$INSTALLED_VERSION" = "$ROLLUP_VERSION" ]; then
+          NEEDS_INSTALL=false
+        fi
+      else
+        # Package exists and is loadable, assume it's fine
+        NEEDS_INSTALL=false
+      fi
+    fi
+  fi
 fi
 
-# Install platform-specific packages
-if [ -z "$ROLLUP_VERSION" ]; then
-  # Install all common platform packages to ensure compatibility across CI environments
-  npm install --no-save --legacy-peer-deps \
-    @rollup/rollup-linux-x64-gnu \
-    @rollup/rollup-linux-x64-musl \
-    @rollup/rollup-darwin-arm64 \
-    @rollup/rollup-darwin-x64 \
-    @rollup/rollup-win32-x64-msvc \
-    @rollup/rollup-win32-x64-gnu \
-    @rollup/rollup-win32-arm64-msvc \
-    @rollup/rollup-win32-ia32-msvc \
-    2>/dev/null || true
-else
-  # Install platform-specific packages matching the installed version
-  npm install --no-save --legacy-peer-deps \
-    "@rollup/rollup-linux-x64-gnu@$ROLLUP_VERSION" \
-    "@rollup/rollup-linux-x64-musl@$ROLLUP_VERSION" \
-    "@rollup/rollup-darwin-arm64@$ROLLUP_VERSION" \
-    "@rollup/rollup-darwin-x64@$ROLLUP_VERSION" \
-    "@rollup/rollup-win32-x64-msvc@$ROLLUP_VERSION" \
-    "@rollup/rollup-win32-x64-gnu@$ROLLUP_VERSION" \
-    "@rollup/rollup-win32-arm64-msvc@$ROLLUP_VERSION" \
-    "@rollup/rollup-win32-ia32-msvc@$ROLLUP_VERSION" \
-    2>/dev/null || true
+# If platform package is missing, wrong version, or not loadable, install all platform packages
+# This ensures CI works across different architectures
+# Always install all platform packages to ensure cross-platform compatibility in CI
+if [ "$NEEDS_INSTALL" = true ] || [ -z "$PLATFORM_PKG" ]; then
+  if [ -z "$ROLLUP_VERSION" ]; then
+    # Install all common platform packages to ensure compatibility across CI environments
+    npm install --no-save --legacy-peer-deps \
+      @rollup/rollup-linux-x64-gnu \
+      @rollup/rollup-linux-x64-musl \
+      @rollup/rollup-darwin-arm64 \
+      @rollup/rollup-darwin-x64 \
+      @rollup/rollup-win32-x64-msvc \
+      @rollup/rollup-win32-x64-gnu \
+      @rollup/rollup-win32-arm64-msvc \
+      @rollup/rollup-win32-ia32-msvc \
+      >/dev/null 2>&1 || echo "⚠️  Some platform packages may have failed to install (this is expected for optional dependencies)"
+  else
+    # Install platform-specific packages matching the installed version
+    npm install --no-save --legacy-peer-deps \
+      "@rollup/rollup-linux-x64-gnu@$ROLLUP_VERSION" \
+      "@rollup/rollup-linux-x64-musl@$ROLLUP_VERSION" \
+      "@rollup/rollup-darwin-arm64@$ROLLUP_VERSION" \
+      "@rollup/rollup-darwin-x64@$ROLLUP_VERSION" \
+      "@rollup/rollup-win32-x64-msvc@$ROLLUP_VERSION" \
+      "@rollup/rollup-win32-x64-gnu@$ROLLUP_VERSION" \
+      "@rollup/rollup-win32-arm64-msvc@$ROLLUP_VERSION" \
+      "@rollup/rollup-win32-ia32-msvc@$ROLLUP_VERSION" \
+      >/dev/null 2>&1 || echo "⚠️  Some platform packages may have failed to install (this is expected for optional dependencies)"
+  fi
 fi
 
