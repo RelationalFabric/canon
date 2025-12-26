@@ -81,12 +81,11 @@
     "checks": "npm run check:all",
     "dev": "tsx --watch src/index.ts",
     "test": "npm run check:test",
-    "prepare": "node -e \"try { require.resolve('husky'); require('child_process').execSync('husky', { stdio: 'ignore' }); } catch(e) {}\"",
-    "postinstall": "node -e \"try { require.resolve('husky'); require('child_process').execSync('husky', { stdio: 'ignore' }); } catch(e) {}\""
+    "prepare": "npx husky",
+    "postinstall": "npx husky"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
-    "husky": "^9.1.7",
     "typescript": "^5.0.0"
   },
   "peerDependenciesMeta": {
@@ -107,6 +106,7 @@
     "consola": "^3.3.2",
     "dedent": "^1.7.0",
     "fs-extra": "^11.2.0",
+    "husky": "^9.1.7",
     "hygen": "^6.2.11",
     "immutable": "^5.1.4",
     "jsonc-parser": "^3.2.1",
@@ -140,7 +140,6 @@
     "chokidar-cli": "^3.0.0",
     "depcheck": "^1.4.7",
     "eslint": "^9.39.1",
-    "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "npm-check-updates": "^19.1.2",
     "typescript": "^5.9.3"
