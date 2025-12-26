@@ -6,8 +6,8 @@ on:
       - main
       - develop
     paths:
-      - "docs/adrs/*.md"
-      - "!docs/adrs/README.md"
+      - 'docs/adrs/*.md'
+      - '!docs/adrs/README.md'
   workflow_dispatch:
 
 permissions:

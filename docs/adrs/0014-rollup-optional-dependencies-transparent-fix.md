@@ -5,7 +5,7 @@
 
 ## Context and Problem Statement
 
-The package uses VitePress and Vitest as dependencies, which transitively depend on Rollup. Rollup uses platform-specific optional dependencies (e.g., `@rollup/rollup-linux-x64-gnu`, `@rollup/rollup-darwin-arm64`) for native binaries. 
+The package uses VitePress and Vitest as dependencies, which transitively depend on Rollup. Rollup uses platform-specific optional dependencies (e.g., `@rollup/rollup-linux-x64-gnu`, `@rollup/rollup-darwin-arm64`) for native binaries.
 
 npm has a known bug with optional dependencies (https://github.com/npm/cli/issues/4828) where `npm ci` fails on different architectures with errors like:
 
@@ -53,7 +53,11 @@ Add fallback logic in GitHub Actions workflows to run a fix script if `npm ci` f
 Add a postinstall script that automatically installs missing platform packages:
 
 ```json
-"postinstall": "scripts/fix-rollup-deps.sh"
+{
+  "scripts": {
+    "postinstall": "scripts/fix-rollup-deps.sh"
+  }
+}
 ```
 
 **Pros:**
@@ -71,9 +75,11 @@ Add a postinstall script that automatically installs missing platform packages:
 Use npm's `overrides` field to force install platform packages:
 
 ```json
-"overrides": {
-  "rollup": {
-    "@rollup/rollup-linux-x64-gnu": "$rollup"
+{
+  "overrides": {
+    "rollup": {
+      "@rollup/rollup-linux-x64-gnu": "$rollup"
+    }
   }
 }
 ```
@@ -92,10 +98,11 @@ Use npm's `overrides` field to force install platform packages:
 Declare all Rollup platform packages directly in `package.json` as `optionalDependencies`:
 
 ```json
-"optionalDependencies": {
-  "@rollup/rollup-linux-x64-gnu": "^4.52.3",
-  "@rollup/rollup-darwin-arm64": "^4.52.3",
-  // ... all platform packages
+{
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.52.3",
+    "@rollup/rollup-darwin-arm64": "^4.52.3"
+  }
 }
 ```
 
@@ -187,4 +194,3 @@ The solution was verified to work:
 - [npm optional dependencies documentation](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#optionaldependencies)
 - [npm bug report: optional dependencies issue](https://github.com/npm/cli/issues/4828)
 - [Rollup platform-specific packages](https://github.com/rollup/rollup/tree/master/packages)
-
