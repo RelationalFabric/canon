@@ -13,6 +13,6 @@ interface SampleBase extends Pojo {
 }
 type SamplePojo = PojoWith<SampleBase, 'id', string>
 
-void invariant<Expect<Pojo, Record<string, unknown>>>()
-void invariant<Expect<SamplePojo['id'], string>>()
-void invariant<Expect<SamplePojo['name'], string>>()
+invariant<Expect<Pojo, Record<string, unknown>>>()
+invariant<Expect<SamplePojo['id'], string>>()
+invariant<Expect<SamplePojo['name'], string>>()

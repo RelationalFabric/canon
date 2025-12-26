@@ -16,7 +16,7 @@ type PredicateTarget<T> = T extends Predicate<infer Target> ? Target : never
 type GuardReturn<T> = T extends (value: unknown) => value is infer R ? R : never
 type PredicateReturn<T> = T extends (value: unknown) => infer R ? R : never
 
-void invariant<Expect<GuardTarget<ExampleGuard>, { id: string }>>()
-void invariant<Expect<PredicateTarget<ExamplePredicate>, { id: string }>>()
-void invariant<Expect<GuardReturn<ExampleGuard>, { id: string }>>()
-void invariant<Expect<PredicateReturn<ExamplePredicate>, boolean>>()
+invariant<Expect<GuardTarget<ExampleGuard>, { id: string }>>()
+invariant<Expect<PredicateTarget<ExamplePredicate>, { id: string }>>()
+invariant<Expect<GuardReturn<ExampleGuard>, { id: string }>>()
+invariant<Expect<PredicateReturn<ExamplePredicate>, boolean>>()

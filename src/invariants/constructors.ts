@@ -15,8 +15,8 @@ class ExampleClass {
 type ExampleConstructor = Constructor<ExampleClass>
 type ExtractedType<T> = T extends Constructor<infer U> ? U : never
 
-void invariant<Expect<ExtractedType<ExampleConstructor>, ExampleClass>>()
-void invariant<Expect<AnyConstructor, Constructor<unknown>>>()
+invariant<Expect<ExtractedType<ExampleConstructor>, ExampleClass>>()
+invariant<Expect<AnyConstructor, Constructor<unknown>>>()
 
 // Verify that AnyConstructor is assignable to specific constructors
 const _test1: ExampleConstructor = null as unknown as AnyConstructor as ExampleConstructor
