@@ -8,8 +8,23 @@ export interface JsType {
   undefined: undefined
   symbol: symbol
   bigint: bigint
-  // @eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function: (...args: any[]) => any // This is the only time we're allowing any
+
+  function: (...args: any[]) => any
 }
 
 export type JsTypeName = keyof JsType
+
+/**
+ * Generic function type - represents any callable function
+ *
+ * This is one of the rare cases where `any` is permitted in TypeScript,
+ * as the language requires it for generic function signatures that can
+ * accept any number/type of arguments. Function parameters are contravariant,
+ * so `(...args: unknown[]) => unknown` is not assignable to specific function
+ * types like `(x: number) => number`. Using `any` here mirrors the approach
+ * taken with `Constructor<T>`.
+ *
+ * @see Constructor in constructors.d.ts for similar rationale
+ */
+
+export type Fn = (...args: any[]) => any

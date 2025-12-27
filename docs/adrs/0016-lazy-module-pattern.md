@@ -1,6 +1,6 @@
 # ADR-0016: Lazy Module Pattern
 
-- Status: proposed
+- Status: accepted
 - Date: 2025-01-28
 
 ## Context and Problem Statement

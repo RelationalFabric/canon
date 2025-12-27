@@ -12,8 +12,15 @@ export * from './canon.js'
 // Opinionated kit exports
 export * from './kit.js'
 
+// Lazy Module Pattern (ADR-0016)
+export * from './lazy-module.js'
+
 // Metadata helpers
 export * from './meta.js'
+
+// Protocol System (ADR-0015)
+export * from './protocol.js'
+
 // Radar
 export * from './radar/index.js'
 

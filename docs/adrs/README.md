@@ -18,8 +18,8 @@
 | [ADR-0012](./0012-type-testing-framework.md) | Type Testing Framework | 🟢 Accepted | 2025-11-04 |
 | [ADR-0013](./0013-canon-cli-foundation.md) | Canon CLI Foundation | 🟡 Proposed | 2025-11-12 |
 | [ADR-0014](./0014-rollup-optional-dependencies-transparent-fix.md) | Rollup Optional Dependencies Transparent Fix | 🟢 Accepted | 2025-01-27 |
-| [ADR-0015](./0015-protocol-system.md) | Protocol System | 🟡 Proposed | 2025-01-28 |
-| [ADR-0016](./0016-lazy-module-pattern.md) | Lazy Module Pattern | 🟡 Proposed | 2025-01-28 |
+| [ADR-0015](./0015-protocol-system.md) | Protocol System | 🟢 Accepted | 2025-01-28 |
+| [ADR-0016](./0016-lazy-module-pattern.md) | Lazy Module Pattern | 🟢 Accepted | 2025-01-28 |
 
 ## ADR Process
 
