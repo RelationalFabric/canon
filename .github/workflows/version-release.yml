@@ -1,0 +1,87 @@
+name: Version Bump - Release Branch (Seal Version)
+
+on:
+  push:
+    branches:
+      - 'release/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version:
+    outputs:
+      branch: ${{ steps.version.outputs.branch }}
+      changes-made: ${{ steps.version.outputs.changes-made }}
+      packages-updated: ${{ steps.version.outputs.packages-updated }}
+      releases-created: ${{ steps.version.outputs.releases-created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Version Bump (Seal Version)
+        id: version
+        uses: bahulneel/action-version@v0.47.3
+        with:
+          strategy: apply-bump
+          base: main
+          branch: ${{ github.ref_name }}
+          create_branch: true
+          branch_cleanup: semantic
+          commit_template: 'chore(release): seal version ${package} to ${version} (${bumpType})'
+
+      - name: Create PR to main
+        if: steps.version.outputs.changes-made == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BRANCH: ${{ steps.version.outputs.branch }}
+          BASE_BRANCH: main
+        run: |
+          echo "Checking if a PR from '$RELEASE_BRANCH' to '$BASE_BRANCH' already exists..."
+          EXISTING_PR_NUMBER=$(gh pr list \
+            --head "$RELEASE_BRANCH" \
+            --base "$BASE_BRANCH" \
+            --state open \
+            --json number \
+            -q '.[0].number' || echo "")
+
+          if [ -n "$EXISTING_PR_NUMBER" ]; then
+            echo "INFO: A pull request from '$RELEASE_BRANCH' to '$BASE_BRANCH' (PR #$EXISTING_PR_NUMBER) already exists and is open. Skipping PR creation."
+          else
+            echo "No existing pull request found from '$RELEASE_BRANCH' to '$BASE_BRANCH'. Creating new PR..."
+            gh pr create \
+              --title "chore(release): seal version for release" \
+              --body "This PR seals the version number for release. The version has been finalized from prerelease to stable.
+
+          **Version Information:**
+          - Packages updated: ${{ steps.version.outputs.packages-updated }}
+          - Releases created: ${{ steps.version.outputs.releases-created }}
+          - Release branch: ${{ steps.version.outputs.branch }}
+
+          Please review and merge into the $BASE_BRANCH branch." \
+              --base "$BASE_BRANCH" \
+              --head "$RELEASE_BRANCH"
+            echo "SUCCESS: Pull Request from '$RELEASE_BRANCH' to '$BASE_BRANCH' created."
+          fi
+
+      - name: Output summary
+        if: steps.version.outputs.changes-made == 'true'
+        run: |
+          echo "Version sealing completed:"
+          echo "  Branch: ${{ steps.version.outputs.branch }}"
+          echo "  Packages updated: ${{ steps.version.outputs.packages-updated }}"
+          echo "  Releases created: ${{ steps.version.outputs.releases-created }}"

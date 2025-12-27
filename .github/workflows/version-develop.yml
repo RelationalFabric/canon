@@ -1,0 +1,51 @@
+name: Version Bump - Develop (Pre-release)
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version:
+    outputs:
+      changes-made: ${{ steps.version.outputs.changes-made }}
+      packages-updated: ${{ steps.version.outputs.packages-updated }}
+      prereleases-created: ${{ steps.version.outputs.prereleases-created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Version Bump (Pre-release)
+        id: version
+        uses: bahulneel/action-version@v0.47.3
+        with:
+          strategy: pre-release
+          base: main
+          branch: develop
+          create_branch: false
+          tag_prereleases: true
+          commit_template: 'chore(release): bump ${package} to ${version} (${bumpType})'
+
+      - name: Output summary
+        if: steps.version.outputs.changes-made == 'true'
+        run: |
+          echo "Version bump completed:"
+          echo "  Packages updated: ${{ steps.version.outputs.packages-updated }}"
+          echo "  Prereleases created: ${{ steps.version.outputs.prereleases-created }}"
