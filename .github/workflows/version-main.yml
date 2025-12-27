@@ -79,18 +79,18 @@ jobs:
         run: |
           # Fetch all branches
           git fetch origin main develop
-          
+
           # Checkout develop
           git checkout develop
-          
+
           # Create sync branch
           MAIN_VERSION="${{ needs.publish.outputs.version }}"
           SYNC_BRANCH="sync/version-$MAIN_VERSION"
           git checkout -b "$SYNC_BRANCH"
-          
+
           # Update package.json version if different
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          
+
           if [ "$CURRENT_VERSION" != "$MAIN_VERSION" ]; then
             npm pkg set version="$MAIN_VERSION"
             # Run npm install to ensure package-lock.json stays in sync
