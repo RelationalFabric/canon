@@ -11,14 +11,14 @@ on:
     branches:
       - main
       - develop
-      - "release/**"
+      - 'release/**'
 
   # Pull request events - trigger versioning on PR creation/updates
   pull_request:
     branches:
       - main
       - develop
-      - "release/**"
+      - 'release/**'
     types:
       - opened
       - synchronize
@@ -34,7 +34,7 @@ on:
         type: boolean
         default: false
       branch:
-        description: "Branch to run versioning on. Only used when create_release is false. Defaults to the branch that triggered the workflow (github.ref)."
+        description: Branch to run versioning on. Only used when create_release is false. Defaults to the branch that triggered the workflow (github.ref).
         required: false
         type: string
 
@@ -60,7 +60,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
