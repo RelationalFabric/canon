@@ -151,11 +151,11 @@ export default class DocsRenameReadmesCommand extends CanonCommand {
       description: 'Directory containing documentation files',
       default: 'docs',
     }),
-    exclude: CanonFlags.string({
+    'exclude': CanonFlags.string({
       description: 'Comma-separated list of directory names to exclude from renaming',
       default: '.vitepress',
     }),
-    restore: CanonFlags.boolean({
+    'restore': CanonFlags.boolean({
       description: 'Restore index.md files back to README.md (reverse operation)',
       default: false,
     }),

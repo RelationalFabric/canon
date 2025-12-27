@@ -1,6 +1,6 @@
-import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { Oclif } from '../../../kit.js'
 import { createLogger } from '../../../log.js'
