@@ -58,17 +58,17 @@
   "scripts": {
     "build": "echo \"This is a pure TypeScript library and has no code build process run check:all to verify your changes\" && exit 1",
     "build:adr": "npm-run-all build:adr:toc build:adr:index",
-    "build:adr:index": "node scripts/generate-adr-index.js",
+    "build:adr:index": "canon adr:index",
     "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
-    "build:docs": "npm run build:docs:examples && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
-    "build:docs:examples": "tsx scripts/generate-examples-docs.ts",
-    "build:docs:restore": "scripts/restore-readmes-from-build.sh",
-    "build:radar": "tsx scripts/convert-radar.ts",
+    "build:docs": "npm run build:docs:examples && canon docs:rename-readmes && npx vitepress build && canon docs:rename-readmes --restore",
+    "build:docs:examples": "canon docs:examples",
+    "build:docs:restore": "canon docs:rename-readmes --restore",
+    "build:radar": "canon radar:convert",
     "check:all": "npm-run-all check:lint check:types check:test check:radar ",
     "check:all:fix": "npm-run-all check:lint:fix check:types check:test",
     "check:lint": "eslint .",
     "check:lint:fix": "eslint . --fix",
-    "check:radar": "tsx scripts/validate-radar.ts",
+    "check:radar": "canon radar:validate",
     "check:test": "vitest run",
     "check:test:json": "vitest run --reporter=default --reporter=json --outputFile=.scratch/vitest-report.json",
     "check:test:coverage": "vitest run --coverage",
@@ -146,7 +146,8 @@
   },
   "oclif": {
     "bin": "canon",
-    "commands": "./src/cli/commands"
+    "commands": "./src/cli/commands",
+    "additionalHelpFlags": ["-?", "-h"]
   },
   "husky": {
     "hooks": {

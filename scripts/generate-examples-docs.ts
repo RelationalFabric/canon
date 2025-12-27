@@ -268,18 +268,23 @@ function replaceDirectory(tempDir: string, targetDir: string): void {
 }
 
 /**
- * Main function
+ * Generate examples documentation
  */
-async function main(): Promise<void> {
+export async function generateExamplesDocs(options: {
+  examplesDir?: string
+  outputDir?: string
+  testReportPath?: string
+} = {}): Promise<void> {
   logger.info('🔍 Scanning examples directory...')
 
   const rootDir = process.cwd()
-  const examplesDir = join(rootDir, 'examples')
+  const examplesDir = options.examplesDir ?? join(rootDir, 'examples')
+  const outputDir = options.outputDir ?? join(rootDir, 'docs', 'examples')
+  const testReportPath = options.testReportPath ?? join(rootDir, '.scratch', 'vitest-report.json')
 
   if (!existsSync(examplesDir) || !statSync(examplesDir).isDirectory()) {
     logger.error('❌ Examples directory not found.')
-    process.exitCode = 1
-    return
+    throw new Error(`Examples directory not found: ${examplesDir}`)
   }
 
   // Discover examples
@@ -287,7 +292,6 @@ async function main(): Promise<void> {
   logger.info(`📁 Found ${examplePaths.length} examples`)
 
   // Load test report
-  const testReportPath = join(rootDir, '.scratch', 'vitest-report.json')
   const testReport = existsSync(testReportPath) ? loadTestReport(testReportPath) : null
 
   if (!testReport) {
@@ -331,7 +335,6 @@ async function main(): Promise<void> {
     writeFileSync(join(tmpOutputDir, 'README.md'), indexContent)
 
     // Atomically replace docs/examples/
-    const outputDir = join(rootDir, 'docs', 'examples')
     logger.info('📦 Publishing documentation...')
     replaceDirectory(tmpOutputDir, outputDir)
 
@@ -348,6 +351,10 @@ async function main(): Promise<void> {
       rmSync(tmpBaseDir, { recursive: true, force: true })
     }
   }
+}
+
+async function main(): Promise<void> {
+  await generateExamplesDocs()
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

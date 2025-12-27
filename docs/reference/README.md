@@ -6,6 +6,7 @@ title: Reference
 
 Authoritative specifications and integration guides for Canon's APIs and semantic building blocks.
 
+- [CLI Reference](./cli.md) — Command-line interface commands and usage
 - [API Reference](./api.md) — Canon package exports and runtime behaviors
 - [Core Axioms](./axioms.md) — Detailed specifications for the foundational axioms
 - [Canons Reference](./canons.md) — Guidance for implementing and extending canons

@@ -5,10 +5,6 @@ import { join } from 'node:path'
 import process from 'node:process'
 import consola from 'consola'
 
-const rootDir = process.cwd()
-const adrsDir = join(rootDir, 'docs', 'adrs')
-const readmePath = join(adrsDir, 'README.md')
-
 const logger = consola.withTag('adr')
 
 // Status color mapping
@@ -110,7 +106,7 @@ ${adrTable}
 `
 }
 
-function updateReadme(adrTable) {
+function updateReadme(adrTable, readmePath) {
   let readmeContent = ''
 
   try {
@@ -151,7 +147,11 @@ ${afterAdrProcess}`
   logger.success('✅ ADR index updated successfully')
 }
 
-function main() {
+export async function generateAdrIndex(options = {}) {
+  const rootDir = process.cwd()
+  const adrsDir = options.adrsDir ?? join(rootDir, 'docs', 'adrs')
+  const readmePath = options.readmePath ?? join(adrsDir, 'README.md')
+
   logger.info('🔍 Scanning ADR files...')
 
   try {
@@ -172,7 +172,7 @@ function main() {
     }
 
     const adrTable = generateAdrTable(adrs)
-    updateReadme(adrTable)
+    updateReadme(adrTable, readmePath)
 
     // Log summary
     const statusCounts = adrs.reduce((acc, adr) => {
@@ -186,8 +186,21 @@ function main() {
     })
   } catch (error) {
     logger.error('Error:', error instanceof Error ? error.message : 'Unknown error')
-    process.exit(1)
+    throw error
   }
 }
 
-main()
+function main() {
+  const rootDir = process.cwd()
+  const adrsDir = join(rootDir, 'docs', 'adrs')
+  const readmePath = join(adrsDir, 'README.md')
+
+  generateAdrIndex({ adrsDir, readmePath }).catch((error) => {
+    logger.error('Error:', error instanceof Error ? error.message : 'Unknown error')
+    process.exit(1)
+  })
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main()
+}

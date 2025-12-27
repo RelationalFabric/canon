@@ -32,6 +32,7 @@ export default createEslintConfig()
 ## Documentation Sections
 
 - **[Reference](./reference/)** - API details, axiom specifications, and integrations
+- **[CLI Reference](./reference/cli.md)** - Command-line interface documentation and usage
 - **[Canons](./canons.md)** - Core principles and guidelines
 - **[Axioms](./axioms.md)** - Fundamental assumptions and rules
 - **[Examples](./examples/)** - Practical usage examples
