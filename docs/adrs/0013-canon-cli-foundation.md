@@ -1,6 +1,6 @@
 # ADR-0013: Canon CLI Foundation
 
-- Status: proposed
+- Status: accepted
 - Date: 2025-11-12
 
 ## Context and Problem Statement
