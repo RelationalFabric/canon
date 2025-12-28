@@ -55,7 +55,6 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "echo \"This is a pure TypeScript library and has no code build process run check:all to verify your changes\" && exit 1",
     "build:adr": "npm-run-all build:adr:toc build:adr:index",
     "build:adr:index": "canon adr:index",
     "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
@@ -82,11 +81,12 @@
     "checks": "npm run check:all",
     "dev": "tsx --watch src/index.ts",
     "test": "npm run check:test",
-    "prepare": "npx husky",
-    "postinstall": "npx husky"
+    "prepare": "husky",
+    "postinstall": "husky"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
+    "husky": "^9.1.7",
     "typescript": "^5.0.0"
   },
   "peerDependenciesMeta": {
@@ -107,7 +107,6 @@
     "consola": "^3.3.2",
     "dedent": "^1.7.0",
     "fs-extra": "^11.2.0",
-    "husky": "^9.1.7",
     "hygen": "^6.2.11",
     "immutable": "^5.1.4",
     "jsonc-parser": "^3.2.1",
@@ -141,6 +140,7 @@
     "chokidar-cli": "^3.0.0",
     "depcheck": "^1.4.7",
     "eslint": "^9.39.1",
+    "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "npm-check-updates": "^19.1.2",
     "typescript": "^5.9.3",
@@ -148,8 +148,7 @@
   },
   "oclif": {
     "bin": "canon",
-    "commands": "./src/cli/commands",
-    "additionalHelpFlags": ["-?", "-h"]
+    "commands": "./src/cli/commands"
   },
   "husky": {
     "hooks": {
