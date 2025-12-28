@@ -26,12 +26,17 @@ import type {
 // ---------------------------------------------------------------------------
 
 /**
+ * Symbol used to mark pseudo-constructors
+ */
+const PSEUDO_CONSTRUCTOR = Symbol.for('canon:protocol:pseudo-constructor')
+
+/**
  * Create a pseudo-constructor with a fixed name
  */
-function createPseudoConstructor(name: string, marker: string): AnyConstructor {
+function createPseudoConstructor(name: string): AnyConstructor {
   const ctor = function () {} as unknown as AnyConstructor
   Object.defineProperty(ctor, 'name', { value: name, writable: false })
-  Object.defineProperty(ctor, marker, { value: true, writable: false })
+  Object.defineProperty(ctor, PSEUDO_CONSTRUCTOR, { value: name, writable: false })
   return ctor
 }
 
@@ -48,7 +53,7 @@ function createPseudoConstructor(name: string, marker: string): AnyConstructor {
  * })
  * ```
  */
-export const Null: AnyConstructor = createPseudoConstructor('Null', '$isNullConstructor')
+export const Null: AnyConstructor = createPseudoConstructor('Null')
 
 /**
  * Pseudo-constructor for undefined values
@@ -63,7 +68,7 @@ export const Null: AnyConstructor = createPseudoConstructor('Null', '$isNullCons
  * })
  * ```
  */
-export const Undefined: AnyConstructor = createPseudoConstructor('Undefined', '$isUndefinedConstructor')
+export const Undefined: AnyConstructor = createPseudoConstructor('Undefined')
 
 /**
  * Pseudo-constructor for plain object fallback
@@ -79,7 +84,7 @@ export const Undefined: AnyConstructor = createPseudoConstructor('Undefined', '$
  * })
  * ```
  */
-export const ObjectFallback: AnyConstructor = createPseudoConstructor('ObjectFallback', '$isObjectFallback')
+export const ObjectFallback: AnyConstructor = createPseudoConstructor('ObjectFallback')
 
 // ---------------------------------------------------------------------------
 // Protocol implementation storage
