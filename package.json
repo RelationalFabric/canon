@@ -42,7 +42,6 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "bin": {
-    "adr": "./scripts/adr.js",
     "canon": "./cli/canon.mjs"
   },
   "files": [
