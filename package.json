@@ -42,11 +42,12 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "bin": {
-    "canon": "./cli/canon.mjs"
+    "canon": "./cli/canon.ts"
   },
   "files": [
     "cli",
     "eslint.js",
+    "scripts",
     "src",
     "tsconfig.base.json",
     "types"
@@ -56,7 +57,7 @@
   },
   "scripts": {
     "build:adr": "npm-run-all build:adr:toc build:adr:index",
-    "build:adr:index": "canon adr:index",
+    "build:adr:index": "canon adr",
     "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
     "build:docs": "npm run build:docs:examples && canon docs:rename-readmes && npx vitepress build && canon docs:rename-readmes --restore",
     "build:docs:examples": "canon docs:examples",
@@ -64,7 +65,7 @@
     "export:pdf": "npm run build:docs && vitepress-export-pdf export docs",
     "export:pdf:prod": "vitepress-export-pdf export docs --urlOrigin https://relationalfabric.github.io/canon",
     "build:radar": "canon radar:convert",
-    "check:all": "npm-run-all check:lint check:types check:test check:radar ",
+    "check:all": "npm-run-all check:lint check:types check:test check:radar",
     "check:all:fix": "npm-run-all check:lint:fix check:types check:test",
     "check:lint": "eslint .",
     "check:lint:fix": "eslint . --fix",

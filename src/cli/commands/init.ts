@@ -200,6 +200,7 @@ export default class InitCommand extends CanonCommand {
 
     if (options.scripts) {
       const scripts: Record<string, string> = {
+        // Quality checks
         'check:lint': 'eslint .',
         'check:lint:fix': 'eslint . --fix',
         'check:types': 'tsc --noEmit',
@@ -209,26 +210,37 @@ export default class InitCommand extends CanonCommand {
         'check:radar': 'canon radar:validate',
         'check:all': 'npm-run-all check:lint check:types check:test check:radar',
         'check:all:fix': 'npm-run-all check:lint:fix check:types check:test',
+        // Build commands using canon CLI
         'build:docs:examples': 'canon docs:examples',
         'build:docs': 'npm run build:docs:examples && canon docs:rename-readmes && npx vitepress build && canon docs:rename-readmes --restore',
         'build:docs:restore': 'canon docs:rename-readmes --restore',
         'build:radar': 'canon radar:convert',
         'build:adr': 'npm-run-all build:adr:toc build:adr:index',
-        'build:adr:index': 'canon adr:index',
+        'build:adr:index': 'canon adr',
         'build:adr:toc': 'cd docs/adrs && npx adr-tools generate toc',
+        // Development
         'dev': 'tsx --watch src/index.ts',
         'test': 'npm run check:test',
+        // Git hooks via husky
+        'prepare': 'husky',
       }
 
       for (const [script, command] of Object.entries(scripts)) {
         contents = this.ensureJsonValue(contents, ['scripts', script], command)
       }
+
+      // Set up lint-staged configuration
+      contents = this.ensureJsonValue(contents, ['lint-staged', '*.{js,jsx,ts,tsx,json,css,md}'], ['npx eslint --fix'])
     }
 
     if (options.devDependencies) {
+      // Core devDependencies for Canon-based projects
+      // Note: canon itself provides many tools as dependencies, so projects
+      // only need to add canon + peer dependencies to get full functionality
       const devDependencies: Record<string, string> = {
         '@relational-fabric/canon': `^${canonPackage.version}`,
         'eslint': '^9.0.0',
+        'husky': '^9.1.7',
         'typescript': '^5.0.0',
       }
 

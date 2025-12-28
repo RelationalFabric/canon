@@ -39,7 +39,9 @@ export default class AdrIndexCommand extends CanonCommand {
 
     try {
       // Import and run the script logic
-      const packageRoot = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))))
+      // Path: src/cli/commands/adr/index.ts → 5 levels up to get to package root
+      const currentDir = dirname(fileURLToPath(import.meta.url))
+      const packageRoot = dirname(dirname(dirname(dirname(currentDir))))
       const scriptPath = join(packageRoot, 'scripts', 'generate-adr-index.js')
       const scriptUrl = pathToFileURL(scriptPath).href
       const { generateAdrIndex } = await import(scriptUrl)

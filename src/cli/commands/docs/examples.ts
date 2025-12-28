@@ -47,7 +47,9 @@ export default class DocsExamplesCommand extends CanonCommand {
 
     try {
       // Import and run the script logic
-      const packageRoot = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))))
+      // Path: src/cli/commands/docs/examples.ts → 5 levels up to get to package root
+      const currentDir = dirname(fileURLToPath(import.meta.url))
+      const packageRoot = dirname(dirname(dirname(dirname(currentDir))))
       const scriptPath = join(packageRoot, 'scripts', 'generate-examples-docs.ts')
       const scriptUrl = pathToFileURL(scriptPath).href
       const { generateExamplesDocs } = await import(scriptUrl)
