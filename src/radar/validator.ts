@@ -2,7 +2,7 @@
  * Technology Radar data validation utilities
  */
 
-import type { QuadrantKey, RadarData, RingKey } from '../types/radar.js'
+import type { QuadrantKey, RadarData, RingKey } from '../types/index.js'
 import { parseYaml } from '../kit.js'
 
 const VALID_QUADRANTS: QuadrantKey[] = [

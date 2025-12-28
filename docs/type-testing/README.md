@@ -14,15 +14,15 @@ interface User {
 }
 
 // Positive assertion – `id` must be a string
-void invariant<Expect<User['id'], string>>()
+invariant<Expect<User['id'], string>>()
 
 // Negative assertion – `role` should not be a number
-void invariant<IsFalse<Expect<User['role'], number>>>()
+invariant<IsFalse<Expect<User['role'], number>>>()
 
 // Exact match in both directions
 type CanonicalRole = 'admin' | 'user'
-void invariant<Expect<User['role'], CanonicalRole>>()
-void invariant<Expect<CanonicalRole, User['role']>>()
+invariant<Expect<User['role'], CanonicalRole>>()
+invariant<Expect<CanonicalRole, User['role']>>()
 ```
 
 ## API Reference
@@ -45,25 +45,25 @@ void invariant<Expect<CanonicalRole, User['role']>>()
 import type { Expect, IsFalse, IsTrue } from '@relational-fabric/canon'
 import { invariant } from '@relational-fabric/canon'
 
-void invariant<Expect<true, true>>()
-void invariant<Expect<'value', string>>()
-void invariant<IsFalse<Expect<string, number>>>()
+invariant<Expect<true, true>>()
+invariant<Expect<'value', string>>()
+invariant<IsFalse<Expect<string, number>>>()
 
 // @ts-expect-error - Expect should fail when the left side does not extend the right.
-void invariant<Expect<{ id: string }, { id: number }>>()
+invariant<Expect<{ id: string }, { id: number }>>()
 
 // @ts-expect-error - IsTrue rejects non-true values.
-void invariant<IsTrue<false>>()
+invariant<IsTrue<false>>()
 
 // @ts-expect-error - IsFalse only accepts precisely `false`.
-void invariant<IsFalse<true>>()
+invariant<IsFalse<true>>()
 ```
 
 ## Integration Tips
 
 - **IDE Feedback** – failed invariants surface as regular TypeScript errors. Jump to definition from the error to inspect the assertion.
 - **CI/CD** – invariants run automatically when you execute `npm run check:types` (`tsc --noEmit`). No additional tooling is required.
-- **Examples** – use the utilities inside example files with `void invariant<Expect<...>>()` to keep lint checks satisfied.
+- **Examples** – use the utilities inside example files with `invariant<Expect<...>>()` to keep lint checks satisfied.
 
 ## Advanced Usage
 
@@ -75,8 +75,8 @@ import { invariant } from '@relational-fabric/canon'
 
 type ElementType<T> = T extends Array<infer E> ? E : never
 
-void invariant<Expect<ElementType<string[]>, string>>()
-void invariant<Expect<ElementType<Array<{ id: string }>>, { id: string }>>()
+invariant<Expect<ElementType<string[]>, string>>()
+invariant<Expect<ElementType<Array<{ id: string }>>, { id: string }>>()
 ```
 
 ### Conditional Assertions
@@ -87,8 +87,8 @@ import { invariant } from '@relational-fabric/canon'
 
 type NonEmptyArray<T> = T extends [unknown, ...unknown[]] ? true : false
 
-void invariant<Expect<NonEmptyArray<[number]>, true>>()
-void invariant<Expect<NonEmptyArray<[]>, false>>()
+invariant<Expect<NonEmptyArray<[number]>, true>>()
+invariant<Expect<NonEmptyArray<[]>, false>>()
 ```
 
 ### Error Message Clarity
@@ -99,7 +99,7 @@ Name intermediate types before asserting them so that TypeScript produces clean 
 type EmailAddress = User['email']
 
 // @ts-expect-error - Emails are strings, not numbers
-void invariant<Expect<EmailAddress, number>>()
+invariant<Expect<EmailAddress, number>>()
 ```
 
 These utilities are lightweight enough to use directly in production code, tests, and examples. Because they erase at runtime, they keep bundles lean while still documenting intent.

@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 
+import { spawn } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-
-import 'tsx/esm'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
 const entryPoint = resolve(currentDir, '../src/cli/index.ts')
 
-const module = await import(entryPoint)
+// Use tsx to run the TypeScript CLI entry point
+const tsxProcess = spawn('npx', ['tsx', entryPoint, ...process.argv.slice(2)], {
+  stdio: 'inherit',
+  shell: true,
+})
 
-if (typeof module.runCli !== 'function') {
-  throw new TypeError('Canon CLI entry point did not expose runCli()')
-}
-
-await module.runCli(process.argv.slice(2))
+tsxProcess.on('exit', (code) => {
+  process.exit(code ?? 1)
+})

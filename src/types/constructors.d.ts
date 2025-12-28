@@ -2,9 +2,6 @@
  * Constructor type utilities for Canon type system
  */
 
-import type { Expect } from '../testing.js'
-import { invariant } from '../testing.js'
-
 /**
  * Represents a constructor function (class).
  *
@@ -40,25 +37,3 @@ export type Constructor<T> = new (...args: any[]) => T
  * ```
  */
 export type AnyConstructor = Constructor<unknown>
-
-// ---------------------------------------------------------------------------
-// Compile-time invariants
-// ---------------------------------------------------------------------------
-
-class ExampleClass {
-  constructor(public value: string) {}
-}
-
-type ExampleConstructor = Constructor<ExampleClass>
-type ExtractedType<T> = T extends Constructor<infer U> ? U : never
-
-void invariant<Expect<ExtractedType<ExampleConstructor>, ExampleClass>>()
-void invariant<Expect<AnyConstructor, Constructor<unknown>>>()
-
-// Verify that AnyConstructor is assignable to specific constructors
-const _test1: ExampleConstructor = null as unknown as AnyConstructor as ExampleConstructor
-void _test1
-
-// Verify that specific constructors are assignable to AnyConstructor
-const _test2: AnyConstructor = null as unknown as ExampleConstructor
-void _test2

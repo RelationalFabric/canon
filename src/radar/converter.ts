@@ -2,7 +2,7 @@
  * Technology Radar data conversion utilities
  */
 
-import type { CsvRow, QuadrantKey, RadarData, RingKey } from '../types/radar.js'
+import type { CsvRow, QuadrantKey, RadarData, RingKey } from '../types/index.js'
 
 import { Console } from 'node:console'
 import { readFileSync, writeFileSync } from 'node:fs'

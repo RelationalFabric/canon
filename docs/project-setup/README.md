@@ -64,6 +64,19 @@ The CLI wires the same scripts we maintain in this repository, including:
 
 Because Canon ships every underlying binary (`npm-run-all`, `tsx`, `vitest`, `vitepress`, `adr-tools`, `hygen`, `fs-extra`, etc.) as runtime dependencies, all scripts work immediately after installation.
 
+## CLI Commands
+
+All Canon workflows are accessible via the CLI. See the [CLI Reference](../reference/cli.md) for complete documentation of all available commands, including:
+
+- `canon init` - Project initialization
+- `canon adr:index` - Generate ADR index tables
+- `canon docs:examples` - Generate examples documentation
+- `canon docs:rename-readmes` - Manage README/index.md files for VitePress
+- `canon radar:convert` - Convert radar YAML to CSV
+- `canon radar:validate` - Validate radar YAML files
+
+All commands support `-?`, `-h`, `--help`, and `help` for usage information.
+
 ## 5. Optional Enhancements
 
 - **Husky + Lint-Staged**: Add Git hooks (`npm install --save-dev husky lint-staged`) and mirror Canon’s `package.json` configuration.

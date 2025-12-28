@@ -6,8 +6,8 @@
 
 import type { Registry } from './registry.js'
 import type { CanonConfig, Canons } from './types/index.js'
+import { defineCanon } from './canon.js'
 import { createRegistry } from './registry.js'
-import { defineCanon } from './types/index.js'
 
 /**
  * Global singleton registry

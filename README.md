@@ -113,7 +113,9 @@ npm install @relational-fabric/canon
 npx canon init
 ```
 
-The CLI copies Canon’s starter templates, wires all workflows into `package.json`, and ensures `eslint` and `typescript` are present as dev dependencies. Use `--name`, `--directory`, and `--force` to control the output, or see [Project Setup](docs/project-setup/README.md) for a guided walk-through.
+The CLI copies Canon's starter templates, wires all workflows into `package.json`, and ensures `eslint` and `typescript` are present as dev dependencies. Use `--name`, `--directory`, and `--force` to control the output, or see [Project Setup](docs/project-setup/README.md) for a guided walk-through.
+
+See the [CLI Reference](docs/reference/cli.md) for all available commands and options.
 
 ### Use TypeScript Configuration
 

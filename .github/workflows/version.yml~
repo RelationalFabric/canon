@@ -1,0 +1,98 @@
+# Unified versioning workflow for canon
+# Uses action-version with model-driven configuration
+# Triggers on all events the action can respond to
+# Uses gitflow pattern with protected main and develop, tagging at version finalization
+
+name: Version
+
+on:
+  # Push events - trigger versioning on branch updates
+  push:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+
+  # Pull request events - trigger versioning on PR creation/updates
+  pull_request:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+  # Manual trigger for testing or ad-hoc versioning
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: "Create a release branch from develop (finalizes version and creates release/* branch). When true, always checks out 'develop' and ignores the 'branch' input."
+        required: false
+        type: boolean
+        default: false
+      branch:
+        description: Branch to run versioning on. Only used when create_release is false. Defaults to the branch that triggered the workflow (github.ref).
+        required: false
+        type: string
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write # Required for npm publish if needed
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # Full history needed for merge-base calculation
+          # Checkout logic:
+          # - If create_release=true: always checkout 'develop' (ignores 'branch' input)
+          # - If create_release=false: use 'branch' input if provided, otherwise use github.ref
+          ref: ${{ inputs.create_release == true && 'develop' || (inputs.branch || github.ref) }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Version Bump
+        id: version-bump
+        uses: bahulneel/action-version@main
+        with:
+          # Release mode: explicitly create release branch (bypasses flow matching)
+          release: ${{ inputs.create_release == true && 'true' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # The action behavior:
+        # - If release=true (release mode):
+        #   1. Bypasses flow matching
+        #   2. Forces: strategy=finalize, create_branch=true, branch_template=release/${version}
+        #   3. Finalizes prerelease versions and creates release branch
+        # - If release=false (versioning mode, default):
+        #   1. Reads .versioning.yml for model-driven configuration
+        #   2. Detects GitHub context (current branch from GITHUB_REF, event type from GITHUB_EVENT_NAME)
+        #   3. Matches current branch to appropriate flow (event type is captured but not used for matching)
+        #   4. Infers behavior (strategy, base, create_branch, tags) from model
+        #   5. Executes versioning operation based on context
+
+      - name: Output Results
+        if: steps.version-bump.outputs.changes-made == 'true'
+        run: |
+          echo "✅ Versioning completed successfully"
+          echo "📦 Packages updated: ${{ steps.version-bump.outputs.packages-updated }}"
+          echo "🚀 Releases created: ${{ steps.version-bump.outputs.releases-created }}"
+          echo "🔖 Prereleases created: ${{ steps.version-bump.outputs.prereleases-created }}"
+          echo "✨ Versions finalized: ${{ steps.version-bump.outputs.versions-finalized }}"
+          echo "🌿 Branch: ${{ steps.version-bump.outputs.branch }}"
+          echo "📋 Strategy used: ${{ steps.version-bump.outputs.strategy-used }}"

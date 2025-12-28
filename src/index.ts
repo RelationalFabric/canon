@@ -12,8 +12,15 @@ export * from './canon.js'
 // Opinionated kit exports
 export * from './kit.js'
 
+// Lazy Module Pattern (ADR-0016)
+export * from './lazy-module.js'
+
 // Metadata helpers
 export * from './meta.js'
+
+// Protocol System (ADR-0015)
+export * from './protocol.js'
+
 // Radar
 export * from './radar/index.js'
 
@@ -24,8 +31,8 @@ export * from './shell.js'
 
 // Type testing utilities (compile-time helpers only)
 export * from './testing.js'
-// Type system (includes defineAxiom, defineCanon)
-export * from './types/index.js'
+// Type system
+export type * from './types/index.js'
 
 // Utilities
 export * from './utils/guards.js'

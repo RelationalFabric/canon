@@ -5,9 +5,7 @@
  * (like ID, type, version) that can be found in different data structures.
  */
 
-import type { Expect } from '../testing.js'
 import type { TypeGuard } from './guards.js'
-import { invariant } from '../testing.js'
 
 /**
  * Base axiom type that merges configuration with metadata
@@ -106,27 +104,3 @@ export interface AxiomConfig {
   $basis: TypeGuard<unknown>
   [key: string]: unknown
 }
-
-/**
- * Define an axiom runtime configuration
- *
- * Simply returns the config unchanged - useful for creating exportable axioms.
- *
- * @param config - The runtime axiom configuration
- * @returns The same config object
- */
-export function defineAxiom(config: AxiomConfig): AxiomConfig {
-  return config
-}
-
-// ---------------------------------------------------------------------------
-// Compile-time invariants
-// ---------------------------------------------------------------------------
-
-void invariant<Expect<KeyNameAxiom['key'], string>>()
-void invariant<
-  Expect<RepresentationAxiom<string, string>['isCanonical'], (value: unknown) => value is string>
->()
-void invariant<Expect<EntityReference<string>['ref'], string>>()
-void invariant<Expect<EntityReference<string>['resolved'], boolean>>()
-void invariant<Expect<AxiomConfig['$basis'], TypeGuard<unknown>>>()
