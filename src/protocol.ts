@@ -4,6 +4,10 @@
  * Protocols define operations (interfaces) that multiple types can implement,
  * enabling polymorphic dispatch based on the type of the first argument.
  *
+ * Implementations are stored directly on constructor objects, providing O(1)
+ * dispatch lookup. For types without natural constructors (null, undefined,
+ * plain objects), pseudo-constructors are provided.
+ *
  * @see ADR-0015: Protocol System
  */
 
@@ -17,69 +21,140 @@ import type {
   ProtocolTarget,
 } from './types/index.js'
 
+// ---------------------------------------------------------------------------
+// Pseudo-constructors for types without natural constructors
+// ---------------------------------------------------------------------------
+
 /**
- * Storage for protocol implementations
- *
- * Map structure: protocolId -> typeId -> method implementations
+ * Create a pseudo-constructor with a fixed name
  */
-const protocolRegistry = new Map<symbol, Map<string, ProtocolImplementation<ProtocolInterface>>>()
+function createPseudoConstructor(name: string, marker: string): AnyConstructor {
+  const ctor = function () {} as unknown as AnyConstructor
+  Object.defineProperty(ctor, 'name', { value: name, writable: false })
+  Object.defineProperty(ctor, marker, { value: true, writable: false })
+  return ctor
+}
+
+/**
+ * Pseudo-constructor for null values
+ *
+ * Use this when extending protocols to handle null values.
+ *
+ * @example
+ * ```typescript
+ * extendProtocol(PSeq, Null, {
+ *   first: () => undefined,
+ *   empty: () => true
+ * })
+ * ```
+ */
+export const Null: AnyConstructor = createPseudoConstructor('Null', '$isNullConstructor')
+
+/**
+ * Pseudo-constructor for undefined values
+ *
+ * Use this when extending protocols to handle undefined values.
+ *
+ * @example
+ * ```typescript
+ * extendProtocol(PSeq, Undefined, {
+ *   first: () => undefined,
+ *   empty: () => true
+ * })
+ * ```
+ */
+export const Undefined: AnyConstructor = createPseudoConstructor('Undefined', '$isUndefinedConstructor')
+
+/**
+ * Pseudo-constructor for plain object fallback
+ *
+ * Use this when extending protocols to handle any plain object
+ * that doesn't have a more specific implementation.
+ *
+ * @example
+ * ```typescript
+ * extendProtocol(PSeq, ObjectFallback, {
+ *   first: obj => Object.values(obj)[0],
+ *   empty: obj => Object.keys(obj).length === 0
+ * })
+ * ```
+ */
+export const ObjectFallback: AnyConstructor = createPseudoConstructor('ObjectFallback', '$isObjectFallback')
+
+// ---------------------------------------------------------------------------
+// Protocol implementation storage
+// ---------------------------------------------------------------------------
+
+/**
+ * Symbol key used to store protocol implementations on constructors
+ */
+const PROTOCOL_IMPLS = Symbol.for('canon:protocol:implementations')
+
+/**
+ * Type for the implementations map stored on constructors
+ */
+type ConstructorImplMap = Map<symbol, ProtocolImplementation<ProtocolInterface>>
+
+/**
+ * Registry to track which constructors implement each protocol
+ * (for introspection purposes)
+ */
+const protocolImplementorRegistry = new Map<symbol, Set<AnyConstructor>>()
+
+/**
+ * Get or create the implementations map for a constructor
+ */
+function getImplMap(ctor: AnyConstructor): ConstructorImplMap {
+  const ctorWithImpls = ctor as AnyConstructor & { [PROTOCOL_IMPLS]?: ConstructorImplMap }
+  if (!ctorWithImpls[PROTOCOL_IMPLS]) {
+    ctorWithImpls[PROTOCOL_IMPLS] = new Map()
+  }
+  return ctorWithImpls[PROTOCOL_IMPLS]
+}
+
+/**
+ * Get the constructor for a value (for dispatch lookup)
+ *
+ * @param value - The value to get the constructor for
+ * @returns The constructor or pseudo-constructor for the value
+ */
+function getConstructorOf(value: unknown): AnyConstructor | undefined {
+  // Handle null and undefined with pseudo-constructors
+  if (value === null)
+    return Null
+  if (value === undefined)
+    return Undefined
+
+  // Handle primitive values - get their wrapper constructors
+  const typeOf = typeof value
+  if (typeOf === 'string')
+    return String as unknown as AnyConstructor
+  if (typeOf === 'number')
+    return Number as unknown as AnyConstructor
+  if (typeOf === 'boolean')
+    return Boolean as unknown as AnyConstructor
+  if (typeOf === 'symbol')
+    return Symbol as unknown as AnyConstructor
+  if (typeOf === 'bigint')
+    return BigInt as unknown as AnyConstructor
+
+  // Handle objects - get their constructor
+  if (typeOf === 'object' || typeOf === 'function') {
+    const ctor = (value as object).constructor as AnyConstructor | undefined
+    if (ctor) {
+      return ctor
+    }
+    // Object with no constructor (Object.create(null)) - use fallback
+    return ObjectFallback
+  }
+
+  return undefined
+}
 
 /**
  * Counter for generating unique protocol IDs
  */
 let protocolCounter = 0
-
-/**
- * Generate a unique type identifier for dispatch lookup
- *
- * @param target - The type to identify
- * @returns A string identifier for the type
- */
-function getTypeId(target: ProtocolTarget | unknown): string {
-  // Handle primitive empty values
-  if (target === undefined)
-    return 'undefined'
-  if (target === null)
-    return 'null'
-
-  // Handle primitive constructors
-  if (target === String)
-    return 'String'
-  if (target === Boolean)
-    return 'Boolean'
-  if (target === Number)
-    return 'Number'
-
-  // Handle literal empty object {} as fallback matcher
-  if (typeof target === 'object' && Object.keys(target).length === 0 && Object.getPrototypeOf(target) === Object.prototype) {
-    return '$objectFallback'
-  }
-
-  // Handle constructor functions
-  if (typeof target === 'function' && 'prototype' in target) {
-    return (target as AnyConstructor).name || '$anonymous'
-  }
-
-  // For values at dispatch time, get constructor name
-  if (typeof target === 'object' && target !== null) {
-    const constructor = (target as object).constructor
-    if (constructor && constructor.name) {
-      return constructor.name
-    }
-    return '$objectFallback'
-  }
-
-  // Handle primitive values at dispatch time
-  const typeOf = typeof target
-  if (typeOf === 'string')
-    return 'String'
-  if (typeOf === 'boolean')
-    return 'Boolean'
-  if (typeOf === 'number')
-    return 'Number'
-
-  return '$unknown'
-}
 
 /**
  * Create a dispatching method for a protocol
@@ -91,35 +166,37 @@ function getTypeId(target: ProtocolTarget | unknown): string {
  */
 function createDispatcher(protocolId: symbol, protocolName: string, methodName: string): Fn {
   return (target: unknown, ...args: unknown[]): unknown => {
-    const implementations = protocolRegistry.get(protocolId)
-    if (!implementations) {
-      throw new Error(`Protocol ${protocolName} has no implementations registered`)
-    }
+    const ctor = getConstructorOf(target)
 
-    // Try direct type lookup
-    const typeId = getTypeId(target)
-    const impl = implementations.get(typeId)
+    if (ctor) {
+      // Try direct constructor lookup
+      const implMap = getImplMap(ctor)
+      const impl = implMap.get(protocolId)
 
-    if (impl && methodName in impl) {
-      const method = impl[methodName]
-      if (typeof method === 'function') {
-        return (method as Fn)(target, ...args)
-      }
-    }
-
-    // Try object fallback
-    if (typeId !== '$objectFallback' && typeof target === 'object' && target !== null) {
-      const fallback = implementations.get('$objectFallback')
-      if (fallback && methodName in fallback) {
-        const method = fallback[methodName]
+      if (impl && methodName in impl) {
+        const method = impl[methodName]
         if (typeof method === 'function') {
           return (method as Fn)(target, ...args)
         }
       }
+
+      // For objects, try ObjectFallback if direct lookup failed
+      if (typeof target === 'object' && target !== null && ctor !== ObjectFallback) {
+        const fallbackMap = getImplMap(ObjectFallback)
+        const fallbackImpl = fallbackMap.get(protocolId)
+
+        if (fallbackImpl && methodName in fallbackImpl) {
+          const method = fallbackImpl[methodName]
+          if (typeof method === 'function') {
+            return (method as Fn)(target, ...args)
+          }
+        }
+      }
     }
 
+    const ctorName = ctor?.name || typeof target
     throw new Error(
-      `No implementation of ${protocolName}.${methodName} found for type ${typeId}`,
+      `No implementation of ${protocolName}.${methodName} found for type ${ctorName}`,
     )
   }
 }
@@ -155,9 +232,6 @@ export function defineProtocol<I extends ProtocolInterface>(
 ): Protocol<I> {
   const id = Symbol.for(`canon:protocol:${name}:${++protocolCounter}`)
 
-  // Initialize registry for this protocol
-  protocolRegistry.set(id, new Map())
-
   // Build the protocol object with dispatching methods
   const protocol = {
     $id: id,
@@ -176,8 +250,10 @@ export function defineProtocol<I extends ProtocolInterface>(
 /**
  * Extend a protocol with implementations for a specific type
  *
+ * Implementations are stored directly on the constructor object for O(1) lookup.
+ *
  * @param protocol - The protocol to extend
- * @param target - The type to add implementations for
+ * @param target - The constructor to add implementations for
  * @param implementations - Object mapping method names to implementations
  *
  * @example
@@ -196,8 +272,8 @@ export function defineProtocol<I extends ProtocolInterface>(
  *   empty: str => str.length === 0
  * })
  *
- * // Handle null
- * extendProtocol(PSeq, null, {
+ * // Handle null using Null pseudo-constructor
+ * extendProtocol(PSeq, Null, {
  *   first: () => undefined,
  *   rest: () => null,
  *   empty: () => true
@@ -209,16 +285,18 @@ export function extendProtocol<I extends ProtocolInterface>(
   target: ProtocolTarget,
   implementations: ProtocolImplementation<I>,
 ): void {
-  const typeId = getTypeId(target)
-  const registry = protocolRegistry.get(protocol.$id)
-
-  if (!registry) {
-    throw new Error(`Protocol ${protocol.$name} is not properly initialized`)
+  // Track implementors for introspection
+  let implementors = protocolImplementorRegistry.get(protocol.$id)
+  if (!implementors) {
+    implementors = new Set()
+    protocolImplementorRegistry.set(protocol.$id, implementors)
   }
+  implementors.add(target)
 
-  // Merge with existing implementations (if any)
-  const existing = registry.get(typeId) || {}
-  registry.set(typeId, { ...existing, ...implementations })
+  // Store implementation on constructor
+  const implMap = getImplMap(target)
+  const existing = implMap.get(protocol.$id) || {}
+  implMap.set(protocol.$id, { ...existing, ...implementations })
 }
 
 /**
@@ -242,57 +320,61 @@ export function satisfiesProtocol<I extends ProtocolInterface>(
   value: unknown,
   protocol: Protocol<I>,
 ): boolean {
-  const registry = protocolRegistry.get(protocol.$id)
-  if (!registry) {
+  const ctor = getConstructorOf(value)
+  if (!ctor) {
     return false
   }
 
-  const typeId = getTypeId(value)
-
   // Check direct implementation
-  if (registry.has(typeId)) {
+  const implMap = getImplMap(ctor)
+  if (implMap.has(protocol.$id)) {
     return true
   }
 
   // Check object fallback for objects
-  if (typeof value === 'object' && value !== null) {
-    return registry.has('$objectFallback')
+  if (typeof value === 'object' && value !== null && ctor !== ObjectFallback) {
+    const fallbackMap = getImplMap(ObjectFallback)
+    return fallbackMap.has(protocol.$id)
   }
 
   return false
 }
 
 /**
- * Get all registered type IDs for a protocol
+ * Get all constructors that implement a protocol
  *
  * Useful for debugging and introspection.
  *
  * @param protocol - The protocol to inspect
- * @returns Array of type identifiers that implement the protocol
+ * @returns Array of constructor names that implement the protocol
  */
 export function getProtocolImplementors<I extends ProtocolInterface>(
   protocol: Protocol<I>,
 ): string[] {
-  const registry = protocolRegistry.get(protocol.$id)
-  if (!registry) {
+  const implementors = protocolImplementorRegistry.get(protocol.$id)
+  if (!implementors) {
     return []
   }
-  return Array.from(registry.keys())
+  return Array.from(implementors).map(ctor => ctor.name || '$anonymous')
 }
 
 /**
- * Clear all implementations for a protocol
- *
- * Primarily useful for testing.
+ * Clear all implementations for a protocol from a specific constructor
  *
  * @param protocol - The protocol to clear
+ * @param target - The constructor to clear implementations from
  */
-export function clearProtocol<I extends ProtocolInterface>(
+export function clearProtocolFrom<I extends ProtocolInterface>(
   protocol: Protocol<I>,
+  target: ProtocolTarget,
 ): void {
-  const registry = protocolRegistry.get(protocol.$id)
-  if (registry) {
-    registry.clear()
+  const implMap = getImplMap(target)
+  implMap.delete(protocol.$id)
+
+  // Also remove from implementor registry
+  const implementors = protocolImplementorRegistry.get(protocol.$id)
+  if (implementors) {
+    implementors.delete(target)
   }
 }
 
@@ -365,8 +447,8 @@ if (import.meta.vitest) {
         expect(PTestSeq.empty('a')).toBe(false)
       })
 
-      it('should extend protocol for null', () => {
-        extendProtocol(PTestSeq, null, {
+      it('should extend protocol for Null pseudo-constructor', () => {
+        extendProtocol(PTestSeq, Null, {
           first: () => undefined,
           rest: () => null,
           empty: () => true,
@@ -377,8 +459,8 @@ if (import.meta.vitest) {
         expect(PTestSeq.empty(null)).toBe(true)
       })
 
-      it('should extend protocol for undefined', () => {
-        extendProtocol(PTestSeq, undefined, {
+      it('should extend protocol for Undefined pseudo-constructor', () => {
+        extendProtocol(PTestSeq, Undefined, {
           first: () => undefined,
           rest: () => undefined,
           empty: () => true,
@@ -389,8 +471,8 @@ if (import.meta.vitest) {
         expect(PTestSeq.empty(undefined)).toBe(true)
       })
 
-      it('should support object fallback with {}', () => {
-        extendProtocol(PTestSeq, {}, {
+      it('should support ObjectFallback pseudo-constructor', () => {
+        extendProtocol(PTestSeq, ObjectFallback, {
           first: (obj: unknown) => Object.values(obj as object)[0],
           rest: (obj: unknown) => {
             const entries = Object.entries(obj as object).slice(1)
@@ -418,8 +500,8 @@ if (import.meta.vitest) {
         expect(satisfiesProtocol([1, 2, 3], PTestSeq)).toBe(true)
       })
 
-      it('should use object fallback for unregistered objects', () => {
-        extendProtocol(PTestSeq, {}, {
+      it('should use ObjectFallback for unregistered objects', () => {
+        extendProtocol(PTestSeq, ObjectFallback, {
           first: (obj: unknown) => Object.values(obj as object)[0],
         })
 
@@ -432,7 +514,7 @@ if (import.meta.vitest) {
         expect(getProtocolImplementors(PTestSeq)).toEqual([])
       })
 
-      it('should return registered type IDs', () => {
+      it('should return registered constructor names', () => {
         extendProtocol(PTestSeq, Array, { first: () => undefined })
         extendProtocol(PTestSeq, String, { first: () => undefined })
 
@@ -447,6 +529,23 @@ if (import.meta.vitest) {
         expect(() => PTestSeq.first([1, 2, 3])).toThrow(
           /No implementation of PTestSeq.first found for type Array/,
         )
+      })
+    })
+
+    describe('pseudo-constructors', () => {
+      it('Null should be a constructor-like object', () => {
+        expect(typeof Null).toBe('function')
+        expect(Null.name).toBe('Null')
+      })
+
+      it('Undefined should be a constructor-like object', () => {
+        expect(typeof Undefined).toBe('function')
+        expect(Undefined.name).toBe('Undefined')
+      })
+
+      it('ObjectFallback should be a constructor-like object', () => {
+        expect(typeof ObjectFallback).toBe('function')
+        expect(ObjectFallback.name).toBe('ObjectFallback')
       })
     })
   })

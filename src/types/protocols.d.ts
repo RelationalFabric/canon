@@ -10,38 +10,8 @@
  * - `ISeq` - Reserved/unused (avoids confusion with interface)
  */
 
-import type { AnyConstructor, Constructor } from './constructors.js'
+import type { AnyConstructor } from './constructors.js'
 import type { Fn } from './js.js'
-
-/**
- * Primitive empty values: null, undefined, or literal empty object {}
- *
- * Note: TypeScript can't perfectly type the literal `{}`, so this accepts
- * the broader Record<string, never> type, but semantically means only
- * null, undefined, and {} (not [] or '').
- */
-export type PrimitiveEmpty = null | undefined | Record<string, never>
-
-/**
- * Primitive constructor types for extending protocols on primitives
- */
-export type PrimitiveCtr = StringConstructor | BooleanConstructor | NumberConstructor
-
-/**
- * Alias for any constructor in protocol contexts
- */
-export type Ctr = AnyConstructor
-
-/**
- * Method signature type for protocol methods
- *
- * Protocol methods must have a receiver (target) as the first parameter.
- * The method definition includes a documentation string.
- */
-export type ProtocolMethod<TReceiver, TArgs extends unknown[], TReturn> = (
-  target: TReceiver,
-  ...args: TArgs
-) => TReturn
 
 /**
  * Protocol interface - defines the shape of a protocol's methods
@@ -109,7 +79,7 @@ export type Protocol<I extends ProtocolInterface> = ProtocolMeta<I> & ProtocolMe
  * Specifies which types are expected to implement the protocol.
  * This is for documentation/expectations only - dispatch is independent.
  */
-export type ProtocolConfig = Array<PrimitiveEmpty | PrimitiveCtr | Ctr>
+export type ProtocolConfig = AnyConstructor[]
 
 /**
  * Implementation definition for extending a protocol to a type
@@ -123,13 +93,13 @@ export type ProtocolImplementation<I extends ProtocolInterface> = {
 /**
  * Type that can be used as a protocol target
  *
- * Supports:
- * - Primitive values: undefined, null (for values without constructors)
- * - Any object fallback: {} (matches any object, use with extreme caution)
- * - Primitive constructors: String, Boolean, Number
- * - Constructor functions: Array, Map, Set, etc.
+ * All targets are constructor-like objects. For types without natural
+ * constructors (null, undefined, plain objects), use the pseudo-constructors:
+ * - `Null` - for null values
+ * - `Undefined` - for undefined values
+ * - `ObjectFallback` - for plain objects (fallback matcher)
  */
-export type ProtocolTarget = PrimitiveEmpty | PrimitiveCtr | Constructor<unknown>
+export type ProtocolTarget = AnyConstructor
 
 /**
  * Global registry of protocols available in Canon
