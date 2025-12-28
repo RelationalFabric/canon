@@ -165,7 +165,7 @@ Use these npm scripts for development tasks:
 
 ### ADR Management
 
-- `cd docs/adrs && npx adr new "Title"` - Create a new ADR
+- `cd docs/adrs && npx adr-tools new "Title"` - Create a new ADR
 - `npm run build:adr` - Build all ADR artifacts (TOC + index)
 - `npm run build:adr:toc` - Generate table of contents (in ADR directory)
 - `npm run build:adr:index` - Generate ADR index in documentation

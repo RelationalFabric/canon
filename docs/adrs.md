@@ -74,9 +74,9 @@ npm install
 
 2. **Create a new ADR:**
 
-   ```bash
-   npx adr new "Descriptive Title of Your Decision"
-   ```
+    ```bash
+    npx adr-tools new "Descriptive Title of Your Decision"
+    ```
 
 3. **Edit the generated ADR file** with your decision details
 
@@ -86,17 +86,17 @@ npm install
 
 #### Using adr-tools directly (recommended):
 
-- **List all ADRs:** `cd docs/adrs && npx adr list`
-- **Create new ADR:** `cd docs/adrs && npx adr new "Title"`
+- **List all ADRs:** `cd docs/adrs && npx adr-tools list`
+- **Create new ADR:** `cd docs/adrs && npx adr-tools new "Title"`
 - **Build ADR artifacts:** `npm run build:adr` (generates TOC + index)
 
 #### Direct adr-tools commands:
 
-- **List all ADRs:** `npx adr list`
-- **Create new ADR:** `npx adr new "Title"`
-- **Link ADRs:** `npx adr link <from> <to> <relationship>`
-- **Generate table of contents:** `npx adr generate toc`
-- **Help:** `npx adr help`
+- **List all ADRs:** `npx adr-tools list`
+- **Create new ADR:** `npx adr-tools new "Title"`
+- **Link ADRs:** `npx adr-tools link <from> <to> <relationship>`
+- **Generate table of contents:** `npx adr-tools generate toc`
+- **Help:** `npx adr-tools help`
 
 ### Manual Process (if adr-tools unavailable)
 

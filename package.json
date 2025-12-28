@@ -58,10 +58,12 @@
   "scripts": {
     "build:adr": "npm-run-all build:adr:toc build:adr:index",
     "build:adr:index": "node scripts/generate-adr-index.js",
-    "build:adr:toc": "cd docs/adrs && npx adr generate toc",
+    "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
     "build:docs": "npm run build:docs:examples && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
     "build:docs:examples": "tsx scripts/generate-examples-docs.ts",
     "build:docs:restore": "scripts/restore-readmes-from-build.sh",
+    "export:pdf": "npm run build:docs && press-export-pdf export docs",
+    "export:pdf:prod": "press-export-pdf export docs --urlOrigin https://relationalfabric.github.io/canon",
     "build:radar": "tsx scripts/convert-radar.ts",
     "check:all": "npm-run-all check:lint check:types check:test check:radar ",
     "check:all:fix": "npm-run-all check:lint:fix check:types check:test",
@@ -85,6 +87,7 @@
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
+    "husky": "^9.1.7",
     "typescript": "^5.0.0"
   },
   "peerDependenciesMeta": {
@@ -122,6 +125,14 @@
     "yaml": "^2.8.1"
   },
   "optionalDependencies": {
+    "@rollup/rollup-darwin-arm64": "^4.52.3",
+    "@rollup/rollup-darwin-x64": "^4.52.3",
+    "@rollup/rollup-linux-x64-gnu": "^4.52.3",
+    "@rollup/rollup-linux-x64-musl": "^4.52.3",
+    "@rollup/rollup-win32-arm64-msvc": "^4.52.3",
+    "@rollup/rollup-win32-ia32-msvc": "^4.52.3",
+    "@rollup/rollup-win32-x64-gnu": "^4.52.3",
+    "@rollup/rollup-win32-x64-msvc": "^4.52.3",
     "defu": "^6.1.4"
   },
   "devDependencies": {
@@ -133,7 +144,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "npm-check-updates": "^19.1.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitepress-export-pdf": "^1.0.0"
   },
   "oclif": {
     "bin": "canon",

@@ -104,7 +104,7 @@ ${adrTable}
 
 ## ADR Process
 
-1. Use \`cd docs/adrs && npx adr new "Meaningful Decision Title"\` to draft a new record.
+1. Use \`cd docs/adrs && npx adr-tools new "Meaningful Decision Title"\` to draft a new record.
 2. Update the table with \`npm run build:adr\` so the index stays in sync.
 3. Commit the new ADR together with any code or documentation changes it describes.
 `
