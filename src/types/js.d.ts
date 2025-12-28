@@ -1,19 +1,3 @@
-export interface JsType {
-  string: string
-  number: number
-  boolean: boolean
-  object: object
-  array: unknown[]
-  null: null
-  undefined: undefined
-  symbol: symbol
-  bigint: bigint
-
-  function: (...args: any[]) => any
-}
-
-export type JsTypeName = keyof JsType
-
 /**
  * Generic function type - represents any callable function
  *
@@ -26,5 +10,19 @@ export type JsTypeName = keyof JsType
  *
  * @see Constructor in constructors.d.ts for similar rationale
  */
-
 export type Fn = (...args: any[]) => any
+
+export interface JsType {
+  string: string
+  number: number
+  boolean: boolean
+  object: object
+  array: unknown[]
+  null: null
+  undefined: undefined
+  symbol: symbol
+  bigint: bigint
+  function: Fn
+}
+
+export type JsTypeName = keyof JsType

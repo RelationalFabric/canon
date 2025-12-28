@@ -304,8 +304,7 @@ if (import.meta.vitest) {
   const { describe, it, expect, beforeEach } = import.meta.vitest
 
   // Define a test protocol interface with index signature for ProtocolInterface compatibility
-
-  type TestSeq = Record<string, (...args: any[]) => any> & {
+  type TestSeq = Record<string, Fn> & {
     first: (seq: unknown) => unknown
     rest: (seq: unknown) => unknown
     empty: (seq: unknown) => boolean
