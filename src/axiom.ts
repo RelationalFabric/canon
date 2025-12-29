@@ -6,6 +6,18 @@ import type { AxiomConfig, Axioms } from './types/index.js'
 import { inferCanon } from './canon.js'
 
 /**
+ * Define an axiom runtime configuration (for module-style exports)
+ *
+ * Simply returns the config unchanged - useful for creating exportable axioms.
+ *
+ * @param config - The runtime axiom configuration
+ * @returns The same config object
+ */
+export function defineAxiom(config: AxiomConfig): AxiomConfig {
+  return config
+}
+
+/**
  * Infer axiom configuration for a value
  *
  * Finds the canon that matches the value, then returns the specified axiom's config.

@@ -1,4 +1,4 @@
-import type { Metadata } from './types/metadata.js'
+import type { Metadata } from './types/index.js'
 
 import 'reflect-metadata'
 

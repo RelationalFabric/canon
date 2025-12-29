@@ -11,13 +11,13 @@ Each example can be run independently using tsx:
 npx tsx examples/01-basic-id-axiom.ts
 
 # Module-style canon definition
-npx tsx examples/02-module-style-canon.ts
-```
+npx tsx examples/02-module-style-canon/index.ts
 
-Or run all examples:
+# Protocol system
+npx tsx examples/08-protocol-system/index.ts
 
-```bash
-npx tsx examples/01-basic-id-axiom.ts && npx tsx examples/02-module-style-canon.ts
+# Lazy module pattern
+npx tsx examples/09-lazy-module-pattern/index.ts
 ```
 
 ## Examples Overview
@@ -39,7 +39,7 @@ Demonstrates the fundamental usage of the Canon framework:
 - JSON-LD format (semantic `@id` field)
 - Universal API working across formats
 
-### 02-module-style-canon.ts
+### 02-module-style-canon/
 
 Demonstrates the module-style pattern for shareable canons:
 
@@ -54,6 +54,40 @@ Demonstrates the module-style pattern for shareable canons:
 - Reusable canon configurations
 - Batch registration
 - Separation of definition and registration
+
+### 08-protocol-system/
+
+Demonstrates the Protocol System (ADR-0015):
+
+- Defining protocols with `defineProtocol()`
+- Extending protocols for built-in types (Array, String)
+- Using pseudo-constructors (`Null`, `Undefined`, `ObjectFallback`)
+- Checking protocol support with `satisfiesProtocol()`
+- Writing generic functions using protocols
+
+**Key Concepts:**
+
+- Polymorphic dispatch based on type
+- Protocol methods with documentation
+- O(1) dispatch via constructor-based storage
+- Pseudo-constructors for types without natural constructors
+
+### 09-lazy-module-pattern/
+
+Demonstrates the Lazy Module Pattern (ADR-0016):
+
+- Creating lazy modules with `createLazyModule()`
+- Registering implementations with capability scores
+- Automatic selection of the best implementation
+- Option-based selection with `.select(opts)`
+- Memoized selection results
+
+**Key Concepts:**
+
+- Capability-based implementation selection
+- Always-available pure JS fallback
+- Scoring system (UNSUPPORTED, RISKY, FALLBACK, BASELINE, GOOD, OPTIMAL)
+- Cross-platform and architecture-aware code
 
 ## Testing Strategy
 

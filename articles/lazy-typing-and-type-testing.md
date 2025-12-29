@@ -165,11 +165,11 @@ interface Entity {
 }
 
 // These compile only if the expectations hold
-void invariant<Expect<Entity['id'], string>>()
-void invariant<Expect<Entity['createdAt'], Date>>()
+invariant<Expect<Entity['id'], string>>()
+invariant<Expect<Entity['createdAt'], Date>>()
 
 // Negative assertions
-void invariant<IsFalse<Expect<Entity['createdAt'], string>>>()
+invariant<IsFalse<Expect<Entity['createdAt'], string>>>()
 ```
 
 If someone changes `createdAt` to `string`, the invariant fails to compile. There's no separate test run: type tests are types, and a failed assertion is simply a broken type. The expectation is visible. The compiler enforces it. The documentation cannot lie.
@@ -252,8 +252,8 @@ import type { Expect, Satisfies } from '@relational-fabric/canon'
 import { invariant } from '@relational-fabric/canon'
 
 // Verify our shapes satisfy the Id axiom correctly
-void invariant<Expect<Satisfies<'Id', 'Internal'>, { id: string }>>()
-void invariant<Expect<Satisfies<'Id', 'JsonLd'>, { '@id': string }>>()
+invariant<Expect<Satisfies<'Id', 'Internal'>, { id: string }>>()
+invariant<Expect<Satisfies<'Id', 'JsonLd'>, { '@id': string }>>()
 ```
 
 Type tests document exactly what the lazy typing system guarantees. If someone misconfigures a canon, the invariants catch it at compile time.
@@ -317,9 +317,9 @@ interface Config {
 }
 
 // Document and enforce type expectations
-void invariant<Expect<Config['apiUrl'], string>>()
-void invariant<Expect<Config['timeout'], number>>()
-void invariant<IsFalse<Expect<Config['timeout'], string>>>()
+invariant<Expect<Config['apiUrl'], string>>()
+invariant<Expect<Config['timeout'], number>>()
+invariant<IsFalse<Expect<Config['timeout'], string>>>()
 ```
 
 ## Lazy Typing

@@ -28,16 +28,16 @@ export function invariant<_ extends true>(): void {
 // Self-validation of the utilities
 // ---------------------------------------------------------------------------
 
-void invariant<Expect<true, true>>()
-void invariant<Expect<'value', string>>()
-void invariant<Expect<1 | 2, number>>()
-void invariant<IsFalse<Expect<string, number>>>()
+invariant<Expect<true, true>>()
+invariant<Expect<'value', string>>()
+invariant<Expect<1 | 2, number>>()
+invariant<IsFalse<Expect<string, number>>>()
 
 // @ts-expect-error - Expect should fail when the left side does not extend the right.
-void invariant<Expect<{ id: string }, { id: number }>>()
+invariant<Expect<{ id: string }, { id: number }>>()
 
 // @ts-expect-error - IsTrue rejects non-true values.
-void invariant<IsTrue<false>>()
+invariant<IsTrue<false>>()
 
 // @ts-expect-error - IsFalse only accepts precisely `false`.
-void invariant<IsFalse<true>>()
+invariant<IsFalse<true>>()

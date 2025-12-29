@@ -1,7 +1,7 @@
 {
   "name": "@relational-fabric/canon",
   "type": "module",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A modern TypeScript package template with ESLint and TypeScript configurations for starting new projects",
   "author": "Relational Fabric",
   "license": "MIT",
@@ -42,10 +42,10 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "bin": {
-    "adr": "./scripts/adr.js",
-    "canon": "./cli/canon.mjs"
+    "canon": "./bin/canon"
   },
   "files": [
+    "bin",
     "cli",
     "eslint.js",
     "src",
@@ -57,19 +57,19 @@
   },
   "scripts": {
     "build:adr": "npm-run-all build:adr:toc build:adr:index",
-    "build:adr:index": "node scripts/generate-adr-index.js",
+    "build:adr:index": "canon adr:index",
     "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
-    "build:docs": "npm run build:docs:examples && scripts/rename-readmes-for-build.sh && npx vitepress build && scripts/restore-readmes-from-build.sh",
-    "build:docs:examples": "tsx scripts/generate-examples-docs.ts",
-    "build:docs:restore": "scripts/restore-readmes-from-build.sh",
-    "export:pdf": "npm run build:docs && press-export-pdf export docs",
-    "export:pdf:prod": "press-export-pdf export docs --urlOrigin https://relationalfabric.github.io/canon",
-    "build:radar": "tsx scripts/convert-radar.ts",
+    "build:docs": "npm run build:docs:examples && canon docs:rename-readmes && npx vitepress build && canon docs:rename-readmes --restore",
+    "build:docs:examples": "canon docs:examples",
+    "build:docs:restore": "canon docs:rename-readmes --restore",
+    "export:pdf": "npm run build:docs && vitepress-export-pdf export docs",
+    "export:pdf:prod": "vitepress-export-pdf export docs --urlOrigin https://relationalfabric.github.io/canon",
+    "build:radar": "canon radar:convert",
     "check:all": "npm-run-all check:lint check:types check:test check:radar ",
     "check:all:fix": "npm-run-all check:lint:fix check:types check:test",
     "check:lint": "eslint .",
     "check:lint:fix": "eslint . --fix",
-    "check:radar": "tsx scripts/validate-radar.ts",
+    "check:radar": "canon radar:validate",
     "check:test": "vitest run",
     "check:test:json": "vitest run --reporter=default --reporter=json --outputFile=.scratch/vitest-report.json",
     "check:test:coverage": "vitest run --coverage",
@@ -149,7 +149,7 @@
   },
   "oclif": {
     "bin": "canon",
-    "commands": "./src/cli/commands"
+    "commands": "./cli/src/commands"
   },
   "husky": {
     "hooks": {

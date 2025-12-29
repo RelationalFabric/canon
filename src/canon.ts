@@ -6,6 +6,18 @@ import type { CanonConfig } from './types/index.js'
 import { getRegistry } from './shell.js'
 
 /**
+ * Define a canon runtime configuration (for module-style exports)
+ *
+ * Simply returns the config unchanged - useful for creating exportable canons.
+ *
+ * @param config - The runtime canon configuration
+ * @returns The same config object
+ */
+export function defineCanon(config: CanonConfig): CanonConfig {
+  return config
+}
+
+/**
  * Infer which canon matches a value
  *
  * Finds the canon with the MOST matching axioms for the value.

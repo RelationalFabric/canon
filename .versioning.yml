@@ -1,0 +1,29 @@
+# Model-driven versioning configuration for canon
+# Uses gitflow preset with protected main and protected develop
+
+presets:
+  - gitflow
+
+# Branch metadata overrides
+branches:
+  main:
+    protected: true # Main is protected (requires PRs)
+  develop:
+    protected: true # Develop is protected (requires PRs)
+  release/*:
+    protected: false # Release branches are unprotected - action creates and commits directly to them
+
+# Flow overrides
+# The gitflow preset already provides:
+# - release-prep: from develop to release/*, versioning: finalize
+# - release: from release/* to main (no versioning, already finalized)
+# - sync-version: from main to develop (no versioning, sync exact version)
+# - bump-version: from * (excluding main/release/*), versioning: pre-release
+flows:
+  # Override release flow to add tagging when merging to main
+  # Tags are created when the release is merged to main (post-merge event)
+  # This ensures tags only exist for releases that actually make it to main
+  - name: release
+    from: release/*
+    to: main
+    tags: true # Create git tags when release is merged to main
