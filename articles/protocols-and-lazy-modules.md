@@ -1,20 +1,16 @@
-# Protocols and Lazy Modules: Decoupling Operations and Implementations
+# The Return to Canon: Why Your Code is Too Structure-Aware
 
-## Two foundational patterns that bridge shape independence and runtime selection. How Canon enables universal APIs that work across structures and environments.
+## Moving from "Infrastructures of Suspicion" to the Universal API
 
 I promised two follow-up articles to my recent work on [Howard's claims system](https://github.com/RelationalFabric/howard) and [Canon's lazy typing](https://levelup.gitconnected.com/the-end-of-disposable-code-how-i-built-universal-apis-in-typescript-618b3ed38302). I promised Fast Value Hashing and Object Metadata—the pieces that make proofs persistent and eliminate what I called the "Logical Tax."
 
-This isn't those articles.
-
-Instead, I want to introduce two patterns that emerged naturally from building those foundations: **Protocols** and **Lazy Modules**. They're precursors to the promised work, and understanding them is essential for what comes next. Protocols solve operation independence—writing code that works across different data structures. Lazy modules solve implementation selection—choosing the best available implementation across different runtime environments.
+This isn't those articles. Instead, I've realized we need to address a deeper architectural debt. Before we can talk about hashing or metadata, we have to talk about the two patterns that emerged from their foundations: Protocols and Lazy Modules. I've spent years wishing for a way to write code that doesn't care if it's looking at a Map, a JSON-LD object, or a SQL Row. These aren't just 'features'; they are the infrastructure required to stop writing disposable code.
 
 Together, they enable a class of universal APIs that I believe will become central to how we build composable systems.
 
 ### The Problem: Decoupling Operations from Structures
 
-In my article on [the logic of claims](https://github.com/RelationalFabric/howard), I wrote about the "infrastructure of suspicion"—every layer of the stack re-interrogating data because it doesn't trust previous layers. Canon's lazy typing addresses part of this: it lets you write code that works with different data shapes through canonical APIs.
-
-But there's another dimension to this problem. Canons solve *shape matching*—knowing where to find semantic concepts like identity or timestamps in different formats. What about *operation matching*—performing the same operation across different data structures?
+There's a specific 'ick' in our industry: Structure-Awareness. We write a 'Validator' (a term that gives me the ick) that knows exactly where an id field is in a POJO. Then we want to use that same logic on a Map. Suddenly, we're writing `if (data instanceof Map) ... else ...` all over the codebase. Greenspun's Tenth Rule isn't just a joke to me; it's been the roadmap of my career. When I built Cosy Lang 13 years ago, I was explicitly trying to avoid the 'ad-hoc' trap by bringing formal protocols and lazy sequences to CoffeeScript. Today, seeing developers still manually re-implementing sequence logic for every new data structure gives me the ick. We've had the answer for decades—it's time we brought it to our core TypeScript infrastructure.
 
 Consider key-based access. You might have:
 
@@ -46,6 +42,8 @@ This is the same problem Canons solve, but for operations rather than data extra
 ---
 
 ### Protocols: Operations as First-Class Citizens
+
+I've always viewed the Curry-Howard Correspondence as a guiding principle: programs are proofs, and types are propositions. If a type is a proposition, then an operation should be a Protocol. By moving to `Satisfies<Protocol<Associative>>`, your logic for extracting an ID doesn't care if it's hitting a key in a JSON object or a method on a Class. We move from an 'Infrastructure of Suspicion'—constantly checking types—to a 'Fabric of Proof' where the behavior is guaranteed by the protocol dispatch.
 
 The inspiration comes from Clojure's protocol system, which I referenced when building Howard. Clojure protocols define sets of operations that types can implement. They dispatch based on the type of the first argument, allowing you to extend types without modifying their original definitions.
 
@@ -177,13 +175,17 @@ Protocol dispatch is O(1). Each protocol gets a unique identifier, and implement
 
 No iteration through implementations. No runtime type checking. Just direct property access.
 
-This design is inspired by [Cosy Lang's protocol implementation](https://raw.githubusercontent.com/getcosy/lang/refs/heads/master/src/protocol.coffee), which demonstrated that efficient protocol dispatch is achievable in dynamic languages.
+I didn't arrive at this realization yesterday. In an amusingly over-engineered chapter of my past, I actually tried to solve this 13 years ago with something called Cosy Lang—a project where I tried to force-feed Clojure's soul into CoffeeScript. It was a hell of a learning experience, but it was also a perfect example of Greenspun's Tenth Rule in action: I was building an ad-hoc, informally-specified implementation of the very logic I'm finally formalizing now. It's a bit of a laugh now, but the fact that I'm still using those implementation notes today tells you how persistent this 'Structure-Awareness' problem really is.
+
+This design is inspired by [Cosy Lang's protocol implementation](https://raw.githubusercontent.com/getcosy/lang/refs/heads/master/src/protocol.coffee), which demonstrated that efficient protocol dispatch is achievable in dynamic languages. The difference is that Canon formalizes what Cosy Lang stumbled into.
 
 ---
 
 ### The Next Problem: Implementation Selection
 
 Protocols solve operation independence. But there's another problem: sometimes you need multiple implementations of the same operation with different characteristics.
+
+Lazy Modules extend the "lazy" philosophy: if a sequence is 'lazy' because it defers the work, a module is 'lazy' because it defers the implementation. We wait until the very last second to decide how to execute a proof, ensuring we use the most efficient 'loom' the environment provides.
 
 You might need native bindings for performance, but they're only available on specific platforms. You might need WASM modules that work in browsers but not Node.js. You might need x86-optimised code that breaks on ARM architectures.
 
@@ -193,31 +195,31 @@ This is especially painful with bundlers like Rollup or Vite. Everything works l
 
 The challenge: how do you select the best available implementation while guaranteeing something always works?
 
----
-
 ### Lazy Modules: Capability-Based Selection
 
-Lazy modules solve this by providing a capability-based selection system. They guarantee there's always a pure JavaScript fallback that works everywhere, while allowing implementations to register themselves and compete based on their capabilities.
+As my colleagues will tell you, the 'Logical Tax'—the computational cost of proving a claim at runtime—is the biggest barrier to adoption. To eliminate this tax, we need the fastest possible implementations: WASM for the browser, native C++ for Node.js. But I refuse to make the developer manually select these. The Lazy Module Pattern introduces a capability-based selection system. A pure JS fallback always scores a -0.1—it's the choice of last resort. We aren't just asserting types; we are asserting that the environment can handle the proof at peak efficiency.
 
 The pattern is inspired by plugin systems: implementations register themselves without modifying the core module, and selection happens based on what each implementation claims to support.
 
-#### The Solution: Always Have a Fallback
+#### The Solution: Capability-Based Selection
 
-Every lazy module must provide a pure JavaScript implementation that scores -0.1. This ensures:
+Each implementation returns a score representing both capability and quality. The system picks the highest-scoring implementation that can satisfy the request.
 
-- There's always something that works (pure JavaScript runs everywhere)
-- Better implementations win (anything that returns 0.0 or higher beats the fallback)
-- The fallback only wins when nothing else supports the requested options
-
-The scoring system is simple:
+The scoring values:
 
 - `undefined` → not supported (excluded from selection)
-- `-1.0` → works but risky or unstable (last resort only)
-- `-0.1` → pure JS fallback (functional but suboptimal)
-- `0.0` → baseline (thoughtful implementations that haven't measured performance)
-- `> 0` → better (up to `1.0` = optimal)
+- `-1.0` to `<-0.1` → works but risky or unstable (last resort only)
+- `-0.1` → pure JS fallback (always available)
+- `0.0` → baseline
+- `0.0` to `1.0` → better (higher is better, `1.0` = optimal)
 
-Selection happens once per unique set of options and is cached. The first call selects the best available implementation, and subsequent calls reuse that selection.
+Every lazy module must provide a pure JavaScript fallback scoring `-0.1`. This guarantees something always works. Better implementations (≥ `0.0`) win when they can handle the request, but the system falls back to whatever can if they can't.
+
+For example, a native implementation scores `1.0` for standard algorithms but returns `undefined` for experimental features. The `-0.1` fallback handles everything. Requesting an experimental feature automatically selects the fallback.
+
+Scores below `-0.1` are for risky implementations that should only be used when even the fallback can't handle the request. Gotcha: scoring at `-0.2` beats the `-0.1` fallback, so use this range sparingly.
+
+Selection is cached per unique set of options.
 
 #### Creating a Lazy Module
 
@@ -288,11 +290,39 @@ You need to:
 First, we define an Associative protocol for key-based access:
 
 ```typescript
-const PAssoc = defineProtocol({
+// path/to/assoc.ts
+import { defineProtocol } from '@relational-fabric/canon'
+import type { Protocol, Satisfies } from '@relational-fabric/canon'
+
+export interface Assoc<T = unknown> {
+  get: (collection: T, key: string) => unknown
+  set: (collection: T, key: string, value: unknown) => T
+  has: (collection: T, key: string) => boolean
+}
+
+export const PAssoc = defineProtocol<Assoc>({
   get: 'Get value by key',
   set: 'Set value by key, returning new collection',
   has: 'Check if key exists',
 })
+
+export type AssocProtocol<T = unknown> = Protocol<Assoc<T>>
+export type Associative<T = unknown> = Satisfies<AssocProtocol<T>>
+
+// Register PAssoc as an axiom for use with Satisfies
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    PAssoc: AssocProtocol
+  }
+}
+```
+
+Then we extend it with implementations:
+
+```typescript
+// path/to/assoc-implementations.ts
+import { PAssoc } from 'path/to/assoc'
+import { extendProtocol } from '@relational-fabric/canon'
 
 extendProtocol(PAssoc, Object, {
   get: (obj, key) => (obj as Record<string, unknown>)[key],
@@ -311,17 +341,29 @@ extendProtocol(PAssoc, Map, {
 })
 ```
 
-Now we can write universal access functions:
+I've spent years fighting the 'imperative smuggle' in our APIs. `get` and `set` give me the ick because they assume we are 'reaching into' a container to twist a knob. We don't 'set' fields in a Fabric of Proof; we patch a proposition with novelty. This isn't semantic hairsplitting; it's a commitment to the idea that data is a series of immutable propositions. We aren't changing the past; we are declaring a new version of the truth.
+
+Now we can write universal access functions. These move us from imperative accessors to relational operations:
 
 ```typescript
-function getOf<T>(collection: T, key: string): unknown {
-  return PAssoc.get(collection, key)
+// The Identity-Preserving Evolution: maintains the container type
+function patch<T>(collection: T, novelty: Record<string, unknown>): T {
+  return Object.entries(novelty).reduce(
+    (acc, [key, value]) => PAssoc.set(acc, key, value) as T,
+    collection
+  )
 }
 
-function setOf<T>(collection: T, key: string, value: unknown): T {
-  return PAssoc.set(collection, key, value) as T
+// The Relational Projection: returns a Normal Form (plain object) for destructuring
+function select<T, K extends string>(collection: T, ...keys: K[]): Record<K, unknown> {
+  return keys.reduce(
+    (acc, key) => patch(acc, { [key]: PAssoc.get(collection, key) }),
+    {} as Record<K, unknown>
+  )
 }
 ```
+
+Unlike imperative `get`/`set` operations, `select` performs a relational projection—always returning a destructurable Normal Form. `patch` applies novelty while preserving the original container's identity and type-specific behavior.
 
 #### Lazy Module for Runtime Independence
 
@@ -385,12 +427,11 @@ Now we can write a universal JWT signing function:
 
 ```typescript
 function signToken<T>(token: T, secret: string, algorithm: 'HS256' | 'RS256' | 'ES256' = 'HS256'): T {
-  const header = getOf(token, 'header') as object
-  const payload = getOf(token, 'payload') as object
+  const { header, payload } = select(token, 'header', 'payload')
+  
+  const signature = signJWT(header as object, payload as object, secret, { algorithm })
 
-  const signature = signJWT(header, payload, secret, { algorithm })
-
-  return setOf(token, 'signature', signature)
+  return patch(token, { signature })
 }
 
 // Works with any structure
@@ -416,14 +457,14 @@ The same code works with different data structures (protocols) and automatically
 
 ### The Path Forward
 
-Protocols and lazy modules are foundational patterns. They solve two orthogonal problems: shape independence (protocols) and runtime independence (lazy modules). Together, they enable universal APIs that work consistently across different structures and optimally across different environments.
+This is how we end the cycle of disposable code. We stop building 'Validators' and start building Semantics. We are moving toward a world where data carries verifiable claims, proofs persist across boundaries, and the cost of verification approaches zero. Protocols and Lazy Modules are the loom. Making it fast and making it stick comes next.
 
-These patterns are precursors to the work I promised: Fast Value Hashing and Object Metadata. Protocols will enable content-based hashing that works across different data structures. Lazy modules will ensure we always have a working hash implementation, even when native bindings aren't available.
+### Postscript: What's Next
 
-The vision is semantic integrity: a system where data carries verifiable claims, proofs persist across boundaries, and the cost of verification approaches zero. Protocols and lazy modules are the infrastructure that makes this possible.
+I'm sharing these patterns now because they are the tax-collectors for the 'Logical Tax.' You can't have universal fast hashing if your hashing logic is coupled to a POJO. You can't have persistent metadata if your data structures can't handle a patch. We're starting with the Associative protocol because it's the DML (Data Manipulation Language) of the Universal API. The speed and the persistence come next.
 
-The logical foundation is laid. Making it fast and making it stick comes next.
+Over the next few releases, we'll be adding all the foundational protocols you would expect to find—Associative, Sequential, Countable, and more. These aren't just convenience APIs; they're the building blocks that make universal operations possible across any data structure.
 
 ---
 
-*Protocols and lazy modules are available in [Canon](https://github.com/RelationalFabric/canon), part of the Relational Fabric ecosystem. For examples and documentation, see the [Canon repository](https://github.com/RelationalFabric/canon).*
+*Protocols and lazy modules are available in [Canon](https://github.com/RelationalFabric/canon), part of the Relational Fabric ecosystem. For examples and documentation, see the [Canon documentation site](https://relationalfabric.github.io/canon/) or the [Canon repository](https://github.com/RelationalFabric/canon).*
