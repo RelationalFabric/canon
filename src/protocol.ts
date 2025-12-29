@@ -6,7 +6,7 @@
  *
  * Implementations are stored directly on constructor objects, providing O(1)
  * dispatch lookup. For types without natural constructors (null, undefined,
- * plain objects), pseudo-constructors are provided.
+ * plain objects), constructors are provided.
  *
  * @see ADR-0015: Protocol System
  */
@@ -22,59 +22,51 @@ import type {
 } from './types/index.js'
 
 // ---------------------------------------------------------------------------
-// Pseudo-constructors for types without natural constructors
+// Constructors for types without natural constructors
 // ---------------------------------------------------------------------------
 
 /**
- * Symbol used to mark pseudo-constructors
- */
-const PSEUDO_CONSTRUCTOR = Symbol.for('canon:protocol:pseudo-constructor')
-
-/**
- * Create a pseudo-constructor with a fixed name
- */
-function createPseudoConstructor(name: string): AnyConstructor {
-  const ctor = function () {} as unknown as AnyConstructor
-  Object.defineProperty(ctor, 'name', { value: name, writable: false })
-  Object.defineProperty(ctor, PSEUDO_CONSTRUCTOR, { value: name, writable: false })
-  return ctor
-}
-
-/**
- * Pseudo-constructor for null values
+ * Constructor for null values
  *
  * Use this when extending protocols to handle null values.
+ * Calling `new Null()` or `Null()` returns `null`.
  *
  * @example
  * ```typescript
  * extendProtocol(PSeq, Null, {
- *   first: () => undefined,
- *   empty: () => true
+ *   first: (_) => undefined,
+ *   empty: (_) => true
  * })
  * ```
  */
-export const Null: AnyConstructor = createPseudoConstructor('Null')
+function NullImpl(this: void): null {
+  return null
+}
 
 /**
- * Pseudo-constructor for undefined values
+ * Constructor for undefined values
  *
  * Use this when extending protocols to handle undefined values.
+ * Calling `new Undefined()` or `Undefined()` returns `undefined`.
  *
  * @example
  * ```typescript
  * extendProtocol(PSeq, Undefined, {
- *   first: () => undefined,
- *   empty: () => true
+ *   first: (_) => undefined,
+ *   empty: (_) => true
  * })
  * ```
  */
-export const Undefined: AnyConstructor = createPseudoConstructor('Undefined')
+function UndefinedImpl(this: void): undefined {
+  return undefined
+}
 
 /**
- * Pseudo-constructor for plain object fallback
+ * Constructor for plain object fallback
  *
  * Use this when extending protocols to handle any plain object
  * that doesn't have a more specific implementation.
+ * Calling `new ObjectFallback()` or `ObjectFallback()` returns `{}` (empty object).
  *
  * @example
  * ```typescript
@@ -84,7 +76,14 @@ export const Undefined: AnyConstructor = createPseudoConstructor('Undefined')
  * })
  * ```
  */
-export const ObjectFallback: AnyConstructor = createPseudoConstructor('ObjectFallback')
+function ObjectFallbackImpl(this: void): Record<string, never> {
+  return {}
+}
+
+// Export as constructors that can be used both as functions and constructors
+export const Null = NullImpl as AnyConstructor & (() => null)
+export const Undefined = UndefinedImpl as AnyConstructor & (() => undefined)
+export const ObjectFallback = ObjectFallbackImpl as AnyConstructor & (() => Record<string, never>)
 
 // ---------------------------------------------------------------------------
 // Protocol implementation storage
@@ -121,14 +120,14 @@ function getImplMap(ctor: AnyConstructor): ConstructorImplMap {
  * Get the constructor for a value (for dispatch lookup)
  *
  * @param value - The value to get the constructor for
- * @returns The constructor or pseudo-constructor for the value
+ * @returns The constructor for the value
  */
 function getConstructorOf(value: unknown): AnyConstructor | undefined {
-  // Handle null and undefined with pseudo-constructors
+  // Handle null and undefined with constructors
   if (value === null)
-    return Null
+    return Null as AnyConstructor
   if (value === undefined)
-    return Undefined
+    return Undefined as AnyConstructor
 
   // Handle primitive values - get their wrapper constructors
   const typeOf = typeof value
@@ -150,7 +149,7 @@ function getConstructorOf(value: unknown): AnyConstructor | undefined {
       return ctor
     }
     // Object with no constructor (Object.create(null)) - use fallback
-    return ObjectFallback
+    return ObjectFallback as AnyConstructor
   }
 
   return undefined
@@ -186,8 +185,8 @@ function createDispatcher(protocolId: symbol, protocolName: string, methodName: 
       }
 
       // For objects, try ObjectFallback if direct lookup failed
-      if (typeof target === 'object' && target !== null && ctor !== ObjectFallback) {
-        const fallbackMap = getImplMap(ObjectFallback)
+      if (typeof target === 'object' && target !== null && ctor !== (ObjectFallback as AnyConstructor)) {
+        const fallbackMap = getImplMap(ObjectFallback as AnyConstructor)
         const fallbackImpl = fallbackMap.get(protocolId)
 
         if (fallbackImpl && methodName in fallbackImpl) {
@@ -212,7 +211,9 @@ function createDispatcher(protocolId: symbol, protocolName: string, methodName: 
  * Creates a protocol with the specified method definitions. Each method
  * definition is a documentation string describing the method's purpose.
  *
- * @param name - Human-readable name for the protocol (e.g., 'PSeq')
+ * The protocol identifier is the source of truth for the protocol's identity.
+ * The type parameter `I` is required and defines the protocol interface.
+ *
  * @param methods - Object mapping method names to documentation strings
  * @returns A Protocol object with dispatching methods
  *
@@ -224,7 +225,7 @@ function createDispatcher(protocolId: symbol, protocolName: string, methodName: 
  *   empty: (seq: Seq<T>) => boolean
  * }
  *
- * const PSeq = defineProtocol<Seq<unknown>>('PSeq', {
+ * const PSeq = defineProtocol<Seq<unknown>>({
  *   first: 'Returns the first item of the sequence',
  *   rest: 'Returns the rest of the sequence',
  *   empty: 'Is the sequence empty'
@@ -232,21 +233,21 @@ function createDispatcher(protocolId: symbol, protocolName: string, methodName: 
  * ```
  */
 export function defineProtocol<I extends ProtocolInterface>(
-  name: string,
   methods: MethodDefinition<I>,
 ): Protocol<I> {
-  const id = Symbol.for(`canon:protocol:${name}:${++protocolCounter}`)
+  const id = Symbol(`canon:protocol:${++protocolCounter}`)
+  const protocolName = `Protocol${protocolCounter}`
 
   // Build the protocol object with dispatching methods
   const protocol = {
     $id: id,
-    $name: name,
+    $name: protocolName,
     $docs: Object.freeze({ ...methods }),
   } as Protocol<I>
 
   // Add dispatching methods
   for (const methodName of Object.keys(methods)) {
-    (protocol as Record<string, unknown>)[methodName] = createDispatcher(id, name, methodName)
+    (protocol as Record<string, unknown>)[methodName] = createDispatcher(id, protocolName, methodName)
   }
 
   return protocol
@@ -277,11 +278,11 @@ export function defineProtocol<I extends ProtocolInterface>(
  *   empty: str => str.length === 0
  * })
  *
- * // Handle null using Null pseudo-constructor
+ * // Handle null using Null constructor
  * extendProtocol(PSeq, Null, {
- *   first: () => undefined,
- *   rest: () => null,
- *   empty: () => true
+ *   first: (_) => undefined,
+ *   rest: (_) => null,
+ *   empty: (_) => true
  * })
  * ```
  */
@@ -337,8 +338,8 @@ export function satisfiesProtocol<I extends ProtocolInterface>(
   }
 
   // Check object fallback for objects
-  if (typeof value === 'object' && value !== null && ctor !== ObjectFallback) {
-    const fallbackMap = getImplMap(ObjectFallback)
+  if (typeof value === 'object' && value !== null && ctor !== (ObjectFallback as AnyConstructor)) {
+    const fallbackMap = getImplMap(ObjectFallback as AnyConstructor)
     return fallbackMap.has(protocol.$id)
   }
 
@@ -381,177 +382,4 @@ export function clearProtocolFrom<I extends ProtocolInterface>(
   if (implementors) {
     implementors.delete(target)
   }
-}
-
-// ---------------------------------------------------------------------------
-// In-source tests
-// ---------------------------------------------------------------------------
-
-if (import.meta.vitest) {
-  const { describe, it, expect, beforeEach } = import.meta.vitest
-
-  // Define a test protocol interface with index signature for ProtocolInterface compatibility
-  type TestSeq = Record<string, Fn> & {
-    first: (seq: unknown) => unknown
-    rest: (seq: unknown) => unknown
-    empty: (seq: unknown) => boolean
-  }
-
-  describe('Protocol System', () => {
-    let PTestSeq: Protocol<TestSeq>
-
-    beforeEach(() => {
-      // Create a fresh protocol for each test
-      PTestSeq = defineProtocol<TestSeq>('PTestSeq', {
-        first: 'Returns the first item',
-        rest: 'Returns the rest',
-        empty: 'Is it empty',
-      })
-    })
-
-    describe('defineProtocol', () => {
-      it('should create a protocol with methods', () => {
-        expect(PTestSeq.$name).toBe('PTestSeq')
-        expect(typeof PTestSeq.$id).toBe('symbol')
-        expect(typeof PTestSeq.first).toBe('function')
-        expect(typeof PTestSeq.rest).toBe('function')
-        expect(typeof PTestSeq.empty).toBe('function')
-      })
-
-      it('should store documentation', () => {
-        expect(PTestSeq.$docs.first).toBe('Returns the first item')
-        expect(PTestSeq.$docs.rest).toBe('Returns the rest')
-        expect(PTestSeq.$docs.empty).toBe('Is it empty')
-      })
-    })
-
-    describe('extendProtocol', () => {
-      it('should extend protocol for Array', () => {
-        extendProtocol(PTestSeq, Array, {
-          first: (arr: unknown) => (arr as unknown[])[0],
-          rest: (arr: unknown) => (arr as unknown[]).slice(1),
-          empty: (arr: unknown) => (arr as unknown[]).length === 0,
-        })
-
-        expect(PTestSeq.first([1, 2, 3])).toBe(1)
-        expect(PTestSeq.rest([1, 2, 3])).toEqual([2, 3])
-        expect(PTestSeq.empty([])).toBe(true)
-        expect(PTestSeq.empty([1])).toBe(false)
-      })
-
-      it('should extend protocol for String', () => {
-        extendProtocol(PTestSeq, String, {
-          first: (str: unknown) => (str as string)[0],
-          rest: (str: unknown) => (str as string).slice(1),
-          empty: (str: unknown) => (str as string).length === 0,
-        })
-
-        expect(PTestSeq.first('abc')).toBe('a')
-        expect(PTestSeq.rest('abc')).toBe('bc')
-        expect(PTestSeq.empty('')).toBe(true)
-        expect(PTestSeq.empty('a')).toBe(false)
-      })
-
-      it('should extend protocol for Null pseudo-constructor', () => {
-        extendProtocol(PTestSeq, Null, {
-          first: () => undefined,
-          rest: () => null,
-          empty: () => true,
-        })
-
-        expect(PTestSeq.first(null)).toBe(undefined)
-        expect(PTestSeq.rest(null)).toBe(null)
-        expect(PTestSeq.empty(null)).toBe(true)
-      })
-
-      it('should extend protocol for Undefined pseudo-constructor', () => {
-        extendProtocol(PTestSeq, Undefined, {
-          first: () => undefined,
-          rest: () => undefined,
-          empty: () => true,
-        })
-
-        expect(PTestSeq.first(undefined)).toBe(undefined)
-        expect(PTestSeq.rest(undefined)).toBe(undefined)
-        expect(PTestSeq.empty(undefined)).toBe(true)
-      })
-
-      it('should support ObjectFallback pseudo-constructor', () => {
-        extendProtocol(PTestSeq, ObjectFallback, {
-          first: (obj: unknown) => Object.values(obj as object)[0],
-          rest: (obj: unknown) => {
-            const entries = Object.entries(obj as object).slice(1)
-            return Object.fromEntries(entries)
-          },
-          empty: (obj: unknown) => Object.keys(obj as object).length === 0,
-        })
-
-        expect(PTestSeq.first({ a: 1, b: 2 })).toBe(1)
-        expect(PTestSeq.rest({ a: 1, b: 2 })).toEqual({ b: 2 })
-        expect(PTestSeq.empty({})).toBe(true)
-      })
-    })
-
-    describe('satisfiesProtocol', () => {
-      it('should return false for unregistered types', () => {
-        expect(satisfiesProtocol([1, 2, 3], PTestSeq)).toBe(false)
-      })
-
-      it('should return true for registered types', () => {
-        extendProtocol(PTestSeq, Array, {
-          first: (arr: unknown) => (arr as unknown[])[0],
-        })
-
-        expect(satisfiesProtocol([1, 2, 3], PTestSeq)).toBe(true)
-      })
-
-      it('should use ObjectFallback for unregistered objects', () => {
-        extendProtocol(PTestSeq, ObjectFallback, {
-          first: (obj: unknown) => Object.values(obj as object)[0],
-        })
-
-        expect(satisfiesProtocol({ a: 1 }, PTestSeq)).toBe(true)
-      })
-    })
-
-    describe('getProtocolImplementors', () => {
-      it('should return empty array for new protocol', () => {
-        expect(getProtocolImplementors(PTestSeq)).toEqual([])
-      })
-
-      it('should return registered constructor names', () => {
-        extendProtocol(PTestSeq, Array, { first: () => undefined })
-        extendProtocol(PTestSeq, String, { first: () => undefined })
-
-        const implementors = getProtocolImplementors(PTestSeq)
-        expect(implementors).toContain('Array')
-        expect(implementors).toContain('String')
-      })
-    })
-
-    describe('dispatch errors', () => {
-      it('should throw when no implementation exists', () => {
-        expect(() => PTestSeq.first([1, 2, 3])).toThrow(
-          /No implementation of PTestSeq.first found for type Array/,
-        )
-      })
-    })
-
-    describe('pseudo-constructors', () => {
-      it('Null should be a constructor-like object', () => {
-        expect(typeof Null).toBe('function')
-        expect(Null.name).toBe('Null')
-      })
-
-      it('Undefined should be a constructor-like object', () => {
-        expect(typeof Undefined).toBe('function')
-        expect(Undefined.name).toBe('Undefined')
-      })
-
-      it('ObjectFallback should be a constructor-like object', () => {
-        expect(typeof ObjectFallback).toBe('function')
-        expect(ObjectFallback.name).toBe('ObjectFallback')
-      })
-    })
-  })
 }

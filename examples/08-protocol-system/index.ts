@@ -33,7 +33,7 @@ The naming convention uses `P` prefix for protocol values (e.g., `PSeq` for a se
 */
 
 // ```
-const PSeq = defineProtocol('PSeq', {
+const PSeq = defineProtocol({
   first: 'Returns the first item of the sequence',
   rest: 'Returns the rest of the sequence after the first item',
   empty: 'Returns true if the sequence is empty',
@@ -111,20 +111,20 @@ if (import.meta.vitest) {
 /*
 # Handling Null and Undefined
 
-For types without natural constructors (null and undefined), Canon provides pseudo-constructors: `Null` and `Undefined`.
+For types without natural constructors (null and undefined), Canon provides constructors: `Null` and `Undefined`. These constructors can be called to create their values: `Null()` returns `null`, `Undefined()` returns `undefined`.
 */
 
 // ```
 extendProtocol(PSeq, Null, {
-  first: () => undefined,
-  rest: () => null,
-  empty: () => true,
+  first: (_) => undefined,
+  rest: (_) => null,
+  empty: (_) => true,
 })
 
 extendProtocol(PSeq, Undefined, {
-  first: () => undefined,
-  rest: () => undefined,
-  empty: () => true,
+  first: (_) => undefined,
+  rest: (_) => undefined,
+  empty: (_) => true,
 })
 
 const nullFirst = PSeq.first(null)
@@ -153,7 +153,7 @@ if (import.meta.vitest) {
 /*
 # Object Fallback
 
-Use `ObjectFallback` to provide a default implementation for any plain object that doesn't have a more specific implementation.
+Use `ObjectFallback` to provide a default implementation for any plain object that doesn't have a more specific implementation. `ObjectFallback()` returns `{}` (empty object).
 */
 
 // ```
@@ -262,7 +262,7 @@ if (import.meta.vitest) {
 
 - **Define protocols** with `defineProtocol()` to create polymorphic interfaces
 - **Extend protocols** with `extendProtocol()` to add implementations for any type
-- **Use pseudo-constructors** (`Null`, `Undefined`, `ObjectFallback`) for types without natural constructors
+- **Use constructors** (`Null`, `Undefined`, `ObjectFallback`) for types without natural constructors
 - **Check support** with `satisfiesProtocol()` before calling protocol methods
 - **Write generic functions** that work with any type implementing the protocol
 - Dispatch is **O(1)** - implementations are stored directly on constructor objects

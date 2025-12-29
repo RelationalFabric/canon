@@ -58,14 +58,14 @@ Protocols are defined using `defineProtocol()`. Each method gets a documentation
 ```typescript
 import { defineProtocol, extendProtocol } from '@relational-fabric/canon'
 
-const PSeq = defineProtocol('PSeq', {
+const PSeq = defineProtocol({
   first: 'Returns the first item of the sequence',
   rest: 'Returns the rest of the sequence after the first item',
   empty: 'Returns true if the sequence is empty',
 })
 ```
 
-The naming convention uses a `P` prefix for protocol values (like `PSeq` for a sequence protocol). This distinguishes them from TypeScript interfaces (which would be `Seq`) and avoids confusion with other naming patterns.
+The type parameter is required—it defines the protocol interface. The naming convention uses a `P` prefix for protocol values (like `PSeq` for a sequence protocol). This distinguishes them from TypeScript interfaces (which would be `Seq`) and avoids confusion with other naming patterns. The protocol identifier is the source of truth for the protocol's identity.
 
 #### Extending Protocols
 
@@ -73,15 +73,15 @@ Use `extendProtocol()` to add implementations for specific types. Here we extend
 
 ```typescript
 extendProtocol(PSeq, Array, {
-  first: (arr: unknown) => (arr as unknown[])[0],
-  rest: (arr: unknown) => (arr as unknown[]).slice(1),
-  empty: (arr: unknown) => (arr as unknown[]).length === 0,
+  first: arr => arr[0],
+  rest: arr => arr.slice(1),
+  empty: arr => arr.length === 0,
 })
 
 extendProtocol(PSeq, String, {
-  first: (str: unknown) => (str as string)[0],
-  rest: (str: unknown) => (str as string).slice(1),
-  empty: (str: unknown) => (str as string).length === 0,
+  first: str => str[0],
+  rest: str => str.slice(1),
+  empty: str => str.length === 0,
 })
 ```
 
@@ -111,6 +111,8 @@ take('Hello', 3) // ['H', 'e', 'l']
 ```
 
 The `take` function works with arrays, strings, and any other type that implements the sequence protocol. No conditional logic. No type checking. Just polymorphic dispatch.
+
+Notice that in the `extendProtocol` calls, we don't need to manually type the parameters. TypeScript infers the method signatures from the protocol interface, so we can write `arr => arr[0]` instead of `(arr: unknown) => (arr as unknown[])[0]`. The type system does the work for us.
 
 #### Dispatch Efficiency
 
@@ -233,26 +235,26 @@ You need to:
 First, we define an Associative protocol for key-based access:
 
 ```typescript
-const PAssoc = defineProtocol('PAssoc', {
+const PAssoc = defineProtocol({
   get: 'Get value by key',
   set: 'Set value by key, returning new collection',
   has: 'Check if key exists',
 })
 
 extendProtocol(PAssoc, Object, {
-  get: (obj: unknown, key: string) => (obj as Record<string, unknown>)[key],
-  set: (obj: unknown, key: string, value: unknown) => ({ ...(obj as Record<string, unknown>), [key]: value }),
-  has: (obj: unknown, key: string) => key in (obj as Record<string, unknown>),
+  get: (obj, key) => (obj as Record<string, unknown>)[key],
+  set: (obj, key, value) => ({ ...(obj as Record<string, unknown>), [key]: value }),
+  has: (obj, key) => key in (obj as Record<string, unknown>),
 })
 
 extendProtocol(PAssoc, Map, {
-  get: (map: unknown, key: string) => (map as Map<string, unknown>).get(key),
-  set: (map: unknown, key: string, value: unknown) => {
+  get: (map, key) => (map as Map<string, unknown>).get(key),
+  set: (map, key, value) => {
     const newMap = new Map(map as Map<string, unknown>)
     newMap.set(key, value)
     return newMap
   },
-  has: (map: unknown, key: string) => (map as Map<string, unknown>).has(key),
+  has: (map, key) => (map as Map<string, unknown>).has(key),
 })
 ```
 

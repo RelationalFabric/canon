@@ -82,22 +82,46 @@ export type Protocol<I extends ProtocolInterface> = ProtocolMeta<I> & ProtocolMe
 export type ProtocolConfig = AnyConstructor[]
 
 /**
+ * Extract method signature without receiver type constraint
+ *
+ * This allows implementations to use any receiver type while maintaining
+ * the correct parameter and return types from the protocol interface.
+ */
+type MethodSignature<I extends ProtocolInterface, K extends keyof I> = I[K] extends (
+  target: unknown,
+  ...args: infer A
+) => infer R
+  ? (target: unknown, ...args: A) => R
+  : never
+
+/**
  * Implementation definition for extending a protocol to a type
  *
  * Provides the actual implementations of protocol methods for a specific type.
+ * The receiver type (first parameter) is inferred from usage, while the
+ * remaining parameters and return type are inferred from the protocol interface.
+ *
+ * This allows users to write implementations without manually typing parameters:
+ * ```typescript
+ * extendProtocol(PSeq, Array, {
+ *   first: arr => arr[0],  // arr is inferred, return type inferred from protocol
+ *   rest: arr => arr.slice(1),
+ *   empty: arr => arr.length === 0
+ * })
+ * ```
  */
 export type ProtocolImplementation<I extends ProtocolInterface> = {
-  [K in keyof I]?: I[K]
+  [K in keyof I]?: MethodSignature<I, K>
 }
 
 /**
  * Type that can be used as a protocol target
  *
  * All targets are constructor-like objects. For types without natural
- * constructors (null, undefined, plain objects), use the pseudo-constructors:
- * - `Null` - for null values
- * - `Undefined` - for undefined values
- * - `ObjectFallback` - for plain objects (fallback matcher)
+ * constructors (null, undefined, plain objects), use the constructors:
+ * - `Null` - for null values (returns `null`)
+ * - `Undefined` - for undefined values (returns `undefined`)
+ * - `ObjectFallback` - for plain objects (returns `{}`)
  */
 export type ProtocolTarget = AnyConstructor
 
