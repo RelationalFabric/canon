@@ -1,10 +1,10 @@
-import type { JsonFormattingOptions, JsonParseError } from '../../kit.js'
+import type { JsonFormattingOptions, JsonParseError } from '@relational-fabric/canon'
 import { createRequire } from 'node:module'
 import { basename, relative, resolve } from 'node:path'
 import process from 'node:process'
 
 import { fileURLToPath } from 'node:url'
-import { Files, Hygen, Jsonc, Oclif } from '../../kit.js'
+import { Files, Hygen, Jsonc, Oclif } from '@relational-fabric/canon'
 
 interface InitFlags {
   directory?: string
@@ -22,7 +22,7 @@ interface HygenPrompter {
 }
 
 const require = createRequire(import.meta.url)
-const canonPackage = require('../../../package.json') as { readonly version: string }
+const canonPackage = require('../../../../package.json') as { readonly version: string }
 
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const templatesDirectory = resolve(packageRoot, 'cli/templates/_templates')
@@ -91,7 +91,9 @@ export default class InitCommand extends CanonCommand {
   async run(): Promise<void> {
     const { flags } = await this.parse(InitCommand)
     const resolvedFlags = flags as InitFlags
-    const directory = resolve(process.cwd(), resolvedFlags.directory ?? '.')
+    // Commands are the boundary - can read process state here
+    const rootDir = process.cwd()
+    const directory = resolve(rootDir, resolvedFlags.directory ?? '.')
     await Files.ensureDir(directory)
 
     const projectName = this.normalizeName(resolvedFlags.name ?? this.deriveName(directory))
@@ -121,7 +123,7 @@ export default class InitCommand extends CanonCommand {
       devDependencies: devDependenciesEnabled,
     })
 
-    const relativePath = relative(process.cwd(), directory) || '.'
+    const relativePath = relative(rootDir, directory) || '.'
     this.log(`✅ Canon project ready at ${relativePath}`)
   }
 

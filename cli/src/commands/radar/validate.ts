@@ -1,8 +1,8 @@
 import { join } from 'node:path'
 import process from 'node:process'
 
-import { Oclif } from '../../../kit.js'
-import { createLogger } from '../../../log.js'
+import { createLogger, Oclif } from '@relational-fabric/canon'
+import { validateRadarFile } from '@relational-fabric/canon/radar'
 
 const { command: CanonCommand, flags: CanonFlags } = Oclif
 const logger = createLogger('canon:cli:radar:validate')
@@ -28,12 +28,11 @@ export default class RadarValidateCommand extends CanonCommand {
     const { flags } = await this.parse(RadarValidateCommand)
     const resolvedFlags = flags as RadarValidateFlags
 
+    // Commands are the boundary - can read process state here
     const rootDir = process.cwd()
     const filePath = join(rootDir, resolvedFlags.file ?? 'planning/radar/data.yaml')
 
     try {
-      // Import the validator function directly from the source
-      const { validateRadarFile } = await import('../../../radar/validator.js')
       const result = await validateRadarFile(filePath)
 
       if (result.isValid) {

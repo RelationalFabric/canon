@@ -1,11 +1,9 @@
-#!/usr/bin/env node
-
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import process from 'node:process'
-import consola from 'consola'
 
-const logger = consola.withTag('adr')
+import { createLogger } from '@relational-fabric/canon'
+
+const logger = createLogger('canon:adr:index')
 
 // Status color mapping
 const statusColors = {
@@ -13,7 +11,7 @@ const statusColors = {
   accepted: '🟢',
   deprecated: '🔴',
   superseded: '🟠',
-}
+} as const
 
 // Status labels
 const statusLabels = {
@@ -21,19 +19,33 @@ const statusLabels = {
   accepted: 'Accepted',
   deprecated: 'Deprecated',
   superseded: 'Superseded',
+} as const
+
+interface GenerateAdrIndexOptions {
+  rootDir: string
+  adrsDir?: string
+  readmePath?: string
 }
 
-function findMetadataValue(lines, key) {
+function findMetadataValue(lines: readonly string[], key: string): string | null {
   const pattern = new RegExp(`^\\s*[-*]\\s*${key}\\s*:\\s*(.+)$`, 'i')
   for (const line of lines) {
     const match = line.match(pattern)
     if (match)
-      return match[1].trim()
+      return match[1]!.trim()
   }
   return null
 }
 
-function extractAdrInfo(filePath) {
+function extractAdrInfo(filePath: string): {
+  number: string
+  title: string
+  status: keyof typeof statusColors
+  date: string
+  filename: string
+  color: string
+  label: string
+} | null {
   try {
     const content = readFileSync(filePath, 'utf-8')
     const lines = content.split('\n')
@@ -50,7 +62,7 @@ function extractAdrInfo(filePath) {
     if (!rawStatus)
       return null
 
-    const status = rawStatus.toLowerCase()
+    const status = rawStatus.toLowerCase() as keyof typeof statusColors
     if (!statusColors[status])
       return null
 
@@ -58,16 +70,16 @@ function extractAdrInfo(filePath) {
     const date = findMetadataValue(lines, 'Date') ?? 'Unknown'
 
     // Extract filename for link
-    const filename = filePath.split('/').pop()
+    const filename = filePath.split('/').pop() ?? ''
 
     return {
-      number: title.split(':')[0],
+      number: title.split(':')[0]!,
       title: title.split(':').slice(1).join(':').trim(),
       status,
       date,
       filename,
-      color: statusColors[status],
-      label: statusLabels[status],
+      color: statusColors[status]!,
+      label: statusLabels[status]!,
     }
   } catch (error) {
     logger.error(`Error reading ${filePath}:`, error instanceof Error ? error.message : 'Unknown error')
@@ -75,11 +87,19 @@ function extractAdrInfo(filePath) {
   }
 }
 
-function generateAdrTable(adrs) {
+function generateAdrTable(adrs: Array<{
+  number: string
+  title: string
+  status: keyof typeof statusColors
+  date: string
+  filename: string
+  color: string
+  label: string
+}>): string {
   // Sort by ADR number
   adrs.sort((a, b) => Number.parseInt(a.number) - Number.parseInt(b.number))
 
-  const tableHeader = `| ADR | Title | Status | Date |\n|-----|-------|--------|------|`
+  const tableHeader = '| ADR | Title | Status | Date |\n|-----|-------|--------|------|'
 
   const tableRows = adrs
     .map(
@@ -91,7 +111,7 @@ function generateAdrTable(adrs) {
   return `${tableHeader}\n${tableRows}`
 }
 
-function buildDefaultReadme(adrTable) {
+function buildDefaultReadme(adrTable: string): string {
   return `# Architecture Decision Records
 
 ## ADR List
@@ -106,7 +126,7 @@ ${adrTable}
 `
 }
 
-function updateReadme(adrTable, readmePath) {
+function updateReadme(adrTable: string, readmePath: string): void {
   let readmeContent = ''
 
   try {
@@ -147,9 +167,16 @@ ${afterAdrProcess}`
   logger.success('✅ ADR index updated successfully')
 }
 
-export async function generateAdrIndex(options = {}) {
-  const rootDir = process.cwd()
-  const adrsDir = options.adrsDir ?? join(rootDir, 'docs', 'adrs')
+/**
+ * Generate ADR index table
+ *
+ * @param options - Configuration options
+ * @param options.rootDir - Root directory of the project
+ * @param options.adrsDir - Directory containing ADR files (relative to rootDir)
+ * @param options.readmePath - Path to ADR README file (relative to rootDir)
+ */
+export async function generateAdrIndex(options: GenerateAdrIndexOptions): Promise<void> {
+  const adrsDir = options.adrsDir ?? join(options.rootDir, 'docs', 'adrs')
   const readmePath = options.readmePath ?? join(adrsDir, 'README.md')
 
   logger.info('🔍 Scanning ADR files...')
@@ -162,7 +189,7 @@ export async function generateAdrIndex(options = {}) {
 
     logger.info(`📁 Found ${files.length} ADR files`)
 
-    const adrs = files.map(extractAdrInfo).filter(adr => adr !== null)
+    const adrs = files.map(extractAdrInfo).filter((adr): adr is NonNullable<typeof adr> => adr !== null)
 
     logger.success(`✅ Successfully parsed ${adrs.length} ADRs`)
 
@@ -178,29 +205,14 @@ export async function generateAdrIndex(options = {}) {
     const statusCounts = adrs.reduce((acc, adr) => {
       acc[adr.status] = (acc[adr.status] || 0) + 1
       return acc
-    }, {})
+    }, {} as Record<string, number>)
 
     logger.info('\n📊 ADR Status Summary:')
     Object.entries(statusCounts).forEach(([status, count]) => {
-      logger.info(`  ${statusColors[status]} ${statusLabels[status]}: ${count}`)
+      logger.info(`  ${statusColors[status as keyof typeof statusColors]} ${statusLabels[status as keyof typeof statusLabels]}: ${count}`)
     })
   } catch (error) {
     logger.error('Error:', error instanceof Error ? error.message : 'Unknown error')
     throw error
   }
-}
-
-function main() {
-  const rootDir = process.cwd()
-  const adrsDir = join(rootDir, 'docs', 'adrs')
-  const readmePath = join(adrsDir, 'README.md')
-
-  generateAdrIndex({ adrsDir, readmePath }).catch((error) => {
-    logger.error('Error:', error instanceof Error ? error.message : 'Unknown error')
-    process.exit(1)
-  })
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main()
 }

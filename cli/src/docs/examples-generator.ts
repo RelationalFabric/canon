@@ -1,5 +1,3 @@
-#!/usr/bin/env tsx
-
 /**
  * Generate Examples Documentation (Tutorial-First)
  *
@@ -28,14 +26,21 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, extname, join } from 'node:path'
-import consola from 'consola'
+import { createLogger } from '@relational-fabric/canon'
 import { parseExampleFile } from './examples/parser.js'
 import { generateExampleDoc } from './examples/renderer.js'
 import { getTestStatusForFile, loadTestReport } from './examples/test-status.js'
 
-const logger = consola.withTag('examples-docs')
+const logger = createLogger('canon:docs:examples')
 
 const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/examples'
+
+interface GenerateExamplesDocsOptions {
+  rootDir: string
+  examplesDir?: string
+  outputDir?: string
+  testReportPath?: string
+}
 
 /**
  * Discover examples in the examples directory
@@ -270,14 +275,10 @@ function replaceDirectory(tempDir: string, targetDir: string): void {
 /**
  * Generate examples documentation
  */
-export async function generateExamplesDocs(options: {
-  examplesDir?: string
-  outputDir?: string
-  testReportPath?: string
-} = {}): Promise<void> {
+export async function generateExamplesDocs(options: GenerateExamplesDocsOptions): Promise<void> {
   logger.info('🔍 Scanning examples directory...')
 
-  const rootDir = process.cwd()
+  const rootDir = options.rootDir
   const examplesDir = options.examplesDir ?? join(rootDir, 'examples')
   const outputDir = options.outputDir ?? join(rootDir, 'docs', 'examples')
   const testReportPath = options.testReportPath ?? join(rootDir, '.scratch', 'vitest-report.json')
@@ -351,15 +352,4 @@ export async function generateExamplesDocs(options: {
       rmSync(tmpBaseDir, { recursive: true, force: true })
     }
   }
-}
-
-async function main(): Promise<void> {
-  await generateExamplesDocs()
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    logger.error('❌ Error generating documentation:', error)
-    process.exitCode = 1
-  })
 }
