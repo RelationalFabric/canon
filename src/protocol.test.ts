@@ -15,7 +15,7 @@ import {
 type TestSeq = Record<string, Fn> & {
   first: (seq: unknown) => unknown
   rest: (seq: unknown) => unknown
-  empty: (seq: unknown) => boolean
+  isEmpty: (seq: unknown) => boolean
 }
 
 describe('protocol System', () => {
@@ -26,7 +26,7 @@ describe('protocol System', () => {
     PTestSeq = defineProtocol<TestSeq>({
       first: 'Returns the first item',
       rest: 'Returns the rest',
-      empty: 'Is it empty',
+      isEmpty: 'Is it empty',
     })
   })
 
@@ -36,13 +36,13 @@ describe('protocol System', () => {
       expect(typeof PTestSeq.$id).toBe('symbol')
       expect(typeof PTestSeq.first).toBe('function')
       expect(typeof PTestSeq.rest).toBe('function')
-      expect(typeof PTestSeq.empty).toBe('function')
+      expect(typeof PTestSeq.isEmpty).toBe('function')
     })
 
     it('should store documentation', () => {
       expect(PTestSeq.$docs.first).toBe('Returns the first item')
       expect(PTestSeq.$docs.rest).toBe('Returns the rest')
-      expect(PTestSeq.$docs.empty).toBe('Is it empty')
+      expect(PTestSeq.$docs.isEmpty).toBe('Is it empty')
     })
   })
 
@@ -51,50 +51,50 @@ describe('protocol System', () => {
       extendProtocol(PTestSeq, Array, {
         first: (arr: unknown) => (arr as unknown[])[0],
         rest: (arr: unknown) => (arr as unknown[]).slice(1),
-        empty: (arr: unknown) => (arr as unknown[]).length === 0,
+        isEmpty: (arr: unknown) => (arr as unknown[]).length === 0,
       })
 
       expect(PTestSeq.first([1, 2, 3])).toBe(1)
       expect(PTestSeq.rest([1, 2, 3])).toEqual([2, 3])
-      expect(PTestSeq.empty([])).toBe(true)
-      expect(PTestSeq.empty([1])).toBe(false)
+      expect(PTestSeq.isEmpty([])).toBe(true)
+      expect(PTestSeq.isEmpty([1])).toBe(false)
     })
 
     it('should extend protocol for String', () => {
       extendProtocol(PTestSeq, String, {
         first: (str: unknown) => (str as string)[0],
         rest: (str: unknown) => (str as string).slice(1),
-        empty: (str: unknown) => (str as string).length === 0,
+        isEmpty: (str: unknown) => (str as string).length === 0,
       })
 
       expect(PTestSeq.first('abc')).toBe('a')
       expect(PTestSeq.rest('abc')).toBe('bc')
-      expect(PTestSeq.empty('')).toBe(true)
-      expect(PTestSeq.empty('a')).toBe(false)
+      expect(PTestSeq.isEmpty('')).toBe(true)
+      expect(PTestSeq.isEmpty('a')).toBe(false)
     })
 
     it('should extend protocol for Null pseudo-constructor', () => {
       extendProtocol(PTestSeq, Null, {
         first: () => undefined,
         rest: () => null,
-        empty: () => true,
+        isEmpty: () => true,
       })
 
       expect(PTestSeq.first(null)).toBe(undefined)
       expect(PTestSeq.rest(null)).toBe(null)
-      expect(PTestSeq.empty(null)).toBe(true)
+      expect(PTestSeq.isEmpty(null)).toBe(true)
     })
 
     it('should extend protocol for Undefined pseudo-constructor', () => {
       extendProtocol(PTestSeq, Undefined, {
         first: () => undefined,
         rest: () => undefined,
-        empty: () => true,
+        isEmpty: () => true,
       })
 
       expect(PTestSeq.first(undefined)).toBe(undefined)
       expect(PTestSeq.rest(undefined)).toBe(undefined)
-      expect(PTestSeq.empty(undefined)).toBe(true)
+      expect(PTestSeq.isEmpty(undefined)).toBe(true)
     })
 
     it('should support ObjectFallback pseudo-constructor', () => {
@@ -104,12 +104,12 @@ describe('protocol System', () => {
           const entries = Object.entries(obj as object).slice(1)
           return Object.fromEntries(entries)
         },
-        empty: (obj: unknown) => Object.keys(obj as object).length === 0,
+        isEmpty: (obj: unknown) => Object.keys(obj as object).length === 0,
       })
 
       expect(PTestSeq.first({ a: 1, b: 2 })).toBe(1)
       expect(PTestSeq.rest({ a: 1, b: 2 })).toEqual({ b: 2 })
-      expect(PTestSeq.empty({})).toBe(true)
+      expect(PTestSeq.isEmpty({})).toBe(true)
     })
   })
 

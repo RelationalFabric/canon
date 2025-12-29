@@ -53,54 +53,106 @@ Canon's protocol system brings this pattern to TypeScript. Protocols define oper
 
 #### Defining a Protocol
 
-Protocols are defined using `defineProtocol()`. Each method gets a documentation string that describes its purpose:
+Protocols are defined using `defineProtocol()`. Each method gets a documentation string that describes its purpose. The type parameter is required—it defines the protocol interface.
+
+Protocol definitions should be separated from their implementations. Here's how to define a protocol in its own module:
 
 ```typescript
-import { defineProtocol, extendProtocol } from '@relational-fabric/canon'
+// path/to/seq.ts
+import { defineProtocol } from '@relational-fabric/canon'
+import type { Protocol, Satisfies } from '@relational-fabric/canon'
 
-const PSeq = defineProtocol({
+export interface Seq<T = unknown> {
+  first: (seq: Seq<T>) => T | undefined
+  rest: (seq: Seq<T>) => Seq<T>
+  isEmpty: (seq: Seq<T>) => boolean
+}
+
+export const PSeq = defineProtocol<Seq>({
   first: 'Returns the first item of the sequence',
   rest: 'Returns the rest of the sequence after the first item',
-  empty: 'Returns true if the sequence is empty',
+  isEmpty: 'Returns true if the sequence is empty',
 })
+
+export type SeqProtocol<T = unknown> = Protocol<Seq<T>>
+export type Seqable<T = unknown> = Satisfies<SeqProtocol<T>>
+
+// Register PSeq as an axiom for use with Satisfies
+declare module '@relational-fabric/canon' {
+  interface Axioms {
+    PSeq: SeqProtocol
+  }
+}
 ```
 
-The type parameter is required—it defines the protocol interface. The naming convention uses a `P` prefix for protocol values (like `PSeq` for a sequence protocol). This distinguishes them from TypeScript interfaces (which would be `Seq`) and avoids confusion with other naming patterns. The protocol identifier is the source of truth for the protocol's identity.
+The naming convention uses a `P` prefix for protocol values (like `PSeq` for a sequence protocol). This distinguishes them from TypeScript interfaces (which would be `Seq`) and avoids confusion with other naming patterns. The protocol identifier is the source of truth for the protocol's identity.
 
 #### Extending Protocols
 
-Use `extendProtocol()` to add implementations for specific types. Here we extend the sequence protocol for arrays and strings:
+Use `extendProtocol()` to add implementations for specific types. Implementations are typically defined in separate modules that import the protocol:
 
 ```typescript
+// path/to/seq-implementations.ts
+import { PSeq } from 'path/to/seq'
+import { extendProtocol } from '@relational-fabric/canon'
+
+// Extend Array to implement PSeq
 extendProtocol(PSeq, Array, {
   first: arr => arr[0],
   rest: arr => arr.slice(1),
-  empty: arr => arr.length === 0,
+  isEmpty: arr => arr.length === 0,
 })
 
+// Extend String to implement PSeq
 extendProtocol(PSeq, String, {
   first: str => str[0],
   rest: str => str.slice(1),
-  empty: str => str.length === 0,
+  isEmpty: str => str.length === 0,
+})
+
+// Extend Object (for Iterables) to implement PSeq
+extendProtocol(PSeq, Object, {
+  first: iter => {
+    const result = (iter as Iterable<unknown>)[Symbol.iterator]().next()
+    return result.done ? undefined : result.value
+  },
+  rest: iter => {
+    const iterator = (iter as Iterable<unknown>)[Symbol.iterator]()
+    iterator.next() // skip first
+    return Array.from(iterator)
+  },
+  isEmpty: iter => {
+    const result = (iter as Iterable<unknown>)[Symbol.iterator]().next()
+    return result.done === true
+  },
 })
 ```
 
-Now we can write polymorphic code that works with any sequence type:
+Now we can write polymorphic code that works with any sequence type. Usage code imports the protocol and types:
 
 ```typescript
+// path/to/usage.ts
+import { PSeq } from 'path/to/seq'
+import type { Seqable } from 'path/to/seq'
+
+const { first, rest, isEmpty } = PSeq
+
 const numbers = [1, 2, 3, 4, 5]
-const firstNumber = PSeq.first(numbers) // 1
+const firstNumber = first(numbers) // 1
 
 const greeting = 'Hello'
-const firstChar = PSeq.first(greeting) // 'H'
+const firstChar = first(greeting) // 'H'
 
-function take<T>(seq: T, n: number): unknown[] {
+const set = new Set([1, 2, 3, 4, 5])
+const firstSetItem = first(set) // 1
+
+function take<T extends Seqable>(seq: T, n: number): unknown[] {
   const result: unknown[] = []
   let current: unknown = seq
 
-  for (let i = 0; i < n && !PSeq.empty(current); i++) {
-    result.push(PSeq.first(current))
-    current = PSeq.rest(current)
+  for (let i = 0; i < n && !isEmpty(current); i++) {
+    result.push(first(current))
+    current = rest(current)
   }
 
   return result
@@ -108,6 +160,7 @@ function take<T>(seq: T, n: number): unknown[] {
 
 take([1, 2, 3, 4, 5], 3) // [1, 2, 3]
 take('Hello', 3) // ['H', 'e', 'l']
+take(new Set([1, 2, 3, 4, 5]), 3) // [1, 2, 3]
 ```
 
 The `take` function works with arrays, strings, and any other type that implements the sequence protocol. No conditional logic. No type checking. Just polymorphic dispatch.

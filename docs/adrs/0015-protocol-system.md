@@ -59,13 +59,13 @@ To avoid conflicts between TypeScript interfaces and runtime protocol values:
 interface Seq<T> {
   first: (seq: Satisfies<Seq<T>>) => T | undefined
   rest: (seq: Satisfies<Seq<T>>) => Seq<T>
-  empty?: (seq: Satisfies<Seq<T>>) => boolean
+  isEmpty?: (seq: Satisfies<Seq<T>>) => boolean
 }
 
 const PSeq = defineProtocol<Seq<unknown>>({
   first: seq => 'Returns the first item of the sequence',
   rest: seq => 'Returns the rest of the sequence',
-  empty: seq => 'Is the sequence empty'
+  isEmpty: seq => 'Is the sequence empty'
 })
 ```
 
@@ -115,7 +115,7 @@ Methods dispatch based on the type of the first argument:
 extendProtocol(PSeq, Array, {
   first: arr => arr[0],
   rest: arr => arr.slice(1),
-  empty: arr => arr.length === 0
+  isEmpty: arr => arr.length === 0
 })
 
 // Use protocol - dispatches to Array implementation
