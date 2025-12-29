@@ -1,9 +1,8 @@
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import process from 'node:process'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 
-import { Oclif } from '../../../kit.js'
-import { createLogger } from '../../../log.js'
+import { createLogger, Oclif } from '@relational-fabric/canon'
+import { generateAdrIndex } from '../../adr/index-generator.js'
 
 const { command: CanonCommand, flags: CanonFlags } = Oclif
 const logger = createLogger('canon:cli:adr:index')
@@ -33,17 +32,14 @@ export default class AdrIndexCommand extends CanonCommand {
     const { flags } = await this.parse(AdrIndexCommand)
     const resolvedFlags = flags as AdrIndexFlags
 
+    // Commands are the boundary - can read process state here
     const rootDir = process.cwd()
     const adrsDir = join(rootDir, resolvedFlags.adrsDir ?? 'docs/adrs')
     const readmePath = join(adrsDir, resolvedFlags.readmePath ?? 'README.md')
 
     try {
-      // Import and run the script logic
-      const packageRoot = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))))
-      const scriptPath = join(packageRoot, 'scripts', 'generate-adr-index.js')
-      const scriptUrl = pathToFileURL(scriptPath).href
-      const { generateAdrIndex } = await import(scriptUrl)
       await generateAdrIndex({
+        rootDir,
         adrsDir,
         readmePath,
       })

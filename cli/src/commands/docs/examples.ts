@@ -1,9 +1,8 @@
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import process from 'node:process'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 
-import { Oclif } from '../../../kit.js'
-import { createLogger } from '../../../log.js'
+import { createLogger, Oclif } from '@relational-fabric/canon'
+import { generateExamplesDocs } from '../../docs/examples-generator.js'
 
 const { command: CanonCommand, flags: CanonFlags } = Oclif
 const logger = createLogger('canon:cli:docs:examples')
@@ -38,6 +37,7 @@ export default class DocsExamplesCommand extends CanonCommand {
     const { flags } = await this.parse(DocsExamplesCommand)
     const resolvedFlags = flags as DocsExamplesFlags
 
+    // Commands are the boundary - can read process state here
     const rootDir = process.cwd()
     const examplesDir = join(rootDir, resolvedFlags.examplesDir ?? 'examples')
     const outputDir = join(rootDir, resolvedFlags.outputDir ?? 'docs/examples')
@@ -46,12 +46,8 @@ export default class DocsExamplesCommand extends CanonCommand {
       : undefined
 
     try {
-      // Import and run the script logic
-      const packageRoot = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))))
-      const scriptPath = join(packageRoot, 'scripts', 'generate-examples-docs.ts')
-      const scriptUrl = pathToFileURL(scriptPath).href
-      const { generateExamplesDocs } = await import(scriptUrl)
       await generateExamplesDocs({
+        rootDir,
         examplesDir,
         outputDir,
         testReportPath,
