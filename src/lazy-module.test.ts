@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest'
 import type { SelectionOptions } from './types/lazy-module.js'
+import { describe, expect, it } from 'vitest'
 import { CapabilityScores, createLazyModule } from './lazy-module.js'
 
 type SimpleFn = (x: number) => number
 interface SimpleOpts extends SelectionOptions { mode?: 'fast' | 'slow' }
 
-describe('Lazy Module Pattern', () => {
+describe('lazy Module Pattern', () => {
   describe('createLazyModule', () => {
     it('should create a module with fallback', () => {
       const { module } = createLazyModule<SimpleFn>({
@@ -138,7 +138,7 @@ describe('Lazy Module Pattern', () => {
     })
   })
 
-  describe('CapabilityScores', () => {
+  describe('capabilityScores', () => {
     it('should have correct score values', () => {
       expect(CapabilityScores.UNSUPPORTED).toBe(undefined)
       expect(CapabilityScores.RISKY).toBe(-1.0)

@@ -393,4 +393,3 @@ export async function createLazyModuleAsync<
 
   return { module: moduleFn, register }
 }
-

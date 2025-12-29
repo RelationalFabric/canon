@@ -116,15 +116,15 @@ For types without natural constructors (null and undefined), Canon provides cons
 
 // ```
 extendProtocol(PSeq, Null, {
-  first: (_) => undefined,
-  rest: (_) => null,
-  empty: (_) => true,
+  first: _ => undefined,
+  rest: _ => null,
+  empty: _ => true,
 })
 
 extendProtocol(PSeq, Undefined, {
-  first: (_) => undefined,
-  rest: (_) => undefined,
-  empty: (_) => true,
+  first: _ => undefined,
+  rest: _ => undefined,
+  empty: _ => true,
 })
 
 const nullFirst = PSeq.first(null)

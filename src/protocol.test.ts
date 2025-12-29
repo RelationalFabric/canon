@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest'
 import type { Fn } from './types/index.js'
 import type { Protocol } from './types/protocols.js'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   defineProtocol,
   extendProtocol,
@@ -18,7 +18,7 @@ type TestSeq = Record<string, Fn> & {
   empty: (seq: unknown) => boolean
 }
 
-describe('Protocol System', () => {
+describe('protocol System', () => {
   let PTestSeq: Protocol<TestSeq>
 
   beforeEach(() => {
@@ -31,13 +31,13 @@ describe('Protocol System', () => {
   })
 
   describe('defineProtocol', () => {
-      it('should create a protocol with methods', () => {
-        expect(PTestSeq.$name).toMatch(/^Protocol\d+$/)
-        expect(typeof PTestSeq.$id).toBe('symbol')
-        expect(typeof PTestSeq.first).toBe('function')
-        expect(typeof PTestSeq.rest).toBe('function')
-        expect(typeof PTestSeq.empty).toBe('function')
-      })
+    it('should create a protocol with methods', () => {
+      expect(PTestSeq.$name).toMatch(/^Protocol\d+$/)
+      expect(typeof PTestSeq.$id).toBe('symbol')
+      expect(typeof PTestSeq.first).toBe('function')
+      expect(typeof PTestSeq.rest).toBe('function')
+      expect(typeof PTestSeq.empty).toBe('function')
+    })
 
     it('should store documentation', () => {
       expect(PTestSeq.$docs.first).toBe('Returns the first item')
@@ -150,28 +150,28 @@ describe('Protocol System', () => {
     })
   })
 
-    describe('dispatch errors', () => {
-      it('should throw when no implementation exists', () => {
-        expect(() => PTestSeq.first([1, 2, 3])).toThrow(
-          /No implementation of Protocol\d+\.first found for type Array/,
-        )
-      })
+  describe('dispatch errors', () => {
+    it('should throw when no implementation exists', () => {
+      expect(() => PTestSeq.first([1, 2, 3])).toThrow(
+        /No implementation of Protocol\d+\.first found for type Array/,
+      )
     })
+  })
 
   describe('constructors', () => {
-    it('Null should be a constructor that returns null', () => {
+    it('null should be a constructor that returns null', () => {
       expect(typeof Null).toBe('function')
       expect(Null()).toBe(null)
       expect(new Null()).toBe(null)
     })
 
-    it('Undefined should be a constructor that returns undefined', () => {
+    it('undefined should be a constructor that returns undefined', () => {
       expect(typeof Undefined).toBe('function')
       expect(Undefined()).toBe(undefined)
       expect(new Undefined()).toBe(undefined)
     })
 
-    it('ObjectFallback should be a constructor that returns empty object', () => {
+    it('objectFallback should be a constructor that returns empty object', () => {
       expect(typeof ObjectFallback).toBe('function')
       expect(ObjectFallback()).toEqual({})
       expect(new ObjectFallback()).toEqual({})
