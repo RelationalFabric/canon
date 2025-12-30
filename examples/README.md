@@ -76,7 +76,7 @@ Demonstrates the Protocol System (ADR-0015):
 
 Demonstrates the Lazy Module Pattern (ADR-0016):
 
-- Creating lazy modules with `createLazyModule()`
+- Creating lazy modules with `defineLazyModule()`
 - Registering implementations with capability scores
 - Automatic selection of the best implementation
 - Option-based selection with `.select(opts)`

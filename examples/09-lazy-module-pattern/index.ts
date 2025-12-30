@@ -18,7 +18,7 @@ Each implementation reports a "capability score" and the highest-scoring impleme
 // ```
 import {
   CapabilityScores,
-  createLazyModule,
+  defineLazyModule,
 } from '@relational-fabric/canon'
 // ```
 
@@ -35,7 +35,7 @@ interface HashOptions extends Record<string, unknown> {
   algorithm?: 'simple' | 'djb2' | 'fnv1a'
 }
 
-const { module: hash, register: registerHash } = createLazyModule<HashFn, HashOptions>({
+const hash = defineLazyModule<HashFn, HashOptions>({
   name: 'hash',
   defaultOptions: { algorithm: 'simple' },
   fallback: () => (data: string) => {
@@ -87,7 +87,7 @@ Register implementations with higher scores to override the fallback. The `suppo
 
 // ```
 // DJB2 hash - a well-known string hash algorithm
-registerHash({
+hash.register({
   name: 'djb2',
   supports: (opts) => {
     if (opts?.algorithm === 'djb2')
@@ -104,7 +104,7 @@ registerHash({
 })
 
 // FNV-1a hash - another well-known algorithm
-registerHash({
+hash.register({
   name: 'fnv1a',
   supports: (opts) => {
     if (opts?.algorithm === 'fnv1a')

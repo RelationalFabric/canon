@@ -57,14 +57,14 @@ function optionsToKey(opts: SelectionOptions): string {
  *
  * @example
  * ```typescript
- * const { module: hash, register } = createLazyModule<HashFn, HashOpts>({
+ * const hash = defineLazyModule<HashFn, HashOpts>({
  *   name: 'hash',
  *   defaultOptions: { width: 64 },
  *   fallback: () => (data) => simpleHash(data)
  * })
  *
  * // Register implementations
- * register({
+ * hash.register({
  *   name: 'xxhash',
  *   supports: (opts) => opts.width === 64 ? 1.0 : undefined,
  *   implementation: () => xxhash64
@@ -75,13 +75,10 @@ function optionsToKey(opts: SelectionOptions): string {
  * const h128 = hash.select({ width: 128 })(data) // Select for specific opts
  * ```
  */
-export function createLazyModule<
+export function defineLazyModule<
   TFn extends Fn,
   TOpts extends SelectionOptions = SelectionOptions,
->(config: LazyModuleConfig<TFn, TOpts>): {
-  module: LazyModuleFn<TFn, TOpts>
-  register: (impl: LazyImplementation<TFn, TOpts>) => void
-} {
+>(config: LazyModuleConfig<TFn, TOpts>): LazyModuleFn<TFn, TOpts> {
   // Storage for registered implementations
   const implementations: Array<LazyImplementation<TFn, TOpts>> = []
 
@@ -223,173 +220,8 @@ export function createLazyModule<
     selectionCache.clear()
   }
 
-  return { module: moduleFn, register }
-}
+  // Add register as a method on the module function
+  moduleFn.register = register
 
-/**
- * Create a lazy module with async implementation loading
- *
- * Similar to createLazyModule but supports async implementation loading.
- *
- * @param config - Configuration for the lazy module
- * @returns A promise-based lazy module
- */
-export async function createLazyModuleAsync<
-  TFn extends Fn,
-  TOpts extends SelectionOptions = SelectionOptions,
->(config: LazyModuleConfig<TFn, TOpts>): Promise<{
-  module: LazyModuleFn<TFn, TOpts>
-  register: (impl: LazyImplementation<TFn, TOpts>) => Promise<void>
-}> {
-  // Storage for registered implementations
-  const implementations: Array<LazyImplementation<TFn, TOpts>> = []
-
-  // Resolved implementations cache
-  const resolvedImpls = new Map<string, TFn>()
-
-  // Memoization caches
-  let defaultSelection: SelectionResult<TFn> | undefined
-  const selectionCache = new Map<string, SelectionResult<TFn>>()
-
-  // Track if we've added the fallback
-  let fallbackAdded = false
-
-  /**
-   * Ensure fallback is registered and resolved
-   */
-  async function ensureFallback(): Promise<void> {
-    if (fallbackAdded)
-      return
-
-    fallbackAdded = true
-    const fallbackImpl: LazyImplementation<TFn, TOpts> = {
-      name: '$fallback',
-      supports: () => CapabilityScores.FALLBACK,
-      implementation: config.fallback,
-    }
-    implementations.push(fallbackImpl)
-
-    // Pre-resolve the fallback
-    const fn = await fallbackImpl.implementation()
-    resolvedImpls.set('$fallback', fn)
-  }
-
-  /**
-   * Select the best implementation for given options
-   */
-  async function selectBest(opts: TOpts): Promise<SelectionResult<TFn>> {
-    await ensureFallback()
-
-    // Score all implementations
-    const scored: Array<{ impl: LazyImplementation<TFn, TOpts>, score: number }> = []
-
-    for (const impl of implementations) {
-      const score = impl.supports(opts)
-      if (score !== undefined) {
-        scored.push({ impl, score })
-      }
-    }
-
-    if (scored.length === 0) {
-      throw new Error(
-        `No implementation of ${config.name} supports the requested options: ${JSON.stringify(opts)}`,
-      )
-    }
-
-    // Sort by score (highest first)
-    scored.sort((a, b) => b.score - a.score)
-
-    const winner = scored[0]
-
-    // Get or resolve the implementation
-    let fn = resolvedImpls.get(winner.impl.name)
-    if (!fn) {
-      fn = await winner.impl.implementation()
-      resolvedImpls.set(winner.impl.name, fn)
-    }
-
-    return {
-      name: winner.impl.name,
-      score: winner.score,
-      fn,
-    }
-  }
-
-  // Pre-initialize with default options
-  await ensureFallback()
-  const opts = (config.defaultOptions || {}) as TOpts
-  defaultSelection = await selectBest(opts)
-
-  /**
-   * Get or compute the default selection
-   */
-  function getDefaultSelection(): SelectionResult<TFn> {
-    if (!defaultSelection) {
-      throw new Error('Default selection not initialized')
-    }
-    return defaultSelection
-  }
-
-  /**
-   * The main module function - uses default selection
-   */
-  const moduleFn = ((...args: unknown[]): unknown => {
-    const selection = getDefaultSelection()
-    return selection.fn(...args)
-  }) as LazyModuleFn<TFn, TOpts>
-
-  /**
-   * Select implementation based on options (sync, uses cache)
-   */
-  moduleFn.select = (opts: TOpts): TFn => {
-    const key = optionsToKey(opts)
-    const cached = selectionCache.get(key)
-
-    if (!cached) {
-      throw new Error(
-        `Selection for options ${JSON.stringify(opts)} not pre-computed. `
-        + `Use selectAsync() or pre-register implementations.`,
-      )
-    }
-
-    return cached.fn
-  }
-
-  /**
-   * Get the current default selection
-   */
-  moduleFn.getDefault = (): SelectionResult<TFn> => {
-    return getDefaultSelection()
-  }
-
-  /**
-   * Get all registered implementations
-   */
-  moduleFn.getImplementations = (): Array<{ name: string, supports: (opts: TOpts) => CapabilityScore }> => {
-    return implementations.map(impl => ({
-      name: impl.name,
-      supports: impl.supports,
-    }))
-  }
-
-  /**
-   * Register a new implementation
-   */
-  async function register(impl: LazyImplementation<TFn, TOpts>): Promise<void> {
-    implementations.push(impl)
-
-    // Pre-resolve the implementation
-    const fn = await impl.implementation()
-    resolvedImpls.set(impl.name, fn)
-
-    // Clear caches when new implementation is registered
-    defaultSelection = undefined
-    selectionCache.clear()
-
-    // Recompute default selection
-    const defaultOpts = (config.defaultOptions || {}) as TOpts
-    defaultSelection = await selectBest(defaultOpts)
-  }
-
-  return { module: moduleFn, register }
+  return moduleFn
 }

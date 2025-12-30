@@ -109,6 +109,13 @@ export type LazyModuleFn<TFn extends Fn, TOpts extends SelectionOptions = Select
    * Get all registered implementations
    */
   getImplementations: () => Array<{ name: string, supports: (opts: TOpts) => CapabilityScore }>
+
+  /**
+   * Register a new implementation
+   *
+   * @param impl - The implementation to register
+   */
+  register: (impl: LazyImplementation<TFn, TOpts>) => void
 }
 
 /**

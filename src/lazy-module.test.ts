@@ -1,14 +1,14 @@
 import type { SelectionOptions } from './types/lazy-module.js'
 import { describe, expect, it } from 'vitest'
-import { CapabilityScores, createLazyModule } from './lazy-module.js'
+import { CapabilityScores, defineLazyModule } from './lazy-module.js'
 
 type SimpleFn = (x: number) => number
 interface SimpleOpts extends SelectionOptions { mode?: 'fast' | 'slow' }
 
 describe('lazy Module Pattern', () => {
-  describe('createLazyModule', () => {
+  describe('defineLazyModule', () => {
     it('should create a module with fallback', () => {
-      const { module } = createLazyModule<SimpleFn>({
+      const module = defineLazyModule<SimpleFn>({
         name: 'test',
         fallback: () => x => x * 2,
       })
@@ -17,7 +17,7 @@ describe('lazy Module Pattern', () => {
     })
 
     it('should select fallback by default', () => {
-      const { module } = createLazyModule<SimpleFn>({
+      const module = defineLazyModule<SimpleFn>({
         name: 'test',
         fallback: () => x => x * 2,
       })
@@ -28,12 +28,12 @@ describe('lazy Module Pattern', () => {
     })
 
     it('should prefer higher-scoring implementations', () => {
-      const { module, register } = createLazyModule<SimpleFn>({
+      const module = defineLazyModule<SimpleFn>({
         name: 'test',
         fallback: () => x => x * 2,
       })
 
-      register({
+      module.register({
         name: 'better',
         supports: () => 0.5,
         implementation: () => x => x * 3,
@@ -45,18 +45,18 @@ describe('lazy Module Pattern', () => {
     })
 
     it('should support option-based selection', () => {
-      const { module, register } = createLazyModule<SimpleFn, SimpleOpts>({
+      const module = defineLazyModule<SimpleFn, SimpleOpts>({
         name: 'test',
         fallback: () => x => x * 2,
       })
 
-      register({
+      module.register({
         name: 'fast',
         supports: opts => opts?.mode === 'fast' ? 1.0 : undefined,
         implementation: () => x => x * 10,
       })
 
-      register({
+      module.register({
         name: 'slow',
         supports: opts => opts?.mode === 'slow' ? 1.0 : undefined,
         implementation: () => x => x * 1,
@@ -74,7 +74,7 @@ describe('lazy Module Pattern', () => {
     })
 
     it('should memoize selections', () => {
-      const { module, register } = createLazyModule<SimpleFn, SimpleOpts>({
+      const module = defineLazyModule<SimpleFn, SimpleOpts>({
         name: 'test',
         fallback: () => x => x * 2,
       })
@@ -99,12 +99,12 @@ describe('lazy Module Pattern', () => {
     })
 
     it('should list implementations', () => {
-      const { module, register } = createLazyModule<SimpleFn>({
+      const module = defineLazyModule<SimpleFn>({
         name: 'test',
         fallback: () => x => x * 2,
       })
 
-      register({
+      module.register({
         name: 'impl1',
         supports: () => 0.5,
         implementation: () => x => x,
@@ -116,7 +116,7 @@ describe('lazy Module Pattern', () => {
     })
 
     it('should clear cache when new implementation registered', () => {
-      const { module, register } = createLazyModule<SimpleFn>({
+      const module = defineLazyModule<SimpleFn>({
         name: 'test',
         fallback: () => x => x * 2,
       })
@@ -126,7 +126,7 @@ describe('lazy Module Pattern', () => {
       expect(module.getDefault().name).toBe('$fallback')
 
       // Register better implementation
-      register({
+      module.register({
         name: 'better',
         supports: () => 0.5,
         implementation: () => x => x * 5,

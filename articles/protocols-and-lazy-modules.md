@@ -43,7 +43,7 @@ This is the same problem Canons solve, but for operations rather than data extra
 
 ### Fabrics of Proof: Trading Suspicion for Polymorphism
 
-I've always viewed the Curry-Howard Correspondence as a guiding principle: programs are proofs, and types are propositions. If a type is a proposition, then an operation should be a Protocol. By moving to `Satisfies<Protocol<Associative>>`, your logic for extracting an ID doesn't care if it's hitting a key in a JSON object or a method on a Class. As I argued in ["The Logic of Claims"](https://github.com/RelationalFabric/howard), we move from an 'Infrastructure of Suspicion' (constantly checking types) to a 'Fabric of Proof' where the behavior is guaranteed by the protocol dispatch.
+I've always viewed the [Curry-Howard Correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence) as a guiding principle: programs are proofs, and types are propositions. If a type is a proposition, then an operation should be a Protocol. By moving to `Satisfies<Protocol<Associative>>`, your logic for extracting an ID doesn't care if it's hitting a key in a JSON object or a method on a Class. As I argued in ["The Logic of Claims"](https://github.com/RelationalFabric/howard), we move from an 'Infrastructure of Suspicion' (constantly checking types) to a 'Fabric of Proof' where the behavior is guaranteed by the protocol dispatch.
 
 The inspiration comes from Clojure's protocol system, which I referenced when building Howard. Clojure protocols define sets of operations that types can implement. They dispatch based on the type of the first argument, allowing you to extend types without modifying their original definitions.
 
@@ -189,15 +189,15 @@ Lazy Modules extend the "lazy" philosophy: if a sequence is 'lazy' because it de
 
 You might need native bindings for performance, but they're only available on specific platforms. You might need WASM modules that work in browsers but not Node.js. You might need x86-optimised code that breaks on ARM architectures.
 
-I've lost count of how many times I've built something on my Mac, watched it work perfectly, then had CI fail because the build environment is different. Native bindings that work on ARM don't exist for x86. WASM modules that work locally can't be found in a serverless environment. "It worked on my machine" becomes "it literally can't work on that machine."
+More often than I would like, I've built something on my Mac, watched it work perfectly, then had CI fail because the build environment is different. Native bindings that work on ARM don't exist for x86. WASM modules that work locally can't be found in a serverless environment. "It worked on my machine" becomes "it literally can't work on that machine."
 
-I've lost count of the hours wasted fighting bundlers like Rollup or Vite over environment-specific bindings. Everything works locally because your machine has the native bindings. Then you deploy, and the production environment doesn't have them. The build fails, or worse, it succeeds but the runtime crashes when it tries to load a missing native module.
+Almost as often, I've wasted hours fighting bundlers like Rollup or Vite over environment-specific bindings. Everything works locally because your machine has the native bindings. Then you deploy, and the production environment doesn't have them. The build fails, or worse, it succeeds but the runtime crashes when it tries to load a missing native module.
 
 The challenge: how do you select the best available implementation while guaranteeing something always works?
 
 ### Architecture Independence: Killing "It Works on My Machine"
 
-As my colleagues will tell you, the 'Logical Tax' (the computational cost of proving a claim at runtime) is the biggest barrier to adoption. To eliminate this tax, we need the fastest possible implementations: WASM for the browser, native C++ for Node.js. But I refuse to make the developer manually select these. The Lazy Module Pattern introduces a capability-based selection system. A pure JS fallback always scores a -0.1: it's the choice of last resort. We aren't just asserting types; we are asserting that the environment can handle the proof at peak efficiency.
+The 'Logical Tax' (the computational cost of proving a claim at runtime) is the biggest barrier to adoption. To eliminate this tax, we need the fastest possible implementations: WASM for the browser, native C++ for Node.js. But I refuse to make the developer manually select these. The Lazy Module Pattern introduces a capability-based selection system. A pure JS fallback always scores a -0.1: it's the choice of last resort. We aren't just asserting types; we are asserting that the environment can handle the proof at peak efficiency.
 
 The pattern is inspired by plugin systems: implementations register themselves without modifying the core module, and selection happens based on what each implementation claims to support.
 
@@ -223,10 +223,11 @@ Selection is cached per unique set of options.
 
 #### Creating a Lazy Module
 
-Here's how you create a lazy module for encryption:
+The power of lazy modules comes from decoupling the interface from implementations. Here's how a real-world setup works:
 
 ```typescript
-import { createLazyModule, CapabilityScores } from '@relational-fabric/canon'
+// src/encrypt.ts
+import { defineLazyModule } from '@relational-fabric/canon'
 
 type EncryptOpts = {
   algorithm: 'AES-256-GCM' | 'ChaCha20-Poly1305'
@@ -234,7 +235,7 @@ type EncryptOpts = {
 
 type EncryptFn = (data: Uint8Array, key: Uint8Array, opts: EncryptOpts) => Uint8Array
 
-const { module: encrypt, register } = createLazyModule<EncryptFn, EncryptOpts>({
+export default defineLazyModule<EncryptFn, EncryptOpts>({
   name: 'encrypt',
   defaultOptions: { algorithm: 'AES-256-GCM' },
   fallback: () => (data, key, opts) => {
@@ -243,9 +244,15 @@ const { module: encrypt, register } = createLazyModule<EncryptFn, EncryptOpts>({
     return pureJsEncrypt(data, key, opts)
   },
 })
+```
 
-// Register native implementation (if available)
-register({
+Native implementations register themselves in separate files:
+
+```typescript
+// src/encrypt-native.ts
+import encrypt from './encrypt'
+
+encrypt.register({
   name: 'native-crypto',
   supports: (opts) => {
     if (opts.algorithm === 'AES-256-GCM' && hasNodeCrypto()) {
@@ -261,13 +268,21 @@ register({
     }
   },
 })
-
-// Use the module
-const encrypted = encrypt(data, key, { algorithm: 'AES-256-GCM' })
-// Uses native crypto on Node.js, pure JS fallback elsewhere
 ```
 
-The module automatically selects the best available implementation based on the options. On Node.js with native crypto available, it uses the native implementation. In a browser or edge runtime, it falls back to pure JavaScript. The same code works everywhere.
+Consumer code imports only what it needs:
+
+```typescript
+// src/app.ts
+import encrypt from './encrypt'
+// Optionally import implementations based on environment
+// import './encrypt-native' // Only in Node.js builds
+
+const encrypted = encrypt(data, key, { algorithm: 'AES-256-GCM' })
+// Automatically uses best available implementation
+```
+
+The core module exports the module as default. Implementations register themselves in separate files, and consumers only import what they need based on their environment. The module automatically selects the best available implementation based on the options. On Node.js with native crypto available, it uses the native implementation. In a browser or edge runtime, it falls back to pure JavaScript. The same code works everywhere.
 
 ---
 
@@ -341,7 +356,7 @@ extendProtocol(PAssoc, Map, {
 })
 ```
 
-I've spent years fighting the 'imperative smuggle' in our APIs. `get` and `set` give me the ick because they assume we are 'reaching into' a container to twist a knob. We don't 'set' fields in a Fabric of Proof; we patch a proposition with novelty. This isn't semantic hairsplitting; it's a commitment to the idea that data is a series of immutable propositions. We aren't changing the past; we are declaring a new version of the truth.
+I've spent more of my career than I'd like to admit passive-aggressively fighting imperative thinking smuggling its way into function names. `get` and `set` make me wince when I see them because they assume these objects are no more than receptacles for data, rather than a linguistic machete to cut through the domain. Relational naming tells us something about the model our code represents rather than the operations we're performing to get there. This is why the Kanren family of languages can run forward and backwards: their statements are purely relational (see Will Byrd's ["The Most Beautiful Program Ever Written"](https://www.youtube.com/watch?v=OyfBQmvr2Hc) for a stunning demonstration). When we use `select` and `patch`, we're describing how our data relate to each other, not reaching into containers to manipulate them. Our code becomes a statement about the domain itself.
 
 Now we can write universal access functions. These move us from imperative accessors to relational operations:
 
@@ -363,6 +378,8 @@ function select<T, K extends string>(collection: T, ...keys: K[]): Record<K, unk
 }
 ```
 
+Notice that we still have our getters and setters (`PAssoc.get` and `PAssoc.set`), but they're like the assembly language of data (too low level for us higher beings. *wink*)
+
 **The Universal API: A Relational Cheat Sheet**
 
 * **`select` (The Projection)**: Replaces `getOf` and manual accessors. It returns a **Normal Form** (a plain object) instead of a raw value, making it purpose-built for destructuring.
@@ -370,16 +387,19 @@ function select<T, K extends string>(collection: T, ...keys: K[]): Record<K, unk
 
 #### Lazy Module for Runtime Independence
 
-Next, we create a lazy module for JWT signing:
+The power of lazy modules comes from decoupling the interface from implementations. Here's how a real-world setup works:
 
 ```typescript
+// src/sign-jwt.ts
+import { defineLazyModule } from '@relational-fabric/canon'
+
 type SignOpts = {
   algorithm: 'HS256' | 'RS256' | 'ES256'
 }
 
 type SignFn = (header: object, payload: object, secret: string, opts: SignOpts) => string
 
-const { module: signJWT, register: registerSigner } = createLazyModule<SignFn, SignOpts>({
+export default defineLazyModule<SignFn, SignOpts>({
   name: 'signJWT',
   defaultOptions: { algorithm: 'HS256' },
   fallback: () => (header, payload, secret, opts) => {
@@ -387,9 +407,15 @@ const { module: signJWT, register: registerSigner } = createLazyModule<SignFn, S
     return pureJsSign(header, payload, secret, opts)
   },
 })
+```
 
-// Register Node.js native implementation
-registerSigner({
+Node.js and browser implementations register themselves in separate files:
+
+```typescript
+// src/sign-jwt-node.ts
+import signJWT from './sign-jwt'
+
+signJWT.register({
   name: 'node-crypto',
   supports: (opts) => {
     if (typeof require !== 'undefined' && require.resolve('crypto')) {
@@ -404,9 +430,13 @@ registerSigner({
     }
   },
 })
+```
 
-// Register Web Crypto API implementation
-registerSigner({
+```typescript
+// src/sign-jwt-web.ts
+import signJWT from './sign-jwt'
+
+signJWT.register({
   name: 'web-crypto',
   supports: (opts) => {
     if (typeof crypto !== 'undefined' && crypto.subtle) {
@@ -424,11 +454,19 @@ registerSigner({
 })
 ```
 
+The core module exports the lazy module as default. Implementations register themselves in separate files using the `register` method, and consumers only import what they need based on their environment. The module automatically selects the best available implementation.
+
 #### Bringing It Together
 
-Now we can write a universal JWT signing function:
+Consumer code imports the core module and optionally loads implementations:
 
 ```typescript
+// src/app.ts
+import signJWT from './sign-jwt'
+// Optionally import implementations based on environment
+// import './sign-jwt-node' // Only in Node.js builds
+// import './sign-jwt-web'  // Only in browser builds
+
 function signToken<T>(token: T, secret: string, algorithm: 'HS256' | 'RS256' | 'ES256' = 'HS256'): T {
   const { header, payload } = select(token, 'header', 'payload')
   
