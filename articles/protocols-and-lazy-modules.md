@@ -504,7 +504,9 @@ This is how we end the cycle of disposable code. We stop building 'Validators' a
 
 I'm sharing these patterns now because they are the tax-collectors for the 'Logical Tax.' You can't have universal fast hashing if your hashing logic is coupled to a POJO. You can't have persistent metadata if your data structures can't handle a patch. We're starting with the Associative protocol because it's the DML (Data Manipulation Language) of the Universal API. The speed and the persistence come next.
 
-Over the next few releases, we'll be adding all the foundational protocols you would expect to find: Associative, Sequential, Countable, and more. These aren't just convenience APIs; they're the building blocks that make universal operations possible across any data structure.
+Over the next few releases, we'll be adding all the foundational protocols you would expect to find: Associative, Sequential, Countable, and more. It turns out that most data structures can be modeled with a few common, simple interfaces so rather than spending most of our time messing around with implementation details; let's start writing software.
+
+Here's the kicker: if you're with me on the Curry-Howard Correspondence bandwagon, you might find yourself asking: if protocols provide dispatch on types, and propositions are types, then why can't we dispatch on propositions also? If that's you, you get a prize. Stay tuned for the answer to that question.
 
 ---
 
