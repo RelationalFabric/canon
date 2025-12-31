@@ -16,6 +16,4 @@
 * [14. rollup-optional-dependencies-transparent-fix](0014-rollup-optional-dependencies-transparent-fix.md)
 * [15. protocol-system](0015-protocol-system.md)
 * [16. lazy-module-pattern](0016-lazy-module-pattern.md)
-* [17. associative-protocol](0017-associative-protocol.md)
-* [18. universal-api-operations](0018-universal-api-operations.md)
-* [19. xxhash3-lazy-module](0019-xxhash3-lazy-module.md)
+* [17. protocols-and-lazy-modules-for-hashing](0017-protocols-and-lazy-modules-for-hashing.md)
