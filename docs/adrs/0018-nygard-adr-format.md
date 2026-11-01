@@ -9,7 +9,7 @@ format: y-statement
 
 ## Statement
 
-Every architectural ADR uses Michael Nygard's format and only these sections, in this order: Title, Status (with Date), Context, Decision, Consequences. Policy ADRs keep the Y-statement format from ADR-0007. New ADRs start from `docs/adrs/template.md`.
+Every architectural ADR uses Michael Nygard's format and only these sections, in this order: Title, Status (with Date), Context, Decision, Consequences. Policy ADRs keep the Y-statement format from ADR-0007. New ADRs start from `docs/adr-template.md`.
 
 ## Rationale
 
@@ -17,6 +17,6 @@ ADRs so far have used three different heading sets: MADR-style (Considered Optio
 
 ## Implications
 
-- `docs/adrs/template.md` holds the Nygard template, and `docs/adrs.md` points to it.
+- `docs/adr-template.md` holds the Nygard template, and `docs/adrs.md` points to it.
 - New ADRs, including those still proposed, use the template.
 - Accepted ADRs are not rewritten; their content stays as decided.
