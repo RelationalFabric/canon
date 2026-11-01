@@ -3,7 +3,7 @@
 - Status: proposed
 - Date: 2026-11-01
 
-## Context and Problem Statement
+## Context
 
 Canon currently has three layers:
 
@@ -17,7 +17,7 @@ The immediate driver is DCSGS (the Distributed Context-Sensitive Graph Store). C
 
 A second need follows from the first. Once several of these bundles exist in different bounded contexts, there has to be a way to map one onto another without corrupting meaning.
 
-## Decision Drivers
+The decision must satisfy these constraints:
 
 - Consumers bring their own model; libraries depend on requirements, not on canons.
 - Requirements must be reusable and composable, not restated in every canon.
@@ -25,9 +25,11 @@ A second need follows from the first. Once several of these bundles exist in dif
 - Mapping between bundles must preserve meaning, and that must be checkable.
 - Follow canon's vocabulary and patterns. No new names beyond those decided here.
 
-## Decision Outcome
+Related: ADR-0015: Protocol System (the "canons of canons" problem), ADR-0016: Lazy Module Pattern, `docs/axioms.md`, `docs/canons.md`, Theory and theory morphism in algebraic specification (OBJ, CASL, institution theory).
 
-Add two first-class concepts to canon, **Theory** and **Morphism**.
+## Decision
+
+We will add two first-class concepts to canon, **Theory** and **Morphism**.
 
 ### Theory
 
@@ -72,24 +74,22 @@ A Morphism must be:
 
 `Type` is currently registered as a `KeyNameAxiom`. Theories need type hierarchy (for example, "every model of X is a model of Y" at the data level). This ADR records that Type is to become its own core axiom kind that can express a type hierarchy. Its design is left to a follow-up ADR.
 
-## Positive Consequences
+## Consequences
+
+Easier:
 
 - Libraries such as DCSGS state their requirements once, as Theories, and accept any consumer Canon that models them.
 - The ~25 DCSGS requirements become a few Theories that build on each other instead of a flat list.
 - Meaning is kept intact across bounded contexts (for example, an FME ontology and a DCSGS Theory) through Morphisms.
 - Clear separation: axiom kinds, axioms, canons and protocols keep their current meaning.
 
-## Negative Consequences
+Harder:
 
 - Two more concepts to learn, on top of axiom kinds, axioms, canons, protocols and lazy modules.
 - "Model" is now a verb (a Canon models a Theory). Docs must not also use "model" for a consumer's data model; call that the consumer's Canon.
 - Checking that a Morphism preserves axioms may need howard, which adds a dependency for full soundness checks.
 
-## Implementation Details
-
-To follow once the open questions below are settled.
-
-## Open Questions
+Still to decide:
 
 1. **Laws.** Does a Theory carry laws relating its axioms (for example, Version increases over time) from the start, or only axiom requirements for now?
 2. **Checking "models".** Is "a Canon models a Theory" checked at type level only, at runtime too, or proven through a howard claim?
@@ -98,10 +98,3 @@ To follow once the open questions below are settled.
 5. **Type axiom kind.** Shape of the Type axiom kind with hierarchy, in a follow-up ADR.
 6. **Registration.** How Theories and Morphisms are registered (for example, alongside `Axioms` and canons in the registry).
 7. **ADR number.** 0017 assumes no newer canon ADR exists on `develop` since the local copy (release 1.4.1, 29 Dec 2025).
-
-## Links
-
-- ADR-0015: Protocol System (the "canons of canons" problem)
-- ADR-0016: Lazy Module Pattern
-- `docs/axioms.md`, `docs/canons.md`
-- Theory and theory morphism in algebraic specification (OBJ, CASL, institution theory)

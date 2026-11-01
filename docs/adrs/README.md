@@ -17,3 +17,4 @@
 * [15. protocol-system](0015-protocol-system.md)
 * [16. lazy-module-pattern](0016-lazy-module-pattern.md)
 * [17. theories-and-morphisms](0017-theories-and-morphisms.md)
+* [18. nygard-adr-format](0018-nygard-adr-format.md)

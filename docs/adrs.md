@@ -18,6 +18,8 @@ For architectural decisions, each ADR follows the format defined by [Michael Nyg
 4. **Decision** - The change that we're proposing or have made
 5. **Consequences** - What becomes easier or more difficult to do and any risks introduced by this change
 
+New ADRs start from `docs/adrs/template.md` (see ADR-0018).
+
 ### Y-Statement Format
 
 For policy decisions and ongoing constraints, use the Y-statement format:
@@ -102,7 +104,7 @@ npm install
 
 If adr-tools is not available, you can create ADRs manually:
 
-1. Copy the template from an existing ADR file
+1. Copy `docs/adrs/template.md`
 2. Rename it to `XXXX-descriptive-title.md` where XXXX is the next sequential number
 3. Fill in the template with your decision
 4. Use `npm run build:adr` to generate updated artifacts
