@@ -16,3 +16,4 @@
 * [14. rollup-optional-dependencies-transparent-fix](0014-rollup-optional-dependencies-transparent-fix.md)
 * [15. protocol-system](0015-protocol-system.md)
 * [16. lazy-module-pattern](0016-lazy-module-pattern.md)
+* [17. theories-and-morphisms](0017-theories-and-morphisms.md)
