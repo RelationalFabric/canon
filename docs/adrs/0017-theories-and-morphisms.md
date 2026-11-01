@@ -85,6 +85,10 @@ A Morphism must be:
 - "Model" is now a verb (a Canon models a Theory). Docs must not also use "model" for a consumer's data model; call that the consumer's Canon.
 - Checking that a Morphism preserves axioms may need howard, which adds a dependency for full soundness checks.
 
+## Implementation Details
+
+To follow once the open questions below are settled.
+
 ## Open Questions
 
 1. **Laws.** Does a Theory carry laws relating its axioms (for example, Version increases over time) from the start, or only axiom requirements for now?
