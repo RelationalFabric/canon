@@ -1,7 +1,10 @@
 # ADR-0017: Theories and Morphisms
 
-- Status: proposed
-- Date: 2026-11-01
+Date: 2026-11-01
+
+## Status
+
+Proposed
 
 ## Context
 

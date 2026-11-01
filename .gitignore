@@ -141,3 +141,6 @@ vite.config.ts.timestamp-*
 # Generated radar data files
 docs/public/radar/
 .scratch/
+
+# Sequence counter written by @meza/adr-tools
+.adr-sequence.lock

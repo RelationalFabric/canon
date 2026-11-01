@@ -215,9 +215,8 @@ export default class InitCommand extends CanonCommand {
         'build:docs': 'npm run build:docs:examples && canon docs:rename-readmes && npx vitepress build && canon docs:rename-readmes --restore',
         'build:docs:restore': 'canon docs:rename-readmes --restore',
         'build:radar': 'canon radar:convert',
-        'build:adr': 'npm-run-all build:adr:toc build:adr:index',
+        'build:adr': 'npm run build:adr:index',
         'build:adr:index': 'canon adr:index',
-        'build:adr:toc': 'cd docs/adrs && npx adr-tools generate toc',
         'dev': 'tsx --watch src/index.ts',
         'test': 'npm run check:test',
       }

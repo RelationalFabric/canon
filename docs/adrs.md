@@ -13,12 +13,12 @@ Architecture Decision Records are documents that capture important architectural
 For architectural decisions, each ADR follows the format defined by [Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions):
 
 1. **Title** - A descriptive title
-2. **Status** - Proposed, Accepted, Deprecated, or Superseded
+2. **Status** - A `## Status` section: Proposed, Accepted, Deprecated, or Superseded
 3. **Context** - The forces at play, including technological, political, social, and project local
 4. **Decision** - The change that we're proposing or have made
 5. **Consequences** - What becomes easier or more difficult to do and any risks introduced by this change
 
-New ADRs start from `docs/adr-template.md` (see ADR-0018).
+New ADRs start from `docs/adrs/templates/template.md` (see ADR-0018).
 
 ### Y-Statement Format
 
@@ -38,8 +38,11 @@ format: y-statement
 
 # ADR-XXX: Policy Title
 
-- Status: accepted
-- Date: YYYY-MM-DD
+Date: YYYY-MM-DD
+
+## Status
+
+Accepted
 
 ## Statement
 
@@ -56,11 +59,13 @@ All packages must specify `>=22.0.0` in engines field.
 
 ## Creating New ADRs
 
-We use [adr-tools](https://github.com/npryce/adr-tools) to manage ADRs. This ensures consistency and provides helpful commands for ADR management.
+We use [@meza/adr-tools](https://github.com/meza/adr-tools) to manage ADRs. The ADR directory is `docs/adrs`, recorded in `.adr-dir`. This ensures consistency and provides helpful commands for ADR management.
+
+`adr generate toc` is not part of the build. It writes `docs/adrs/decisions.md`. `npm run build:adr` runs `canon adr:index` and writes `docs/adrs/README.md`.
 
 ### Prerequisites
 
-Install adr-tools (already included as a dev dependency):
+Install `@meza/adr-tools` (already included as a dev dependency):
 
 ```bash
 npm install
@@ -68,43 +73,29 @@ npm install
 
 ### Creating a New ADR
 
-1. **Navigate to the ADR directory:**
-
-   ```bash
-   cd docs/adrs
-   ```
-
-2. **Create a new ADR:**
+1. **From the repository root, create a new ADR:**
 
     ```bash
-    npx adr-tools new "Descriptive Title of Your Decision"
+    npx adr new "Descriptive Title of Your Decision"
     ```
 
-3. **Edit the generated ADR file** with your decision details
+2. **Edit the generated ADR file** with your decision details
 
-4. **Update the status** as the decision progresses through the lifecycle
+3. **Update the status** as the decision progresses through the lifecycle
 
 ### ADR Management Commands
 
-#### Using adr-tools directly (recommended):
+- **List all ADRs:** `npx adr list`
+- **Create new ADR:** `npx adr new "Title"`
+- **Link ADRs:** `npx adr link <source> <link> <target> <reverse-link>`
+- **Build the ADR index:** `npm run build:adr` (writes `docs/adrs/README.md`)
+- **Help:** `npx adr help`
 
-- **List all ADRs:** `cd docs/adrs && npx adr-tools list`
-- **Create new ADR:** `cd docs/adrs && npx adr-tools new "Title"`
-- **Build ADR artifacts:** `npm run build:adr` (generates TOC + index)
+### Manual Process (if @meza/adr-tools unavailable)
 
-#### Direct adr-tools commands:
+If `@meza/adr-tools` is not available, you can create ADRs manually:
 
-- **List all ADRs:** `npx adr-tools list`
-- **Create new ADR:** `npx adr-tools new "Title"`
-- **Link ADRs:** `npx adr-tools link <from> <to> <relationship>`
-- **Generate table of contents:** `npx adr-tools generate toc`
-- **Help:** `npx adr-tools help`
-
-### Manual Process (if adr-tools unavailable)
-
-If adr-tools is not available, you can create ADRs manually:
-
-1. Copy `docs/adr-template.md`
+1. Copy `docs/adrs/templates/template.md`
 2. Rename it to `XXXX-descriptive-title.md` where XXXX is the next sequential number
 3. Fill in the template with your decision
 4. Use `npm run build:adr` to generate updated artifacts

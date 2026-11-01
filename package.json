@@ -56,9 +56,8 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build:adr": "npm-run-all build:adr:toc build:adr:index",
+    "build:adr": "npm run build:adr:index",
     "build:adr:index": "./bin/canon adr:index",
-    "build:adr:toc": "cd docs/adrs && npx adr-tools generate toc",
     "build:docs": "npm run build:docs:examples && ./bin/canon docs:rename-readmes && npx vitepress build && ./bin/canon docs:rename-readmes --restore",
     "build:docs:examples": "./bin/canon docs:examples",
     "build:docs:restore": "./bin/canon docs:rename-readmes --restore",
@@ -104,7 +103,6 @@
     "@tsconfig/node-lts": "^22.0.2",
     "@types/fs-extra": "^11.0.4",
     "@vitest/coverage-v8": "^4.0.8",
-    "adr-tools": "^2.0.4",
     "consola": "^3.3.2",
     "dedent": "^1.7.0",
     "fs-extra": "^11.2.0",
@@ -136,6 +134,7 @@
     "defu": "^6.1.4"
   },
   "devDependencies": {
+    "@meza/adr-tools": "^2.0.4",
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.10.0",
     "chokidar-cli": "^3.0.0",

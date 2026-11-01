@@ -90,9 +90,9 @@ Before making significant changes to the project architecture, please read the e
 When making architectural decisions that affect the project structure, configuration, or major features:
 
 1. **Read existing ADRs** to understand current decisions and context
-2. **Use adr-tools to create a new ADR:**
+2. **Use @meza/adr-tools to create a new ADR:**
     ```bash
-    cd docs/adrs && npx adr-tools new "Descriptive Title of Your Decision"
+    npx adr new "Descriptive Title of Your Decision"
     ```
 3. **Edit the generated ADR file** with your decision details
 4. **Follow the ADR format** with clear context, decision drivers, and consequences
@@ -100,11 +100,11 @@ When making architectural decisions that affect the project structure, configura
 
 #### ADR Management Commands
 
-- **List all ADRs:** `cd docs/adrs && npx adr-tools list`
-- **Create new ADR:** `cd docs/adrs && npx adr-tools new "Title"`
-- **Build ADR artifacts:** `npm run build:adr` (generates TOC + index)
-- **Link ADRs:** `cd docs/adrs && npx adr-tools link <from> <to> <relationship>`
-- **Help:** `cd docs/adrs && npx adr-tools help`
+- **List all ADRs:** `npx adr list`
+- **Create new ADR:** `npx adr new "Title"`
+- **Build the ADR index:** `npm run build:adr` (writes `docs/adrs/README.md`)
+- **Link ADRs:** `npx adr link <source> <link> <target> <reverse-link>`
+- **Help:** `npx adr help`
 
 For more details, see the [ADR Documentation](./docs/adrs.md).
 

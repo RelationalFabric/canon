@@ -4,12 +4,15 @@ format: y-statement
 
 # ADR-0018: Nygard ADR Format
 
-- Status: proposed
-- Date: 2026-11-01
+Date: 2026-11-01
+
+## Status
+
+Proposed
 
 ## Statement
 
-Every architectural ADR uses Michael Nygard's format and only these sections, in this order: Title, Status (with Date), Context, Decision, Consequences. Policy ADRs keep the Y-statement format from ADR-0007. New ADRs start from `docs/adr-template.md`.
+Every architectural ADR uses Michael Nygard's format and only these sections, in this order: Title, Status (a section), Date, Context, Decision, Consequences. Policy ADRs keep the Y-statement format from ADR-0007. New ADRs start from `docs/adrs/templates/template.md`, created with `@meza/adr-tools`.
 
 ## Rationale
 
@@ -17,6 +20,6 @@ ADRs so far have used three different heading sets: MADR-style (Considered Optio
 
 ## Implications
 
-- `docs/adr-template.md` holds the Nygard template, and `docs/adrs.md` points to it.
+- `docs/adrs/templates/template.md` holds the Nygard template, and `docs/adrs.md` points to it. New ADRs are created with `@meza/adr-tools`.
 - New ADRs, including those still proposed, use the template.
 - Accepted ADRs are not rewritten; their content stays as decided.
