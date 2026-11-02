@@ -153,7 +153,7 @@ See [Definitions](./definitions.md) for the difference between defining and decl
 
 ## Morphisms
 
-A **Morphism** maps one Theory's terms onto another's. Canon defines, applies and type-checks Morphisms. Use one to carry meaning across bounded contexts, for example between a consumer's own Theory and a library's.
+A **Morphism** maps one Theory's terms onto another's. Canon defines, applies and type-checks Morphisms. Use one to carry meaning across bounded contexts, for example between a consumer's own Theory and a library's. A Morphism is a homomorphism by definition: one-way from source to target, complete, and structure-preserving through the axioms at each key. It need not be a monomorphism or an isomorphism; those are properties a particular Morphism may have, and an isomorphism is a pair of Morphisms that are inverses.
 
 Morphisms are definitions too. `defineMorphism` produces the Morphism value. Its name is derived from the source and target Theories, so there is at most one Morphism per pair, and its identity looks like `canon://morphism/<Source>/<Target>`. It is found and dispatched by that pair, not by a label. Identity and registration follow [Definitions](./definitions.md).
 
