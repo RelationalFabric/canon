@@ -5,7 +5,7 @@ export default defineConfig({
     // Include source and example files for testing
     includeSource: ['src/**/*.{js,ts}', 'examples/**/*.{js,ts}'],
     // Explicit test files
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
     // Exclude certain files from testing
     exclude: ['**/node_modules/**', '**/dist/**', '**/radar/**'],
     // Coverage configuration
