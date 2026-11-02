@@ -290,9 +290,8 @@ npm install
 
 **Architecture Decision Records:**
 
-- `cd docs/adrs && npx adr-tools new "Title"` - Create a new ADR
-- `npm run build:adr` - Build all ADR artifacts (TOC + index)
-- `npm run build:adr:toc` - Generate table of contents
+- `npx adr new "Title"` - Create a new ADR from `docs/adrs/templates/template.md`
+- `npm run build:adr` - Write the ADR index to `docs/adrs/README.md`
 - `npm run build:adr:index` - Generate ADR index in documentation
 
 **Technology Radar:**

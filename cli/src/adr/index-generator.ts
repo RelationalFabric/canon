@@ -11,6 +11,7 @@ const statusColors = {
   accepted: '🟢',
   deprecated: '🔴',
   superseded: '🟠',
+  obsolescent: '🟣',
 } as const
 
 // Status labels
@@ -19,6 +20,7 @@ const statusLabels = {
   accepted: 'Accepted',
   deprecated: 'Deprecated',
   superseded: 'Superseded',
+  obsolescent: 'Obsolescent',
 } as const
 
 interface GenerateAdrIndexOptions {
@@ -28,11 +30,28 @@ interface GenerateAdrIndexOptions {
 }
 
 function findMetadataValue(lines: readonly string[], key: string): string | null {
-  const pattern = new RegExp(`^\\s*[-*]\\s*${key}\\s*:\\s*(.+)$`, 'i')
+  const pattern = new RegExp(`^\\s*(?:[-*]\\s*)?${key}\\s*:\\s*(.+)$`, 'i')
   for (const line of lines) {
     const match = line.match(pattern)
     if (match)
       return match[1]!.trim()
+  }
+  return null
+}
+
+function findSectionBody(lines: readonly string[], heading: string): string | null {
+  const headingPattern = new RegExp(`^##\\s+${heading}\\s*$`, 'i')
+  for (let index = 0; index < lines.length; index++) {
+    if (!headingPattern.test(lines[index] ?? ''))
+      continue
+    for (let bodyIndex = index + 1; bodyIndex < lines.length; bodyIndex++) {
+      const line = lines[bodyIndex] ?? ''
+      if (line.startsWith('#'))
+        return null
+      const trimmed = line.trim()
+      if (trimmed)
+        return trimmed
+    }
   }
   return null
 }
@@ -57,8 +76,8 @@ function extractAdrInfo(filePath: string): {
 
     const title = titleLine.replace('# ADR-', '').trim()
 
-    // Extract status (line with "- Status:" or "* Status:")
-    const rawStatus = findMetadataValue(lines, 'Status')
+    // Extract status from "- Status:" / "* Status:" or the body of a "## Status" section.
+    const rawStatus = findMetadataValue(lines, 'Status') ?? findSectionBody(lines, 'Status')
     if (!rawStatus)
       return null
 
@@ -120,7 +139,7 @@ ${adrTable}
 
 ## ADR Process
 
-1. Use \`cd docs/adrs && npx adr-tools new "Meaningful Decision Title"\` to draft a new record.
+1. Use \`npx adr new "Meaningful Decision Title"\` to draft a new record.
 2. Update the table with \`npm run build:adr\` so the index stays in sync.
 3. Commit the new ADR together with any code or documentation changes it describes.
 `
