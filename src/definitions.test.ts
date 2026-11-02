@@ -38,6 +38,29 @@ describe('definition registry', () => {
     expect(registry.size).toBe(1)
   })
 
+  it('keeps the original value when a structurally equal object is registered again', () => {
+    const registry = new DefinitionRegistry()
+    const uri = definitionUri('theory', 'Identity')
+    const original = { name: 'Identity' }
+    const duplicate = { name: 'Identity' }
+
+    registry.register(uri, original)
+    registry.register(uri, duplicate)
+
+    expect(registry.get(uri)).toBe(original)
+    expect(metaOf(duplicate).uri).toBe(uri)
+  })
+
+  it('throws when a different object is registered at the same uri', () => {
+    const registry = new DefinitionRegistry()
+    const uri = definitionUri('theory', 'Identity')
+    registry.register(uri, { name: 'Identity' })
+
+    expect(() => registry.register(uri, { name: 'Other' })).toThrow(
+      `Definition already registered: ${uri} (ADR-0017)`,
+    )
+  })
+
   it('throws when the same URI is registered twice and the message includes the URI', () => {
     const registry = new DefinitionRegistry()
     const uri = definitionUri('axiom', 'Id')

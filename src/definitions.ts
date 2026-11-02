@@ -3,6 +3,7 @@
  */
 
 import type { DefinitionKind, DefinitionUri, LexiconTermUri } from './types/index.js'
+import { objectHash } from './kit.js'
 import { metaOf, updateMeta } from './meta.js'
 
 /**
@@ -44,11 +45,13 @@ export class DefinitionRegistry {
 
   /**
    * Register a value at a definition or lexicon URI.
-   * A registered value carries that URI in its metadata. Throws if that URI is already registered,
-   * or if the value is already registered at a different URI (ADR-0017).
+   * A registered value carries that URI in its metadata.
+   * Re-registering the same URI is idempotent when the values hash equal, and throws otherwise.
+   * A value already registered at a different URI also throws (ADR-0017).
    */
   register(uri: DefinitionUri | LexiconTermUri, value: unknown): void {
-    if (this.definitions.has(uri)) {
+    const alreadyRegistered = this.definitions.has(uri)
+    if (alreadyRegistered && objectHash(this.definitions.get(uri)) !== objectHash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     if (isMetaCarrier(value)) {
@@ -57,7 +60,9 @@ export class DefinitionRegistry {
         throw new Error(`Definition already registered: ${existing}`)
       }
     }
-    this.definitions.set(uri, value)
+    if (!alreadyRegistered) {
+      this.definitions.set(uri, value)
+    }
     if (isMetaCarrier(value)) {
       updateMeta(value, metadata => ({
         ...metadata,
