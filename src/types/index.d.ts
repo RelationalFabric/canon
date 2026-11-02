@@ -5,6 +5,7 @@
 export * from './axioms.js'
 export * from './canons.js'
 export * from './constructors.js'
+export * from './definitions.js'
 export * from './guards.js'
 export * from './js.js'
 export * from './lazy-module.js'

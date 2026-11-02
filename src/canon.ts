@@ -3,7 +3,7 @@
  */
 
 import type { CanonConfig } from './types/index.js'
-import { getRegistry } from './shell.js'
+import { definitionRegistry } from './definitions.js'
 
 /**
  * Define a canon runtime configuration (for module-style exports)
@@ -33,12 +33,11 @@ export function defineCanon(config: CanonConfig): CanonConfig {
  * ```
  */
 export function inferCanon(value: unknown): CanonConfig | undefined {
-  const registry = getRegistry()
-
   let bestCanon: CanonConfig | undefined
   let maxMatches = 0
 
-  for (const canonConfig of registry) {
+  for (const [, canonConfigUnknown] of definitionRegistry.entries('canon')) {
+    const canonConfig = canonConfigUnknown as CanonConfig
     let matches = 0
 
     // Count how many axioms match
