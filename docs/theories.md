@@ -1,6 +1,6 @@
 # Theories: Shared Requirements Above Canons
 
-> **Status: proposed.** This document describes [ADR-0018: Theories and Morphisms](./adrs/0018-theories-and-morphisms.md). None of it is implemented yet. `ObjectConstraintAxiom`, the `Theories` interface, `defineTheory`, `declareTheory` and Morphisms are all proposed.
+> **Status: proposed.** This document describes [ADR-0018: Theories and Morphisms](./adrs/0018-theories-and-morphisms.md). None of it is implemented yet. `ObjectConstraintAxiom`, the `Theories` and `Morphisms` interfaces, `defineTheory`, `declareTheory`, `defineMorphism`, `declareMorphism` and Morphisms are all proposed.
 
 ## Prerequisites
 
@@ -72,7 +72,7 @@ Both are about what can be done with objects rather than their values. Their key
 
 ## Modelling a Theory
 
-A canon **models** a Theory when its canon type inherits from the Theory's type. Theories are optional: a canon that models no Theory works exactly as it does today.
+A canon **models** a Theory when its canon type inherits from the Theory's type. It lists those Theories in the `models` field of its config, as labels or Theory values. Theories are optional: a canon that models no Theory works exactly as it does today.
 
 ```typescript
 // Models Typed Entity, and so Identity and Taxonomy
@@ -129,7 +129,7 @@ Canon assumes nothing about value-level laws.
 Like canons, Theories have a type and a runtime config:
 
 - The **type** lives in the global `Theories` interface, extended by module augmentation, keyed by label.
-- The **config** adds only the runtime information the type implies: the Theory's name and the Theories it composes.
+- The **config** adds only the runtime information the type implies: the Theory's name and the Theories it composes. Composed Theories are listed in `extends`. With `defineTheory` the name comes from `name`; with `declareTheory` it comes from the label.
 
 ```typescript
 declare module '@relational-fabric/canon' {
@@ -139,23 +139,23 @@ declare module '@relational-fabric/canon' {
   }
 }
 
-// Defined by value: the config carries the name
-const Identity = defineTheory({ name: 'Identity', theories: [] })
+// Defined by value: `name` supplies the name
+const Identity = defineTheory({ name: 'Identity', extends: [] })
 
 // Declared by label: the label supplies the name
-declareTheory('Taxonomy', { theories: [] })
+declareTheory('Taxonomy', { extends: [] })
 
 // Composed from a value and a label
-declareTheory('TypedEntity', { theories: [Identity, 'Taxonomy'] })
+declareTheory('TypedEntity', { extends: [Identity, 'Taxonomy'] })
 ```
-
-> `theories` is a **placeholder** field name.
 
 See [Definitions](./definitions.md) for the difference between defining and declaring, and between referring by label and by value.
 
 ## Morphisms
 
 A **Morphism** maps one Theory's terms onto another's. Canon defines, applies and type-checks Morphisms. Use one to carry meaning across bounded contexts, for example between a consumer's own Theory and a library's.
+
+Morphisms are definitions too. `defineMorphism` takes a config whose `name` field supplies the name. `declareMorphism` takes a label, which supplies the name, and registers the Morphism under that label so it can be found and dispatched dynamically on demand. A global `Morphisms` interface holds each Morphism's type, keyed by label. Identity and registration follow [Definitions](./definitions.md).
 
 ### Completeness
 

@@ -4,6 +4,8 @@
 
 Proposed
 
+Date: 2026-11-02
+
 ## Context
 
 Canon lets you define three kinds of thing today: canons, axioms and protocols. The Theory work (ADR-0018, to follow) adds a fourth, Theories. Theories need to be passed around: a canon lists the Theories it models, `ObjectConstraintAxiom` names the Theories its value must model, and one Theory composes others. Before we can write that ADR we need to settle what a definition *is* once it has been defined, and how canon finds it again at runtime.
@@ -32,15 +34,15 @@ We will treat every definition as a value with a formal identity, held in one sh
 
 ### 1. A definition is the thing itself
 
-The result of defining a canon, an axiom or a Theory is equivalent to the thing it defines. There is no separate "real" object behind it to look up by name. The definition can be passed wherever it is needed, for example where a canon names the Theories it models, where `ObjectConstraintAxiom` names the Theories its value must model, and where Theories compose.
+The result of defining a canon, an axiom, a Theory or a Morphism is equivalent to the thing it defines. Morphisms are definitions too, alongside canons, axioms and Theories. There is no separate "real" object behind it to look up by name. The definition can be passed wherever it is needed, for example where a canon names the Theories it models, where `ObjectConstraintAxiom` names the Theories its value must model, and where Theories compose.
 
 ### 2. Each definition gets a formal identity
 
-When something is defined, canon gives it a formal identity, in the way `defineProtocol` already gives each protocol an `$id`. That identity is what canon stores and passes as the value. Two definitions with identical configs are still two different definitions, because they have different identities.
+When something is defined, canon gives it a formal identity. That identity is a URI in a `canon://` scheme that identifies what kind of definition sits at each location. That identity is what canon stores and passes as the value. `defineProtocol` already gives each protocol an `$id`; that is historical precedent only. Names must be unique at registration, because type augmentation keys definitions by name; a duplicate is a clash.
 
 ### 3. One shared registry, keyed by identity
 
-There is a single shared registry for all kinds of definition: canons, axioms, Theories and, later, protocols. It is keyed by formal identity. Registries remain the runtime source of truth: when canon needs a definition's full config, it gets it from the registry.
+There is a single shared registry for all kinds of definition: canons, axioms, Theories, Morphisms and, later, protocols. It is keyed by formal identity. Registries remain the runtime source of truth: when canon needs a definition's full config, it gets it from the registry.
 
 Keeping every kind in one registry lets it traverse itself:
 
@@ -62,7 +64,7 @@ Existing `declareCanon(label, config)` and `registerCanons({ label: config })` c
 
 ### A label or a value, whichever is at hand
 
-Anywhere canon refers to a canon, an axiom or a Theory by name, it accepts either a label or the definition value, whichever is at hand:
+Anywhere canon refers to a canon, an axiom, a Theory or a Morphism by name, it accepts either a label or the definition value, whichever is at hand:
 
 - a **label** resolves through the label-to-identity mapping;
 - a **value** is registered on use (step 4).
@@ -90,7 +92,7 @@ It is the step before Superseded. If the name stops fitting, it can be changed e
 
 **The canon-only registry is replaced.** The canon-only registry in `src/registry.ts` gives way to the shared, identity-keyed registry, with labels mapping to identities.
 
-**Labels and values are interchangeable, but not symmetric.** Every place that names a canon, axiom or Theory takes either form: a label assumes the definition is already registered and may fail to resolve, while a value carries its definition and is registered on use, so it cannot fail for that reason.
+**Labels and values are interchangeable, but not symmetric.** Every place that names a canon, axiom, Theory or Morphism takes either form: a label assumes the definition is already registered and may fail to resolve, while a value carries its definition and is registered on use, so it cannot fail for that reason.
 
 **Axioms become reachable on their own.** Because axioms are definitions too, they get identities and registry entries, instead of existing only inside a canon's config.
 
