@@ -119,6 +119,73 @@ describe('definition registry', () => {
     expect(() => registry.register(second, value)).toThrow(`Definition already registered: ${first}`)
   })
 
+  describe('resolve', () => {
+    it('registers and returns a map of definitions in key order', () => {
+      const registry = new DefinitionRegistry()
+      const identity = { name: 'Identity' }
+      const taxonomy = { name: 'Taxonomy' }
+
+      expect(registry.resolve('theory', { Identity: identity, Taxonomy: taxonomy })).toEqual([
+        { uri: 'canon://theory/Identity', value: identity },
+        { uri: 'canon://theory/Taxonomy', value: taxonomy },
+      ])
+    })
+
+    it('resolves a list of names to registered values', () => {
+      const registry = new DefinitionRegistry()
+      const identity = { name: 'Identity' }
+      const taxonomy = { name: 'Taxonomy' }
+      registry.register(definitionUri('theory', 'Identity'), identity)
+      registry.register(definitionUri('theory', 'Taxonomy'), taxonomy)
+
+      expect(registry.resolve('theory', ['Identity', 'Taxonomy'])).toEqual([
+        { uri: 'canon://theory/Identity', value: identity },
+        { uri: 'canon://theory/Taxonomy', value: taxonomy },
+      ])
+    })
+
+    it('resolves a list of names and registered values', () => {
+      const registry = new DefinitionRegistry()
+      const identity = { name: 'Identity' }
+      const id = { name: 'Id' }
+      registry.register(definitionUri('theory', 'Identity'), identity)
+      registry.register(definitionUri('axiom', 'Id'), id)
+
+      expect(registry.resolve('theory', ['Identity', id])).toEqual([
+        { uri: 'canon://theory/Identity', value: identity },
+        { uri: 'canon://axiom/Id', value: id },
+      ])
+    })
+
+    it('registers a trailing map after names', () => {
+      const registry = new DefinitionRegistry()
+      const identity = { name: 'Identity' }
+      const taxonomy = { name: 'Taxonomy' }
+      registry.register(definitionUri('theory', 'Identity'), identity)
+
+      expect(registry.resolve('theory', ['Identity', { Taxonomy: taxonomy }])).toEqual([
+        { uri: 'canon://theory/Identity', value: identity },
+        { uri: 'canon://theory/Taxonomy', value: taxonomy },
+      ])
+    })
+
+    it('throws when a map is not the last list item', () => {
+      const registry = new DefinitionRegistry()
+
+      expect(() => registry.resolve('theory', [{ Identity: { name: 'Identity' } }, 'Taxonomy'])).toThrow(
+        'A definition ref map is only allowed as the last item (ADR-0017)',
+      )
+    })
+
+    it('returns an undefined value for an unregistered name', () => {
+      const registry = new DefinitionRegistry()
+
+      expect(registry.resolve('theory', ['Missing'])).toEqual([
+        { uri: 'canon://theory/Missing', value: undefined },
+      ])
+    })
+  })
+
   it('clear empties the registry', () => {
     const registry = new DefinitionRegistry()
     registry.register(definitionUri('canon', 'Core'), {})

@@ -110,6 +110,71 @@ export class DefinitionRegistry {
       }
     }
   }
+
+  /**
+   * Resolve a name-to-value map, or a list of names and uri-carrying values.
+   * Only the last list item may be a map of values to register (ADR-0017).
+   */
+  resolve(
+    kind: DefinitionKind,
+    refs: Record<string, unknown> | readonly unknown[],
+  ): Array<{ uri: string, value: unknown }> {
+    if (Array.isArray(refs)) {
+      return this.resolveList(kind, refs)
+    }
+    return this.registerRecord(kind, refs)
+  }
+
+  /**
+   * Register each map entry under `kind` and return the stored definitions in key order (ADR-0017).
+   */
+  private registerRecord(
+    kind: DefinitionKind,
+    refs: Record<string, unknown>,
+  ): Array<{ uri: string, value: unknown }> {
+    const resolved: Array<{ uri: string, value: unknown }> = []
+    for (const [name, value] of Object.entries(refs)) {
+      const uri = definitionUri(kind, name)
+      this.register(uri, value)
+      resolved.push({ uri, value: this.get(uri) })
+    }
+    return resolved
+  }
+
+  /**
+   * Resolve list-form refs in input order (ADR-0017).
+   */
+  private resolveList(
+    kind: DefinitionKind,
+    refs: readonly unknown[],
+  ): Array<{ uri: string, value: unknown }> {
+    const resolved: Array<{ uri: string, value: unknown }> = []
+    for (let index = 0; index < refs.length; index++) {
+      const item = refs[index]
+      const isLast = index === refs.length - 1
+      if (typeof item === 'string') {
+        const uri = definitionUri(kind, item)
+        resolved.push({ uri, value: this.get(uri) })
+        continue
+      }
+      const uri = carriedUri(item)
+      if (uri !== undefined) {
+        resolved.push({ uri, value: item })
+        continue
+      }
+      if (isPlainRecord(item)) {
+        if (!isLast) {
+          throw new Error('A definition ref map is only allowed as the last item (ADR-0017)')
+        }
+        for (const entry of this.registerRecord(kind, item)) {
+          resolved.push(entry)
+        }
+        continue
+      }
+      throw new Error('A definition ref must be a name or a value carrying a uri (ADR-0017)')
+    }
+    return resolved
+  }
 }
 
 /**
@@ -117,4 +182,26 @@ export class DefinitionRegistry {
  */
 function isMetaCarrier(value: unknown): value is object {
   return value !== null && (typeof value === 'object' || typeof value === 'function')
+}
+
+/**
+ * A plain object map. Arrays and class instances are not maps.
+ */
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+  const prototype: unknown = Object.getPrototypeOf(value)
+  return prototype === Object.prototype || prototype === null
+}
+
+/**
+ * The definition URI already stored on a value, when it has one.
+ */
+function carriedUri(value: unknown): string | undefined {
+  if (!isMetaCarrier(value)) {
+    return undefined
+  }
+  const uri = metaOf(value).uri
+  return typeof uri === 'string' && uri !== '' ? uri : undefined
 }
