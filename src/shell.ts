@@ -44,8 +44,8 @@ export function resetRegistry(): void {
  */
 export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig): void {
   const defined = defineCanon(config)
-  globalRegistry.register(label, defined)
   definitionRegistry.register(definitionUri('canon', label), defined)
+  globalRegistry.register(label, defined)
 }
 
 /**
@@ -56,7 +56,7 @@ export function declareCanon<Label extends keyof Canons>(label: Label, config: C
 export function registerCanons(canons: Record<string, CanonConfig>): void {
   for (const [label, config] of Object.entries(canons)) {
     const defined = defineCanon(config)
-    globalRegistry.register(label as keyof Canons, defined)
     definitionRegistry.register(definitionUri('canon', label), defined)
+    globalRegistry.register(label as keyof Canons, defined)
   }
 }

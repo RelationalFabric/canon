@@ -95,5 +95,23 @@ describe('shell', () => {
         },
       })).toThrow('Definition already registered: canon://canon/X (ADR-0017)')
     })
+
+    it('keeps the original config when a conflicting registration throws', () => {
+      const original: CanonConfig = { axioms: {} }
+      registerCanons({ X: original })
+
+      expect(() => registerCanons({
+        X: {
+          axioms: {
+            Id: {
+              $basis: (v: unknown): v is { id: string } => true,
+              key: 'id',
+            },
+          },
+        },
+      })).toThrow('Definition already registered: canon://canon/X (ADR-0017)')
+
+      expect(getRegistry().get('X')).toBe(original)
+    })
   })
 })
