@@ -22,7 +22,7 @@ interface HygenPrompter {
 }
 
 const require = createRequire(import.meta.url)
-const canonPackage = require('../../../../package.json') as { readonly version: string }
+const canonPackage = require('../../../package.json') as { readonly version: string }
 
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const templatesDirectory = resolve(packageRoot, 'cli/templates/_templates')
