@@ -4,9 +4,9 @@
 
 import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { canonRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { Registry } from './registry.js'
-import { declareCanon, getRegistry, registerCanons, resetRegistry } from './shell.js'
+import { declareCanon, registerCanons, resetRegistry } from './shell.js'
 
 declare module './types/canons.js' {
   interface Canons {
@@ -24,13 +24,6 @@ describe('shell', () => {
     resetRegistry()
   })
 
-  describe('getRegistry', () => {
-    it('should return the global registry', () => {
-      const registry = getRegistry()
-      expect(registry).toBeInstanceOf(Registry)
-    })
-  })
-
   describe('resetRegistry', () => {
     it('should clear the global registry', () => {
       const config: CanonConfig = {
@@ -43,10 +36,10 @@ describe('shell', () => {
       }
 
       declareCanon('TestCanon' as any, config)
-      expect(getRegistry().size).toBe(1)
+      expect(canonRefFor('TestCanon').resolve()).toBe(config)
 
       resetRegistry()
-      expect(getRegistry().size).toBe(0)
+      expect(canonRefFor('TestCanon').resolve()).toBeUndefined()
     })
   })
 
@@ -63,8 +56,7 @@ describe('shell', () => {
 
       declareCanon('TestCanon' as any, config)
 
-      expect(getRegistry().has('TestCanon')).toBe(true)
-      expect(getRegistry().get('TestCanon')).toBe(config)
+      expect(canonRefFor('TestCanon').resolve()).toBe(config)
     })
 
     it('returns a ref that resolves to the declared canon', () => {
@@ -83,9 +75,9 @@ describe('shell', () => {
 
       registerCanons({ X: cfg })
 
-      const registered = getRegistry().get('X')
+      const registered = canonRefFor('X').resolve()
       expect(registered).toBeDefined()
-      if (registered) {
+      if (isMetaCarrier(registered)) {
         expect(metaOf(registered).uri).toBe('canon://canon/X')
       }
     })
@@ -126,7 +118,11 @@ describe('shell', () => {
         },
       })).toThrow('Definition already registered: canon://canon/X (ADR-0017)')
 
-      expect(getRegistry().get('X')).toBe(original)
+      expect(canonRefFor('X').resolve()).toBe(original)
     })
   })
 })
+
+function isMetaCarrier(value: unknown): value is object {
+  return value !== null && (typeof value === 'object' || typeof value === 'function')
+}
