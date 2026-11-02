@@ -7,19 +7,13 @@
 import type { Registry } from './registry.js'
 import type { CanonConfig, Canons } from './types/index.js'
 import { defineCanon } from './canon.js'
-import { DefinitionRegistry, definitionUri } from './definitions.js'
+import { canonRefFor, definitionRegistry, definitionUri } from './definitions.js'
 import { createRegistry } from './registry.js'
 
 /**
  * Global singleton registry
  */
 const globalRegistry: Registry = createRegistry()
-
-/**
- * Definition registry for canons declared through the shell.
- * Not exported. Cleared by resetRegistry so shell tests stay isolated.
- */
-const definitionRegistry = new DefinitionRegistry()
 
 /**
  * Get the current global registry
@@ -42,10 +36,11 @@ export function resetRegistry(): void {
  * @param label - The canon label
  * @param config - The canon configuration
  */
-export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig): void {
+export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig) {
   const defined = defineCanon(config)
   definitionRegistry.register(definitionUri('canon', label), defined)
   globalRegistry.register(label, defined)
+  return canonRefFor(label)
 }
 
 /**

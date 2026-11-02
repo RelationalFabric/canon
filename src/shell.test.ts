@@ -8,6 +8,12 @@ import { metaOf } from './meta.js'
 import { Registry } from './registry.js'
 import { declareCanon, getRegistry, registerCanons, resetRegistry } from './shell.js'
 
+declare module './types/canons.js' {
+  interface Canons {
+    DeclaredCanon: Record<string, never>
+  }
+}
+
 describe('shell', () => {
   beforeEach(() => {
     resetRegistry()
@@ -59,6 +65,15 @@ describe('shell', () => {
 
       expect(getRegistry().has('TestCanon')).toBe(true)
       expect(getRegistry().get('TestCanon')).toBe(config)
+    })
+
+    it('returns a ref that resolves to the declared canon', () => {
+      const config: CanonConfig = { axioms: {} }
+
+      const ref = declareCanon('DeclaredCanon', config)
+
+      expect(ref.key).toBe('canon://canon/DeclaredCanon')
+      expect(ref.resolve()).toBe(config)
     })
   })
 

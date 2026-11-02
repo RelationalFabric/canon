@@ -2,7 +2,7 @@
  * Definition URIs and the shared definition registry (ADR-0017).
  */
 
-import type { DefinitionKind, DefinitionUri, LexiconTermUri } from './types/index.js'
+import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri } from './types/index.js'
 import { objectHash } from './kit.js'
 import { metaOf, updateMeta } from './meta.js'
 
@@ -112,7 +112,7 @@ export class DefinitionRegistry {
   }
 
   /**
-   * Resolve a name-to-value map, or a list of names and uri-carrying values.
+   * Resolve a name-to-value map, or a list of names, key refs, and uri-carrying values.
    * Only the last list item may be a map of values to register (ADR-0017).
    */
   resolve(
@@ -121,6 +121,9 @@ export class DefinitionRegistry {
   ): Array<{ uri: string, value: unknown }> {
     if (Array.isArray(refs)) {
       return this.resolveList(kind, refs)
+    }
+    if (!isPlainRecord(refs)) {
+      throw new Error('Definition refs must be a map or a list (ADR-0017)')
     }
     return this.registerRecord(kind, refs)
   }
@@ -160,6 +163,11 @@ export class DefinitionRegistry {
       const uri = carriedUri(item)
       if (uri !== undefined) {
         resolved.push({ uri, value: item })
+        continue
+      }
+      const key = definitionKeyOf(item)
+      if (key !== undefined) {
+        resolved.push({ uri: key, value: this.get(key) })
         continue
       }
       if (isPlainRecord(item)) {
@@ -204,4 +212,80 @@ function carriedUri(value: unknown): string | undefined {
   }
   const uri = metaOf(value).uri
   return typeof uri === 'string' && uri !== '' ? uri : undefined
+}
+
+/**
+ * Shared definition registry used by ref constructors and the shell.
+ * Internal export: not re-exported from the package entry.
+ */
+export const definitionRegistry = new DefinitionRegistry()
+
+/**
+ * Lazy reference whose `resolve` reads the shared definition registry (ADR-0017).
+ */
+function refFor<K extends DefinitionKind, N extends string>(kind: K, name: N): KeyRef<DefinitionUri<K, N>, unknown> {
+  const key = definitionUri(kind, name)
+  return {
+    key,
+    resolve(): unknown | undefined {
+      return definitionRegistry.get(key)
+    },
+  }
+}
+
+/**
+ * Lazy reference to a canon definition (ADR-0017).
+ */
+export function canonRefFor<N extends string>(name: N): KeyRef<DefinitionUri<'canon', N>, unknown> {
+  return refFor('canon', name)
+}
+
+/**
+ * Lazy reference to an axiom definition (ADR-0017).
+ */
+export function axiomRefFor<N extends string>(name: N): KeyRef<DefinitionUri<'axiom', N>, unknown> {
+  return refFor('axiom', name)
+}
+
+/**
+ * Lazy reference to a theory definition (ADR-0017).
+ */
+export function theoryRefFor<N extends string>(name: N): KeyRef<DefinitionUri<'theory', N>, unknown> {
+  return refFor('theory', name)
+}
+
+/**
+ * Lazy reference to a morphism. Its name is `<source>/<target>` (ADR-0017).
+ */
+export function morphismRefFor<S extends string, T extends string>(
+  source: S,
+  target: T,
+): KeyRef<DefinitionUri<'morphism', `${S}/${T}`>, unknown> {
+  return refFor('morphism', `${source}/${target}`)
+}
+
+/**
+ * The key of a list item that is a KeyRef, when that key is a definition URI.
+ */
+function definitionKeyOf(value: unknown): DefinitionUri | LexiconTermUri | undefined {
+  if (typeof value !== 'object' || value === null)
+    return undefined
+  if (!('key' in value) || !('resolve' in value))
+    return undefined
+  if (typeof value.resolve !== 'function' || !isDefinitionKey(value.key))
+    return undefined
+  return value.key
+}
+
+/**
+ * Whether a string is a definition or lexicon term URI.
+ */
+function isDefinitionKey(value: unknown): value is DefinitionUri | LexiconTermUri {
+  return typeof value === 'string' && (
+    value.startsWith('canon://canon/')
+    || value.startsWith('canon://axiom/')
+    || value.startsWith('canon://theory/')
+    || value.startsWith('canon://morphism/')
+    || value.startsWith('canon://lexicon/')
+  )
 }

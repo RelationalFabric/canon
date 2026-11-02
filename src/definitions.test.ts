@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { DefinitionRegistry, definitionUri, lexiconTermUri } from './definitions.js'
+import { DefinitionRegistry, definitionRegistry, definitionUri, lexiconTermUri, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 
 describe('definitionUri', () => {
@@ -23,6 +23,26 @@ describe('lexiconTermUri', () => {
 
   it('builds a term in a named lexicon', () => {
     expect(lexiconTermUri('other', 'User')).toBe('canon://lexicon/other/User')
+  })
+})
+
+describe('refs', () => {
+  it('resolves undefined before registration and the value after', () => {
+    definitionRegistry.clear()
+    try {
+      const ref = theoryRefFor('Identity')
+      const value = { name: 'Identity' }
+
+      expect(ref.resolve()).toBeUndefined()
+      definitionRegistry.register(ref.key, value)
+      expect(ref.resolve()).toBe(value)
+    } finally {
+      definitionRegistry.clear()
+    }
+  })
+
+  it('builds canon://morphism/A/B', () => {
+    expect(morphismRefFor('A', 'B').key).toBe('canon://morphism/A/B')
   })
 })
 
@@ -175,6 +195,23 @@ describe('definition registry', () => {
       expect(() => registry.resolve('theory', [{ Identity: { name: 'Identity' } }, 'Taxonomy'])).toThrow(
         'A definition ref map is only allowed as the last item (ADR-0017)',
       )
+    })
+
+    it('resolves key refs in a list by key', () => {
+      const registry = new DefinitionRegistry()
+      const identity = { name: 'Identity' }
+      const key = definitionUri('theory', 'Identity')
+      registry.register(key, identity)
+      const ref = {
+        key,
+        resolve(): undefined {
+          return undefined
+        },
+      }
+
+      expect(registry.resolve('theory', [ref])).toEqual([
+        { uri: key, value: identity },
+      ])
     })
 
     it('returns an undefined value for an unregistered name', () => {

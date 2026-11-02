@@ -13,3 +13,11 @@ export type DefinitionUri<K extends DefinitionKind = DefinitionKind, N extends s
  * A lexicon term URI. A lexicon name defaults to `default`.
  */
 export type LexiconTermUri<L extends string = 'default', T extends string = string> = `canon://lexicon/${L}/${T}`
+
+/**
+ * A lazy stand-in for a value resolved by key `K` in some space.
+ */
+export interface KeyRef<K, V> {
+  readonly key: K
+  resolve: () => V | undefined
+}
