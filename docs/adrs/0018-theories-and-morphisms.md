@@ -131,5 +131,5 @@ Harder:
 - `EntityReference` and the `References` axiom describe usage, not what an object can express. They have no users yet, so they can be changed or deprecated in favour of ObjectConstraintAxiom; that work is a follow-up.
 - Reference and other interpretations are unavailable until a downstream package supplies them.
 - Canon checks only that a Morphism is complete; everything else is left to the axioms at each key.
-- Taxonomy has two parts, lexicon and hierarchy. Only the lexicon is expressible now, as a single `Type` key whose value is an open `string` for now. The hierarchy is deferred.
+- Taxonomy has two parts, lexicon and hierarchy. Only the lexicon is expressible now, as a single `Type` key whose value is an open `string` for now. Each lexicon term is addressable in the shared registry, so lexicon terms can later be mapped between lexicons (type morphisms); whether type morphisms are the same concept as Morphisms is not yet decided. The hierarchy is deferred.
 - Order and Aggregate are named but unspecified, so nothing can model them yet. Their specification waits until canon can do algebra with Theories, potentially where protocols come in.

@@ -36,7 +36,7 @@ interface Identity {
 
 Every object belongs to a kind, so canons can agree on classification. Taxonomy is about kind membership, not field structure.
 
-Taxonomy has two parts, a **lexicon** (the names of kinds) and a **hierarchy** (how kinds relate). Only the lexicon can be expressed for now. It is a single `Type` key, whose value is an open `string` for now. The hierarchy comes later.
+Taxonomy has two parts, a **lexicon** (the names of kinds) and a **hierarchy** (how kinds relate). Only the lexicon can be expressed for now. It is a single `Type` key, whose value is an open `string` for now. Each lexicon term is addressable in the shared registry, so terms can later be mapped between lexicons. A lexicon term's identity is a path of the form `canon://lexicon/<name>/<term>`, and the lexicon name defaults to `default` when none is given. Whether those mappings are the same concept as Morphisms is not yet decided. The hierarchy comes later.
 
 ```typescript
 interface Taxonomy {

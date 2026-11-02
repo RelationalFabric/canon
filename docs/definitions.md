@@ -20,6 +20,8 @@ A definition is the value you get back from defining a canon, an axiom, a Theory
 - **A unique name.** Names must be unique at registration. The augmented interfaces (`Canons`, `Axioms`, `Theories`) key definitions by name, and registering a second definition under a name already in use is a clash. A Morphism's derived name means there is at most one Morphism per source and target pair.
 - **Registration state.** Canon records, in the definition's metadata, whether it has been registered yet.
 
+A lexicon term is addressable in that same registry. Its identity is a path of the form `canon://lexicon/<name>/<term>`. The lexicon name defaults to `default` when none is given.
+
 All definitions, of every kind, live in **one shared registry**, keyed by those URIs. Because they share a registry, canon can follow the links between them: from a canon to the Theories it models, or from a Theory to the Theories it extends.
 
 ## Defining vs Declaring

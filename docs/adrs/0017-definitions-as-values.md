@@ -42,7 +42,7 @@ When something is defined, canon gives it a formal identity. That identity is a 
 
 ### 3. One shared registry, keyed by identity
 
-There is a single shared registry for all kinds of definition: canons, axioms, Theories, Morphisms and, later, protocols. It is keyed by formal identity. Registries remain the runtime source of truth: when canon needs a definition's full config, it gets it from the registry.
+There is a single shared registry for all kinds of definition: canons, axioms, Theories, Morphisms, lexicon terms and, later, protocols. It is keyed by formal identity. Registries remain the runtime source of truth: when canon needs a definition's full config, it gets it from the registry.
 
 Keeping every kind in one registry lets it traverse itself:
 
