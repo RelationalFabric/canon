@@ -1,6 +1,6 @@
 # Theories: Shared Requirements Above Canons
 
-> **Status: proposed.** This document describes [ADR-0018: Theories and Morphisms](./adrs/0018-theories-and-morphisms.md). None of it is implemented yet. `ObjectConstraintAxiom`, the `Theories` and `Morphisms` interfaces, `defineTheory`, `declareTheory`, `defineMorphism`, `declareMorphism` and Morphisms are all proposed.
+> **Status: proposed.** This document describes [ADR-0018: Theories and Morphisms](./adrs/0018-theories-and-morphisms.md). None of it is implemented yet. `ObjectConstraintAxiom`, the `Theories` interface, `defineTheory`, `declareTheory`, `defineMorphism` and Morphisms are all proposed.
 
 ## Prerequisites
 
@@ -155,7 +155,7 @@ See [Definitions](./definitions.md) for the difference between defining and decl
 
 A **Morphism** maps one Theory's terms onto another's. Canon defines, applies and type-checks Morphisms. Use one to carry meaning across bounded contexts, for example between a consumer's own Theory and a library's.
 
-Morphisms are definitions too. `defineMorphism` takes a config whose `name` field supplies the name. `declareMorphism` takes a label, which supplies the name, and registers the Morphism under that label so it can be found and dispatched dynamically on demand. A global `Morphisms` interface holds each Morphism's type, keyed by label. Identity and registration follow [Definitions](./definitions.md).
+Morphisms are definitions too. `defineMorphism` produces the Morphism value. Its name is derived from the source and target Theories, so there is at most one Morphism per pair, and its identity looks like `canon://morphism/<Source>/<Target>`. It is found and dispatched by that pair, not by a label. Identity and registration follow [Definitions](./definitions.md).
 
 ### Completeness
 

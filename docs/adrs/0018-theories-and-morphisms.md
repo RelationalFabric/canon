@@ -89,7 +89,7 @@ An interpretation is a set of Theories plus claims, including situational claims
 
 ### Morphism
 
-A **Morphism** is a mapping from one Theory's terms into another's. Canon defines, applies and type-checks Morphisms. Morphisms can be declared under a label as well as defined, so they can be found and dispatched dynamically on demand.
+A **Morphism** is a mapping from one Theory's terms into another's. Canon defines, applies and type-checks Morphisms. A Morphism's name is derived from its source and target Theories, so there is one Morphism per pair, and it can be found and dispatched by that pair on demand.
 
 The only requirement on a Morphism is that it is **complete**: every term of the source Theory is mapped. Once a Morphism is complete, the axioms at each key do the rest. For example, a `RepresentationAxiom` converts whichever representation the target uses to its canonical form. A Morphism therefore needs no separate rule about value representation or axiom preservation.
 

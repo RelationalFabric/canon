@@ -16,8 +16,8 @@ This document explains what that means, how definitions are named, and how to re
 
 A definition is the value you get back from defining a canon, an axiom, a Theory or a Morphism. Each definition has:
 
-- **A formal identity.** That identity is a URI of the form `canon://<kind>/<name>`, where kind is one of `canon`, `axiom`, `theory`, `morphism`. The shared registry is indexed by these URIs, so each index is typed by its kind, and the URI identifies what kind of definition sits at that location.
-- **A unique name.** Names must be unique at registration. The augmented interfaces (`Canons`, `Axioms`, `Theories`, `Morphisms`) key definitions by name, and registering a second definition under a name already in use is a clash.
+- **A formal identity.** That identity is a URI of the form `canon://<kind>/<name>`, where kind is one of `canon`, `axiom`, `theory`, `morphism`. The shared registry is indexed by these URIs, so each index is typed by its kind, and the URI identifies what kind of definition sits at that location. A Morphism's identity looks like `canon://morphism/<Source>/<Target>`: its name is derived from the source and target Theories, not given.
+- **A unique name.** Names must be unique at registration. The augmented interfaces (`Canons`, `Axioms`, `Theories`) key definitions by name, and registering a second definition under a name already in use is a clash. A Morphism's derived name means there is at most one Morphism per source and target pair.
 - **Registration state.** Canon records, in the definition's metadata, whether it has been registered yet.
 
 All definitions, of every kind, live in **one shared registry**, keyed by those URIs. Because they share a registry, canon can follow the links between them: from a canon to the Theories it models, or from a Theory to the Theories it extends.
@@ -28,7 +28,7 @@ There are two ways to create a definition. They differ in where the definition's
 
 ### Declaring: the label supplies the name
 
-`declareCanon`, `declareTheory` and `declareMorphism` take a **label** and a config. The label is the name, so the config does not repeat it. Declaring also registers the definition under that label.
+`declareCanon` and `declareTheory` take a **label** and a config. The label is the name, so the config does not repeat it. Declaring also registers the definition under that label. A Morphism has no label.
 
 ```typescript
 declareTheory('Taxonomy', { extends: [] })
@@ -36,7 +36,7 @@ declareTheory('Taxonomy', { extends: [] })
 
 ### Defining: the config's `name` field supplies the name
 
-`defineCanon`, `defineAxiom`, `defineTheory` and `defineMorphism` take only a config. There is no label, so the config's `name` field supplies the name. The result is the definition value, which you keep in a variable.
+`defineCanon`, `defineAxiom` and `defineTheory` take only a config. There is no label, so the config's `name` field supplies the name. `defineMorphism` also takes only a config, and the name is derived from the source and target Theories in that config. The result is the definition value, which you keep in a variable.
 
 ```typescript
 const Identity = defineTheory({ name: 'Identity', extends: [] })
@@ -51,7 +51,7 @@ A Theory lists the Theories it composes in `extends`. A canon lists the Theories
 
 ## Referring to Definitions: a Label or a Value
 
-Anywhere canon expects you to name a canon, an axiom, a Theory or a Morphism, you can give it either a **label** or the **definition value**, whichever you have to hand. You can mix both in one list:
+Anywhere canon expects you to name a canon, an axiom or a Theory, you can give it either a **label** or the **definition value**, whichever you have to hand. You can mix both in one list. A Morphism is not named that way: it is found and dispatched by its source and target pair.
 
 ```typescript
 declareTheory('TypedEntity', { extends: [Identity, 'Taxonomy'] })
