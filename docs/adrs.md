@@ -13,12 +13,12 @@ Architecture Decision Records are documents that capture important architectural
 For architectural decisions, each ADR follows the format defined by [Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions):
 
 1. **Title** - A descriptive title
-2. **Status** - A `## Status` section: Proposed, Accepted, Deprecated, or Superseded
+2. **Status** - A `## Status` section: Proposed, Accepted, Deprecated, Superseded, or Obsolescent
 3. **Context** - The forces at play, including technological, political, social, and project local
 4. **Decision** - The change that we're proposing or have made
 5. **Consequences** - What becomes easier or more difficult to do and any risks introduced by this change
 
-New ADRs start from `docs/adrs/templates/template.md` (see ADR-0018).
+New ADRs start from `docs/adrs/templates/template.md` (see ADR-0019).
 
 ### Y-Statement Format
 
@@ -107,3 +107,4 @@ If `@meza/adr-tools` is not available, you can create ADRs manually:
 - **Accepted** - The decision has been made and implemented
 - **Deprecated** - The decision is no longer recommended but may still be in use
 - **Superseded** - The decision has been replaced by a newer ADR
+- **Obsolescent** - The decision is still in force, but is expected to be superseded. Neither the decision nor any work built on it should be treated as stable.

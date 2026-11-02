@@ -11,6 +11,7 @@ const statusColors = {
   accepted: '🟢',
   deprecated: '🔴',
   superseded: '🟠',
+  obsolescent: '🟣',
 } as const
 
 // Status labels
@@ -19,6 +20,7 @@ const statusLabels = {
   accepted: 'Accepted',
   deprecated: 'Deprecated',
   superseded: 'Superseded',
+  obsolescent: 'Obsolescent',
 } as const
 
 interface GenerateAdrIndexOptions {

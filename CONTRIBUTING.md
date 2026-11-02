@@ -114,6 +114,7 @@ For more details, see the [ADR Documentation](./docs/adrs.md).
 - **Accepted** - Decision has been made and implemented
 - **Deprecated** - Decision is no longer recommended
 - **Superseded** - Decision has been replaced by a newer ADR
+- **Obsolescent** - The decision is still in force, but is expected to be superseded. Neither the decision nor any work built on it should be treated as stable.
 
 ## Development Workflow
 

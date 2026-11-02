@@ -35,6 +35,8 @@ export default createEslintConfig()
 - **[CLI Reference](./reference/cli.md)** - Command-line interface documentation and usage
 - **[Canons](./canons.md)** - Core principles and guidelines
 - **[Axioms](./axioms.md)** - Fundamental assumptions and rules
+- **[Definitions](./definitions.md)** - Canons, axioms and Theories as values (proposed)
+- **[Theories](./theories.md)** - Shared requirements above canons (proposed)
 - **[Examples](./examples/)** - Practical usage examples
 - **[Type Testing](./type-testing/)** - Compile-time invariants and assertion helpers
 

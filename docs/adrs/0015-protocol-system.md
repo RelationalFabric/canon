@@ -1,6 +1,9 @@
 # ADR-0015: Protocol System
 
-- Status: accepted
+## Status
+
+Obsolescent
+
 - Date: 2025-01-28
 
 ## Context and Problem Statement

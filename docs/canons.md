@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-**Before reading this document, please read the [Axioms documentation](./axioms.md).**
+**Before reading this document, please read the [Axioms documentation](./axioms.md).** After canons, [Definitions](./definitions.md) and [Theories](./theories.md) describe proposed follow-ons: definitions as values, and shared requirements a canon can model.
 
 Canons build directly on the foundation of axioms. Understanding how axioms work is essential to understanding canons. The axioms document covers:
 
@@ -371,3 +371,8 @@ Canon is designed as a **universal adapter** that composes with existing TypeScr
 - **immutable.js** - For immutable data structures
 
 This composition approach ensures that Canon enhances rather than replaces your existing type infrastructure.
+
+## Related
+
+- [Definitions](./definitions.md) — defining and declaring canons as values (proposed)
+- [Theories](./theories.md) — requirements a canon can model (proposed)

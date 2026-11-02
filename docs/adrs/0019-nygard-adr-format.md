@@ -2,7 +2,7 @@
 format: y-statement
 ---
 
-# ADR-0018: Nygard ADR Format
+# ADR-0019: Nygard ADR Format
 
 Date: 2026-11-01
 

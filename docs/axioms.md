@@ -186,3 +186,8 @@ function idOf<T extends Satisfies<'Id'>>(x: T): AxiomValue<'Id'> {
 ```
 
 This axiom system provides the foundation for Canon's powerful type composition, enabling developers to work with semantic concepts across different data formats through lazy typing and adaptability.
+
+## Related
+
+- [Definitions](./definitions.md) — how a defined axiom is a value with an identity (proposed)
+- [Theories](./theories.md) — reusable bundles of axiom requirements above canons (proposed)
