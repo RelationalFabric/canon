@@ -4,8 +4,9 @@
 
 import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { metaOf } from './meta.js'
 import { Registry } from './registry.js'
-import { declareCanon, getRegistry, resetRegistry } from './shell.js'
+import { declareCanon, getRegistry, registerCanons, resetRegistry } from './shell.js'
 
 describe('shell', () => {
   beforeEach(() => {
@@ -58,6 +59,41 @@ describe('shell', () => {
 
       expect(getRegistry().has('TestCanon')).toBe(true)
       expect(getRegistry().get('TestCanon')).toBe(config)
+    })
+  })
+
+  describe('registerCanons', () => {
+    it('records canon://canon/X on the registered value', () => {
+      const cfg: CanonConfig = { axioms: {} }
+
+      registerCanons({ X: cfg })
+
+      const registered = getRegistry().get('X')
+      expect(registered).toBeDefined()
+      if (registered) {
+        expect(metaOf(registered).uri).toBe('canon://canon/X')
+      }
+    })
+
+    it('does not throw when a structurally equal config is registered again', () => {
+      registerCanons({ X: { axioms: {} } })
+
+      expect(() => registerCanons({ X: { axioms: {} } })).not.toThrow()
+    })
+
+    it('throws when a different config is registered under the same key', () => {
+      registerCanons({ X: { axioms: {} } })
+
+      expect(() => registerCanons({
+        X: {
+          axioms: {
+            Id: {
+              $basis: (v: unknown): v is { id: string } => true,
+              key: 'id',
+            },
+          },
+        },
+      })).toThrow('Definition already registered: canon://canon/X (ADR-0017)')
     })
   })
 })
