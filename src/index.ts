@@ -9,6 +9,8 @@ export * from './axioms/version.js'
 
 export * from './canon.js'
 
+export * from './definitions.js'
+
 // Opinionated kit exports
 export * from './kit.js'
 
