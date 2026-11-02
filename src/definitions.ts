@@ -3,6 +3,7 @@
  */
 
 import type { DefinitionKind, DefinitionUri, LexiconTermUri } from './types/index.js'
+import { metaOf, updateMeta } from './meta.js'
 
 /**
  * Build a definition URI. A definition's formal identity is `canon://${kind}/${name}` (ADR-0017).
@@ -42,13 +43,27 @@ export class DefinitionRegistry {
   private readonly definitions = new Map<DefinitionUri | LexiconTermUri, unknown>()
 
   /**
-   * Register a value at a definition or lexicon URI. Throws if that URI is already registered (ADR-0017).
+   * Register a value at a definition or lexicon URI.
+   * A registered value carries that URI in its metadata. Throws if that URI is already registered,
+   * or if the value is already registered at a different URI (ADR-0017).
    */
   register(uri: DefinitionUri | LexiconTermUri, value: unknown): void {
     if (this.definitions.has(uri)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
+    if (isMetaCarrier(value)) {
+      const existing = metaOf(value).uri
+      if (typeof existing === 'string' && existing !== uri) {
+        throw new Error(`Definition already registered: ${existing}`)
+      }
+    }
     this.definitions.set(uri, value)
+    if (isMetaCarrier(value)) {
+      updateMeta(value, metadata => ({
+        ...metadata,
+        uri,
+      }))
+    }
   }
 
   /**
@@ -90,4 +105,11 @@ export class DefinitionRegistry {
       }
     }
   }
+}
+
+/**
+ * Metadata can be attached to objects and functions. Primitives cannot carry a `uri`.
+ */
+function isMetaCarrier(value: unknown): value is object {
+  return value !== null && (typeof value === 'object' || typeof value === 'function')
 }

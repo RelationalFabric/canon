@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { DefinitionRegistry, definitionUri, lexiconTermUri } from './definitions.js'
+import { metaOf } from './meta.js'
 
 describe('definitionUri', () => {
   it('builds canon://theory/Identity', () => {
@@ -66,6 +67,33 @@ describe('definition registry', () => {
       [theory, 'theory'],
       [term, 'user'],
     ])
+  })
+
+  it('records the registered uri on the value', () => {
+    const registry = new DefinitionRegistry()
+    const uri = definitionUri('theory', 'Identity')
+    const value = { name: 'Identity' }
+
+    registry.register(uri, value)
+
+    expect(metaOf(value).uri).toBe(uri)
+  })
+
+  it('leaves an unregistered value without a uri in metadata', () => {
+    const value = { name: 'Identity' }
+
+    expect(metaOf(value).uri).toBeUndefined()
+  })
+
+  it('throws when the same value is registered under a second uri', () => {
+    const registry = new DefinitionRegistry()
+    const value = { name: 'Identity' }
+    const first = definitionUri('theory', 'Identity')
+    const second = definitionUri('theory', 'Other')
+
+    registry.register(first, value)
+
+    expect(() => registry.register(second, value)).toThrow(`Definition already registered: ${first}`)
   })
 
   it('clear empties the registry', () => {
