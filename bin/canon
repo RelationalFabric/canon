@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env -S npx tsx
 
 import process from 'node:process'
 import { runCli } from '../cli/src/index.js'

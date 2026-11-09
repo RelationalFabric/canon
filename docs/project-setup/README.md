@@ -60,9 +60,9 @@ The CLI wires the same scripts we maintain in this repository, including:
 - `npm run check:all` — lint, type-check, test, and validate radar data
 - `npm run check:all:fix` — auto-fix lint issues before running the remaining checks
 - `npm run build:docs` — build VitePress documentation with Canon’s rename workflow
-- `npm run build:adr` — regenerate ADR tables of contents and index files
+- `npm run build:adr` — regenerate the ADR index in `docs/adrs/README.md`
 
-Because Canon ships every underlying binary (`npm-run-all`, `tsx`, `vitest`, `vitepress`, `adr-tools`, `hygen`, `fs-extra`, etc.) as runtime dependencies, all scripts work immediately after installation.
+Because Canon ships every underlying binary (`npm-run-all`, `tsx`, `vitest`, `vitepress`, `hygen`, `fs-extra`, etc.) as runtime dependencies, all scripts work immediately after installation.
 
 ## CLI Commands
 

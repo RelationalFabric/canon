@@ -38,6 +38,8 @@ export default {
             { text: 'Introduction', link: '/docs/' },
             { text: 'Axioms', link: '/docs/axioms' },
             { text: 'Canons', link: '/docs/canons' },
+            { text: 'Definitions', link: '/docs/definitions' },
+            { text: 'Theories', link: '/docs/theories' },
             { text: 'Type Testing', link: '/docs/type-testing/' },
             { text: 'Examples', link: '/docs/examples/' },
           ],
