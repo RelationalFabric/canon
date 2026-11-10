@@ -1,5 +1,6 @@
 import './theories/identity.js'
 import './theories/taxonomy.js'
+import './theories/typed-entity.js'
 
 // Axiom and Canon APIs
 export * from './axiom.js'
