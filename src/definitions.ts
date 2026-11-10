@@ -41,7 +41,7 @@ export function lexiconTermUri(lexiconOrTerm: string, term?: string): LexiconTer
  * Shared registry of definitions keyed by URI. Names are unique at registration (ADR-0017).
  */
 export class DefinitionRegistry {
-  private readonly definitions = new Map<DefinitionUri | LexiconTermUri, unknown>()
+  readonly #definitions = new Map<DefinitionUri | LexiconTermUri, unknown>()
 
   /**
    * Register a value at a definition or lexicon URI.
@@ -50,8 +50,8 @@ export class DefinitionRegistry {
    * A value already registered at a different URI also throws (ADR-0017).
    */
   register(uri: DefinitionUri | LexiconTermUri, value: unknown): void {
-    const alreadyRegistered = this.definitions.has(uri)
-    if (alreadyRegistered && objectHash(this.definitions.get(uri)) !== objectHash(value)) {
+    const alreadyRegistered = this.#definitions.has(uri)
+    if (alreadyRegistered && objectHash(this.#definitions.get(uri)) !== objectHash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     if (isMetaCarrier(value)) {
@@ -61,7 +61,7 @@ export class DefinitionRegistry {
       }
     }
     if (!alreadyRegistered) {
-      this.definitions.set(uri, value)
+      this.#definitions.set(uri, value)
     }
     if (isMetaCarrier(value)) {
       updateMeta(value, metadata => ({
@@ -75,28 +75,28 @@ export class DefinitionRegistry {
    * Return the value registered at a URI, or undefined when it is absent (ADR-0017).
    */
   get(uri: DefinitionUri | LexiconTermUri): unknown | undefined {
-    return this.definitions.get(uri)
+    return this.#definitions.get(uri)
   }
 
   /**
    * Whether a URI is registered (ADR-0017).
    */
   has(uri: DefinitionUri | LexiconTermUri): boolean {
-    return this.definitions.has(uri)
+    return this.#definitions.has(uri)
   }
 
   /**
    * Number of registered definitions (ADR-0017).
    */
   get size(): number {
-    return this.definitions.size
+    return this.#definitions.size
   }
 
   /**
    * Remove every registered definition (ADR-0017).
    */
   clear(): void {
-    this.definitions.clear()
+    this.#definitions.clear()
   }
 
   /**
@@ -104,7 +104,7 @@ export class DefinitionRegistry {
    */
   * entries(kind?: DefinitionKind): Generator<[DefinitionUri | LexiconTermUri, unknown]> {
     const prefix = kind === undefined ? undefined : `canon://${kind}/`
-    for (const entry of this.definitions) {
+    for (const entry of this.#definitions) {
       if (prefix === undefined || entry[0].startsWith(prefix)) {
         yield entry
       }
@@ -120,18 +120,18 @@ export class DefinitionRegistry {
     refs: Record<string, unknown> | readonly unknown[],
   ): Array<{ uri: string, value: unknown }> {
     if (Array.isArray(refs)) {
-      return this.resolveList(kind, refs)
+      return this.#resolveList(kind, refs)
     }
     if (!isPlainRecord(refs)) {
       throw new Error('Definition refs must be a map or a list (ADR-0017)')
     }
-    return this.registerRecord(kind, refs)
+    return this.#registerRecord(kind, refs)
   }
 
   /**
    * Register each map entry under `kind` and return the stored definitions in key order (ADR-0017).
    */
-  private registerRecord(
+  #registerRecord(
     kind: DefinitionKind,
     refs: Record<string, unknown>,
   ): Array<{ uri: string, value: unknown }> {
@@ -147,7 +147,7 @@ export class DefinitionRegistry {
   /**
    * Resolve list-form refs in input order (ADR-0017).
    */
-  private resolveList(
+  #resolveList(
     kind: DefinitionKind,
     refs: readonly unknown[],
   ): Array<{ uri: string, value: unknown }> {
@@ -174,7 +174,7 @@ export class DefinitionRegistry {
         if (!isLast) {
           throw new Error('A definition ref map is only allowed as the last item (ADR-0017)')
         }
-        for (const entry of this.registerRecord(kind, item)) {
+        for (const entry of this.#registerRecord(kind, item)) {
           resolved.push(entry)
         }
         continue
