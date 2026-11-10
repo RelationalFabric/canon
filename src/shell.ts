@@ -290,9 +290,14 @@ function parseMorphismKey(key: string): { source: string, target: string } {
 }
 
 function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): void {
-  for (const key of Object.keys(morphisms)) {
+  for (const [key, config] of Object.entries(morphisms)) {
     const { source, target } = parseMorphismKey(key)
     resolveTheoryLabel(source)
     resolveTheoryLabel(target)
+    const uri = definitionUri('morphism', key)
+    const existing = morphismRefFor(source, target).value
+    if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+      throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
+    }
   }
 }

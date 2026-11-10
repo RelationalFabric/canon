@@ -272,6 +272,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — Pre-U5 fix. `validateRegisterMorphisms` rejects a key whose morphism URI is already registered with a different value (`objectHash`), before any batch entry is stored. One test in `src/shell.test.ts`. `npm run check:all`.
 - 2026-11-10 — U4. `registerMorphisms` validates every entry before any register (invalid key, unresolved source or target), then registers each key at `canon://morphism/<Source>/<Target>`. Six tests in `src/shell.test.ts`, including an all-or-nothing batch. JSDoc on `resolveExtends` and `resolveTheoryLabel` corrected. `npm run check:all`.
 - 2026-11-10 — U3. `declareMorphism` in `src/shell.ts`: `defineMorphism`, resolve source and target theories, register at `canon://morphism/<Source>/<Target>`, return `morphismRefFor`. Six tests in `src/shell.test.ts`. No `registerMorphisms`, no runtime `maps` check, `inferCanon` unchanged. `npm run check:all`.
 - 2026-11-10 — U2. Nameless `defineMorphism` in `src/morphism.ts`, exported only from `src/index.ts`. `MorphismConfig` stays in the module with `maps?: Record<string, string>`. It returns the same object, does not register, and does not write `uri`. Three tests in `src/morphism.test.ts`. `npm run check:all`.

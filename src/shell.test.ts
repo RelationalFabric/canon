@@ -281,6 +281,18 @@ describe('shell', () => {
       expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
       expect(morphismRefFor('Missing', 'Taxonomy').value).toBeUndefined()
     })
+
+    it('stores nothing when a batch conflicts with an already registered morphism', () => {
+      declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+      expect(() => registerMorphisms({
+        'Taxonomy/Identity': { maps: { Type: 'Id' } },
+        'Identity/Taxonomy': { maps: { Id: 'Id' } },
+      })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
+
+      expect(morphismRefFor('Taxonomy', 'Identity').value).toBeUndefined()
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
+    })
   })
 
   describe('registerTheories', () => {
