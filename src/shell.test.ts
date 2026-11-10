@@ -200,6 +200,26 @@ describe('shell', () => {
       expect(theoryRefFor('Child').value).toEqual({ extends: ['Parent'] })
     })
 
+    it('leaves the registry unchanged when a batch references a missing label', () => {
+      expect(() => registerTheories({
+        A: { extends: ['Missing'] },
+        B: {},
+      })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+
+      expect(theoryRefFor('A').value).toBeUndefined()
+      expect(theoryRefFor('B').value).toBeUndefined()
+    })
+
+    it('leaves the registry unchanged when a batch has a cycle', () => {
+      expect(() => registerTheories({
+        A: { extends: ['B'] },
+        B: { extends: ['A'] },
+      })).toThrow('Theory cycle: canon://theory/A -> canon://theory/B -> canon://theory/A (ADR-0017)')
+
+      expect(theoryRefFor('A').value).toBeUndefined()
+      expect(theoryRefFor('B').value).toBeUndefined()
+    })
+
     it('resolves extends the same way declareTheory does', () => {
       declareTheory('Identity', identityConfig)
 
