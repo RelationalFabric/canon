@@ -58,10 +58,7 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
   }
 }
 
-/**
- * Resolve `extends` the way `declareTheory` does. A missing label throws
- * before the theory being registered is stored.
- */
+/** Throw when a theory label is not registered. */
 function resolveTheoryLabel(label: string): void {
   const resolved = definitionRegistry.resolve('theory', [label])
   for (const entry of resolved) {
@@ -71,6 +68,10 @@ function resolveTheoryLabel(label: string): void {
   }
 }
 
+/**
+ * Resolve `extends` the way `declareTheory` does. A missing label throws
+ * before the theory being registered is stored.
+ */
 function resolveExtends(config: TheoryConfig): void {
   if (config.extends === undefined) {
     return
@@ -114,6 +115,21 @@ export function declareMorphism<
   resolveTheoryLabel(String(target))
   definitionRegistry.register(definitionUri('morphism', `${String(source)}/${String(target)}`), defined)
   return morphismRefFor(String(source), String(target))
+}
+
+/**
+ * Register multiple morphisms at once (for module-style registration)
+ *
+ * @param morphisms - Object mapping `<Source>/<Target>` keys to morphism configs
+ * @param morphisms.maps - Term mappings from source to target
+ */
+export function registerMorphisms(morphisms: Record<string, MorphismConfig>): void {
+  validateRegisterMorphisms(morphisms)
+
+  for (const [key, config] of Object.entries(morphisms)) {
+    const value = defineMorphism(config)
+    definitionRegistry.register(definitionUri('morphism', key), value)
+  }
 }
 
 /**
@@ -228,4 +244,20 @@ function registerTheoriesOrder(theories: Record<string, TheoryConfig>): string[]
   }
 
   return order
+}
+
+function parseMorphismKey(key: string): { source: string, target: string } {
+  const slash = key.indexOf('/')
+  if (slash === -1) {
+    throw new Error(`Invalid morphism name: ${key} (ADR-0018)`)
+  }
+  return { source: key.slice(0, slash), target: key.slice(slash + 1) }
+}
+
+function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): void {
+  for (const key of Object.keys(morphisms)) {
+    const { source, target } = parseMorphismKey(key)
+    resolveTheoryLabel(source)
+    resolveTheoryLabel(target)
+  }
 }

@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { inferCanon } from './canon.js'
 import { canonRefFor, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { declareCanon, declareMorphism, declareTheory, registerCanons, registerTheories, resetRegistry } from './shell.js'
+import { declareCanon, declareMorphism, declareTheory, registerCanons, registerMorphisms, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
 
@@ -217,6 +217,65 @@ describe('shell', () => {
       resetRegistry()
 
       expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+    })
+  })
+
+  describe('registerMorphisms', () => {
+    const morphismConfig = { maps: { Id: 'Type' } }
+
+    beforeEach(() => {
+      declareTheory('Identity', identityConfig)
+      declareTheory('Taxonomy', taxonomyConfig)
+    })
+
+    it('records only canon://morphism/Identity/Taxonomy on the registered value', () => {
+      registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
+
+      const registered = morphismRefFor('Identity', 'Taxonomy').value
+      expect(registered).toBe(morphismConfig)
+      if (isMetaCarrier(registered)) {
+        expect(metaOf(registered)).toEqual({ uri: 'canon://morphism/Identity/Taxonomy' })
+      }
+    })
+
+    it('does not throw when a structurally equal config is registered again', () => {
+      registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
+
+      expect(() => registerMorphisms({ 'Identity/Taxonomy': morphismConfig })).not.toThrow()
+    })
+
+    it('throws when a different config is registered under the same key and keeps the original value', () => {
+      registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
+
+      expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } }))
+        .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
+
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
+    })
+
+    it('throws on a missing source theory and does not register the morphism', () => {
+      resetRegistry()
+      declareTheory('Taxonomy', taxonomyConfig)
+
+      expect(() => registerMorphisms({ 'Missing/Taxonomy': morphismConfig }))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(morphismRefFor('Missing', 'Taxonomy').value).toBeUndefined()
+    })
+
+    it('throws on a key with no slash', () => {
+      expect(() => registerMorphisms({ IdentityTaxonomy: morphismConfig }))
+        .toThrow('Invalid morphism name: IdentityTaxonomy (ADR-0018)')
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+    })
+
+    it('leaves the registry unchanged when a batch has one missing source and one valid entry', () => {
+      expect(() => registerMorphisms({
+        'Missing/Taxonomy': morphismConfig,
+        'Identity/Taxonomy': morphismConfig,
+      })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+      expect(morphismRefFor('Missing', 'Taxonomy').value).toBeUndefined()
     })
   })
 

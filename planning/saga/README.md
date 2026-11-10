@@ -5,7 +5,7 @@
 - **Purpose:** Carry the two ADR-0018 sections that Phase 2 left as dependencies onto the definition registry: Morphisms (`defineMorphism`, `declareMorphism`, `registerMorphisms`, completeness, composition, apply) and `ObjectConstraintAxiom`. Order, Aggregate, lexicon hierarchy, interpretations, `EntityReference` removal, and the docs phase stay out.
 - **Goal:** A complete Morphism between two Theories registers at `canon://morphism/<Source>/<Target>`, composes, and applies; a canon key can require that its value models listed Theories. Measured by the done check on each unit, with `npm run check:all` green where the gate requires full checks. No public name beyond the names this plan settles from existing patterns.
 - **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `73ff807`) is the base.
-- **Status:** Active. U1 through U3 are in. No later unit is started.
+- **Status:** Active. U1 through U4 are in. No later unit is started.
 
 ## Plan
 
@@ -126,7 +126,7 @@ Source and target type parameters extend `keyof Theories`. Do not check `maps` a
 
 **Files:** `src/shell.ts`, `src/shell.test.ts`.
 
-**Work:** `registerMorphisms(morphisms: Record<string, MorphismConfig>): void`. For each key, split on the first `/` into source and target, then do what `declareMorphism` does. A key without `/` throws `Invalid morphism name: <key> (ADR-0018)` before any register for that entry. Resolve source and target before storing that entry. Keys that do not name each other need no ordering pass; do not copy the `registerTheories` pending-set loop unless a test shows one Morphism's `maps` referring to another Morphism (it must not: `maps` is term names).
+**Work:** `registerMorphisms(morphisms: Record<string, MorphismConfig>): void`. All-or-nothing, like `registerTheories`: validate every entry before storing any. For each key: split on the first `/` into source and target — a key without `/` throws `Invalid morphism name: <key> (ADR-0018)`. Each source and target label must resolve, or throw `Unresolved theory: <uri> (ADR-0017)`. Only after every entry passes, register each at `canon://morphism/<Source>/<Target>` via `defineMorphism` and `definitionRegistry.register`. No ordering pass.
 
 **Tests:**
 
@@ -135,6 +135,7 @@ Source and target type parameters extend `keyof Theories`. Do not check `maps` a
 - A different config under the same key throws ``Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)`` and keeps the original value.
 - A missing source Theory throws and does not leave the Morphism registered.
 - `'IdentityTaxonomy'` (no slash) throws `Invalid morphism name: IdentityTaxonomy (ADR-0018)`.
+- A batch with one missing source and one valid entry throws and leaves neither morphism registered.
 
 **Done check:** Those tests pass under `npm run check:test`.
 
@@ -271,6 +272,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U4. `registerMorphisms` validates every entry before any register (invalid key, unresolved source or target), then registers each key at `canon://morphism/<Source>/<Target>`. Six tests in `src/shell.test.ts`, including an all-or-nothing batch. JSDoc on `resolveExtends` and `resolveTheoryLabel` corrected. `npm run check:all`.
 - 2026-11-10 — U3. `declareMorphism` in `src/shell.ts`: `defineMorphism`, resolve source and target theories, register at `canon://morphism/<Source>/<Target>`, return `morphismRefFor`. Six tests in `src/shell.test.ts`. No `registerMorphisms`, no runtime `maps` check, `inferCanon` unchanged. `npm run check:all`.
 - 2026-11-10 — U2. Nameless `defineMorphism` in `src/morphism.ts`, exported only from `src/index.ts`. `MorphismConfig` stays in the module with `maps?: Record<string, string>`. It returns the same object, does not register, and does not write `uri`. Three tests in `src/morphism.test.ts`. `npm run check:all`.
 - 2026-11-10 — U1. Empty `Morphisms` interface in `src/types/morphisms.d.ts`, re-exported from `src/types/index.d.ts`. Keys are `${Source}/${Target}`. No Morphism declared, no runtime config type, no test file. `src/index.ts` unchanged. `npm run check:all`.
