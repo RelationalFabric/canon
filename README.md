@@ -241,6 +241,9 @@ Canon is designed to compose with existing TypeScript libraries and provides:
 
 Canon maintains transparent planning and strategic direction:
 
+- **Technology Radar**: [planning/radar/](planning/radar/) - Technology recommendations and assessments
+- **Strategic Vision**: [planning/](planning/) - Long-term direction and positioning
+- **Development Roadmap**: [planning/](planning/) - Detailed development phases and milestones
 - **Architecture Decisions**: [docs/adrs/](docs/adrs/) - Documented ADRs for major decisions
 - **Update Radar**: `npm run build:radar` - Convert YAML to CSV for visualization
 
@@ -328,6 +331,7 @@ Canon provides comprehensive documentation to help you understand and use the sy
 ### Architecture
 
 - **[ADRs](docs/adrs/)** - Architecture Decision Records
+- **[Technology Radar](planning/radar/methodology.md)** - Technology assessment methodology
 
 ## License
 
