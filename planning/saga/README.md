@@ -5,7 +5,7 @@
 - **Purpose:** Carry Phase 2 (Theories) from the approved ADRs onto the Phase 1 definition registry: nameless `defineTheory`, `declareTheory` returning a `KeyRef`, identities `canon://theory/<Name>`, and the three specified Theories. ObjectConstraintAxiom, Morphisms, Order, Aggregate, and the docs phase stay out of this saga.
 - **Goal:** A canon type can model Identity, Taxonomy, and Typed Entity, and `declareTheory` registers those values with only `uri` in metadata. Measured by the done check on each unit below, with `npm run check:all` green at the units whose gate requires full checks. No public name beyond the ADRs.
 - **ADRs in scope:** ADR-0017 (Definitions as Values), ADR-0018 (Theories only; the Morphism and ObjectConstraintAxiom sections are dependencies, not work).
-- **Status:** Active. U1–U5 and U7 are in. U6 stays blocked on Q3. U8 stays blocked on Q5.
+- **Status:** Active. U1–U5 and U7 are in. U6 and U8 are unblocked. Q1–Q8 are answered.
 
 ## Plan
 
@@ -177,23 +177,23 @@ On load, `declareTheory('Identity', {})` and `declareTheory('Taxonomy', {})`. No
 
 ### U6 — Typed Entity
 
-**Rating:** M. The type half can land with U5. The runtime composition half is **blocked on open question 3**.
+**Rating:** M. Unblocked. The label is `TypedEntity`, so the identity is `canon://theory/TypedEntity` (Q3).
 
 **Files:** `src/theories/typed-entity.ts`, `src/index.ts`, `src/theories/typed-entity.test.ts`.
 
-**Work, type half (not blocked):** Augment `Theories` with the Typed Entity label from open question 3. Its type `extends` Identity and Taxonomy and adds no keys **[ADR]**. Laws:
+**Work:** Augment `Theories` with `TypedEntity`. Its type `extends` Identity and Taxonomy and adds no keys **[ADR]**. Laws:
 
-- `invariant<Expect<Theories[Label], Theories['Identity']>>()`
-- `invariant<Expect<Theories[Label], Theories['Taxonomy']>>()`
-- `invariant<Expect<keyof Theories[Label], 'Id' | 'Type'>>()` so no extra keys appear.
+- `invariant<Expect<Theories['TypedEntity'], Theories['Identity']>>()`
+- `invariant<Expect<Theories['TypedEntity'], Theories['Taxonomy']>>()`
+- `invariant<Expect<keyof Theories['TypedEntity'], 'Id' | 'Type'>>()` so no extra keys appear.
 
-**Work, runtime half (blocked on Q3):** `declareTheory(label, { extends: ['Identity', 'Taxonomy'] })`, using U4. Identity and Taxonomy must already be registered (import order: identity, taxonomy, then typed entity).
+Runtime: `declareTheory('TypedEntity', { extends: ['Identity', 'Taxonomy'] })`, using U4. One list, no discriminant (Q6). Identity and Taxonomy must already be registered (import order: identity, taxonomy, then typed entity).
 
 **Tests:**
 
-- The two `Expect` laws hold (compile-time).
-- After the runtime half: `theoryRefFor(label).key` is `canon://theory/<Label>`, and resolving the composition field yields the Identity and Taxonomy values in that order.
-- A canon-shaped fixture `interface SampleCanon extends Theories[Label] { Id: KeyNameAxiom }` typechecks (narrowing is allowed **[ADR]**). No runtime canon field is added here.
+- The three `Expect` laws hold (compile-time).
+- `theoryRefFor('TypedEntity').key` is `canon://theory/TypedEntity`, and resolving `extends` yields the Identity and Taxonomy values in that order.
+- A canon-shaped fixture `interface SampleCanon extends Theories['TypedEntity'] { Id: KeyNameAxiom }` typechecks (narrowing is allowed **[ADR]**). No runtime canon field is added here.
 
 **Done check:** Type half: `check:types` passes with the three laws. Runtime half: the resolve test passes and no new public name appears.
 
@@ -207,21 +207,21 @@ On load, `declareTheory('Identity', {})` and `declareTheory('Taxonomy', {})`. No
 
 - `interface Modeled extends Theories['Identity'] {}` assigns to a `Canon<{ Id: KeyNameAxiom }>`-shaped type. `Canon<TAxioms>` is `TAxioms` **[code]** `src/types/canons.d.ts`, so this is an `Expect`, not a new wrapper.
 - A type that does not have `Id` does not extend `Theories['Identity']` (`IsFalse` / `@ts-expect-error`).
-- No change to `CanonConfig`. The runtime list of Theories a canon models has no approved property name (open question 5).
+- No change to `CanonConfig`. Q5 is now answered (`models`); that field is U8, not this commit.
 
-**Tests:** The expects above, plus a comment pointing at question 5 so nobody adds a field in this commit.
+**Tests:** The expects above, plus a comment that `models` is U8 so nobody adds a `CanonConfig` field in the U7 commit.
 
 **Done check:** `check:types` and `check:test` pass. `git diff` for this commit does not touch `src/canon.ts`, `src/types/canons.d.ts`, or `inferCanon`.
 
 ### U8 — runtime "canon models these Theories"
 
-**Rating:** H. **Blocked on open question 5.** Not started until the `CanonConfig` property is named.
+**Rating:** H. Unblocked. The `CanonConfig` field is `models`, using the same map/list form as `extends` (Q5).
 
-**Files (when unblocked):** `src/types/canons.d.ts`, `src/shell.ts` (`declareCanon` / `registerCanons` only), `src/shell.test.ts`. Not `inferCanon`, unless a test shows it breaks (it should not; see Risks).
+**Files:** `src/types/canons.d.ts`, `src/shell.ts` (`declareCanon` / `registerCanons` only), `src/shell.test.ts`. Not `inferCanon`, unless a test shows it breaks (it should not; see Risks).
 
-**Work:** The named property uses U4's shapes with kind `'theory'`. `declareCanon` resolves it when present and leaves canons that omit it unchanged **[ADR]** "Theories are optional". Absent labels throw. Values are registered on use. `CanonConfig.axioms` stays `Record<string, AxiomConfig>` **[code]**; this unit does not also accept axiom labels in `axioms`. The **[rule]** about axiom references applies to the new Theory field and to any later axiom-reference field, not as a silent change to `$basis` matching.
+**Work:** `models` uses U4's shapes with kind `'theory'`. `declareCanon` and `registerCanons` resolve it when present and leave canons that omit it unchanged **[ADR]** "Theories are optional". Absent labels throw. Values are registered on use. `CanonConfig.axioms` stays `Record<string, AxiomConfig>` **[code]**; this unit does not also accept axiom labels in `axioms`. The **[rule]** about axiom references applies to `models` and to any later axiom-reference field, not as a silent change to `$basis` matching.
 
-**Done check:** A canon declared with the named field resolves Identity by label and by `theoryRefFor('Identity')`. A canon declared without the field still round-trips through `canonRefFor` as it does today. `inferCanon({ id: ... })` still returns the canon with the most matching axioms **[code]**.
+**Done check:** A canon declared with `models` resolves Identity by label and by `theoryRefFor('Identity')`. A canon declared without `models` still round-trips through `canonRefFor` as it does today. `inferCanon({ id: ... })` still returns the canon with the most matching axioms **[code]**.
 
 ## 3. Risks and interactions
 
@@ -239,7 +239,7 @@ The `as CanonConfig` cast is pre-existing. This phase does not widen it.
 
 `resetRegistry` clears the whole `definitionRegistry`, every kind. Shell tests call it in `beforeEach` **[code]**. After U5, importing the package declares Identity and Taxonomy, and the next `resetRegistry()` drops them. `theoryRefFor('Identity').value` is then `undefined` until something calls `declareTheory` again. Module top-level does not run twice, so a reset does not bring them back.
 
-This plan leaves `resetRegistry` as a full clear. Re-seeding built-ins inside `resetRegistry` would change a public function and break the test that expects a cleared canon to stay gone only if re-seed were partial; more importantly it is a behavior change that belongs in open question 7. Tests that need the built-ins after a reset must call `declareTheory` again. Re-declaring an equal config is idempotent **[code]**.
+This plan leaves `resetRegistry` as a full clear (Q7, answered). The caller re-declares. Tests that need the built-ins after a reset must call `declareTheory` again. Re-declaring an equal config is idempotent **[code]**.
 
 `registerCanons` is unchanged. It does not grow a theory parameter in U1–U7.
 
@@ -276,23 +276,23 @@ Primitives cannot carry metadata **[code]** `isMetaCarrier`. Theory configs are 
 
 ## 4. Open questions for Bahul
 
-These are undecided. Implementation must not pick a name and proceed.
+Settled. Q1 was answered by Bahul. Q2–Q8 were answered on 2026-11-10 by the consistency rule: follow the existing patterns.
 
 1. **Composition field name.** Answered. Bahul, 2026-11-10: `extends`.
 
-2. **Does the runtime value still store `name`?** ADR-0018 says the runtime form is the name plus composition, and that `defineTheory` takes the name from the config. ADR-0017 says the same about `define*`. The approved rule says `define*` is nameless and that metadata holds only `uri`. This plan follows the rule: no `name` property, name = declare label = final URI segment. Confirm that the ADR sentences are withdrawn for this phase. **[ADR]** vs **[rule]**.
+2. **Does the runtime value still store `name`?** Answered. 2026-11-10, consistency rule: no `name` property. The ADR sentences that put `name` on the runtime value, and that have `defineTheory` read the name from the config, are withdrawn for this phase. The name is the declare label, which is the final URI segment. Metadata holds only `uri`.
 
-3. **Typed Entity's label.** The ADR writes "Typed Entity" with a space. `Theories` keys in the same ADR are also `Identity` and `Taxonomy`, which are identifiers. Which string is the `keyof Theories` label and the URI segment (`canon://theory/Typed Entity` vs `canon://theory/TypedEntity`)? **[ADR]** does not say. U6's runtime registration waits on this. The type half can use the chosen label in one place.
+3. **Typed Entity's label.** Answered. 2026-11-10, consistency rule: `TypedEntity`, so `canon://theory/TypedEntity`.
 
-4. **`registerTheories`.** The rule says a name is given at `registerX` or at `declare*`. ADR-0018 names `defineTheory` and `declareTheory` only. `registerCanons` exists **[code]** but is not by itself permission to add `registerTheories`. This plan does not add it. Unregistered Theories receive names from `declareTheory` or from map keys on the composition field (U4). Confirm that map keys plus `declareTheory` are enough.
+4. **`registerTheories`.** Answered. 2026-11-10, consistency rule: no `registerTheories` in this saga. Names come from `declareTheory` or from map keys on `extends`.
 
-5. **`CanonConfig` field for Theories a canon models.** ADR-0017 requires a walk from a canon to the Theories it models, and says a canon lists them. No property name is given. U7 covers inheritance only. U8 waits on the name. **[ADR]**
+5. **`CanonConfig` field for Theories a canon models.** Answered. 2026-11-10, consistency rule: `models`, using the same map/list form as `extends`. U8 adds it.
 
-6. **Extension vs union at runtime.** ADR-0018 specifies both operations and one runtime fact ("the Theories it composes"). This plan's inference is: one list, no discriminant; `extends` one type vs `extends` both types is the whole distinction, and a kind clash is a TypeScript error. Confirm, or name a discriminant. **[ADR]**, **[inference]**
+6. **Extension vs union at runtime.** Answered. 2026-11-10, consistency rule: one list, no discriminant. `extends` one type versus `extends` both types is the distinction, and a kind clash is a TypeScript error.
 
-7. **`resetRegistry` vs built-in Theories.** `resetRegistry` clears every kind **[code]**. After U5, that clears Identity and Taxonomy with no automatic restore. Confirm "full clear, caller re-declares" rather than re-seeding inside `resetRegistry`.
+7. **`resetRegistry` vs built-in Theories.** Answered. 2026-11-10, consistency rule: `resetRegistry` does a full clear, and the caller re-declares.
 
-8. **Order and Aggregate.** Confirm they get no `Theories` keys in Phase 2. ADR-0018 already defers their keys. **[ADR]**
+8. **Order and Aggregate.** Answered. 2026-11-10, consistency rule: they get no `Theories` keys.
 
 ## Ledger
 
@@ -313,6 +313,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — Docs only. Q2–Q8 answered by the consistency rule. U6 is unblocked with label `TypedEntity`. U8 is unblocked with `CanonConfig.models`. No code.
 - 2026-11-10 — U4. `declareTheory` resolves `extends` through `definitionRegistry.resolve('theory', …)` and throws `Unresolved theory: <uri> (ADR-0017)` when a label is missing. No new export, no `name`, no `registerTheories`, no discriminant. Q1 marked answered. Tests in `src/theory.test.ts`. `npm run check:all`.
 - 2026-11-10 — U7. `src/theories/modeling.test.ts` only: `Modeled` extends Identity and `Expect`s `Canon<{ Id: KeyNameAxiom }>`. A type without `Id` is `IsFalse` and a `@ts-expect-error`. No `CanonConfig` field (open question 5). `src/canon.ts`, `src/types/canons.d.ts`, and `inferCanon` untouched. `npm run check:all`.
 - 2026-11-10 — U5. `src/theories/identity.ts` and `taxonomy.ts`: augment `Theories`, laws via `invariant`/`Expect`, `declareTheory` with `{}` on load. Side-effect imports in `src/index.ts`. Tests in `src/theories/identity.test.ts` and `taxonomy.test.ts`. Id and Type axioms not registered in the definition registry. `resetRegistry` unchanged. `npm run check:all`.
