@@ -9,6 +9,7 @@ import type { TheoryConfig } from './theory.js'
 import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
 import { canonRefFor, definitionRegistry, definitionUri, morphismRefFor, theoryRefFor } from './definitions.js'
+import { objectHash } from './kit.js'
 import { defineMorphism } from './morphism.js'
 import { defineTheory } from './theory.js'
 
@@ -153,31 +154,65 @@ export function registerTheories(theories: Record<string, TheoryConfig>): void {
 }
 
 /**
- * String labels a theory composes. Map-form `extends` uses its keys.
+ * String labels a theory composes. Map-form `extends` is a name-to-value record,
+ * not a list of labels, so those keys are not returned here.
  */
 function extendsLabels(config: TheoryConfig): string[] {
-  const { extends: composition } = config
-  if (composition === undefined) {
+  if (!Array.isArray(config.extends)) {
     return []
   }
-  if (Array.isArray(composition)) {
-    return composition.filter((item): item is string => typeof item === 'string')
-  }
-  return Object.keys(composition)
+  return config.extends.filter((item): item is string => typeof item === 'string')
 }
 
 function validateRegisterTheories(theories: Record<string, TheoryConfig>): void {
   const mapKeys = new Set(Object.keys(theories))
+  const provided = new Map<string, unknown>()
 
   for (const config of Object.values(theories)) {
-    for (const label of extendsLabels(config)) {
-      if (!mapKeys.has(label) && theoryRefFor(label).value === undefined) {
-        throw new Error(`Unresolved theory: ${definitionUri('theory', label)} (ADR-0017)`)
-      }
-    }
+    validateTheoryConfig(config, mapKeys, provided)
   }
 
   assertNoTheoryCycles(theories, mapKeys)
+}
+
+function validateTheoryConfig(
+  config: TheoryConfig,
+  batchKeys: Set<string>,
+  provided: Map<string, unknown>,
+): void {
+  for (const label of extendsLabels(config)) {
+    if (!batchKeys.has(label) && theoryRefFor(label).value === undefined) {
+      throw new Error(`Unresolved theory: ${definitionUri('theory', label)} (ADR-0017)`)
+    }
+  }
+
+  const composition = config.extends
+  if (composition === undefined || Array.isArray(composition)) {
+    return
+  }
+
+  for (const [name, value] of Object.entries(composition)) {
+    const uri = definitionUri('theory', name)
+    if (batchKeys.has(name)) {
+      throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
+    }
+    const existing = theoryRefFor(name).value
+    if (existing !== undefined && objectHash(existing) !== objectHash(value)) {
+      throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
+    }
+    const prior = provided.get(name)
+    if (prior !== undefined && objectHash(prior) !== objectHash(value)) {
+      throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
+    }
+    provided.set(name, value)
+    if (isTheoryConfig(value)) {
+      validateTheoryConfig(value, batchKeys, provided)
+    }
+  }
+}
+
+function isTheoryConfig(value: unknown): value is TheoryConfig {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
 function assertNoTheoryCycles(theories: Record<string, TheoryConfig>, mapKeys: Set<string>): void {
