@@ -2,13 +2,17 @@
  * Tests for nameless defineMorphism
  */
 
+import type { MorphismConfig } from './morphism.js'
 import type { Expect } from './testing.js'
 import type { Theories } from './types/index.js'
-import { describe, expect, it } from 'vitest'
-import { definitionRegistry, definitionUri } from './definitions.js'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { definitionRegistry, definitionUri, morphismRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { defineMorphism } from './morphism.js'
+import { composeMorphisms, defineMorphism } from './morphism.js'
+import { declareMorphism, declareTheory, resetRegistry } from './shell.js'
 import { invariant } from './testing.js'
+import { config as identityConfig } from './theories/identity.js'
+import { config as taxonomyConfig } from './theories/taxonomy.js'
 
 type IdentityToTaxonomy = {
   [Source in keyof Theories['Identity']]: keyof Theories['Taxonomy']
@@ -44,5 +48,38 @@ describe('defineMorphism', () => {
     defineMorphism(config)
 
     expect(metaOf(config).uri).toBeUndefined()
+  })
+})
+
+describe('composeMorphisms', () => {
+  beforeEach(() => {
+    resetRegistry()
+    declareTheory('Identity', identityConfig)
+    declareTheory('Taxonomy', taxonomyConfig)
+  })
+
+  it('composes chained maps without registering the result', () => {
+    const left = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as MorphismConfig
+    const right = declareMorphism('Taxonomy', 'Identity', { maps: { Type: 'Id' } }).value as MorphismConfig
+
+    expect(composeMorphisms(left, right)).toEqual({ maps: { Id: 'Id' } })
+    expect(definitionRegistry.has(definitionUri('morphism', 'Identity/Identity'))).toBe(false)
+    expect(morphismRefFor('Identity', 'Identity').value).toBeUndefined()
+  })
+
+  it('throws when the chain breaks and registers nothing new', () => {
+    const left = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as MorphismConfig
+    const right = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as MorphismConfig
+
+    expect(() => composeMorphisms(left, right))
+      .toThrow('Morphism composition break: canon://morphism/Identity/Taxonomy then canon://morphism/Identity/Taxonomy (ADR-0018)')
+    expect(definitionRegistry.has(definitionUri('morphism', 'Identity/Identity'))).toBe(false)
+  })
+
+  it('throws when a morphism is not registered', () => {
+    const registered = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as MorphismConfig
+    const unregistered = defineMorphism({ maps: { Type: 'Id' } })
+
+    expect(() => composeMorphisms(registered, unregistered)).toThrow('Unregistered morphism (ADR-0018)')
   })
 })

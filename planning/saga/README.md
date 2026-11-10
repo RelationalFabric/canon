@@ -5,7 +5,7 @@
 - **Purpose:** Carry the two ADR-0018 sections that Phase 2 left as dependencies onto the definition registry: Morphisms (`defineMorphism`, `declareMorphism`, `registerMorphisms`, completeness, composition, apply) and `ObjectConstraintAxiom`. Order, Aggregate, lexicon hierarchy, interpretations, `EntityReference` removal, and the docs phase stay out.
 - **Goal:** A complete Morphism between two Theories registers at `canon://morphism/<Source>/<Target>`, composes, and applies; a canon key can require that its value models listed Theories. Measured by the done check on each unit, with `npm run check:all` green where the gate requires full checks. No public name beyond the names this plan settles from existing patterns.
 - **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `73ff807`) is the base.
-- **Status:** Active. U1 through U5 are in. No later unit is started.
+- **Status:** Active. U1 through U6 are in. No later unit is started.
 
 ## Plan
 
@@ -244,6 +244,10 @@ It walks `entries('canon')` and reads `.axioms`. A Morphism URI is `canon://morp
 
 Shell tests clear the registry in `beforeEach`. Re-declare Identity and Taxonomy before declaring a Morphism that names them. Do not change `resetRegistry`.
 
+### Type fixtures in test files are not type-checked **[code]**
+
+`tsconfig.json` excludes `*.test.ts`, and Vitest has no typecheck, so `invariant` and `@ts-expect-error` in test files, including U5 and U9, are not verified by CI. An attempt at a `tsconfig.test.json` with the full include gave 52 errors, because module augmentation of `Theories` does not apply in that project. This is parked as separate work.
+
 ## 4. Open questions
 
 Answered. 2026-11-10, pragmatic default, recommended option.
@@ -272,6 +276,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U6. `composeMorphisms` in `src/morphism.ts`, exported from `src/index.ts`. Registered morphisms only; chain check via metadata URI; returns `{ maps }` without registering. Three tests in `src/morphism.test.ts`. Saga risk note for test-file type-checking. `npm run check:all`.
 - 2026-11-10 — U5 review fix. Completeness fixtures use `Expect<{}, IdentityToTaxonomy>` and `Expect<{ Id: 'Nope' }, IdentityToTaxonomy>`. No other change.
 - 2026-11-10 — U5. Type fixtures in `src/morphism.test.ts`: `IdentityToTaxonomy` maps every Identity key to a Taxonomy key. Omitting `Id` and mapping `Id` to a non-Taxonomy name are `@ts-expect-error`. `invariant`/`Expect`. No new export. `src/shell.ts` unchanged. `npm run check:all`.
 - 2026-11-10 — Pre-U5 fix. `validateRegisterMorphisms` rejects a key whose morphism URI is already registered with a different value (`objectHash`), before any batch entry is stored. One test in `src/shell.test.ts`. `npm run check:all`.
