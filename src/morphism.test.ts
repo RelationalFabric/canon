@@ -8,7 +8,7 @@ import type { Theories } from './types/index.js'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { definitionRegistry, definitionUri, morphismRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { composeMorphisms, defineMorphism } from './morphism.js'
+import { applyMorphism, composeMorphisms, defineMorphism } from './morphism.js'
 import { declareMorphism, declareTheory, resetRegistry } from './shell.js'
 import { invariant } from './testing.js'
 import { config as identityConfig } from './theories/identity.js'
@@ -81,5 +81,37 @@ describe('composeMorphisms', () => {
     const unregistered = defineMorphism({ maps: { Type: 'Id' } })
 
     expect(() => composeMorphisms(registered, unregistered)).toThrow('Unregistered morphism (ADR-0018)')
+  })
+})
+
+describe('applyMorphism', () => {
+  beforeEach(() => {
+    resetRegistry()
+    declareTheory('Identity', identityConfig)
+    declareTheory('Taxonomy', taxonomyConfig)
+  })
+
+  it('maps source keys to target keys', () => {
+    const morphism = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as MorphismConfig
+
+    expect(applyMorphism(morphism, { Id: 'a' })).toEqual({ Type: 'a' })
+  })
+
+  it('throws when a mapped source term is missing', () => {
+    const morphism = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as MorphismConfig
+
+    expect(() => applyMorphism(morphism, {}))
+      .toThrow('Incomplete value: canon://morphism/Identity/Taxonomy missing Id')
+  })
+
+  it('does not mutate the input object', () => {
+    const morphism = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as MorphismConfig
+    const input = { Id: 'a' }
+    const keysBefore = Object.keys(input)
+
+    applyMorphism(morphism, input)
+
+    expect(Object.keys(input)).toEqual(keysBefore)
+    expect(input).toEqual({ Id: 'a' })
   })
 })

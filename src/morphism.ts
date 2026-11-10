@@ -54,6 +54,27 @@ export function composeMorphisms(left: MorphismConfig, right: MorphismConfig): M
   return { maps }
 }
 
+/**
+ * Apply a registered morphism's `maps` to a value. Does not mutate the input.
+ */
+export function applyMorphism(
+  morphism: MorphismConfig,
+  value: Record<string, unknown>,
+): Record<string, unknown> {
+  const uri = morphismUriOf(morphism)
+  const maps = morphism.maps ?? {}
+  const result: Record<string, unknown> = {}
+
+  for (const [sourceTerm, targetTerm] of Object.entries(maps)) {
+    if (!(sourceTerm in value)) {
+      throw new Error(`Incomplete value: ${uri} missing ${sourceTerm}`)
+    }
+    result[targetTerm] = value[sourceTerm]
+  }
+
+  return result
+}
+
 function morphismUriOf(value: MorphismConfig): string {
   const uri = metaOf(value).uri
   if (typeof uri !== 'string' || !uri.startsWith(MORPHISM_URI_PREFIX)) {
