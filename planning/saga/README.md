@@ -313,5 +313,6 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — Docs only, after U1. Codified the saga and drip-feed patterns in `planning/process/saga.md` and `planning/process/drip-feed.md`. `planning/README.md` now states the folder's purpose, keeps the saga entry, and points at `planning/process/`. No code, and no saga CLI, hooks, or CI.
 - 2026-11-10 — U1. Empty `Theories` interface in `src/types/theories.d.ts`, re-exported from `src/types/index.d.ts`. No test file. `src/index.ts` unchanged. Scoped checks: `npm run check:types` as part of `npm run check:all`.
-- 2026-11-10 — The Phase 2 plan left `docs/plans/phase-2-theories.md` (commit `cfa30f8`) and now lives in this file. `docs/plans/` is gone. Navigational links from `README.md` and `docs/README.md` into `planning/**` are removed. No observations, hypotheses, issues, candidates, rrs, or deferred directories, and no saga CLI, hooks, or CI.
+- 2026-11-10 — The Phase 2 plan left `docs/plans/phase-2-theories.md` (commit `cfa30f8`) and now lives in this file. `docs/plans/` is gone. Links from `README.md` and `docs/README.md` into `planning/**` were removed in that move and restored in `8d3f460`. Permanent docs may link into `planning/`. No observations, hypotheses, issues, candidates, rrs, or deferred directories, and no saga CLI, hooks, or CI.
