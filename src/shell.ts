@@ -4,10 +4,12 @@
  * Singleton registry instance with convenience API.
  */
 
+import type { MorphismConfig } from './morphism.js'
 import type { TheoryConfig } from './theory.js'
 import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
-import { canonRefFor, definitionRegistry, definitionUri, theoryRefFor } from './definitions.js'
+import { canonRefFor, definitionRegistry, definitionUri, morphismRefFor, theoryRefFor } from './definitions.js'
+import { defineMorphism } from './morphism.js'
 import { defineTheory } from './theory.js'
 
 /**
@@ -60,6 +62,15 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
  * Resolve `extends` the way `declareTheory` does. A missing label throws
  * before the theory being registered is stored.
  */
+function resolveTheoryLabel(label: string): void {
+  const resolved = definitionRegistry.resolve('theory', [label])
+  for (const entry of resolved) {
+    if (entry.value === undefined) {
+      throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
+    }
+  }
+}
+
 function resolveExtends(config: TheoryConfig): void {
   if (config.extends === undefined) {
     return
@@ -84,6 +95,25 @@ export function declareTheory<Label extends keyof Theories>(label: Label, config
   resolveExtends(defined)
   definitionRegistry.register(definitionUri('theory', label), defined)
   return theoryRefFor(label)
+}
+
+/**
+ * Declare a morphism in the global registry
+ *
+ * @param source - The source theory label
+ * @param target - The target theory label
+ * @param config - The morphism value
+ * @param config.maps - Term mappings from source to target
+ */
+export function declareMorphism<
+  Source extends keyof Theories,
+  Target extends keyof Theories,
+>(source: Source, target: Target, config: MorphismConfig) {
+  const defined = defineMorphism(config)
+  resolveTheoryLabel(String(source))
+  resolveTheoryLabel(String(target))
+  definitionRegistry.register(definitionUri('morphism', `${String(source)}/${String(target)}`), defined)
+  return morphismRefFor(String(source), String(target))
 }
 
 /**

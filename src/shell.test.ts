@@ -5,10 +5,11 @@
 import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { inferCanon } from './canon.js'
-import { canonRefFor, theoryRefFor } from './definitions.js'
+import { canonRefFor, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { declareCanon, declareTheory, registerCanons, registerTheories, resetRegistry } from './shell.js'
+import { declareCanon, declareMorphism, declareTheory, registerCanons, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
+import { config as taxonomyConfig } from './theories/taxonomy.js'
 
 declare module './types/canons.js' {
   interface Canons {
@@ -150,6 +151,72 @@ describe('shell', () => {
       resetRegistry()
 
       expect(theoryRefFor('DeclaredTheory').value).toBeUndefined()
+    })
+  })
+
+  describe('declareMorphism', () => {
+    const morphismConfig = { maps: { Id: 'Type' } }
+
+    beforeEach(() => {
+      declareTheory('Identity', identityConfig)
+      declareTheory('Taxonomy', taxonomyConfig)
+    })
+
+    it('returns a ref at canon://morphism/Identity/Taxonomy with the declared config', () => {
+      const ref = declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+      expect(ref.key).toBe('canon://morphism/Identity/Taxonomy')
+      expect(ref.value).toBe(morphismConfig)
+    })
+
+    it('records only the morphism uri on the registered value', () => {
+      const ref = declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+      expect(ref.value).toBeDefined()
+      if (isMetaCarrier(ref.value)) {
+        expect(metaOf(ref.value)).toEqual({ uri: 'canon://morphism/Identity/Taxonomy' })
+      }
+    })
+
+    it('does not throw when a structurally equal config is declared again', () => {
+      declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+      expect(() => declareMorphism('Identity', 'Taxonomy', morphismConfig)).not.toThrow()
+    })
+
+    it('throws when a different config is declared for the same pair and keeps the first value', () => {
+      declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+      expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } }))
+        .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
+
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
+    })
+
+    it('throws on an unknown source or target and does not register the morphism', () => {
+      resetRegistry()
+      declareTheory('Taxonomy', taxonomyConfig)
+
+      expect(() => declareMorphism('Missing' as 'Identity', 'Taxonomy', morphismConfig))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+
+      resetRegistry()
+      declareTheory('Identity', identityConfig)
+
+      expect(() => declareMorphism('Identity', 'Missing' as 'Taxonomy', morphismConfig))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+    })
+
+    it('clears declared morphisms when the registry is reset', () => {
+      declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeDefined()
+
+      resetRegistry()
+
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
     })
   })
 
