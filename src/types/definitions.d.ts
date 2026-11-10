@@ -19,5 +19,5 @@ export type LexiconTermUri<L extends string = 'default', T extends string = stri
  */
 export interface KeyRef<K, V> {
   readonly key: K
-  resolve: () => V | undefined
+  get value(): V | undefined
 }

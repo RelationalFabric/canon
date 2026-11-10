@@ -36,10 +36,10 @@ describe('shell', () => {
       }
 
       declareCanon('TestCanon' as any, config)
-      expect(canonRefFor('TestCanon').resolve()).toBe(config)
+      expect(canonRefFor('TestCanon').value).toBe(config)
 
       resetRegistry()
-      expect(canonRefFor('TestCanon').resolve()).toBeUndefined()
+      expect(canonRefFor('TestCanon').value).toBeUndefined()
     })
   })
 
@@ -56,7 +56,7 @@ describe('shell', () => {
 
       declareCanon('TestCanon' as any, config)
 
-      expect(canonRefFor('TestCanon').resolve()).toBe(config)
+      expect(canonRefFor('TestCanon').value).toBe(config)
     })
 
     it('returns a ref that resolves to the declared canon', () => {
@@ -65,7 +65,7 @@ describe('shell', () => {
       const ref = declareCanon('DeclaredCanon', config)
 
       expect(ref.key).toBe('canon://canon/DeclaredCanon')
-      expect(ref.resolve()).toBe(config)
+      expect(ref.value).toBe(config)
     })
   })
 
@@ -75,7 +75,7 @@ describe('shell', () => {
 
       registerCanons({ X: cfg })
 
-      const registered = canonRefFor('X').resolve()
+      const registered = canonRefFor('X').value
       expect(registered).toBeDefined()
       if (isMetaCarrier(registered)) {
         expect(metaOf(registered).uri).toBe('canon://canon/X')
@@ -118,7 +118,7 @@ describe('shell', () => {
         },
       })).toThrow('Definition already registered: canon://canon/X (ADR-0017)')
 
-      expect(canonRefFor('X').resolve()).toBe(original)
+      expect(canonRefFor('X').value).toBe(original)
     })
   })
 })

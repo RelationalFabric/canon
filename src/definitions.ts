@@ -74,7 +74,7 @@ export class DefinitionRegistry {
   /**
    * Return the value registered at a URI, or undefined when it is absent (ADR-0017).
    */
-  get(uri: DefinitionUri | LexiconTermUri): unknown | undefined {
+  value(uri: DefinitionUri | LexiconTermUri): unknown | undefined {
     return this.#definitions.get(uri)
   }
 
@@ -139,7 +139,7 @@ export class DefinitionRegistry {
     for (const [name, value] of Object.entries(refs)) {
       const uri = definitionUri(kind, name)
       this.register(uri, value)
-      resolved.push({ uri, value: this.get(uri) })
+      resolved.push({ uri, value: this.value(uri) })
     }
     return resolved
   }
@@ -157,7 +157,7 @@ export class DefinitionRegistry {
       const isLast = index === refs.length - 1
       if (typeof item === 'string') {
         const uri = definitionUri(kind, item)
-        resolved.push({ uri, value: this.get(uri) })
+        resolved.push({ uri, value: this.value(uri) })
         continue
       }
       const uri = carriedUri(item)
@@ -167,7 +167,7 @@ export class DefinitionRegistry {
       }
       const key = definitionKeyOf(item)
       if (key !== undefined) {
-        resolved.push({ uri: key, value: this.get(key) })
+        resolved.push({ uri: key, value: this.value(key) })
         continue
       }
       if (isPlainRecord(item)) {
@@ -221,14 +221,14 @@ function carriedUri(value: unknown): string | undefined {
 export const definitionRegistry = new DefinitionRegistry()
 
 /**
- * Lazy reference whose `resolve` reads the shared definition registry (ADR-0017).
+ * Lazy reference whose `value` reads the shared definition registry (ADR-0017).
  */
 function refFor<K extends DefinitionKind, N extends string>(kind: K, name: N): KeyRef<DefinitionUri<K, N>, unknown> {
   const key = definitionUri(kind, name)
   return {
     key,
-    resolve(): unknown | undefined {
-      return definitionRegistry.get(key)
+    get value(): unknown | undefined {
+      return definitionRegistry.value(key)
     },
   }
 }
@@ -270,9 +270,9 @@ export function morphismRefFor<S extends string, T extends string>(
 function definitionKeyOf(value: unknown): DefinitionUri | LexiconTermUri | undefined {
   if (typeof value !== 'object' || value === null)
     return undefined
-  if (!('key' in value) || !('resolve' in value))
+  if (!('key' in value) || !('value' in value))
     return undefined
-  if (typeof value.resolve !== 'function' || !isDefinitionKey(value.key))
+  if (typeof Object.getOwnPropertyDescriptor(value, 'value')?.get !== 'function' || !isDefinitionKey(value.key))
     return undefined
   return value.key
 }

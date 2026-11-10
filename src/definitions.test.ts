@@ -33,9 +33,9 @@ describe('refs', () => {
       const ref = theoryRefFor('Identity')
       const value = { name: 'Identity' }
 
-      expect(ref.resolve()).toBeUndefined()
+      expect(ref.value).toBeUndefined()
       definitionRegistry.register(ref.key, value)
-      expect(ref.resolve()).toBe(value)
+      expect(ref.value).toBe(value)
     } finally {
       definitionRegistry.clear()
     }
@@ -47,14 +47,14 @@ describe('refs', () => {
 })
 
 describe('definition registry', () => {
-  it('registers a value and reports it through get, has, and size', () => {
+  it('registers a value and reports it through value, has, and size', () => {
     const registry = new DefinitionRegistry()
     const uri = definitionUri('theory', 'Identity')
 
     registry.register(uri, { name: 'Identity' })
 
     expect(registry.has(uri)).toBe(true)
-    expect(registry.get(uri)).toEqual({ name: 'Identity' })
+    expect(registry.value(uri)).toEqual({ name: 'Identity' })
     expect(registry.size).toBe(1)
   })
 
@@ -67,7 +67,7 @@ describe('definition registry', () => {
     registry.register(uri, original)
     registry.register(uri, duplicate)
 
-    expect(registry.get(uri)).toBe(original)
+    expect(registry.value(uri)).toBe(original)
     expect(metaOf(duplicate).uri).toBe(uri)
   })
 
@@ -204,7 +204,7 @@ describe('definition registry', () => {
       registry.register(key, identity)
       const ref = {
         key,
-        resolve(): undefined {
+        get value(): undefined {
           return undefined
         },
       }
