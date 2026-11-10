@@ -5,7 +5,7 @@
 - **Purpose:** Carry the two ADR-0018 sections that Phase 2 left as dependencies onto the definition registry: Morphisms (`defineMorphism`, `declareMorphism`, `registerMorphisms`, completeness, composition, apply) and `ObjectConstraintAxiom`. Order, Aggregate, lexicon hierarchy, interpretations, `EntityReference` removal, and the docs phase stay out.
 - **Goal:** A complete Morphism between two Theories registers at `canon://morphism/<Source>/<Target>`, composes, and applies; a canon key can require that its value models listed Theories. Measured by the done check on each unit, with `npm run check:all` green where the gate requires full checks. No public name beyond the names this plan settles from existing patterns.
 - **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `73ff807`) is the base.
-- **Status:** Active. U1 through U8 are in. No later unit is started.
+- **Status:** Active. U1 through U9 are in.
 
 ## Plan
 
@@ -217,7 +217,7 @@ When an axiom config on a canon has `models`, resolve it as kind `'theory'` befo
 
 **Rating:** S
 
-**Files:** `src/theories/object-constraint.test.ts` (new).
+**Files:** `src/theories/object-constraint.ts` (new). Not a `.test.ts`, so `check:types:src` checks the fixture. Not imported from `src/index.ts`.
 
 **Work:** Type-only fixture. A canon type with `Owner: ObjectConstraintAxiom<[Theories['Identity']]>` accepts a value whose `Owner` extends Identity and rejects, with `@ts-expect-error`, a value whose `Owner` has no `Id`. No runtime registration beyond what U8 already does. Do not edit `docs/theories.md`.
 
@@ -244,6 +244,10 @@ It walks `entries('canon')` and reads `.axioms`. A Morphism URI is `canon://morp
 ### Built-ins and `resetRegistry` **[code]**
 
 Shell tests clear the registry in `beforeEach`. Re-declare Identity and Taxonomy before declaring a Morphism that names them. Do not change `resetRegistry`.
+
+### Map-form `models` registers during preflight **[code]**
+
+When an axiom's or a canon's `models` uses the map form, the entries are registered as theories during the preflight. So a `registerCanons` batch that fails on a later canon can leave those theories stored. This predates the branch through `resolveModels`, and isn't fixed in this phase.
 
 ### Type fixtures in test files are not type-checked **[code]**
 
@@ -277,6 +281,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U9. Type fixture in `src/theories/object-constraint.ts`: `Owner: ObjectConstraintAxiom<[Theories['Identity']]>`. An `Owner` with `Id` assigns. An `Owner` without `Id` is `@ts-expect-error`. Not imported from `src/index.ts`. `npm run check:all`.
 - 2026-11-10 — U8. `ObjectConstraintAxiom` in `src/types/axioms.d.ts`. Value type is the intersection of `T`, or `{ [key: string]: unknown }` for the default array. `declareCanon` and `registerCanons` resolve axiom `models` as theories before storing; a bad batch stores nothing. Tests in `src/shell.test.ts`. `inferCanon` and `EntityReference` unchanged. `npm run check:all`.
 - 2026-11-10 — U7. `applyMorphism` in `src/morphism.ts`, exported from `src/index.ts`. Copies mapped terms from registered morphisms; throws on missing source. Three tests in `src/morphism.test.ts`. No axiom files. `npm run check:all`.
 - 2026-11-10 — U6. `composeMorphisms` in `src/morphism.ts`, exported from `src/index.ts`. Registered morphisms only; chain check via metadata URI; returns `{ maps }` without registering. Three tests in `src/morphism.test.ts`. Saga risk note for test-file type-checking. `npm run check:all`.
