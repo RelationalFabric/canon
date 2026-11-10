@@ -41,6 +41,9 @@ export * from './shell.js'
 
 // Type testing utilities (compile-time helpers only)
 export * from './testing.js'
+
+export { defineTheory } from './theory.js'
+
 // Type system
 export type * from './types/index.js'
 

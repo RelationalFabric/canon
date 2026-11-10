@@ -5,7 +5,7 @@
 - **Purpose:** Carry Phase 2 (Theories) from the approved ADRs onto the Phase 1 definition registry: nameless `defineTheory`, `declareTheory` returning a `KeyRef`, identities `canon://theory/<Name>`, and the three specified Theories. ObjectConstraintAxiom, Morphisms, Order, Aggregate, and the docs phase stay out of this saga.
 - **Goal:** A canon type can model Identity, Taxonomy, and Typed Entity, and `declareTheory` registers those values with only `uri` in metadata. Measured by the done check on each unit below, with `npm run check:all` green at the units whose gate requires full checks. No public name beyond the ADRs.
 - **ADRs in scope:** ADR-0017 (Definitions as Values), ADR-0018 (Theories only; the Morphism and ObjectConstraintAxiom sections are dependencies, not work).
-- **Status:** Active. U1 is in. U2 onward is not started. U4, the runtime half of U6, and U8 stay blocked on Q1, Q3, and Q5.
+- **Status:** Active. U1 and U2 are in. U3 onward is not started. U4, the runtime half of U6, and U8 stay blocked on Q1, Q3, and Q5.
 
 ## Plan
 
@@ -313,6 +313,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U2. Nameless `defineTheory` in `src/theory.ts`, exported only from `src/index.ts`. It returns the same object, does not register, and does not write `uri`. Tests in `src/theory.test.ts`. `npm run check:all` is the scoped check.
 - 2026-11-10 — Docs only, after U1. Codified the saga and drip-feed patterns in `planning/process/saga.md` and `planning/process/drip-feed.md`. `planning/README.md` now states the folder's purpose, keeps the saga entry, and points at `planning/process/`. No code, and no saga CLI, hooks, or CI.
 - 2026-11-10 — U1. Empty `Theories` interface in `src/types/theories.d.ts`, re-exported from `src/types/index.d.ts`. No test file. `src/index.ts` unchanged. Scoped checks: `npm run check:types` as part of `npm run check:all`.
 - 2026-11-10 — The Phase 2 plan left `docs/plans/phase-2-theories.md` (commit `cfa30f8`) and now lives in this file. `docs/plans/` is gone. Links from `README.md` and `docs/README.md` into `planning/**` were removed in that move and restored in `8d3f460`. Permanent docs may link into `planning/`. No observations, hypotheses, issues, candidates, rrs, or deferred directories, and no saga CLI, hooks, or CI.
