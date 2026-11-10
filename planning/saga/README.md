@@ -333,6 +333,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U9 review fix. Shared `TheoryConfig` from `src/theory.ts`; `declareTheory` JSDoc sits on the function again. No behavior change.
 - 2026-11-10 — U9. `registerTheories` in `src/shell.ts` mirrors `registerCanons`: map keys are names, `canon://theory/<Key>`, and `extends` resolves like `declareTheory`. Four mirrored tests plus one `extends` test in `src/shell.test.ts`. `npm run check:all`.
 - 2026-11-10 — Docs only. Q4 corrected: Bahul, 2026-11-10 requires `registerTheories`, mirroring `registerCanons`. Plan unit U9 sits after U4 and before U6, with U3's gates. Not implemented in this commit.
 - 2026-11-10 — Docs only. Q2–Q8 answered by the consistency rule. U6 is unblocked with label `TypedEntity`. U8 is unblocked with `CanonConfig.models`. No code.

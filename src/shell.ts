@@ -4,6 +4,7 @@
  * Singleton registry instance with convenience API.
  */
 
+import type { TheoryConfig } from './theory.js'
 import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
 import { canonRefFor, definitionRegistry, definitionUri, theoryRefFor } from './definitions.js'
@@ -41,21 +42,10 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
 }
 
 /**
- * Declare a theory in the global registry
- *
- * @param label - The theory label
- * @param config - The theory value
- * @param config.extends - Theories this one composes, as a map or a list
- */
-interface TheoryRegistration {
-  extends?: Record<string, unknown> | readonly unknown[]
-}
-
-/**
  * Resolve `extends` the way `declareTheory` does. A missing label throws
  * before the theory being registered is stored.
  */
-function resolveExtends(config: TheoryRegistration): void {
+function resolveExtends(config: TheoryConfig): void {
   if (config.extends === undefined) {
     return
   }
@@ -67,7 +57,14 @@ function resolveExtends(config: TheoryRegistration): void {
   }
 }
 
-export function declareTheory<Label extends keyof Theories>(label: Label, config: TheoryRegistration) {
+/**
+ * Declare a theory in the global registry
+ *
+ * @param label - The theory label
+ * @param config - The theory value
+ * @param config.extends - Theories this one composes, as a map or a list
+ */
+export function declareTheory<Label extends keyof Theories>(label: Label, config: TheoryConfig) {
   const defined = defineTheory(config)
   resolveExtends(defined)
   definitionRegistry.register(definitionUri('theory', label), defined)
@@ -80,7 +77,7 @@ export function declareTheory<Label extends keyof Theories>(label: Label, config
  * @param theories - Object mapping theory labels to their configurations
  * @param theories.extends - Theories each entry composes, as a map or a list
  */
-export function registerTheories(theories: Record<string, TheoryRegistration>): void {
+export function registerTheories(theories: Record<string, TheoryConfig>): void {
   for (const [label, config] of Object.entries(theories)) {
     const defined = defineTheory(config)
     resolveExtends(defined)

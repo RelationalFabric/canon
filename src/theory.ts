@@ -6,7 +6,7 @@
  * Runtime theory value. `extends` lists the theories this one composes.
  * The type stays in this module.
  */
-interface TheoryConfig {
+export interface TheoryConfig {
   extends?: Record<string, unknown> | readonly unknown[]
 }
 
