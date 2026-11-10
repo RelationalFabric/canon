@@ -47,7 +47,8 @@ export class DefinitionRegistry {
    * Register a value at a definition or lexicon URI.
    * A registered value carries that URI in its metadata.
    * Re-registering the same URI is idempotent when the values hash equal, and throws otherwise.
-   * A value already registered at a different URI also throws (ADR-0017).
+   * A value already registered at a different live URI also throws (ADR-0017).
+   * A `uri` left on a value after `clear` is stale and is replaced.
    */
   register(uri: DefinitionUri | LexiconTermUri, value: unknown): void {
     const alreadyRegistered = this.#definitions.has(uri)
@@ -56,7 +57,12 @@ export class DefinitionRegistry {
     }
     if (isMetaCarrier(value)) {
       const existing = metaOf(value).uri
-      if (typeof existing === 'string' && existing !== uri) {
+      if (
+        typeof existing === 'string'
+        && existing !== uri
+        && isDefinitionKey(existing)
+        && this.#definitions.has(existing)
+      ) {
         throw new Error(`Definition already registered: ${existing}`)
       }
     }

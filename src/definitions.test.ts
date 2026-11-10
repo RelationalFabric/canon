@@ -139,6 +139,36 @@ describe('definition registry', () => {
     expect(() => registry.register(second, value)).toThrow(`Definition already registered: ${first}`)
   })
 
+  it('registers the same object under a new name after clear', () => {
+    const registry = new DefinitionRegistry()
+    const value = { name: 'Identity' }
+    const first = definitionUri('theory', 'Identity')
+    const second = definitionUri('theory', 'Other')
+
+    registry.register(first, value)
+    registry.clear()
+    registry.register(second, value)
+
+    expect(registry.has(first)).toBe(false)
+    expect(registry.value(second)).toBe(value)
+    expect(metaOf(value).uri).toBe(second)
+  })
+
+  it('lets a different object take a uri freed by clear', () => {
+    const registry = new DefinitionRegistry()
+    const uri = definitionUri('theory', 'Identity')
+    const original = { name: 'Identity' }
+    const replacement = { name: 'Replacement' }
+
+    registry.register(uri, original)
+    registry.clear()
+    registry.register(uri, replacement)
+
+    expect(registry.value(uri)).toBe(replacement)
+    expect(metaOf(replacement).uri).toBe(uri)
+    expect(metaOf(original).uri).toBe(uri)
+  })
+
   describe('resolve', () => {
     it('registers and returns a map of definitions in key order', () => {
       const registry = new DefinitionRegistry()
