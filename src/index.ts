@@ -9,6 +9,16 @@ export * from './axioms/version.js'
 
 export * from './canon.js'
 
+export {
+  axiomRefFor,
+  canonRefFor,
+  DefinitionRegistry,
+  definitionUri,
+  lexiconTermUri,
+  morphismRefFor,
+  theoryRefFor,
+} from './definitions.js'
+
 // Opinionated kit exports
 export * from './kit.js'
 

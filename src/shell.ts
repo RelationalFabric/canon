@@ -4,28 +4,15 @@
  * Singleton registry instance with convenience API.
  */
 
-import type { Registry } from './registry.js'
 import type { CanonConfig, Canons } from './types/index.js'
 import { defineCanon } from './canon.js'
-import { createRegistry } from './registry.js'
-
-/**
- * Global singleton registry
- */
-const globalRegistry: Registry = createRegistry()
-
-/**
- * Get the current global registry
- */
-export function getRegistry(): Registry {
-  return globalRegistry
-}
+import { canonRefFor, definitionRegistry, definitionUri } from './definitions.js'
 
 /**
  * Reset the global registry to empty
  */
 export function resetRegistry(): void {
-  globalRegistry.clear()
+  definitionRegistry.clear()
 }
 
 /**
@@ -34,8 +21,10 @@ export function resetRegistry(): void {
  * @param label - The canon label
  * @param config - The canon configuration
  */
-export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig): void {
-  globalRegistry.register(label, defineCanon(config))
+export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig) {
+  const defined = defineCanon(config)
+  definitionRegistry.register(definitionUri('canon', label), defined)
+  return canonRefFor(label)
 }
 
 /**
@@ -45,6 +34,7 @@ export function declareCanon<Label extends keyof Canons>(label: Label, config: C
  */
 export function registerCanons(canons: Record<string, CanonConfig>): void {
   for (const [label, config] of Object.entries(canons)) {
-    globalRegistry.register(label as keyof Canons, defineCanon(config))
+    const defined = defineCanon(config)
+    definitionRegistry.register(definitionUri('canon', label), defined)
   }
 }

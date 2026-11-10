@@ -51,14 +51,6 @@ function createRegistry(): Registry
 
 Creates a fresh, empty registry instance.
 
-#### `getRegistry`
-
-```ts
-function getRegistry(): Registry
-```
-
-Returns the global singleton registry used by `inferCanon` / `inferAxiom`.
-
 #### `resetRegistry`
 
 ```ts
