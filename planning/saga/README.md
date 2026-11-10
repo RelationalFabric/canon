@@ -5,7 +5,7 @@
 - **Purpose:** Carry Phase 2 (Theories) from the approved ADRs onto the Phase 1 definition registry: nameless `defineTheory`, `declareTheory` returning a `KeyRef`, identities `canon://theory/<Name>`, and the three specified Theories. ObjectConstraintAxiom, Morphisms, Order, Aggregate, and the docs phase stay out of this saga.
 - **Goal:** A canon type can model Identity, Taxonomy, and Typed Entity, and `declareTheory` registers those values with only `uri` in metadata. Measured by the done check on each unit below, with `npm run check:all` green at the units whose gate requires full checks. No public name beyond the ADRs.
 - **ADRs in scope:** ADR-0017 (Definitions as Values), ADR-0018 (Theories only; the Morphism and ObjectConstraintAxiom sections are dependencies, not work).
-- **Status:** Active. U1–U3, U5, and U7 are in. U4, U6, and U8 stay blocked on open questions.
+- **Status:** Active. U1–U5 and U7 are in. U6 stays blocked on Q3. U8 stays blocked on Q5.
 
 ## Plan
 
@@ -79,7 +79,7 @@ Each unit is one commit. Ratings: **S** one module and its tests, no new resolut
 
 **Files:** `src/theory.ts` (new), `src/index.ts` (export `defineTheory` only), `src/theory.test.ts` (new; Phase 1 tests live in sibling `*.test.ts` files **[code]**).
 
-**Work:** `defineTheory` returns its argument unchanged, matching `defineCanon` at this commit **[code]** `src/canon.ts`. It does not read a name, does not call `definitionRegistry.register`, and does not write metadata. The parameter type stays unexported. It accepts an object with no known fields yet, because the composition field has no approved name (open question 1). Callers pass `{}` for a Theory that composes nothing.
+**Work:** `defineTheory` returns its argument unchanged, matching `defineCanon` at this commit **[code]** `src/canon.ts`. It does not read a name, does not call `definitionRegistry.register`, and does not write metadata. The parameter type stays unexported. The composition field is `extends` (Bahul, 2026-11-10). Callers pass `{}` for a Theory that composes nothing. `defineTheory` still does not register that field.
 
 **Tests:**
 
@@ -117,7 +117,7 @@ Empty config is valid for a Theory with no composition (Identity and Taxonomy).
 
 ### U4 — composition resolution
 
-**Rating:** H. **Blocked on open question 1** (the property name). Do not start this commit until Bahul names the field. Do not use `theories` as a placeholder in code.
+**Rating:** H. The composition field is `extends` (Bahul, 2026-11-10). Do not use `theories` as a placeholder in code.
 
 **Files:** `src/theory.ts`, `src/theory.test.ts`, and `declareTheory`'s call site in `src/shell.ts` only to pass the same config through.
 
@@ -177,7 +177,7 @@ On load, `declareTheory('Identity', {})` and `declareTheory('Taxonomy', {})`. No
 
 ### U6 — Typed Entity
 
-**Rating:** M. The type half can land with U5. The runtime composition half is **blocked on open questions 1 and 3**.
+**Rating:** M. The type half can land with U5. The runtime composition half is **blocked on open question 3**.
 
 **Files:** `src/theories/typed-entity.ts`, `src/index.ts`, `src/theories/typed-entity.test.ts`.
 
@@ -187,7 +187,7 @@ On load, `declareTheory('Identity', {})` and `declareTheory('Taxonomy', {})`. No
 - `invariant<Expect<Theories[Label], Theories['Taxonomy']>>()`
 - `invariant<Expect<keyof Theories[Label], 'Id' | 'Type'>>()` so no extra keys appear.
 
-**Work, runtime half (blocked):** `declareTheory(label, { [named field]: ['Identity', 'Taxonomy'] })` once question 1 is answered, using U4. Identity and Taxonomy must already be registered (import order: identity, taxonomy, then typed entity).
+**Work, runtime half (blocked on Q3):** `declareTheory(label, { extends: ['Identity', 'Taxonomy'] })`, using U4. Identity and Taxonomy must already be registered (import order: identity, taxonomy, then typed entity).
 
 **Tests:**
 
@@ -278,7 +278,7 @@ Primitives cannot carry metadata **[code]** `isMetaCarrier`. Theory configs are 
 
 These are undecided. Implementation must not pick a name and proceed.
 
-1. **Composition field name.** ADR-0018 says a Theory's runtime form includes the Theories it composes, and that they may be labels or values. It never names the property. `theories` is not approved. U4 and the runtime half of U6 wait on this. **[ADR]** plus the planning brief.
+1. **Composition field name.** Answered. Bahul, 2026-11-10: `extends`.
 
 2. **Does the runtime value still store `name`?** ADR-0018 says the runtime form is the name plus composition, and that `defineTheory` takes the name from the config. ADR-0017 says the same about `define*`. The approved rule says `define*` is nameless and that metadata holds only `uri`. This plan follows the rule: no `name` property, name = declare label = final URI segment. Confirm that the ADR sentences are withdrawn for this phase. **[ADR]** vs **[rule]**.
 
@@ -313,6 +313,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U4. `declareTheory` resolves `extends` through `definitionRegistry.resolve('theory', …)` and throws `Unresolved theory: <uri> (ADR-0017)` when a label is missing. No new export, no `name`, no `registerTheories`, no discriminant. Q1 marked answered. Tests in `src/theory.test.ts`. `npm run check:all`.
 - 2026-11-10 — U7. `src/theories/modeling.test.ts` only: `Modeled` extends Identity and `Expect`s `Canon<{ Id: KeyNameAxiom }>`. A type without `Id` is `IsFalse` and a `@ts-expect-error`. No `CanonConfig` field (open question 5). `src/canon.ts`, `src/types/canons.d.ts`, and `inferCanon` untouched. `npm run check:all`.
 - 2026-11-10 — U5. `src/theories/identity.ts` and `taxonomy.ts`: augment `Theories`, laws via `invariant`/`Expect`, `declareTheory` with `{}` on load. Side-effect imports in `src/index.ts`. Tests in `src/theories/identity.test.ts` and `taxonomy.test.ts`. Id and Type axioms not registered in the definition registry. `resetRegistry` unchanged. `npm run check:all`.
 - 2026-11-10 — U3. `declareTheory` in `src/shell.ts` mirrors `declareCanon`: `defineTheory`, register at `canon://theory/<Label>`, return `theoryRefFor`. Five tests in `src/shell.test.ts`. `inferCanon` unchanged. `npm run check:all`.

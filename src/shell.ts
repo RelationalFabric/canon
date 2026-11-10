@@ -45,9 +45,21 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
  *
  * @param label - The theory label
  * @param config - The theory value
+ * @param config.extends - Theories this one composes, as a map or a list
  */
-export function declareTheory<Label extends keyof Theories>(label: Label, config: Record<string, never>) {
+export function declareTheory<Label extends keyof Theories>(
+  label: Label,
+  config: { extends?: Record<string, unknown> | readonly unknown[] },
+) {
   const defined = defineTheory(config)
+  if (config.extends !== undefined) {
+    const resolved = definitionRegistry.resolve('theory', config.extends)
+    for (const entry of resolved) {
+      if (entry.value === undefined) {
+        throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
+      }
+    }
+  }
   definitionRegistry.register(definitionUri('theory', label), defined)
   return theoryRefFor(label)
 }
