@@ -5,7 +5,7 @@
 - **Purpose:** Carry Phase 2 (Theories) from the approved ADRs onto the Phase 1 definition registry: nameless `defineTheory`, `declareTheory` returning a `KeyRef`, identities `canon://theory/<Name>`, and the three specified Theories. ObjectConstraintAxiom, Morphisms, Order, Aggregate, and the docs phase stay out of this saga.
 - **Goal:** A canon type can model Identity, Taxonomy, and Typed Entity, and `declareTheory` registers those values with only `uri` in metadata. Measured by the done check on each unit below, with `npm run check:all` green at the units whose gate requires full checks. No public name beyond the ADRs.
 - **ADRs in scope:** ADR-0017 (Definitions as Values), ADR-0018 (Theories only; the Morphism and ObjectConstraintAxiom sections are dependencies, not work).
-- **Status:** Active. U1–U5 and U7 are in. U6 and U8 are unblocked. Q1–Q8 are answered.
+- **Status:** Active. U1–U5 and U7 are in. U9 (`registerTheories`) is next after U4 and before U6, and is not started. U6 and U8 are unblocked. Q1–Q8 are answered.
 
 ## Plan
 
@@ -36,7 +36,7 @@ ADR sections this phase implements:
 
 ### Approved rules this plan treats as decided **[rule]**
 
-- `define*` functions are nameless. The name is given at registration: a `registerX` key, or the `declare*` label. This phase does not add a `registerTheories` function; see open question 4. The registration path this phase does specify is `declareTheory`.
+- `define*` functions are nameless. The name is given at registration: a `registerTheories` key (U9), or the `declareTheory` label. `registerTheories` mirrors `registerCanons` (Q4).
 - A field that takes definitions accepts a map `{ Name: value }`, or a list of name strings or registered values, with an optional trailing map for values that are not registered yet.
 - Anywhere a Theory or an axiom is referenced, a label or a value is accepted.
 - `declare*` functions return the `KeyRef`.
@@ -55,7 +55,7 @@ ADR sections this phase implements:
 
 Shipped names are only ones the ADRs already use: `defineTheory`, `declareTheory`, and the `Theories` interface. `theoryRefFor`, `definitionUri`, `DefinitionRegistry`, and `KeyRef` already exist **[code]** and are reused, not renamed.
 
-No other export is added. In particular this phase does not add `registerTheories`, a `Theory` / `TheoryConfig` type alias, a composition-field identifier, a canon-side "models" field name, or a `name` property. Those are open questions. File paths below are **[inference]** from the existing `src/canon.ts`, `src/shell.ts`, and `src/axioms/` split.
+`registerTheories` is added in U9, mirroring `registerCanons`. This phase does not add a `Theory` / `TheoryConfig` type alias, a second composition field, or a `name` property. The canon field for modelled Theories is `models` (Q5, U8). File paths below are **[inference]** from the existing `src/canon.ts`, `src/shell.ts`, and `src/axioms/` split.
 
 ## 2. Units
 
@@ -101,7 +101,7 @@ Each unit is one commit. Ratings: **S** one module and its tests, no new resolut
 2. `definitionRegistry.register(definitionUri('theory', label), defined)`.
 3. `return theoryRefFor(label)`.
 
-The label type parameter extends `keyof Theories`. The name is the label **[rule]**. The identity is `canon://theory/<Label>` **[rule]**, **[code]** `definitionUri`. Registration metadata is whatever `DefinitionRegistry.register` already writes, which is the `uri` key only **[code]**, **[rule]**. Do not set a `name` field. Do not add `registerTheories`.
+The label type parameter extends `keyof Theories`. The name is the label **[rule]**. The identity is `canon://theory/<Label>` **[rule]**, **[code]** `definitionUri`. Registration metadata is whatever `DefinitionRegistry.register` already writes, which is the `uri` key only **[code]**, **[rule]**. Do not set a `name` field. `registerTheories` is U9, not this unit.
 
 Empty config is valid for a Theory with no composition (Identity and Taxonomy).
 
@@ -144,6 +144,25 @@ Metadata on every registered member stays `uri` only. `defineTheory` still does 
 - A value with no `uri` and no `KeyRef` shape, sitting alone in the list, surfaces the existing resolve error **[code]**.
 
 **Done check:** The tests pass without a new export and without edits to `DefinitionRegistry`.
+
+### U9 — `registerTheories`
+
+Placed after U4 and before U6. Not started until released.
+
+**Rating:** M
+
+**Files:** `src/shell.ts`, `src/shell.test.ts`.
+
+**Work:** `registerTheories` mirrors `registerCanons` exactly **[code]** `src/shell.ts`. Same signature shape: one argument, a map of label to theory config. The map keys give the names. For each entry, `defineTheory` then `definitionRegistry.register(definitionUri('theory', key), defined)`. The identity is `canon://theory/<Key>`. It returns nothing. It does not resolve `extends` (that stays on `declareTheory`). No `name` property.
+
+**Tests** (mirror `registerCanons` in `src/shell.test.ts`):
+
+- `registerTheories({ X: cfg })` records only `uri: canon://theory/X` on the registered value, read back through `theoryRefFor('X')`.
+- A second `registerTheories` of a structurally equal config does not throw.
+- A different config under the same key throws ``Definition already registered: canon://theory/X (ADR-0017)``.
+- When that throw happens, `theoryRefFor('X').value` is still the original config.
+
+**Done check:** Those tests pass under `npm run check:test`. `inferCanon` is not modified.
 
 ### U5 — Identity and Taxonomy
 
@@ -284,7 +303,7 @@ Settled. Q1 was answered by Bahul. Q2–Q8 were answered on 2026-11-10 by the co
 
 3. **Typed Entity's label.** Answered. 2026-11-10, consistency rule: `TypedEntity`, so `canon://theory/TypedEntity`.
 
-4. **`registerTheories`.** Answered. 2026-11-10, consistency rule: no `registerTheories` in this saga. Names come from `declareTheory` or from map keys on `extends`.
+4. **`registerTheories`.** Answered. Bahul, 2026-11-10: add `registerTheories`, mirroring `registerCanons`. The map keys give the names. It registers at `canon://theory/<Key>`. That work is U9.
 
 5. **`CanonConfig` field for Theories a canon models.** Answered. 2026-11-10, consistency rule: `models`, using the same map/list form as `extends`. U8 adds it.
 
@@ -298,7 +317,7 @@ Settled. Q1 was answered by Bahul. Q2–Q8 were answered on 2026-11-10 by the co
 
 The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is not a checklist and is not ticked as work proceeds.
 
-`commit` is required on every unit because each unit is one commit. `push` is opt-in until U8, which closes the saga and must be pushed. `scoped tests` is N/A only for U1, which adds no test file. `scoped checks` is required everywhere (the unit's own typecheck or test run). `full tests` is required where the unit's done check names `check:test` or `check:all` (U3, U5, U7, U8). `full checks` is required where the done check names `check:all` (U5) and on the closing unit (U8). `smoke` is N/A: this package has no app to smoke-test.
+`commit` is required on every unit because each unit is one commit. `push` is opt-in until U8, which closes the saga and must be pushed. `scoped tests` is N/A only for U1, which adds no test file. `scoped checks` is required everywhere (the unit's own typecheck or test run). `full tests` is required where the unit's done check names `check:test` or `check:all` (U3, U5, U7, U8, U9). `full checks` is required where the done check names `check:all` (U5) and on the closing unit (U8). `smoke` is N/A: this package has no app to smoke-test.
 
 | unit | commit | push | scoped tests | scoped checks | full tests | full checks | smoke |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -306,6 +325,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 | U2 | required | opt-in | required | required | opt-in | opt-in | N/A |
 | U3 | required | opt-in | required | required | required | opt-in | N/A |
 | U4 | required | opt-in | required | required | opt-in | opt-in | N/A |
+| U9 | required | opt-in | required | required | required | opt-in | N/A |
 | U5 | required | opt-in | required | required | required | required | N/A |
 | U6 | required | opt-in | required | required | opt-in | opt-in | N/A |
 | U7 | required | opt-in | required | required | required | opt-in | N/A |
@@ -313,6 +333,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — Docs only. Q4 corrected: Bahul, 2026-11-10 requires `registerTheories`, mirroring `registerCanons`. Plan unit U9 sits after U4 and before U6, with U3's gates. Not implemented in this commit.
 - 2026-11-10 — Docs only. Q2–Q8 answered by the consistency rule. U6 is unblocked with label `TypedEntity`. U8 is unblocked with `CanonConfig.models`. No code.
 - 2026-11-10 — U4. `declareTheory` resolves `extends` through `definitionRegistry.resolve('theory', …)` and throws `Unresolved theory: <uri> (ADR-0017)` when a label is missing. No new export, no `name`, no `registerTheories`, no discriminant. Q1 marked answered. Tests in `src/theory.test.ts`. `npm run check:all`.
 - 2026-11-10 — U7. `src/theories/modeling.test.ts` only: `Modeled` extends Identity and `Expect`s `Canon<{ Id: KeyNameAxiom }>`. A type without `Id` is `IsFalse` and a `@ts-expect-error`. No `CanonConfig` field (open question 5). `src/canon.ts`, `src/types/canons.d.ts`, and `inferCanon` untouched. `npm run check:all`.
