@@ -4,7 +4,7 @@
 - **Title:** Phase 3: Morphisms and ObjectConstraintAxiom
 - **Purpose:** Carry the two ADR-0018 sections that Phase 2 left as dependencies onto the definition registry: Morphisms (`defineMorphism`, `declareMorphism`, `registerMorphisms`, completeness, composition, apply) and `ObjectConstraintAxiom`. Order, Aggregate, lexicon hierarchy, interpretations, `EntityReference` removal, and the docs phase stay out.
 - **Goal:** A complete Morphism between two Theories registers at `canon://morphism/<Source>/<Target>`, composes, and applies; a canon key can require that its value models listed Theories. Measured by the done check on each unit, with `npm run check:all` green where the gate requires full checks. No public name beyond the names this plan settles from existing patterns.
-- **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `61e61a0`) is the base.
+- **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `73ff807`) is the base.
 - **Status:** Active. No unit is started.
 
 ## Plan
@@ -16,7 +16,7 @@ Planning only. This file does not implement Phase 3.
 Claim labels:
 
 - **[ADR]** text in ADR-0017 or ADR-0018.
-- **[code]** behavior in the tree at `61e61a0`.
+- **[code]** behavior in the tree at `73ff807`.
 - **[rule]** a naming or shape settled here by consistency with canon as it is: nameless `define*`, `declare*` plus `register*` for every kind, map/list fields, identities `canon://<kind>/<name>`. Where an ADR sentence disagrees, the rule is what this plan implements.
 - **[inference]** a reading that is not a quote and not a rule.
 
@@ -54,7 +54,7 @@ Claim labels:
 - **`EntityReference` and `References`.** The ADR calls replacing them a follow-up. They stay.
 - **Docs** under `docs/`. The docs phase is separate. This saga file is the only planning edit besides the S002 entry in `planning/README.md`.
 - **Protocols.** ADR-0015 stays paused.
-- **Patch values.** Open question 2. Until it is answered, `maps` has no `patch` field and apply does not convert representations.
+- **Patch values.** Answered (Q2): `maps` has no `patch` field and apply does not convert representations.
 
 ### Public names
 
@@ -64,7 +64,7 @@ No `name` property. No `Morphisms` label that is not the `Source/Target` pair. N
 
 ## 2. Units
 
-Each unit is one commit. **S**: one module and its tests, no new resolution rules. **M**: registry behavior plus types, still local. **H**: crosses canon config or inference, or cannot land until an open question is answered. No unit here is blocked on an open question. Q1 and Q2 are excluded from the units rather than embedded in them.
+Each unit is one commit. **S**: one module and its tests, no new resolution rules. **M**: registry behavior plus types, still local. **H**: crosses canon config or inference, or cannot land until an open question is answered. No unit is blocked on an open question. Q1 and Q2 are answered and stay out of the units.
 
 ### U1 — `Morphisms` slot
 
@@ -195,10 +195,10 @@ export type ObjectConstraintAxiom<T extends readonly unknown[] = readonly unknow
     models: Record<string, unknown> | readonly unknown[]
   },
   { [key: string]: unknown }
-> & { theories: T }
+>
 ```
 
-`theories` is type-only in the sense that tests do not read it at runtime; the runtime list is `models`. If a type-only field cannot sit on the value type without forcing a runtime property, keep the tuple as a second type parameter and do not add a `theories` runtime field. The public name is `ObjectConstraintAxiom`.
+The tuple of Theories the value must model is the type parameter `T`. Do not add a field or parameter named `theories`. The runtime list is `models`, the same name as `CanonConfig.models`. The public name is `ObjectConstraintAxiom`.
 
 When an axiom config on a canon has `models`, resolve it as kind `'theory'` before the canon is stored. Missing labels throw. Canons whose axioms omit `models` are unchanged. Do not resolve `models` inside `defineAxiom`.
 
@@ -245,11 +245,11 @@ Shell tests clear the registry in `beforeEach`. Re-declare Identity and Taxonomy
 
 ## 4. Open questions
 
-Only direction the consistency rule cannot settle. Each has a recommendation. Neither blocks U1–U9; both are excluded from those units.
+Answered. 2026-11-10, pragmatic default, recommended option.
 
-1. **Are lexicon term mappings Morphisms?** **[ADR]** Consequences: "whether type morphisms are the same concept as Morphisms is not yet decided." Consistency does not answer it, because lexicon identities are `canon://lexicon/<name>/<term>` **[code]** `lexiconTermUri`, a different kind. **Recommend:** they are not Morphisms in this phase. No unit maps a lexicon term. A later saga can add them if the decision is that they are the same concept.
+1. **Are lexicon term mappings Morphisms?** Answered. Lexicon term mappings are not Morphisms in this phase. Lexicon identities are `canon://lexicon/<name>/<term>` **[code]** `lexiconTermUri`, a different kind. No unit maps a lexicon term.
 
-2. **What is a representation patch on one mapped term?** **[ADR]** says a Morphism assumes the same representation unless a side is a `RepresentationAxiom` or is "patched with a representation", and that patching is optional. It does not say whether the patch is a `RepresentationAxiom` config, a pair of canon labels, or a function. Phase 2 stored no axiom configs on Theory values, so there is no existing patch field to copy. **Recommend:** no `patch` field in this phase. Apply copies values through. A later unit adds `patch` only after the value type is chosen. U7 states the no-conversion rule so that unit does not invent the field.
+2. **What is a representation patch on one mapped term?** Answered. There is no `patch` field. Apply copies values through. `maps` stays `Record<string, string>`.
 
 ## Ledger
 
@@ -271,4 +271,5 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
-- 2026-11-10 — S002 opened on `feature/phase-3` from `feature/theories` (`61e61a0`). Plan only. Phase 3 is ADR-0018's Morphism and ObjectConstraintAxiom sections. Q1 and Q2 are the only open direction calls. No unit implemented.
+- 2026-11-10 — Plan review. Q1 and Q2 answered (2026-11-10, pragmatic default, recommended option): lexicon term mappings are not Morphisms in this phase, and there is no `patch` field. U8 names the Theory list `models` and keeps the tuple as a type parameter; no `theories` field or parameter. Base is `73ff807`. No code.
+- 2026-11-10 — S002 opened on `feature/phase-3` from `feature/theories` (`73ff807`). Plan only. Phase 3 is ADR-0018's Morphism and ObjectConstraintAxiom sections. No unit implemented.
