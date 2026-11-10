@@ -5,7 +5,7 @@
 - **Purpose:** Carry Phase 2 (Theories) from the approved ADRs onto the Phase 1 definition registry: nameless `defineTheory`, `declareTheory` returning a `KeyRef`, identities `canon://theory/<Name>`, and the three specified Theories. ObjectConstraintAxiom, Morphisms, Order, Aggregate, and the docs phase stay out of this saga.
 - **Goal:** A canon type can model Identity, Taxonomy, and Typed Entity, and `declareTheory` registers those values with only `uri` in metadata. Measured by the done check on each unit below, with `npm run check:all` green at the units whose gate requires full checks. No public name beyond the ADRs.
 - **ADRs in scope:** ADR-0017 (Definitions as Values), ADR-0018 (Theories only; the Morphism and ObjectConstraintAxiom sections are dependencies, not work).
-- **Status:** Active. U1–U7 and U9 are in. U8 is unblocked and not started. Q1–Q8 are answered.
+- **Status:** Active. U1–U9 are in. Q1–Q8 are answered. The saga file stays until review.
 
 ## Plan
 
@@ -333,6 +333,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U8. `CanonConfig.models` uses the same map/list form as `extends`. `declareCanon` and `registerCanons` resolve it as kind `theory` and throw on a missing label. Canons that omit it are unchanged. `axioms` and `inferCanon` unchanged. `npm run check:all`.
 - 2026-11-10 — U6. `TypedEntity`: augment with Identity and Taxonomy, `declareTheory` with `extends: ['Identity', 'Taxonomy']`, three laws, tests and `SampleCanon` in `src/theories/typed-entity.*`. Side-effect import after identity and taxonomy. No `CanonConfig`. `npm run check:all`.
 - 2026-11-10 — U9 review fix. Shared `TheoryConfig` from `src/theory.ts`; `declareTheory` JSDoc sits on the function again. No behavior change.
 - 2026-11-10 — U9. `registerTheories` in `src/shell.ts` mirrors `registerCanons`: map keys are names, `canon://theory/<Key>`, and `extends` resolves like `declareTheory`. Four mirrored tests plus one `extends` test in `src/shell.test.ts`. `npm run check:all`.

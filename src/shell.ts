@@ -18,13 +18,26 @@ export function resetRegistry(): void {
 }
 
 /**
+ * Resolve a canon's `models` the way a theory's `extends` is resolved.
+ * A missing label throws before the canon is stored.
+ */
+function resolveModels(config: CanonConfig): void {
+  if (config.models === undefined) {
+    return
+  }
+  resolveExtends({ extends: config.models })
+}
+
+/**
  * Declare a canon in the global registry
  *
  * @param label - The canon label
  * @param config - The canon configuration
+ * @param config.models - Theories this canon models, as a map or a list
  */
 export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig) {
   const defined = defineCanon(config)
+  resolveModels(defined)
   definitionRegistry.register(definitionUri('canon', label), defined)
   return canonRefFor(label)
 }
@@ -33,10 +46,12 @@ export function declareCanon<Label extends keyof Canons>(label: Label, config: C
  * Register multiple canons at once (for module-style registration)
  *
  * @param canons - Object mapping canon labels to their configurations
+ * @param canons.models - Theories each canon models, as a map or a list
  */
 export function registerCanons(canons: Record<string, CanonConfig>): void {
   for (const [label, config] of Object.entries(canons)) {
     const defined = defineCanon(config)
+    resolveModels(defined)
     definitionRegistry.register(definitionUri('canon', label), defined)
   }
 }

@@ -39,6 +39,11 @@ export interface Canons {}
  */
 export interface CanonConfig {
   axioms: Record<string, AxiomConfig>
+  /**
+   * Theories this canon models. Same map or list form as a theory's `extends`.
+   * Omitted when the canon models no theory.
+   */
+  models?: Record<string, unknown> | readonly unknown[]
 }
 
 /**

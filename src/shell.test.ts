@@ -4,6 +4,7 @@
 
 import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { inferCanon } from './canon.js'
 import { canonRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { declareCanon, declareTheory, registerCanons, registerTheories, resetRegistry } from './shell.js'
@@ -65,6 +66,32 @@ describe('shell', () => {
       declareCanon('TestCanon' as any, config)
 
       expect(canonRefFor('TestCanon').value).toBe(config)
+    })
+
+    it('resolves models by label and by theory ref', () => {
+      declareTheory('Identity', identityConfig)
+      const byLabel: CanonConfig = { axioms: {}, models: ['Identity'] }
+      const byRef: CanonConfig = { axioms: {}, models: [theoryRefFor('Identity')] }
+
+      declareCanon('DeclaredCanon', byLabel)
+
+      expect(canonRefFor('DeclaredCanon').value).toBe(byLabel)
+      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+
+      resetRegistry()
+      declareTheory('Identity', identityConfig)
+      declareCanon('DeclaredCanon', byRef)
+
+      expect(canonRefFor('DeclaredCanon').value).toBe(byRef)
+      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+    })
+
+    it('throws on an unknown models label and does not register the canon', () => {
+      const config: CanonConfig = { axioms: {}, models: ['Missing'] }
+
+      expect(() => declareCanon('DeclaredCanon', config))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(canonRefFor('DeclaredCanon').value).toBeUndefined()
     })
 
     it('returns a ref that resolves to the declared canon', () => {
@@ -177,6 +204,49 @@ describe('shell', () => {
   })
 
   describe('registerCanons', () => {
+    it('resolves models the same way declareCanon does', () => {
+      declareTheory('Identity', identityConfig)
+
+      registerCanons({ X: { axioms: {}, models: ['Identity'] } })
+
+      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+      expect(canonRefFor('X').value).toBeDefined()
+
+      expect(() => registerCanons({ Z: { axioms: {}, models: ['Missing'] } }))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(canonRefFor('Z').value).toBeUndefined()
+    })
+
+    it('still infers the canon with the most matching axioms', () => {
+      const idOnly: CanonConfig = {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } =>
+              typeof v === 'object' && v !== null && 'id' in v,
+            key: 'id',
+          },
+        },
+      }
+      const idAndType: CanonConfig = {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } =>
+              typeof v === 'object' && v !== null && 'id' in v,
+            key: 'id',
+          },
+          Type: {
+            $basis: (v: unknown): v is { type: string } =>
+              typeof v === 'object' && v !== null && 'type' in v,
+            key: 'type',
+          },
+        },
+      }
+
+      registerCanons({ IdOnly: idOnly, IdAndType: idAndType })
+
+      expect(inferCanon({ id: 'test-123', type: 'user' })).toBe(idAndType)
+    })
+
     it('records canon://canon/X on the registered value', () => {
       const cfg: CanonConfig = { axioms: {} }
 
