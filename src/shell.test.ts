@@ -9,6 +9,7 @@ import { canonRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { declareCanon, declareTheory, registerCanons, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
+import { defineTheory } from './theory.js'
 
 declare module './types/canons.js' {
   interface Canons {
@@ -19,6 +20,9 @@ declare module './types/canons.js' {
 declare module './types/theories.js' {
   interface Theories {
     DeclaredTheory: Record<string, never>
+    Fresh: Record<string, never>
+    Other: Record<string, never>
+    T: Record<string, never>
     TheoryConflict: Record<string, never>
   }
 }
@@ -187,6 +191,35 @@ describe('shell', () => {
         .toThrow('Definition already registered: canon://theory/X (ADR-0017)')
 
       expect(theoryRefFor('X').value).toBe(original)
+    })
+
+    it('registers a map-form extends value and the theory that composes it', () => {
+      registerTheories({ T: { extends: { Fresh: defineTheory({}) } } })
+
+      expect(theoryRefFor('T').key).toBe('canon://theory/T')
+      expect(theoryRefFor('Fresh').value).toBeDefined()
+    })
+
+    it('stores nothing when a map-form entry shares a batch with a missing list label', () => {
+      expect(() => registerTheories({
+        T: { extends: { Fresh: defineTheory({}) } },
+        Other: { extends: ['Missing'] },
+      })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+
+      expect(theoryRefFor('T').value).toBeUndefined()
+      expect(theoryRefFor('Fresh').value).toBeUndefined()
+      expect(theoryRefFor('Other').value).toBeUndefined()
+    })
+
+    it('stores nothing when a map-form key conflicts with a registered value', () => {
+      declareTheory('Fresh', {})
+
+      expect(() => registerTheories({
+        T: { extends: { Fresh: defineTheory({ extends: [] }) } },
+      })).toThrow('Definition already registered: canon://theory/Fresh (ADR-0017)')
+
+      expect(theoryRefFor('T').value).toBeUndefined()
+      expect(theoryRefFor('Fresh').value).toEqual({})
     })
 
     it('resolves a theory that extends another theory in the same call', () => {
