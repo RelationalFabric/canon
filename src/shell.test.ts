@@ -4,13 +4,20 @@
 
 import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { canonRefFor } from './definitions.js'
+import { canonRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { declareCanon, registerCanons, resetRegistry } from './shell.js'
+import { declareCanon, declareTheory, registerCanons, resetRegistry } from './shell.js'
 
 declare module './types/canons.js' {
   interface Canons {
     DeclaredCanon: Record<string, never>
+  }
+}
+
+declare module './types/theories.js' {
+  interface Theories {
+    DeclaredTheory: Record<string, never>
+    TheoryConflict: Record<string, never>
   }
 }
 
@@ -66,6 +73,55 @@ describe('shell', () => {
 
       expect(ref.key).toBe('canon://canon/DeclaredCanon')
       expect(ref.value).toBe(config)
+    })
+  })
+
+  describe('declareTheory', () => {
+    it('returns a ref that resolves to the declared theory', () => {
+      const config = {}
+
+      const ref = declareTheory('DeclaredTheory', config)
+
+      expect(ref.key).toBe('canon://theory/DeclaredTheory')
+      expect(ref.value).toBe(config)
+    })
+
+    it('records only canon://theory/<Label> on the registered value', () => {
+      const config = {}
+
+      const ref = declareTheory('DeclaredTheory', config)
+
+      expect(ref.value).toBeDefined()
+      if (isMetaCarrier(ref.value)) {
+        expect(metaOf(ref.value)).toEqual({ uri: 'canon://theory/DeclaredTheory' })
+      }
+    })
+
+    it('does not throw when a structurally equal config is declared again', () => {
+      declareTheory('DeclaredTheory', {})
+
+      expect(() => declareTheory('DeclaredTheory', {})).not.toThrow()
+    })
+
+    it('throws when a different config is declared under the same label and keeps the first value', () => {
+      const original = {}
+
+      declareTheory('TheoryConflict', original)
+
+      expect(() => declareTheory('TheoryConflict', { distinct: true } as Record<string, never>))
+        .toThrow('Definition already registered: canon://theory/TheoryConflict (ADR-0017)')
+
+      expect(theoryRefFor('TheoryConflict').value).toBe(original)
+    })
+
+    it('clears declared theories when the registry is reset', () => {
+      declareTheory('DeclaredTheory', {})
+
+      expect(theoryRefFor('DeclaredTheory').value).toBeDefined()
+
+      resetRegistry()
+
+      expect(theoryRefFor('DeclaredTheory').value).toBeUndefined()
     })
   })
 
