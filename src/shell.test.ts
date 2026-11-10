@@ -211,6 +211,30 @@ describe('shell', () => {
       expect(theoryRefFor('Other').value).toBeUndefined()
     })
 
+    it('stores nothing when a list-form map conflicts with a registered value', () => {
+      declareTheory('Identity', identityConfig)
+      declareTheory('Fresh', {})
+
+      expect(() => registerTheories({
+        T: { extends: ['Identity', { Fresh: defineTheory({ extends: [] }) }] },
+      })).toThrow('Definition already registered: canon://theory/Fresh (ADR-0017)')
+
+      expect(theoryRefFor('T').value).toBeUndefined()
+      expect(theoryRefFor('Fresh').value).toEqual({})
+    })
+
+    it('registers a theory and a trailing list-form map entry', () => {
+      declareTheory('Identity', identityConfig)
+      const fresh = defineTheory({})
+
+      registerTheories({
+        T: { extends: ['Identity', { Fresh: fresh }] },
+      })
+
+      expect(theoryRefFor('T').key).toBe('canon://theory/T')
+      expect(theoryRefFor('Fresh').value).toBe(fresh)
+    })
+
     it('stores nothing when a map-form key conflicts with a registered value', () => {
       declareTheory('Fresh', {})
 
