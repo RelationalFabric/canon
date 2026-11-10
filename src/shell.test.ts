@@ -6,7 +6,8 @@ import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { canonRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { declareCanon, declareTheory, registerCanons, resetRegistry } from './shell.js'
+import { declareCanon, declareTheory, registerCanons, registerTheories, resetRegistry } from './shell.js'
+import { identityConfig } from './theories/identity.js'
 
 declare module './types/canons.js' {
   interface Canons {
@@ -122,6 +123,56 @@ describe('shell', () => {
       resetRegistry()
 
       expect(theoryRefFor('DeclaredTheory').value).toBeUndefined()
+    })
+  })
+
+  describe('registerTheories', () => {
+    it('records only canon://theory/X on the registered value', () => {
+      const cfg = {}
+
+      registerTheories({ X: cfg })
+
+      const registered = theoryRefFor('X').value
+      expect(registered).toBe(cfg)
+      if (isMetaCarrier(registered)) {
+        expect(metaOf(registered)).toEqual({ uri: 'canon://theory/X' })
+      }
+    })
+
+    it('does not throw when a structurally equal config is registered again', () => {
+      registerTheories({ X: {} })
+
+      expect(() => registerTheories({ X: {} })).not.toThrow()
+    })
+
+    it('throws when a different config is registered under the same key', () => {
+      registerTheories({ X: {} })
+
+      expect(() => registerTheories({ X: { extends: [] } }))
+        .toThrow('Definition already registered: canon://theory/X (ADR-0017)')
+    })
+
+    it('keeps the original config when a conflicting registration throws', () => {
+      const original = {}
+      registerTheories({ X: original })
+
+      expect(() => registerTheories({ X: { extends: [] } }))
+        .toThrow('Definition already registered: canon://theory/X (ADR-0017)')
+
+      expect(theoryRefFor('X').value).toBe(original)
+    })
+
+    it('resolves extends the same way declareTheory does', () => {
+      declareTheory('Identity', identityConfig)
+
+      registerTheories({ Y: { extends: ['Identity'] } })
+
+      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+      expect(theoryRefFor('Y').key).toBe('canon://theory/Y')
+
+      expect(() => registerTheories({ Z: { extends: ['Missing'] } }))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(theoryRefFor('Missing').value).toBeUndefined()
     })
   })
 

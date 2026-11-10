@@ -5,7 +5,7 @@
 - **Purpose:** Carry Phase 2 (Theories) from the approved ADRs onto the Phase 1 definition registry: nameless `defineTheory`, `declareTheory` returning a `KeyRef`, identities `canon://theory/<Name>`, and the three specified Theories. ObjectConstraintAxiom, Morphisms, Order, Aggregate, and the docs phase stay out of this saga.
 - **Goal:** A canon type can model Identity, Taxonomy, and Typed Entity, and `declareTheory` registers those values with only `uri` in metadata. Measured by the done check on each unit below, with `npm run check:all` green at the units whose gate requires full checks. No public name beyond the ADRs.
 - **ADRs in scope:** ADR-0017 (Definitions as Values), ADR-0018 (Theories only; the Morphism and ObjectConstraintAxiom sections are dependencies, not work).
-- **Status:** Active. U1–U5 and U7 are in. U9 (`registerTheories`) is next after U4 and before U6, and is not started. U6 and U8 are unblocked. Q1–Q8 are answered.
+- **Status:** Active. U1–U5, U7, and U9 are in. U6 and U8 are unblocked and not started. Q1–Q8 are answered.
 
 ## Plan
 
@@ -147,13 +147,13 @@ Metadata on every registered member stays `uri` only. `defineTheory` still does 
 
 ### U9 — `registerTheories`
 
-Placed after U4 and before U6. Not started until released.
+Placed after U4 and before U6.
 
 **Rating:** M
 
 **Files:** `src/shell.ts`, `src/shell.test.ts`.
 
-**Work:** `registerTheories` mirrors `registerCanons` exactly **[code]** `src/shell.ts`. Same signature shape: one argument, a map of label to theory config. The map keys give the names. For each entry, `defineTheory` then `definitionRegistry.register(definitionUri('theory', key), defined)`. The identity is `canon://theory/<Key>`. It returns nothing. It does not resolve `extends` (that stays on `declareTheory`). No `name` property.
+**Work:** `registerTheories` mirrors `registerCanons` exactly **[code]** `src/shell.ts`. Same signature shape: one argument, a map of label to theory config. The map keys give the names. For each entry, `defineTheory` then `definitionRegistry.register(definitionUri('theory', key), defined)`. The identity is `canon://theory/<Key>`. It returns nothing. It resolves `extends` the same way `declareTheory` does. No `name` property.
 
 **Tests** (mirror `registerCanons` in `src/shell.test.ts`):
 
@@ -333,6 +333,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U9. `registerTheories` in `src/shell.ts` mirrors `registerCanons`: map keys are names, `canon://theory/<Key>`, and `extends` resolves like `declareTheory`. Four mirrored tests plus one `extends` test in `src/shell.test.ts`. `npm run check:all`.
 - 2026-11-10 — Docs only. Q4 corrected: Bahul, 2026-11-10 requires `registerTheories`, mirroring `registerCanons`. Plan unit U9 sits after U4 and before U6, with U3's gates. Not implemented in this commit.
 - 2026-11-10 — Docs only. Q2–Q8 answered by the consistency rule. U6 is unblocked with label `TypedEntity`. U8 is unblocked with `CanonConfig.models`. No code.
 - 2026-11-10 — U4. `declareTheory` resolves `extends` through `definitionRegistry.resolve('theory', …)` and throws `Unresolved theory: <uri> (ADR-0017)` when a label is missing. No new export, no `name`, no `registerTheories`, no discriminant. Q1 marked answered. Tests in `src/theory.test.ts`. `npm run check:all`.

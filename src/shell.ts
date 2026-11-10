@@ -47,19 +47,43 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
  * @param config - The theory value
  * @param config.extends - Theories this one composes, as a map or a list
  */
-export function declareTheory<Label extends keyof Theories>(
-  label: Label,
-  config: { extends?: Record<string, unknown> | readonly unknown[] },
-) {
-  const defined = defineTheory(config)
-  if (config.extends !== undefined) {
-    const resolved = definitionRegistry.resolve('theory', config.extends)
-    for (const entry of resolved) {
-      if (entry.value === undefined) {
-        throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
-      }
+interface TheoryRegistration {
+  extends?: Record<string, unknown> | readonly unknown[]
+}
+
+/**
+ * Resolve `extends` the way `declareTheory` does. A missing label throws
+ * before the theory being registered is stored.
+ */
+function resolveExtends(config: TheoryRegistration): void {
+  if (config.extends === undefined) {
+    return
+  }
+  const resolved = definitionRegistry.resolve('theory', config.extends)
+  for (const entry of resolved) {
+    if (entry.value === undefined) {
+      throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
     }
   }
+}
+
+export function declareTheory<Label extends keyof Theories>(label: Label, config: TheoryRegistration) {
+  const defined = defineTheory(config)
+  resolveExtends(defined)
   definitionRegistry.register(definitionUri('theory', label), defined)
   return theoryRefFor(label)
+}
+
+/**
+ * Register multiple theories at once (for module-style registration)
+ *
+ * @param theories - Object mapping theory labels to their configurations
+ * @param theories.extends - Theories each entry composes, as a map or a list
+ */
+export function registerTheories(theories: Record<string, TheoryRegistration>): void {
+  for (const [label, config] of Object.entries(theories)) {
+    const defined = defineTheory(config)
+    resolveExtends(defined)
+    definitionRegistry.register(definitionUri('theory', label), defined)
+  }
 }
