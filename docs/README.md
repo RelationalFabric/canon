@@ -44,12 +44,6 @@ export default createEslintConfig()
 
 - **[ADRs](./adrs.md)** - Architecture Decision Records documenting key decisions
 
-## Planning & Strategy
-
-- **[Technology Radar](../planning/radar/)** - Technology recommendations and assessments
-- **[Planning Overview](../planning/)** - Strategic direction and roadmap
-- **[Radar Methodology](./planning/radar/methodology.md)** - Technology assessment approach
-
 ## Development Notes
 
 **Build Process**: The documentation build process automatically renames all `README.md` files to `index.md` within the docs directory to work with VitePress routing. This is handled by the build scripts in `package.json`:

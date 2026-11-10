@@ -4,6 +4,10 @@ This section contains strategic planning and direction for the Canon project, se
 
 ## Contents
 
+### [S001 — Phase 2: Theories](./saga/)
+
+Active saga. The plan, open questions, and gate configuration live in that file.
+
 ### [Technology Radar](./radar/)
 
 Our comprehensive technology radar tracking recommendations for tools, techniques, features, and data formats used with Canon.

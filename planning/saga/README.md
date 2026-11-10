@@ -1,3 +1,14 @@
+# S001 — Phase 2: Theories
+
+- **Id:** S001
+- **Title:** Phase 2: Theories
+- **Purpose:** Carry Phase 2 (Theories) from the approved ADRs onto the Phase 1 definition registry: nameless `defineTheory`, `declareTheory` returning a `KeyRef`, identities `canon://theory/<Name>`, and the three specified Theories. ObjectConstraintAxiom, Morphisms, Order, Aggregate, and the docs phase stay out of this saga.
+- **Goal:** A canon type can model Identity, Taxonomy, and Typed Entity, and `declareTheory` registers those values with only `uri` in metadata. Measured by the done check on each unit below, with `npm run check:all` green at the units whose gate requires full checks. No public name beyond the ADRs.
+- **ADRs in scope:** ADR-0017 (Definitions as Values), ADR-0018 (Theories only; the Morphism and ObjectConstraintAxiom sections are dependencies, not work).
+- **Status:** Active. Implementation has not started. U4, the runtime half of U6, and U8 stay blocked on Q1, Q3, and Q5.
+
+## Plan
+
 # Phase 2 plan: Theories
 
 Planning only. This file does not implement Theories. It covers Phase 2 (Theories) from ADR-0018, built on the Phase 1 definition APIs from ADR-0017 (commit `46ef312`).
@@ -282,3 +293,24 @@ These are undecided. Implementation must not pick a name and proceed.
 7. **`resetRegistry` vs built-in Theories.** `resetRegistry` clears every kind **[code]**. After U5, that clears Identity and Taxonomy with no automatic restore. Confirm "full clear, caller re-declares" rather than re-seeding inside `resetRegistry`.
 
 8. **Order and Aggregate.** Confirm they get no `Theories` keys in Phase 2. ADR-0018 already defers their keys. **[ADR]**
+
+## Ledger
+
+The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is not a checklist and is not ticked as work proceeds.
+
+`commit` is required on every unit because each unit is one commit. `push` is opt-in until U8, which closes the saga and must be pushed. `scoped tests` is N/A only for U1, which adds no test file. `scoped checks` is required everywhere (the unit's own typecheck or test run). `full tests` is required where the unit's done check names `check:test` or `check:all` (U3, U5, U7, U8). `full checks` is required where the done check names `check:all` (U5) and on the closing unit (U8). `smoke` is N/A: this package has no app to smoke-test.
+
+| unit | commit | push | scoped tests | scoped checks | full tests | full checks | smoke |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| U1 | required | opt-in | N/A | required | opt-in | opt-in | N/A |
+| U2 | required | opt-in | required | required | opt-in | opt-in | N/A |
+| U3 | required | opt-in | required | required | required | opt-in | N/A |
+| U4 | required | opt-in | required | required | opt-in | opt-in | N/A |
+| U5 | required | opt-in | required | required | required | required | N/A |
+| U6 | required | opt-in | required | required | opt-in | opt-in | N/A |
+| U7 | required | opt-in | required | required | required | opt-in | N/A |
+| U8 | required | required | required | required | required | required | N/A |
+
+### Notes
+
+- 2026-11-10 — The Phase 2 plan left `docs/plans/phase-2-theories.md` (commit `cfa30f8`) and now lives in this file. `docs/plans/` is gone. Navigational links from `README.md` and `docs/README.md` into `planning/**` are removed. No observations, hypotheses, issues, candidates, rrs, or deferred directories, and no saga CLI, hooks, or CI.
