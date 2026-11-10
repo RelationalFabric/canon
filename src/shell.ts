@@ -10,6 +10,7 @@ import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
 import { canonRefFor, definitionRegistry, definitionUri, morphismRefFor, theoryRefFor } from './definitions.js'
 import { objectHash } from './kit.js'
+import { metaOf } from './meta.js'
 import { defineMorphism } from './morphism.js'
 import { defineTheory } from './theory.js'
 
@@ -218,10 +219,33 @@ function validateTheoryConfig(
   }
 
   const composition = config.extends
-  if (composition === undefined || Array.isArray(composition)) {
+  if (composition === undefined) {
     return
   }
 
+  if (Array.isArray(composition)) {
+    for (const item of composition) {
+      if (isRefMap(item)) {
+        validateProvidedNames(item, batchKeys, provided)
+      }
+    }
+    return
+  }
+
+  if (isNameMap(composition)) {
+    validateProvidedNames(composition, batchKeys, provided)
+  }
+}
+
+function isNameMap(value: TheoryConfig['extends']): value is Record<string, unknown> {
+  return value !== undefined && !Array.isArray(value)
+}
+
+function validateProvidedNames(
+  composition: Record<string, unknown>,
+  batchKeys: Set<string>,
+  provided: Map<string, unknown>,
+): void {
   for (const [name, value] of Object.entries(composition)) {
     const uri = definitionUri('theory', name)
     if (batchKeys.has(name)) {
@@ -240,6 +264,25 @@ function validateTheoryConfig(
       validateTheoryConfig(value, batchKeys, provided)
     }
   }
+}
+
+function isRefMap(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+  const prototype: unknown = Object.getPrototypeOf(value)
+  if (prototype !== Object.prototype && prototype !== null) {
+    return false
+  }
+  const uri = metaOf(value).uri
+  if (typeof uri === 'string' && uri !== '') {
+    return false
+  }
+  const valueDescriptor = Object.getOwnPropertyDescriptor(value, 'value')
+  if ('key' in value && typeof valueDescriptor?.get === 'function') {
+    return false
+  }
+  return true
 }
 
 function isTheoryConfig(value: unknown): value is TheoryConfig {
