@@ -272,6 +272,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U5 review fix. Completeness fixtures use `Expect<{}, IdentityToTaxonomy>` and `Expect<{ Id: 'Nope' }, IdentityToTaxonomy>`. No other change.
 - 2026-11-10 — U5. Type fixtures in `src/morphism.test.ts`: `IdentityToTaxonomy` maps every Identity key to a Taxonomy key. Omitting `Id` and mapping `Id` to a non-Taxonomy name are `@ts-expect-error`. `invariant`/`Expect`. No new export. `src/shell.ts` unchanged. `npm run check:all`.
 - 2026-11-10 — Pre-U5 fix. `validateRegisterMorphisms` rejects a key whose morphism URI is already registered with a different value (`objectHash`), before any batch entry is stored. One test in `src/shell.test.ts`. `npm run check:all`.
 - 2026-11-10 — U4. `registerMorphisms` validates every entry before any register (invalid key, unresolved source or target), then registers each key at `canon://morphism/<Source>/<Target>`. Six tests in `src/shell.test.ts`, including an all-or-nothing batch. JSDoc on `resolveExtends` and `resolveTheoryLabel` corrected. `npm run check:all`.

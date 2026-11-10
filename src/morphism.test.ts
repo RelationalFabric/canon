@@ -17,10 +17,11 @@ type IdentityToTaxonomy = {
 invariant<Expect<{ Id: 'Type' }, IdentityToTaxonomy>>()
 
 // @ts-expect-error a complete morphism maps every Identity key
-invariant<Expect<Record<string, never>, IdentityToTaxonomy>>()
+// eslint-disable-next-line ts/no-empty-object-type -- incomplete morphism map
+invariant<Expect<{}, IdentityToTaxonomy>>()
 
 // @ts-expect-error Id must map to a Taxonomy key
-invariant<Expect<'Nope', keyof Theories['Taxonomy']>>()
+invariant<Expect<{ Id: 'Nope' }, IdentityToTaxonomy>>()
 
 describe('defineMorphism', () => {
   it('returns the same object', () => {
