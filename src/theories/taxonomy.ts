@@ -15,10 +15,10 @@ declare module '@relational-fabric/canon' {
   }
 }
 
-const taxonomyConfig: Record<string, never> = {}
+const config: Record<string, never> = {}
 
-declareTheory('Taxonomy', taxonomyConfig)
+declareTheory('Taxonomy', config)
 
-export { taxonomyConfig }
+export { config }
 
 invariant<Expect<Theories['Taxonomy']['Type'], KeyNameAxiom>>()

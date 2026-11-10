@@ -2,13 +2,15 @@
  * Tests for the TypedEntity theory
  */
 
+import type { Expect } from '../testing.js'
 import type { KeyNameAxiom, Theories } from '../types/index.js'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { definitionRegistry, theoryRefFor } from '../definitions.js'
 import { declareTheory } from '../shell.js'
-import { identityConfig } from './identity.js'
-import { taxonomyConfig } from './taxonomy.js'
-import { typedEntityConfig } from './typed-entity.js'
+import { invariant } from '../testing.js'
+import { config as identityConfig } from './identity.js'
+import { config as taxonomyConfig } from './taxonomy.js'
+import { config as typedEntityConfig } from './typed-entity.js'
 
 type TypedEntityTheory = Theories['TypedEntity']
 
@@ -16,7 +18,9 @@ interface SampleCanon extends TypedEntityTheory {
   Id: KeyNameAxiom
 }
 
-type _SampleCanonNarrows = SampleCanon
+type SampleCanonNarrows = SampleCanon
+
+invariant<Expect<SampleCanonNarrows, TypedEntityTheory>>()
 
 describe('typed entity theory', () => {
   beforeEach(() => {
@@ -28,6 +32,16 @@ describe('typed entity theory', () => {
   it('registers at canon://theory/TypedEntity', () => {
     expect(theoryRefFor('TypedEntity').key).toBe('canon://theory/TypedEntity')
     expect(theoryRefFor('TypedEntity').value).toBe(typedEntityConfig)
+  })
+
+  it('registers Identity and Taxonomy when the module is evaluated on its own', async () => {
+    vi.resetModules()
+    const { theoryRefFor: freshRef } = await import('../definitions.js')
+    await import('./typed-entity.js')
+
+    expect(freshRef('Identity').key).toBe('canon://theory/Identity')
+    expect(freshRef('Taxonomy').key).toBe('canon://theory/Taxonomy')
+    expect(freshRef('TypedEntity').key).toBe('canon://theory/TypedEntity')
   })
 
   it('resolves extends to Identity and Taxonomy in order', () => {

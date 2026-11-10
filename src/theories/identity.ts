@@ -15,10 +15,10 @@ declare module '@relational-fabric/canon' {
   }
 }
 
-const identityConfig: Record<string, never> = {}
+const config: Record<string, never> = {}
 
-declareTheory('Identity', identityConfig)
+declareTheory('Identity', config)
 
-export { identityConfig }
+export { config }
 
 invariant<Expect<Theories['Identity']['Id'], KeyNameAxiom>>()

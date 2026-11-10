@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { definitionRegistry, definitionUri, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { declareTheory, resetRegistry } from './shell.js'
-import { identityConfig } from './theories/identity.js'
+import { config as identityConfig } from './theories/identity.js'
 import { defineTheory } from './theory.js'
 
 declare module './types/theories.js' {

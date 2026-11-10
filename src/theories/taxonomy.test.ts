@@ -6,18 +6,18 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { theoryRefFor } from '../definitions.js'
 import { metaOf } from '../meta.js'
 import { declareTheory } from '../shell.js'
-import { taxonomyConfig } from './taxonomy.js'
+import { config } from './taxonomy.js'
 
 describe('taxonomy theory', () => {
   beforeEach(() => {
-    declareTheory('Taxonomy', taxonomyConfig)
+    declareTheory('Taxonomy', config)
   })
 
   it('registers at canon://theory/Taxonomy with the declared config', () => {
     const ref = theoryRefFor('Taxonomy')
 
     expect(ref.key).toBe('canon://theory/Taxonomy')
-    expect(ref.value).toBe(taxonomyConfig)
+    expect(ref.value).toBe(config)
   })
 
   it('records only uri on the registered value', () => {

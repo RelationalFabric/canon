@@ -1,8 +1,5 @@
 /**
  * A canon type models a Theory by extending it.
- *
- * Open question 5: CanonConfig has no approved property for the Theories a
- * canon models. Do not add a field in this commit.
  */
 
 import type { Expect, IsFalse } from '../testing.js'

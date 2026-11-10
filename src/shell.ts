@@ -93,9 +93,19 @@ export function declareTheory<Label extends keyof Theories>(label: Label, config
  * @param theories.extends - Theories each entry composes, as a map or a list
  */
 export function registerTheories(theories: Record<string, TheoryConfig>): void {
-  for (const [label, config] of Object.entries(theories)) {
-    const defined = defineTheory(config)
-    resolveExtends(defined)
-    definitionRegistry.register(definitionUri('theory', label), defined)
+  const entries = Object.entries(theories)
+  const defined = new Map<string, TheoryConfig>()
+
+  for (const [label, config] of entries) {
+    const value = defineTheory(config)
+    defined.set(label, value)
+    definitionRegistry.register(definitionUri('theory', label), value)
+  }
+
+  for (const [label] of entries) {
+    const value = defined.get(label)
+    if (value !== undefined) {
+      resolveExtends(value)
+    }
   }
 }

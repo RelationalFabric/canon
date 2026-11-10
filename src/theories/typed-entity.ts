@@ -6,6 +6,8 @@ import type { Expect } from '../testing.js'
 import type { Theories } from '../types/index.js'
 import { declareTheory } from '../shell.js'
 import { invariant } from '../testing.js'
+import './identity.js'
+import './taxonomy.js'
 
 declare module '@relational-fabric/canon' {
   interface Theories {
@@ -13,13 +15,13 @@ declare module '@relational-fabric/canon' {
   }
 }
 
-const typedEntityConfig = {
+const config = {
   extends: ['Identity', 'Taxonomy'] as const,
 }
 
-declareTheory('TypedEntity', typedEntityConfig)
+declareTheory('TypedEntity', config)
 
-export { typedEntityConfig }
+export { config }
 
 invariant<Expect<Theories['TypedEntity'], Theories['Identity']>>()
 invariant<Expect<Theories['TypedEntity'], Theories['Taxonomy']>>()

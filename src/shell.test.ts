@@ -8,7 +8,7 @@ import { inferCanon } from './canon.js'
 import { canonRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { declareCanon, declareTheory, registerCanons, registerTheories, resetRegistry } from './shell.js'
-import { identityConfig } from './theories/identity.js'
+import { config as identityConfig } from './theories/identity.js'
 
 declare module './types/canons.js' {
   interface Canons {
@@ -187,6 +187,17 @@ describe('shell', () => {
         .toThrow('Definition already registered: canon://theory/X (ADR-0017)')
 
       expect(theoryRefFor('X').value).toBe(original)
+    })
+
+    it('resolves a theory that extends another theory in the same call', () => {
+      registerTheories({
+        Child: { extends: ['Parent'] },
+        Parent: {},
+      })
+
+      expect(theoryRefFor('Parent').key).toBe('canon://theory/Parent')
+      expect(theoryRefFor('Child').key).toBe('canon://theory/Child')
+      expect(theoryRefFor('Child').value).toEqual({ extends: ['Parent'] })
     })
 
     it('resolves extends the same way declareTheory does', () => {

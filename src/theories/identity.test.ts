@@ -2,12 +2,14 @@
  * Tests for the Identity theory
  */
 
+import type { Expect } from '../testing.js'
 import type { RepresentationAxiom, Theories } from '../types/index.js'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { theoryRefFor } from '../definitions.js'
 import { metaOf } from '../meta.js'
 import { declareTheory } from '../shell.js'
-import { identityConfig } from './identity.js'
+import { invariant } from '../testing.js'
+import { config } from './identity.js'
 import './taxonomy.js'
 
 type IdentityTheory = Theories['Identity']
@@ -20,20 +22,23 @@ interface WrongIdKind {
 }
 
 // @ts-expect-error union/extension clash when kinds differ
-interface _Incompatible extends IdentityTheory, WrongIdKind {}
+interface Incompatible extends IdentityTheory, WrongIdKind {}
 
-type _ClashLegal = Clash
+type ClashLegal = Clash
+
+invariant<Expect<ClashLegal, IdentityTheory>>()
+invariant<Expect<Incompatible, WrongIdKind>>()
 
 describe('identity theory', () => {
   beforeEach(() => {
-    declareTheory('Identity', identityConfig)
+    declareTheory('Identity', config)
   })
 
   it('registers at canon://theory/Identity with the declared config', () => {
     const ref = theoryRefFor('Identity')
 
     expect(ref.key).toBe('canon://theory/Identity')
-    expect(ref.value).toBe(identityConfig)
+    expect(ref.value).toBe(config)
   })
 
   it('records only uri on the registered value', () => {
