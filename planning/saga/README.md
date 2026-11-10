@@ -5,7 +5,7 @@
 - **Purpose:** Carry the two ADR-0018 sections that Phase 2 left as dependencies onto the definition registry: Morphisms (`defineMorphism`, `declareMorphism`, `registerMorphisms`, completeness, composition, apply) and `ObjectConstraintAxiom`. Order, Aggregate, lexicon hierarchy, interpretations, `EntityReference` removal, and the docs phase stay out.
 - **Goal:** A complete Morphism between two Theories registers at `canon://morphism/<Source>/<Target>`, composes, and applies; a canon key can require that its value models listed Theories. Measured by the done check on each unit, with `npm run check:all` green where the gate requires full checks. No public name beyond the names this plan settles from existing patterns.
 - **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `73ff807`) is the base.
-- **Status:** Active. No unit is started.
+- **Status:** Active. U1 is in. No later unit is started.
 
 ## Plan
 
@@ -271,5 +271,6 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U1. Empty `Morphisms` interface in `src/types/morphisms.d.ts`, re-exported from `src/types/index.d.ts`. Keys are `${Source}/${Target}`. No Morphism declared, no runtime config type, no test file. `src/index.ts` unchanged. `npm run check:all`.
 - 2026-11-10 — Plan review. Q1 and Q2 answered (2026-11-10, pragmatic default, recommended option): lexicon term mappings are not Morphisms in this phase, and there is no `patch` field. U8 names the Theory list `models` and keeps the tuple as a type parameter; no `theories` field or parameter. Base is `73ff807`. No code.
 - 2026-11-10 — S002 opened on `feature/phase-3` from `feature/theories` (`73ff807`). Plan only. Phase 3 is ADR-0018's Morphism and ObjectConstraintAxiom sections. No unit implemented.
