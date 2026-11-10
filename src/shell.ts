@@ -93,19 +93,109 @@ export function declareTheory<Label extends keyof Theories>(label: Label, config
  * @param theories.extends - Theories each entry composes, as a map or a list
  */
 export function registerTheories(theories: Record<string, TheoryConfig>): void {
-  const entries = Object.entries(theories)
-  const defined = new Map<string, TheoryConfig>()
+  validateRegisterTheories(theories)
 
-  for (const [label, config] of entries) {
+  for (const label of registerTheoriesOrder(theories)) {
+    const config = theories[label]
+    if (config === undefined) {
+      continue
+    }
     const value = defineTheory(config)
-    defined.set(label, value)
     definitionRegistry.register(definitionUri('theory', label), value)
+    resolveExtends(value)
   }
+}
 
-  for (const [label] of entries) {
-    const value = defined.get(label)
-    if (value !== undefined) {
-      resolveExtends(value)
+/**
+ * String labels a theory composes. Map-form `extends` uses its keys.
+ */
+function extendsLabels(config: TheoryConfig): string[] {
+  const { extends: composition } = config
+  if (composition === undefined) {
+    return []
+  }
+  if (Array.isArray(composition)) {
+    return composition.filter((item): item is string => typeof item === 'string')
+  }
+  return Object.keys(composition)
+}
+
+function validateRegisterTheories(theories: Record<string, TheoryConfig>): void {
+  const mapKeys = new Set(Object.keys(theories))
+
+  for (const config of Object.values(theories)) {
+    for (const label of extendsLabels(config)) {
+      if (!mapKeys.has(label) && theoryRefFor(label).value === undefined) {
+        throw new Error(`Unresolved theory: ${definitionUri('theory', label)} (ADR-0017)`)
+      }
     }
   }
+
+  assertNoTheoryCycles(theories, mapKeys)
+}
+
+function assertNoTheoryCycles(theories: Record<string, TheoryConfig>, mapKeys: Set<string>): void {
+  const visiting = new Set<string>()
+  const visited = new Set<string>()
+
+  const visit = (label: string, path: string[]): void => {
+    if (visiting.has(label)) {
+      const start = path.indexOf(label)
+      const cycle = path.slice(start).concat(label)
+      const uris = cycle.map(name => definitionUri('theory', name)).join(' -> ')
+      throw new Error(`Theory cycle: ${uris} (ADR-0017)`)
+    }
+    if (visited.has(label)) {
+      return
+    }
+    visiting.add(label)
+    path.push(label)
+    const config = theories[label]
+    if (config !== undefined) {
+      for (const dep of extendsLabels(config)) {
+        if (mapKeys.has(dep)) {
+          visit(dep, path)
+        }
+      }
+    }
+    path.pop()
+    visiting.delete(label)
+    visited.add(label)
+  }
+
+  for (const label of mapKeys) {
+    visit(label, [])
+  }
+}
+
+function registerTheoriesOrder(theories: Record<string, TheoryConfig>): string[] {
+  const labels = Object.keys(theories)
+  const inDegree = new Map(labels.map(label => [label, 0]))
+  const children = new Map(labels.map(label => [label, [] as string[]]))
+
+  for (const [label, config] of Object.entries(theories)) {
+    for (const dep of extendsLabels(config)) {
+      if (Object.prototype.hasOwnProperty.call(theories, dep)) {
+        inDegree.set(label, (inDegree.get(label) ?? 0) + 1)
+        children.get(dep)!.push(label)
+      }
+    }
+  }
+
+  const queue = labels.filter(label => inDegree.get(label) === 0)
+  const order: string[] = []
+
+  while (queue.length > 0) {
+    const label = queue.shift()!
+    order.push(label)
+    for (const child of children.get(label) ?? []) {
+      const next = (inDegree.get(child) ?? 0) - 1
+      inDegree.set(child, next)
+      if (next === 0) {
+        queue.push(child)
+      }
+    }
+  }
+
+  return order
 }
