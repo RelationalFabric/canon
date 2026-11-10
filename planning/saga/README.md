@@ -5,7 +5,7 @@
 - **Purpose:** Carry the two ADR-0018 sections that Phase 2 left as dependencies onto the definition registry: Morphisms (`defineMorphism`, `declareMorphism`, `registerMorphisms`, completeness, composition, apply) and `ObjectConstraintAxiom`. Order, Aggregate, lexicon hierarchy, interpretations, `EntityReference` removal, and the docs phase stay out.
 - **Goal:** A complete Morphism between two Theories registers at `canon://morphism/<Source>/<Target>`, composes, and applies; a canon key can require that its value models listed Theories. Measured by the done check on each unit, with `npm run check:all` green where the gate requires full checks. No public name beyond the names this plan settles from existing patterns.
 - **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `73ff807`) is the base.
-- **Status:** Active. U1 through U4 are in. No later unit is started.
+- **Status:** Active. U1 through U5 are in. No later unit is started.
 
 ## Plan
 
@@ -272,6 +272,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U5. Type fixtures in `src/morphism.test.ts`: `IdentityToTaxonomy` maps every Identity key to a Taxonomy key. Omitting `Id` and mapping `Id` to a non-Taxonomy name are `@ts-expect-error`. `invariant`/`Expect`. No new export. `src/shell.ts` unchanged. `npm run check:all`.
 - 2026-11-10 — Pre-U5 fix. `validateRegisterMorphisms` rejects a key whose morphism URI is already registered with a different value (`objectHash`), before any batch entry is stored. One test in `src/shell.test.ts`. `npm run check:all`.
 - 2026-11-10 — U4. `registerMorphisms` validates every entry before any register (invalid key, unresolved source or target), then registers each key at `canon://morphism/<Source>/<Target>`. Six tests in `src/shell.test.ts`, including an all-or-nothing batch. JSDoc on `resolveExtends` and `resolveTheoryLabel` corrected. `npm run check:all`.
 - 2026-11-10 — U3. `declareMorphism` in `src/shell.ts`: `defineMorphism`, resolve source and target theories, register at `canon://morphism/<Source>/<Target>`, return `morphismRefFor`. Six tests in `src/shell.test.ts`. No `registerMorphisms`, no runtime `maps` check, `inferCanon` unchanged. `npm run check:all`.
