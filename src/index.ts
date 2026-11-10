@@ -1,3 +1,6 @@
+import './theories/identity.js'
+import './theories/taxonomy.js'
+
 // Axiom and Canon APIs
 export * from './axiom.js'
 // Specific Axioms
