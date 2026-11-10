@@ -50,6 +50,26 @@ export type RepresentationAxiom<T, C = unknown> = Axiom<
   }
 >
 
+type UnionToIntersection<U>
+  = (U extends unknown ? (argument: U) => void : never) extends (argument: infer I) => void ? I : never
+
+type ObjectConstraintValue<T extends readonly unknown[]>
+  = number extends T['length']
+    ? { [key: string]: unknown }
+    : UnionToIntersection<T[number]>
+
+/**
+ * A canon value that must model each theory in `T`.
+ * The runtime list is `models`.
+ */
+export type ObjectConstraintAxiom<T extends readonly unknown[] = readonly unknown[]> = Axiom<
+  {
+    $basis: TypeGuard<unknown>
+    models: Record<string, unknown> | readonly unknown[]
+  },
+  ObjectConstraintValue<T>
+>
+
 /**
  * Global registry of axioms available in Canon
  *

@@ -41,6 +41,7 @@ function resolveModels(config: CanonConfig): void {
 export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig) {
   const defined = defineCanon(config)
   resolveModels(defined)
+  resolveAxiomModels(defined)
   definitionRegistry.register(definitionUri('canon', label), defined)
   return canonRefFor(label)
 }
@@ -52,11 +53,41 @@ export function declareCanon<Label extends keyof Canons>(label: Label, config: C
  * @param canons.models - Theories each canon models, as a map or a list
  */
 export function registerCanons(canons: Record<string, CanonConfig>): void {
-  for (const [label, config] of Object.entries(canons)) {
-    const defined = defineCanon(config)
-    resolveModels(defined)
-    definitionRegistry.register(definitionUri('canon', label), defined)
+  const defined = Object.entries(canons).map(([label, config]) => [label, defineCanon(config)] as const)
+  for (const [, config] of defined) {
+    resolveAxiomModels(config)
   }
+  for (const [label, config] of defined) {
+    resolveModels(config)
+    definitionRegistry.register(definitionUri('canon', label), config)
+  }
+}
+
+/**
+ * Resolve `models` on each axiom config as kind `theory`.
+ * A missing label throws before the canon is stored.
+ */
+function resolveAxiomModels(config: CanonConfig): void {
+  for (const axiom of Object.values(config.axioms)) {
+    const models = theoryModels(axiom.models)
+    if (models === undefined) {
+      continue
+    }
+    resolveExtends({ extends: models })
+  }
+}
+
+function theoryModels(value: unknown): TheoryConfig['extends'] | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+  if (Array.isArray(value)) {
+    return value
+  }
+  if (value !== null && typeof value === 'object') {
+    return value as Record<string, unknown>
+  }
+  throw new Error('Definition refs must be a map or a list (ADR-0017)')
 }
 
 /** Throw when a theory label is not registered. */

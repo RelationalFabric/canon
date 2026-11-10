@@ -5,7 +5,7 @@
 - **Purpose:** Carry the two ADR-0018 sections that Phase 2 left as dependencies onto the definition registry: Morphisms (`defineMorphism`, `declareMorphism`, `registerMorphisms`, completeness, composition, apply) and `ObjectConstraintAxiom`. Order, Aggregate, lexicon hierarchy, interpretations, `EntityReference` removal, and the docs phase stay out.
 - **Goal:** A complete Morphism between two Theories registers at `canon://morphism/<Source>/<Target>`, composes, and applies; a canon key can require that its value models listed Theories. Measured by the done check on each unit, with `npm run check:all` green where the gate requires full checks. No public name beyond the names this plan settles from existing patterns.
 - **ADRs in scope:** ADR-0018 (Decision → ObjectConstraintAxiom, Decision → Morphism, and the consequences that follow from those two). ADR-0017 for identity, the shared registry, and label-or-value resolution. Phase 2 (`feature/theories`, head `73ff807`) is the base.
-- **Status:** Active. U1 through U7 are in. No later unit is started.
+- **Status:** Active. U1 through U8 are in. No later unit is started.
 
 ## Plan
 
@@ -195,17 +195,18 @@ export type ObjectConstraintAxiom<T extends readonly unknown[] = readonly unknow
     $basis: TypeGuard<unknown>
     models: Record<string, unknown> | readonly unknown[]
   },
-  { [key: string]: unknown }
+  ObjectConstraintValue<T>
 >
 ```
 
-The tuple of Theories the value must model is the type parameter `T`. Do not add a field or parameter named `theories`. The runtime list is `models`, the same name as `CanonConfig.models`. The public name is `ObjectConstraintAxiom`.
+`ObjectConstraintValue<T>` is the intersection of `T`'s members (`UnionToIntersection` in `src/types/axioms.d.ts`, unexported). When `T` is the default `readonly unknown[]`, the value type is `{ [key: string]: unknown }`. The tuple of Theories the value must model is the type parameter `T`. Do not add a field or parameter named `theories`. The runtime list is `models`, the same name as `CanonConfig.models`. The public name is `ObjectConstraintAxiom`.
 
 When an axiom config on a canon has `models`, resolve it as kind `'theory'` before the canon is stored. Missing labels throw. Canons whose axioms omit `models` are unchanged. Do not resolve `models` inside `defineAxiom`.
 
 **Tests:**
 
 - A canon axiom `{ $basis, models: ['Identity'] }` resolves to the Identity value.
+- A `registerCanons` batch with one bad axiom `models` stores no canon.
 - `models: ['Missing']` throws `Unresolved theory: canon://theory/Missing (ADR-0017)` and does not register the canon.
 - A canon with no `models` on its axioms still round-trips through `canonRefFor`.
 - `inferCanon({ id: 'x' })` still returns the canon with the most matching axioms.
@@ -276,6 +277,7 @@ The matrix is configuration. Each cell is `required`, `N/A`, or `opt-in`. It is 
 
 ### Notes
 
+- 2026-11-10 — U8. `ObjectConstraintAxiom` in `src/types/axioms.d.ts`. Value type is the intersection of `T`, or `{ [key: string]: unknown }` for the default array. `declareCanon` and `registerCanons` resolve axiom `models` as theories before storing; a bad batch stores nothing. Tests in `src/shell.test.ts`. `inferCanon` and `EntityReference` unchanged. `npm run check:all`.
 - 2026-11-10 — U7. `applyMorphism` in `src/morphism.ts`, exported from `src/index.ts`. Copies mapped terms from registered morphisms; throws on missing source. Three tests in `src/morphism.test.ts`. No axiom files. `npm run check:all`.
 - 2026-11-10 — U6. `composeMorphisms` in `src/morphism.ts`, exported from `src/index.ts`. Registered morphisms only; chain check via metadata URI; returns `{ maps }` without registering. Three tests in `src/morphism.test.ts`. Saga risk note for test-file type-checking. `npm run check:all`.
 - 2026-11-10 — U5 review fix. Completeness fixtures use `Expect<{}, IdentityToTaxonomy>` and `Expect<{ Id: 'Nope' }, IdentityToTaxonomy>`. No other change.

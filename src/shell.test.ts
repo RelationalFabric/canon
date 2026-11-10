@@ -99,6 +99,39 @@ describe('shell', () => {
       expect(canonRefFor('DeclaredCanon').value).toBeUndefined()
     })
 
+    it('resolves an axiom models list to the Identity theory', () => {
+      declareTheory('Identity', identityConfig)
+      const config: CanonConfig = {
+        axioms: {
+          Owner: {
+            $basis: (v: unknown): v is { id: string } => true,
+            models: ['Identity'],
+          },
+        },
+      }
+
+      declareCanon('DeclaredCanon', config)
+
+      const models = canonRefFor('DeclaredCanon').value?.axioms.Owner?.models
+      expect(Array.isArray(models) ? models : []).toEqual(['Identity'])
+      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+    })
+
+    it('throws on an unknown axiom models label and does not register the canon', () => {
+      const config: CanonConfig = {
+        axioms: {
+          Owner: {
+            $basis: (v: unknown): v is { id: string } => true,
+            models: ['Missing'],
+          },
+        },
+      }
+
+      expect(() => declareCanon('DeclaredCanon', config))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(canonRefFor('DeclaredCanon').value).toBeUndefined()
+    })
+
     it('returns a ref that resolves to the declared canon', () => {
       const config: CanonConfig = { axioms: {} }
 
@@ -417,6 +450,19 @@ describe('shell', () => {
       expect(() => registerCanons({ Z: { axioms: {}, models: ['Missing'] } }))
         .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
       expect(canonRefFor('Z').value).toBeUndefined()
+    })
+
+    it('stores no canon when one axiom models label is missing', () => {
+      declareTheory('Identity', identityConfig)
+      const basis = (v: unknown): v is { id: string } => true
+
+      expect(() => registerCanons({
+        Good: { axioms: { Owner: { $basis: basis, models: ['Identity'] } } },
+        Bad: { axioms: { Owner: { $basis: basis, models: ['Missing'] } } },
+      })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+
+      expect(canonRefFor('Good').value).toBeUndefined()
+      expect(canonRefFor('Bad').value).toBeUndefined()
     })
 
     it('still infers the canon with the most matching axioms', () => {
