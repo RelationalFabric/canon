@@ -9,7 +9,7 @@ import { declareTheory, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { defineTheory } from './theory.js'
 
-declare module './types/theories.js' {
+declare module '@relational-fabric/canon' {
   interface Theories {
     Composed: Record<string, never>
   }

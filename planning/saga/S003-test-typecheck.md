@@ -212,4 +212,5 @@ Scoped checks for U1–U3 are `npm run check:all` plus the throwaway `tsc --noEm
 
 ### Notes
 
+- U1 done. The four `declare module` specifiers in `src/shell.test.ts`, `src/theory.test.ts`, and `src/registry.test.ts` now target `@relational-fabric/canon`. Throwaway `tsc --noEmit --project tsconfig.test.json` reported 5 errors: `src/axioms/references.ts:66`, `src/axioms/timestamps.ts:57`, `src/shell.test.ts:115`, `src/shell.test.ts:177`, `src/theories/identity.test.ts:30`. `Theories` keys were `Identity|Taxonomy|TypedEntity|DeclaredTheory|Fresh|Other|T|TheoryConflict|Composed`. The throwaway file was deleted before commit. `npm run check:all` is the full-check gate for this pause.
 - Planning commit. Diagnosis is in this file. No implementation unit started. Test-project error counts, measured on TypeScript 5.9.3 and not committed: 71 with tests included as they are; 5 after the four specifiers point at `@relational-fabric/canon`; 3 after the two `Canons` placeholders are `Record<never, never>`; those 3 are `shell.test.ts:115`, `shell.test.ts:177`, and `identity.test.ts:30`. `npm run check:types:src` on the unmodified tree is 0 errors.

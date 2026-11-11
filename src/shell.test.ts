@@ -12,13 +12,13 @@ import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
 import { defineTheory } from './theory.js'
 
-declare module './types/canons.js' {
+declare module '@relational-fabric/canon' {
   interface Canons {
     DeclaredCanon: Record<string, never>
   }
 }
 
-declare module './types/theories.js' {
+declare module '@relational-fabric/canon' {
   interface Theories {
     DeclaredTheory: Record<string, never>
     Fresh: Record<string, never>

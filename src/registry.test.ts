@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import { createRegistry, Registry } from './registry.js'
 
 // Declare test canons in the type system
-declare module './types/canons.js' {
+declare module '@relational-fabric/canon' {
   interface Canons {
     TestCanon: {
       Id: {
