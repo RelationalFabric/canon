@@ -229,7 +229,7 @@ describe('shell', () => {
   })
 
   describe('declareMorphism', () => {
-    const morphismConfig = { maps: { Id: 'Type' } }
+    const morphismConfig = { maps: { Id: 'Type' } } as const
 
     beforeEach(() => {
       declareTheory('Identity', identityConfig)
@@ -261,7 +261,8 @@ describe('shell', () => {
     it('throws when a different config is declared for the same pair and keeps the first value', () => {
       declareMorphism('Identity', 'Taxonomy', morphismConfig)
 
-      expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } }))
+      // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+      expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } } as const))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
       expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
@@ -295,7 +296,7 @@ describe('shell', () => {
   })
 
   describe('registerMorphisms', () => {
-    const morphismConfig = { maps: { Id: 'Type' } }
+    const morphismConfig = { maps: { Id: 'Type' } } as const
 
     beforeEach(() => {
       declareTheory('Identity', identityConfig)
@@ -321,7 +322,8 @@ describe('shell', () => {
     it('throws when a different config is registered under the same key and keeps the original value', () => {
       registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
 
-      expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } }))
+      // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+      expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } as const }))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
       expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
@@ -353,10 +355,11 @@ describe('shell', () => {
     })
 
     it('stores nothing when one config object is used under two keys', () => {
-      const shared = { maps: { Id: 'Type' } }
+      const shared = { maps: { Id: 'Type' } } as const
 
       expect(() => registerMorphisms({
         'Identity/Taxonomy': shared,
+        // @ts-expect-error runtime guard test, map deliberately not complete for this pair
         'Taxonomy/Identity': shared,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy')
 
@@ -365,10 +368,11 @@ describe('shell', () => {
     })
 
     it('stores nothing new when a registered config is reused under another key', () => {
-      const shared = { maps: { Id: 'Type' } }
+      const shared = { maps: { Id: 'Type' } } as const
       declareMorphism('Identity', 'Taxonomy', shared)
 
       expect(() => registerMorphisms({
+        // @ts-expect-error runtime guard test, map deliberately not complete for this pair
         'Taxonomy/Identity': shared,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy')
 
@@ -380,8 +384,9 @@ describe('shell', () => {
       declareMorphism('Identity', 'Taxonomy', morphismConfig)
 
       expect(() => registerMorphisms({
-        'Taxonomy/Identity': { maps: { Type: 'Id' } },
-        'Identity/Taxonomy': { maps: { Id: 'Id' } },
+        'Taxonomy/Identity': { maps: { Type: 'Id' } } as const,
+        // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+        'Identity/Taxonomy': { maps: { Id: 'Id' } } as const,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
       expect(morphismRefFor('Taxonomy', 'Identity').value).toBeUndefined()
