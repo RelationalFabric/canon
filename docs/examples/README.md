@@ -91,6 +91,30 @@ Creating and using custom axioms (Email, Currency, Status, Priority) for domain-
 
 **Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/07-custom-axioms-example)
 
+### [08-protocol-system](./08-protocol-system.md)
+
+Learn how Canon's protocol system enables polymorphic dispatch across different types
+
+**Keywords:** protocol, polymorphism, dispatch, interface, extension
+
+**Difficulty:** intermediate
+
+**Pattern:** Multi-file example
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/08-protocol-system)
+
+### [09-lazy-module-pattern](./09-lazy-module-pattern.md)
+
+Learn how Canon's lazy module pattern enables capability-based implementation selection
+
+**Keywords:** lazy module, capability, selection, implementation, fallback
+
+**Difficulty:** intermediate
+
+**Pattern:** Multi-file example
+
+**Source:** [View on GitHub](https://github.com/RelationalFabric/canon/tree/main/examples/09-lazy-module-pattern)
+
 ## Getting Started
 
 Each example includes:
