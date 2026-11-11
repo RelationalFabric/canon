@@ -274,6 +274,7 @@ export const definitionRegistry = new DefinitionRegistry()
 
 /**
  * Each call, nested or not, rolls back its own writes and uri stamps on failure (ADR-0017).
+ * A failed restore is reported as an AggregateError whose first error and cause are the original error.
  */
 export function allOrNothing<T>(write: () => T): T {
   const outermost = stampLog === undefined
@@ -288,24 +289,33 @@ export function allOrNothing<T>(write: () => T): T {
   try {
     return write()
   } catch (error) {
-    try {
-      for (let index = log.length - 1; index >= logStart; index--) {
-        const entry = log[index]
-        if (entry === undefined) {
-          continue
-        }
-        try {
-          updateMeta(entry.target, () => entry.prior)
-        } catch {
-          // A failed restore must not hide the original error; keep restoring the rest.
-        }
+    const restoreErrors: unknown[] = []
+    const unrestored: typeof log = []
+    for (let index = log.length - 1; index >= logStart; index--) {
+      const entry = log[index]
+      if (entry === undefined) {
+        continue
       }
-    } finally {
       try {
-        restoreEntries(definitionRegistry, before)
-      } finally {
-        log.length = logStart
+        updateMeta(entry.target, () => entry.prior)
+      } catch (restoreError) {
+        restoreErrors.push(restoreError)
+        unrestored.unshift(entry)
       }
+    }
+    try {
+      restoreEntries(definitionRegistry, before)
+    } catch (restoreError) {
+      restoreErrors.push(restoreError)
+    }
+    log.length = logStart
+    log.push(...unrestored)
+    if (restoreErrors.length > 0) {
+      throw new AggregateError(
+        [error, ...restoreErrors],
+        'allOrNothing rollback incomplete: the registry may be inconsistent',
+        { cause: error },
+      )
     }
     throw error
   } finally {

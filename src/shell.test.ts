@@ -41,6 +41,8 @@ declare module './types/theories.js' {
   interface Theories {
     DeclaredTheory: Record<string, never>
     Fresh: Record<string, never>
+    A: Record<string, never>
+    B: Record<string, never>
     Other: Record<string, never>
     T: Record<string, never>
     TheoryConflict: Record<string, never>
@@ -1138,21 +1140,91 @@ describe('shell', () => {
 
     it('keeps the original error when a metadata restore throws', () => {
       const original = new Error('original failure')
+      let thrown: unknown
 
       try {
-        expect(() => allOrNothing(() => {
+        allOrNothing(() => {
           declareTheory('Other', defineTheory({}))
           rollbackArm.value = true
           throw original
-        })).toThrow(original)
+        })
+      } catch (error) {
+        thrown = error
       } finally {
         rollbackArm.value = false
       }
 
+      expect(thrown).toBeInstanceOf(AggregateError)
+      const aggregate = thrown as AggregateError
+      expect(aggregate.errors[0]).toBe(original)
+      expect(aggregate.cause).toBe(original)
       expect(definitionRegistry.size).toBe(0)
       expect(theoryRefFor('Other').value).toBeUndefined()
       declareTheory('Other', defineTheory({}))
       expect(theoryRefFor('Other').value).toBeDefined()
+    })
+
+    it('surfaces a failed restore with the original error', () => {
+      const a = defineTheory({})
+      const b = defineTheory({})
+      declareTheory('A', a)
+      declareTheory('B', b)
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => {
+          resetRegistry()
+          rollbackArm.value = true
+          throw new Error('boom')
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      const aggregate = thrown as AggregateError
+      expect(aggregate.errors[0]).toMatchObject({ message: 'boom' })
+      expect(aggregate.cause).toBe(aggregate.errors[0])
+      expect(aggregate.errors).toHaveLength(2)
+      expect(definitionRegistry.value(theoryRefFor('A').key)).toBe(a)
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(a).uri).toBe('canon://theory/A')
+      expect(metaOf(b).uri).toBeUndefined()
+    })
+
+    it('replays a failed inner restore when the outer savepoint fails', () => {
+      const kept = defineTheory({})
+      declareTheory('Fresh', kept)
+      let innerError: unknown
+      let outerError: unknown
+
+      try {
+        allOrNothing(() => {
+          try {
+            allOrNothing(() => {
+              resetRegistry()
+              rollbackArm.value = true
+              throw new Error('inner')
+            })
+          } catch (error) {
+            innerError = error
+          }
+          throw new Error('outer')
+        })
+      } catch (error) {
+        outerError = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(innerError).toBeInstanceOf(AggregateError)
+      expect(outerError).toBeInstanceOf(Error)
+      expect(outerError).not.toBeInstanceOf(AggregateError)
+      expect(outerError).toMatchObject({ message: 'outer' })
+      expect(definitionRegistry.value(theoryRefFor('Fresh').key)).toBe(kept)
+      expect(metaOf(kept).uri).toBe('canon://theory/Fresh')
     })
   })
 })
