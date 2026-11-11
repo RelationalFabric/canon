@@ -220,7 +220,7 @@ declare module '@relational-fabric/canon' {
 
 ### Naming Conventions
 
-- **Axiom Keys**: PascalCase, plural for general concepts (`Timestamps`, `References`), singular for specific concepts (`Id`, `Type`)
+- **Axiom Keys**: PascalCase, plural for general concepts (`Timestamps`), singular for specific concepts (`Id`, `Type`)
 - **Function Names**: Use relational `*Of` pattern (`idOf()`, `typeOf()`) not imperative `get*` patterns
 - **Type Names**: PascalCase for all type definitions
 - **Variables**: camelCase for all variables and parameters

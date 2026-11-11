@@ -12,8 +12,6 @@ The core axiom set consists of five essential axioms that cover the fundamental 
 2. **Type** - Entity classification and schema information
 3. **Version** - Data versioning for optimistic concurrency control
 4. **Timestamps** - Time-based data with format conversion
-5. **References** - Entity relationships and references
-
 ## Axiom Types
 
 ```typescript
@@ -249,9 +247,9 @@ logger.info(timestampsOf(isoTimestamp)) // Converted to canonical Date
 logger.info(timestampsOf(dateTimestamp)) // Converted to canonical Date
 ```
 
-### 5. References Axiom
+### 5. References axiom (deprecated)
 
-**Purpose**: Represents relationships between entities with automatic conversion between different reference formats.
+Describes usage, not what an object can express. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
 
 **Type Definition**:
 
@@ -307,21 +305,6 @@ function isCanonicalReference(
 }
 ```
 
-**Usage Example**:
-
-```typescript
-import { createLogger, referencesOf } from '@relational-fabric/canon'
-
-const logger = createLogger('docs:axioms:references')
-
-// Works with different reference value types
-const stringRef = 'user-123'
-const entityRef = { ref: 'user-123', resolved: false }
-
-logger.info(referencesOf(stringRef)) // Converted to EntityReference
-logger.info(referencesOf(entityRef)) // Already canonical EntityReference
-```
-
 ## Conversion Types
 
 The core axioms use conversion functions that work with different data formats. The specific types are determined by the axiom implementation:
@@ -374,7 +357,7 @@ While the core axioms define the semantic concepts, the actual field names vary 
 
 ### Conversion Functions
 
-Axioms that support multiple data formats (like `Timestamps` and `References`) include conversion functions:
+Axioms that support multiple data formats (like `Timestamps`) include conversion functions:
 
 - `toCanonical`: Convert from the specific format to the canonical format
 - `fromCanonical`: Convert from the canonical format to the specific format
