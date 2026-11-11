@@ -293,15 +293,19 @@ export function allOrNothing<T>(write: () => T): T {
   savepointStart = logStart
   try {
     const result = write()
+    const failures: unknown[] = []
     for (let index = logStart; index < log.length; index++) {
       const entry = log[index]
       if (entry !== undefined && unrestoredEntries.has(entry)) {
-        throw new AggregateError(
-          [unrestoredEntries.get(entry)],
-          'allOrNothing cannot commit: rollback incomplete',
-          { cause: unrestoredEntries.get(entry) },
-        )
+        failures.push(unrestoredEntries.get(entry))
       }
+    }
+    if (failures.length > 0) {
+      throw new AggregateError(
+        failures,
+        'allOrNothing cannot commit: rollback incomplete',
+        { cause: failures[0] },
+      )
     }
     return result
   } catch (error) {

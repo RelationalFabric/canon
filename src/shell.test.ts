@@ -1291,7 +1291,11 @@ describe('shell', () => {
         rollbackArm.value = false
       }
 
-      expect(thrown).toMatchObject({ message: expect.stringContaining('cannot commit') })
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({
+        message: expect.stringContaining('cannot commit'),
+        cause: { message: 'restore failed' },
+      })
       expect(theoryRefFor('A').value).toBeUndefined()
       expect(theoryRefFor('T').value).toBeUndefined()
       expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
@@ -1326,11 +1330,53 @@ describe('shell', () => {
         rollbackArm.value = false
       }
 
-      expect(thrown).toMatchObject({ message: expect.stringContaining('cannot commit') })
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({
+        message: expect.stringContaining('cannot commit'),
+        cause: { message: 'restore failed' },
+      })
       expect(theoryRefFor('T').value).toBeUndefined()
       expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
       expect(metaOf(b).uri).toBe('canon://theory/B')
       expect(() => declareTheory('B', other)).toThrow()
+    })
+
+    it('a parent cannot commit when the cannot-commit replay is itself incomplete', () => {
+      const b = defineTheory({})
+      declareTheory('B', b)
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => {
+          try {
+            allOrNothing(() => {
+              try {
+                allOrNothing(() => {
+                  resetRegistry()
+                  rollbackArm.value = true
+                  throw new Error('inner')
+                })
+              } catch {
+                // The inner rollback failure is caught inside the middle frame.
+              }
+              rollbackArm.value = true
+              return 'middle'
+            })
+          } catch {
+            // The middle cannot-commit replay is incomplete.
+          }
+          return 'outer'
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({ message: expect.stringContaining('cannot commit') })
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(b).uri).toBe('canon://theory/B')
     })
 
     it('rethrows the original error when an outer replay repairs an incomplete rollback', () => {
