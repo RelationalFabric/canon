@@ -12,7 +12,7 @@ import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
 import { defineTheory } from './theory.js'
 
-const rollbackArm = vi.hoisted(() => ({ value: false }))
+const rollbackArm = vi.hoisted(() => ({ value: false, errors: undefined as string[] | undefined, index: 0 }))
 
 vi.mock('./meta.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./meta.js')>()
@@ -23,6 +23,16 @@ vi.mock('./meta.js', async (importOriginal) => {
       updater: (metadata?: M) => M | undefined,
     ): T => {
       if (rollbackArm.value) {
+        if (rollbackArm.errors !== undefined) {
+          const message = rollbackArm.errors[rollbackArm.index]
+          if (message !== undefined) {
+            rollbackArm.index += 1
+            if (rollbackArm.index >= rollbackArm.errors.length) {
+              rollbackArm.value = false
+            }
+            throw new Error(message)
+          }
+        }
         rollbackArm.value = false
         throw new Error('restore failed')
       }
@@ -43,6 +53,7 @@ declare module './types/theories.js' {
     Fresh: Record<string, never>
     A: Record<string, never>
     B: Record<string, never>
+    C: Record<string, never>
     Other: Record<string, never>
     T: Record<string, never>
     TheoryConflict: Record<string, never>
@@ -57,6 +68,9 @@ describe('shell', () => {
   afterEach(() => {
     // Just clear - isolated tests don't need full restoration
     resetRegistry()
+    rollbackArm.value = false
+    rollbackArm.errors = undefined
+    rollbackArm.index = 0
   })
 
   describe('resetRegistry', () => {
@@ -1259,6 +1273,47 @@ describe('shell', () => {
       expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
       expect(metaOf(b).uri).toBe('canon://theory/B')
       expect(() => declareTheory('A', b)).toThrow()
+    })
+
+    it('cannot commit reports every unrestored failure, in log order', () => {
+      const b = defineTheory({})
+      const c = defineTheory({})
+      declareTheory('B', b)
+      declareTheory('C', c)
+      let thrown: unknown
+
+      try {
+        declareTheory('T', {
+          get extends() {
+            try {
+              allOrNothing(() => {
+                resetRegistry()
+                rollbackArm.errors = ['e2', 'e1']
+                rollbackArm.index = 0
+                rollbackArm.value = true
+                throw new Error('inner')
+              })
+            } catch {
+              // The inner rollback failure is caught inside the getter.
+            }
+            return undefined
+          },
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+        rollbackArm.errors = undefined
+        rollbackArm.index = 0
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      const aggregate = thrown as AggregateError
+      expect(aggregate.message).toContain('rollback incomplete')
+      expect(aggregate.errors).toHaveLength(2)
+      expect(aggregate.errors[0]).toMatchObject({ message: 'e1' })
+      expect(aggregate.errors[1]).toMatchObject({ message: 'e2' })
+      expect(aggregate.cause).toMatchObject({ message: 'e1' })
     })
 
     it('cannot commit when the outer write maps a fresh name to an unrestored object', () => {
