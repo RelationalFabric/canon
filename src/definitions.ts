@@ -8,6 +8,8 @@ import { metaOf, updateMeta } from './meta.js'
 
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
 
+let savepointStart = 0
+
 let restoreEntries: (
   registry: DefinitionRegistry,
   snapshot: Map<DefinitionUri | LexiconTermUri, unknown>,
@@ -86,7 +88,7 @@ export class DefinitionRegistry {
       this.#definitions.set(uri, value)
     }
     if (isMetaCarrier(value)) {
-      if (stampLog !== undefined && !stampLog.some(entry => entry.target === value)) {
+      if (stampLog !== undefined && !stampLog.slice(savepointStart).some(entry => entry.target === value)) {
         let prior: Metadata | undefined
         updateMeta(value, (current) => {
           prior = current
@@ -134,7 +136,7 @@ export class DefinitionRegistry {
           }
           const next = { ...metadata }
           delete next.uri
-          return Object.keys(next).length === 0 ? undefined : next
+          return Reflect.ownKeys(next).length === 0 ? undefined : next
         })
       }
     }
@@ -263,29 +265,39 @@ function carriedUri(value: unknown): string | undefined {
 export const definitionRegistry = new DefinitionRegistry()
 
 /**
- * A failed declare or register call restores the registry entries and every uri stamp it made (ADR-0017).
+ * Each call, nested or not, rolls back its own writes and uri stamps on failure (ADR-0017).
  */
 export function allOrNothing<T>(write: () => T): T {
-  if (stampLog !== undefined) {
-    return write()
+  const outermost = stampLog === undefined
+  if (outermost) {
+    stampLog = []
   }
+  const log = stampLog!
+  const logStart = log.length
   const before = new Map(definitionRegistry.entries())
-  stampLog = []
+  const previousStart = savepointStart
+  savepointStart = logStart
   try {
     return write()
   } catch (error) {
-    const log = stampLog
-    for (let index = log.length - 1; index >= 0; index--) {
-      const entry = log[index]
-      if (entry === undefined) {
-        continue
+    try {
+      for (let index = log.length - 1; index >= logStart; index--) {
+        const entry = log[index]
+        if (entry === undefined) {
+          continue
+        }
+        updateMeta(entry.target, () => entry.prior)
       }
-      updateMeta(entry.target, () => entry.prior)
+    } finally {
+      restoreEntries(definitionRegistry, before)
     }
-    restoreEntries(definitionRegistry, before)
+    log.length = logStart
     throw error
   } finally {
-    stampLog = undefined
+    savepointStart = previousStart
+    if (outermost) {
+      stampLog = undefined
+    }
   }
 }
 
