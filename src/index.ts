@@ -1,3 +1,7 @@
+import './theories/identity.js'
+import './theories/taxonomy.js'
+import './theories/typed-entity.js'
+
 // Axiom and Canon APIs
 export * from './axiom.js'
 // Specific Axioms
@@ -41,6 +45,9 @@ export * from './shell.js'
 
 // Type testing utilities (compile-time helpers only)
 export * from './testing.js'
+
+export { defineTheory } from './theory.js'
+
 // Type system
 export type * from './types/index.js'
 
