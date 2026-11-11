@@ -44,7 +44,7 @@ Bahul, 11 Nov 2026, 15:22 London, decided:
 
 Bahul, 11 Nov 2026, 15:23 London, decided:
 
-11. Morphisms produced by `compose` are usable by `compose`, `identity`, and `map` without registering. The registered-only check must not block them.
+11. Bahul's current direction (15:24 London): Morphisms produced by `compose` are usable by `compose`, `identity`, and `map` without registering. The registered-only check must not block them. This direction is pending proper guidelines on when registration is and isn't required. Dependency: registration guidelines (in progress). Those guidelines are being drafted separately and are not part of S006's file changes.
 
 12. The constructor is named `Morphism`, matching `defineMorphism`. (Relational Fabric consistency call.)
 
