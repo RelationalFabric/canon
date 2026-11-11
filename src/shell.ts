@@ -6,9 +6,9 @@
 
 import type { MorphismConfig } from './morphism.js'
 import type { TheoryConfig } from './theory.js'
-import type { CanonConfig, Canons, DefinitionUri, LexiconTermUri, Theories } from './types/index.js'
+import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
-import { canonRefFor, definitionRegistry, definitionUri, morphismRefFor, theoryRefFor } from './definitions.js'
+import { canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, theoryRefFor } from './definitions.js'
 import { objectHash } from './kit.js'
 import { metaOf } from './meta.js'
 import { defineMorphism } from './morphism.js'
@@ -382,20 +382,6 @@ function registerTheoriesOrder(theories: Record<string, TheoryConfig>): string[]
   return order
 }
 
-function isRegisteredDefinitionUri(value: unknown): value is DefinitionUri | LexiconTermUri {
-  if (typeof value !== 'string') {
-    return false
-  }
-  const uri = value as DefinitionUri | LexiconTermUri
-  return (
-    value.startsWith('canon://canon/')
-    || value.startsWith('canon://axiom/')
-    || value.startsWith('canon://theory/')
-    || value.startsWith('canon://morphism/')
-    || value.startsWith('canon://lexicon/')
-  ) && definitionRegistry.has(uri)
-}
-
 function parseMorphismKey(key: string): { source: string, target: string } {
   const slash = key.indexOf('/')
   if (slash === -1) {
@@ -417,7 +403,7 @@ function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): v
     }
     seen.set(config, uri)
     const carried = metaOf(config).uri
-    if (isRegisteredDefinitionUri(carried) && carried !== uri) {
+    if (isDefinitionKey(carried) && definitionRegistry.has(carried) && carried !== uri) {
       throw new Error(`Definition already registered: ${carried}`)
     }
     const existing = morphismRefFor(source, target).value
