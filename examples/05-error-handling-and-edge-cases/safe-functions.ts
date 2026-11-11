@@ -6,7 +6,7 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { createLogger, idOf, referencesOf, timestampsOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { createLogger, idOf, timestampsOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 const logger = createLogger('examples:error-handling:safe-functions')
 
@@ -76,20 +76,17 @@ export function safeTimestampsOf(entity: unknown): Date | undefined {
 }
 
 /**
- * Safely extract references from any entity, returning empty array on error
+ * Reads createdBy from an entity. Does not use the References axiom.
  */
 export function safeReferencesOf(
   entity: unknown,
 ): { ref: string, resolved: boolean, value?: unknown } | undefined {
-  try {
-    return referencesOf(entity as Satisfies<'References'>)
-  } catch (error) {
-    logger.warn(
-      'Failed to extract references:',
-      error instanceof Error ? error.message : 'Unknown error',
-    )
-    return undefined
+  if (typeof entity === 'object' && entity !== null) {
+    const createdBy = (entity as Record<string, unknown>).createdBy
+    if (typeof createdBy === 'string')
+      return { ref: createdBy, resolved: false }
   }
+  return undefined
 }
 
 /**

@@ -35,7 +35,7 @@ Learn how to create reusable, shareable canons that can be published as npm pack
 
 Working with complex entities that implement multiple axioms (Id, Type, Version, Timestamps, References)
 
-**Keywords:** multi-axiom, comprehensive, entity, timestamps, references, version
+**Keywords:** multi-axiom, comprehensive, entity, timestamps, version
 
 **Difficulty:** intermediate
 

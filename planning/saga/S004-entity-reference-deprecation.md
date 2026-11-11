@@ -116,7 +116,7 @@ Each unit is one commit. **S** is Grok 4.7. **M** is Composer 2.5. Fast mode sta
 
 **Depends on:** U1.
 
-**Files:** the example files named in the inventory, plus whatever `npm run build:docs:examples` rewrites under `docs/examples/`.
+**Files:** the example files named in the inventory, `examples/04-format-conversion-examples/index.ts`, plus whatever `npm run build:docs:examples` rewrites under `docs/examples/`.
 
 **Work:**
 
@@ -219,5 +219,6 @@ Scoped checks for every unit are `npm run check:all`. U2 also runs `npm run buil
 
 ### Notes
 
+- U2 done. `npm run check:all` passed: lint, `check:types:src`, `check:types:examples`, `check:types:tests`, 240 tests passed and 2 skipped, radar valid. The four `examples/` greps for `referencesOf`, `EntityReference`, `Satisfies<'References'>`, and `isCanonicalReference` are empty. Stale example docs were refreshed first in `0a35687`. Expectations changed because `{ name: 'Invalid User' }` used to match only through the wide `References` basis: `examples/04-format-conversion-examples/index.ts:134` now expects `No matching canon found for Id axiom`, and `:136` now expects `No matching canon found for Type axiom`.
 - U1 done. `npm run check:all` passed: lint, `check:types:src`, `check:types:examples`, `check:types:tests`, 240 tests passed and 2 skipped, radar valid. `referencesOf` under `docs/` is only `docs/reference/api.md` and `docs/reference/axioms.md`, in the deprecated sections.
 - Planning commit. Inventory is in this file. No implementation unit started. No source file changed. No radar entry and no changelog: the repo has no changelog, and radar hold entries are not package API deprecations.
