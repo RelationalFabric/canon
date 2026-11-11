@@ -93,6 +93,8 @@ export interface Axioms {}
 /**
  * Canonical reference type for entity relationships
  *
+ * @deprecated Describes usage, not what an object can express. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
+ *
  * @template R - The reference type (usually string)
  * @template T - The value type (defaults to unknown)
  */
