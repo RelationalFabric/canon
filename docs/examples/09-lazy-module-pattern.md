@@ -12,8 +12,8 @@ Each implementation reports a "capability score" and the highest-scoring impleme
 
 ```ts
 import {
-CapabilityScores,
-createLazyModule,
+  CapabilityScores,
+  createLazyModule,
 } from '@relational-fabric/canon'
 ```
 
@@ -25,21 +25,21 @@ Let's create a simple hash module that can have multiple implementations. Every 
 type HashFn = (data: string) => string
 
 interface HashOptions extends Record<string, unknown> {
-algorithm?: 'simple' | 'djb2' | 'fnv1a'
+  algorithm?: 'simple' | 'djb2' | 'fnv1a'
 }
 
 const { module: hash, register: registerHash } = createLazyModule<HashFn, HashOptions>({
-name: 'hash',
-defaultOptions: { algorithm: 'simple' },
-fallback: () => (data: string) => {
-  // Simple hash - always available as fallback
-  let hash = 0
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) - hash) + data.charCodeAt(i)
-    hash = hash & hash // Convert to 32-bit integer
-  }
-  return hash.toString(16)
-},
+  name: 'hash',
+  defaultOptions: { algorithm: 'simple' },
+  fallback: () => (data: string) => {
+    // Simple hash - always available as fallback
+    let hash = 0
+    for (let i = 0; i < data.length; i++) {
+      hash = ((hash << 5) - hash) + data.charCodeAt(i)
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    return hash.toString(16)
+  },
 })
 ```
 
@@ -75,39 +75,39 @@ Register implementations with higher scores to override the fallback. The `suppo
 ```ts
 // DJB2 hash - a well-known string hash algorithm
 registerHash({
-name: 'djb2',
-supports: (opts) => {
-  if (opts?.algorithm === 'djb2')
-    return CapabilityScores.OPTIMAL // 1.0
-  return CapabilityScores.BASELINE // 0.0 - available but not preferred
-},
-implementation: () => (data: string) => {
-  let hash = 5381
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) + hash) + data.charCodeAt(i)
-  }
-  return (hash >>> 0).toString(16)
-},
+  name: 'djb2',
+  supports: (opts) => {
+    if (opts?.algorithm === 'djb2')
+      return CapabilityScores.OPTIMAL // 1.0
+    return CapabilityScores.BASELINE // 0.0 - available but not preferred
+  },
+  implementation: () => (data: string) => {
+    let hash = 5381
+    for (let i = 0; i < data.length; i++) {
+      hash = ((hash << 5) + hash) + data.charCodeAt(i)
+    }
+    return (hash >>> 0).toString(16)
+  },
 })
 
 // FNV-1a hash - another well-known algorithm
 registerHash({
-name: 'fnv1a',
-supports: (opts) => {
-  if (opts?.algorithm === 'fnv1a')
-    return CapabilityScores.OPTIMAL // 1.0
-  if (opts?.algorithm === 'simple')
-    return undefined // Not supported for 'simple'
-  return CapabilityScores.GOOD // 0.5 - good general choice
-},
-implementation: () => (data: string) => {
-  let hash = 2166136261
-  for (let i = 0; i < data.length; i++) {
-    hash ^= data.charCodeAt(i)
-    hash = (hash * 16777619) >>> 0
-  }
-  return hash.toString(16)
-},
+  name: 'fnv1a',
+  supports: (opts) => {
+    if (opts?.algorithm === 'fnv1a')
+      return CapabilityScores.OPTIMAL // 1.0
+    if (opts?.algorithm === 'simple')
+      return undefined // Not supported for 'simple'
+    return CapabilityScores.GOOD // 0.5 - good general choice
+  },
+  implementation: () => (data: string) => {
+    let hash = 2166136261
+    for (let i = 0; i < data.length; i++) {
+      hash ^= data.charCodeAt(i)
+      hash = (hash * 16777619) >>> 0
+    }
+    return hash.toString(16)
+  },
 })
 ```
 
@@ -171,12 +171,12 @@ The scoring system determines implementation priority:
 
 ```ts
 const allScores = {
-unsupported: CapabilityScores.UNSUPPORTED,
-risky: CapabilityScores.RISKY,
-fallback: CapabilityScores.FALLBACK,
-baseline: CapabilityScores.BASELINE,
-good: CapabilityScores.GOOD,
-optimal: CapabilityScores.OPTIMAL,
+  unsupported: CapabilityScores.UNSUPPORTED,
+  risky: CapabilityScores.RISKY,
+  fallback: CapabilityScores.FALLBACK,
+  baseline: CapabilityScores.BASELINE,
+  good: CapabilityScores.GOOD,
+  optimal: CapabilityScores.OPTIMAL,
 }
 ```
 

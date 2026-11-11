@@ -10,7 +10,6 @@ import type {
   ParsedExample,
   TestStatusMap,
 } from './types.js'
-import dedent from 'dedent'
 import {
   applyHeaderControl,
   processInclude,
@@ -85,7 +84,7 @@ export async function renderTutorialBody(
       case 'code': {
         // Render code as fenced block
         lines.push('```ts')
-        lines.push(dedent(section.content))
+        lines.push(section.content)
         lines.push('```')
         lines.push('')
         break
@@ -113,7 +112,7 @@ export async function renderTutorialBody(
 
         // Render code
         lines.push('```ts')
-        lines.push(dedent(section.content))
+        lines.push(section.content)
         lines.push('```')
         lines.push('')
         break
@@ -131,7 +130,7 @@ export async function renderTutorialBody(
 
         // Test body code
         lines.push('```ts')
-        lines.push(dedent(section.content))
+        lines.push(section.content)
         lines.push('```')
         lines.push('')
 
