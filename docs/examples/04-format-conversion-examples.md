@@ -113,9 +113,9 @@ expect(timestamps).toHaveLength(2)
 const invalidData = { name: 'Invalid User' }
 
 // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
-expect(() => idOf(invalidData)).toThrow('Expected string ID, got undefined')
+expect(() => idOf(invalidData)).toThrow('No matching canon found for Id axiom')
 // @ts-expect-error - Demonstrating type system correctly rejects invalid data structure
-expect(() => typeOf(invalidData)).toThrow('Expected string type, got undefined')
+expect(() => typeOf(invalidData)).toThrow('No matching canon found for Type axiom')
 ```
 
 **handles partial data gracefully:**

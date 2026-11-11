@@ -2,7 +2,7 @@
 
 Working with complex entities that implement multiple axioms (Id, Type, Version, Timestamps, References)
 
-Real-world entities often have multiple attributes that need universal extraction: IDs, types, versions, timestamps, and references. Canon's multi-axiom system lets you work with all of these through a single, comprehensive canon.
+Real-world entities often have multiple attributes that need universal extraction: IDs, types, versions, timestamps. Canon's multi-axiom system lets you work with all of these through a single, comprehensive canon.
 
 In this example, we'll work with entities that implement all five core axioms and see how Canon provides unified access to their data.
 
@@ -95,7 +95,7 @@ expect(update.updatedAt).toBeInstanceOf(Date)
 
 ## Working with Timestamps and References
 
-Canon provides flexible conversion utilities for timestamps and references.
+Canon provides flexible conversion utilities for timestamps.
 
 **The timestamp utilities demonstrate various conversion formats.:**
 
@@ -114,7 +114,7 @@ expect(() => demonstrateReferenceConversion()).not.toThrow()
 - **Comprehensive canons** implement all five core axioms in one definition
 - **Unified extraction** - Get all axiom values with consistent APIs
 - **Version control** - Automatic version tracking for entity updates
-- **Flexible conversions** - Timestamps and references support multiple formats
+- **Flexible conversions** - Timestamps support multiple formats
 - Multi-axiom canons power real-world applications with complex entities
 
 ---
@@ -125,5 +125,5 @@ expect(() => demonstrateReferenceConversion()).not.toThrow()
 
 ## Metadata
 
-**Keywords:** multi-axiom, comprehensive, entity, timestamps, references, version
+**Keywords:** multi-axiom, comprehensive, entity, timestamps, version
 **Difficulty:** intermediate
