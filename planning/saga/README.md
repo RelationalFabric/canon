@@ -26,7 +26,7 @@ Bahul, 11 Nov 2026, 15:17–15:18 London, decided:
 
 5. Compose and apply are separate protocols, not one. Composition is what every category has. Application is extra structure (acting on values), so some kinds will compose without applying. Morphisms implement both.
 
-6. The protocols are named after the algebra. Bahul explicitly does not want the Pxyz prefix pattern (`PSeq` and the like).
+6. The protocols are named after the algebra. Bahul explicitly does not want the Pxyz prefix pattern (`PSeq` and the like). The ban on a P prefix for the type aliases is superseded by decision 17. The values you call stay unprefixed.
 
 Bahul, 11 Nov 2026, 15:19 London, decided:
 
@@ -58,15 +58,19 @@ Bahul, 11 Nov 2026, 15:49–15:54 London, decided:
 
 16. A Morphism has fields `source` and `target` holding Theory values, not labels. `declareMorphism` and `registerMorphisms` derive `canon://morphism/<Source>/<Target>` from the names the two Theories are registered under. "One registered Morphism per pair" compares the Theory values. `compose` checks the chain by comparing values.
 
+Bahul, 11 Nov 2026, 15:57–16:00 London, decided:
+
+17. The protocol types are P-prefixed: `PSimpleCategory`, `PSimpleFunctor`, `PSimpleNode`. Each is a type alias, for example `type PSimpleCategory = Protocol<SimpleCategory>`, following the intended `PSeq` pattern `type PSeq = Protocol<Seq>`. The implementations you call are unprefixed: `SimpleCategory`, `SimpleFunctor`, `SimpleNode`. The keys in the `Protocols` interface are unprefixed and map to the P type: `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, `SimpleNode: PSimpleNode`. Likewise `Seq`'s entry should be `Seq: PSeq`. Today `src/types/protocols.d.ts` has `PSeq: Protocol<Seq>` [code: `src/types/protocols.d.ts:136-137`], which departs from this intent. This closes open question 1.
+
 No new dispatcher, registry, or `defineProtocol` option is in scope.
 
 ### Units
 
 Each unit is one commit. Later units stay off this branch until the open questions they need are answered. This saga file is the planning commit; it is not one of the units.
 
-1. **Theory and Morphism constructors.** `defineTheory` and `defineMorphism` return instances of `Theory` and `Morphism`. A Morphism carries `source` and `target` (Theory values) and `maps`. This unit only puts those fields on the value. It does not change compose or apply behaviour. Today source and target come only from the uri [code: `src/morphism.ts:33-40`, `src/morphism.ts:87-93`], and `defineTheory` returns its input unchanged [code: `src/theory.ts:22-24`]. Constructor-keyed dispatch is why the constructors are needed: a plain object dispatches as `Object` [code: `src/protocol.ts:145-152`]. `declareMorphism` and `registerMorphisms` derive `canon://morphism/<Source>/<Target>` from the names the two Theories are registered under, and "one registered Morphism per pair" compares the Theory values [code: `src/definitions.ts:99-102`]. Update the `defineMorphism` tests that expect the identical input object [code: `src/morphism.test.ts:48-53`].
+1. **Theory and Morphism constructors.** Done at `de3564f`. `defineTheory` and `defineMorphism` return instances of `Theory` and `Morphism`. A Morphism carries `source` and `target` (Theory values) and `maps`. This unit only puts those fields on the value. It does not change compose or apply behaviour. Today source and target come only from the uri [code: `src/morphism.ts:33-40`, `src/morphism.ts:87-93`], and `defineTheory` returns its input unchanged [code: `src/theory.ts:22-24`]. Constructor-keyed dispatch is why the constructors are needed: a plain object dispatches as `Object` [code: `src/protocol.ts:145-152`]. `declareMorphism` and `registerMorphisms` derive `canon://morphism/<Source>/<Target>` from the names the two Theories are registered under, and "one registered Morphism per pair" compares the Theory values [code: `src/definitions.ts:99-102`]. Update the `defineMorphism` tests that expect the identical input object [code: `src/morphism.test.ts:48-53`].
 
-2. **SimpleCategory, SimpleFunctor, and SimpleNode.** Define `SimpleCategory` (`compose`) and `SimpleFunctor` (`map`) for `Morphism`, and `SimpleNode` (`identity`) for `Theory`, all via `defineProtocol` and `extendProtocol`. `compose` and `map` read `source` and `target` from the value and compare Theory values for the chain. `SimpleNode.identity` dispatches on the Theory constructor. Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Do not implement Theory mapping beyond this, the rest of dispatch on Theories, or algebraic law checks. Tests in this unit call the protocols. This unit does not remove the registered-only gate (unit 4).
+2. **SimpleCategory, SimpleFunctor, and SimpleNode.** Define `SimpleCategory` (`compose`) and `SimpleFunctor` (`map`) for `Morphism`, and `SimpleNode` (`identity`) for `Theory`, all via `defineProtocol` and `extendProtocol`. Add the type aliases `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`, and the `Protocols` entries `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, and `SimpleNode: PSimpleNode`. Fix the existing `Seq` entry to `Seq: PSeq` together with a `PSeq` alias, and update any uses of the old `PSeq` key. `compose` and `map` read `source` and `target` from the value and compare Theory values for the chain. `SimpleNode.identity` dispatches on the Theory constructor. Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Do not implement Theory mapping beyond this, the rest of dispatch on Theories, or algebraic law checks. Tests in this unit call the protocols. This unit does not remove the registered-only gate (unit 4).
 
 3. **Remove the #87 operations.** Delete `composeMorphisms` and `applyMorphism` and their `src/index.ts` exports. Delete their tests from `src/morphism.test.ts` once unit 2's protocol tests cover the same cases. `defineMorphism` stays.
 
@@ -76,7 +80,7 @@ Each unit is one commit. Later units stay off this branch until the open questio
 
 ### Open questions
 
-1. Do `SimpleCategory`, `SimpleFunctor`, and `SimpleNode` go into the `Protocols` interface? Architecture's view is yes. `Protocols` is protocol-only type augmentation [code: `src/types/protocols.d.ts:142`], not the definition registry. Still Bahul's call. Unapproved.
+1. Closed by decision 17. `SimpleCategory`, `SimpleFunctor`, and `SimpleNode` go into the `Protocols` interface under unprefixed keys, mapped to `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`. `Protocols` is protocol-only type augmentation [code: `src/types/protocols.d.ts:142`], not the definition registry.
 2. Closed. The ADR-0017/0018 amendment is in hand via [#96](https://github.com/RelationalFabric/canon/pull/96).
 
 ## Ledger
@@ -90,3 +94,5 @@ Each unit is one commit. Later units stay off this branch until the open questio
 | 5 | required | required | N/A | required | N/A | opt-in | N/A |
 
 ### Notes
+
+- `de3564f`: unit 1 done (Theory and Morphism constructors).
