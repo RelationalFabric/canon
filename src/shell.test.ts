@@ -1226,6 +1226,85 @@ describe('shell', () => {
       expect(definitionRegistry.value(theoryRefFor('Fresh').key)).toBe(kept)
       expect(metaOf(kept).uri).toBe('canon://theory/Fresh')
     })
+
+    it('retries an unrestored stamp before committing', () => {
+      const b = defineTheory({})
+      declareTheory('B', b)
+      const registered = {
+        get extends() {
+          try {
+            allOrNothing(() => {
+              resetRegistry()
+              rollbackArm.value = true
+              throw new Error('inner')
+            })
+          } catch {
+            // The inner rollback failure is caught inside the getter.
+          }
+          return undefined
+        },
+      }
+
+      declareTheory('T', registered)
+
+      expect(theoryRefFor('T').value).toBe(registered)
+      expect(metaOf(b).uri).toBe('canon://theory/B')
+      expect(() => declareTheory('A', b)).toThrow()
+    })
+
+    it('fails the commit when the retry still cannot restore', () => {
+      const b = defineTheory({})
+      declareTheory('B', b)
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => {
+          try {
+            allOrNothing(() => {
+              resetRegistry()
+              rollbackArm.value = true
+              throw new Error('inner')
+            })
+          } catch {
+            // The inner rollback failure is caught inside the frame.
+          }
+          rollbackArm.value = true
+          return 'done'
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({ message: expect.stringContaining('cannot commit') })
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(b).uri).toBe('canon://theory/B')
+    })
+
+    it('rethrows the original error when an outer replay repairs an incomplete rollback', () => {
+      const kept = defineTheory({})
+      declareTheory('Fresh', kept)
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => allOrNothing(() => {
+          resetRegistry()
+          rollbackArm.value = true
+          throw new Error('inner')
+        }))
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(Error)
+      expect(thrown).not.toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({ message: 'inner' })
+      expect(metaOf(kept).uri).toBe('canon://theory/Fresh')
+    })
   })
 })
 
