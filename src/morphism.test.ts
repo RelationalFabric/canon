@@ -6,13 +6,14 @@ import type { MorphismConfig } from './morphism.js'
 import type { Expect } from './testing.js'
 import type { Theories } from './types/index.js'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { definitionRegistry, definitionUri, morphismRefFor } from './definitions.js'
+import { definitionRegistry, definitionUri, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { applyMorphism, composeMorphisms, defineMorphism } from './morphism.js'
+import { applyMorphism, composeMorphisms, defineMorphism, Morphism } from './morphism.js'
 import { declareMorphism, declareTheory, registerMorphisms, resetRegistry } from './shell.js'
 import { invariant } from './testing.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
+import { Theory } from './theory.js'
 
 type IdentityToTaxonomy = {
   [Source in keyof Theories['Identity']]: keyof Theories['Taxonomy']
@@ -46,10 +47,13 @@ function completenessFixtures(): void {
 void completenessFixtures
 
 describe('defineMorphism', () => {
-  it('returns the same object', () => {
+  it('returns a Morphism instance with maps copied from the config', () => {
     const config = { maps: { Id: 'Id' } }
+    const morphism = defineMorphism(config)
 
-    expect(defineMorphism(config)).toBe(config)
+    expect(morphism).toBeInstanceOf(Morphism)
+    expect(morphism.maps).toEqual(config.maps)
+    expect(morphism).not.toBe(config)
   })
 
   it('does not register a morphism', () => {
@@ -61,13 +65,45 @@ describe('defineMorphism', () => {
   })
 
   it('does not write a uri', () => {
-    const config = { maps: { Id: 'Id' } }
+    const morphism = defineMorphism({ maps: { Id: 'Id' } })
 
-    defineMorphism(config)
-
-    expect(metaOf(config).uri).toBeUndefined()
+    expect(metaOf(morphism).uri).toBeUndefined()
   })
 })
+
+describe('declareMorphism registration', () => {
+  const morphismConfig = { maps: { Id: 'Type' } }
+
+  beforeEach(() => {
+    resetRegistry()
+    declareTheory('Identity', identityConfig)
+    declareTheory('Taxonomy', taxonomyConfig)
+  })
+
+  it('stamps canon://morphism/<Source>/<Target> on the registered Morphism', () => {
+    declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+    const registered = morphismRefFor('Identity', 'Taxonomy').value
+    expect(registered).toBeInstanceOf(Morphism)
+    if (isMetaCarrier(registered)) {
+      expect(metaOf(registered).uri).toBe('canon://morphism/Identity/Taxonomy')
+    }
+  })
+
+  it('sets source and target to the registered Theory values', () => {
+    declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+    const registered = morphismRefFor('Identity', 'Taxonomy').value as Morphism
+    expect(registered.source).toBe(theoryRefFor('Identity').value)
+    expect(registered.target).toBe(theoryRefFor('Taxonomy').value)
+    expect(registered.source).toBeInstanceOf(Theory)
+    expect(registered.target).toBeInstanceOf(Theory)
+  })
+})
+
+function isMetaCarrier(value: unknown): value is object {
+  return value !== null && (typeof value === 'object' || typeof value === 'function')
+}
 
 describe('composeMorphisms', () => {
   beforeEach(() => {

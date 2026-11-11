@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { theoryRefFor } from '../definitions.js'
 import { metaOf } from '../meta.js'
 import { declareTheory } from '../shell.js'
+import { Theory } from '../theory.js'
 import { config } from './taxonomy.js'
 
 describe('taxonomy theory', () => {
@@ -17,7 +18,7 @@ describe('taxonomy theory', () => {
     const ref = theoryRefFor('Taxonomy')
 
     expect(ref.key).toBe('canon://theory/Taxonomy')
-    expect(ref.value).toBe(config)
+    expect(ref.value).toBeInstanceOf(Theory)
   })
 
   it('records only uri on the registered value', () => {

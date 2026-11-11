@@ -7,7 +7,7 @@ import { definitionRegistry, definitionUri, theoryRefFor } from './definitions.j
 import { metaOf } from './meta.js'
 import { declareTheory, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
-import { defineTheory } from './theory.js'
+import { defineTheory, Theory } from './theory.js'
 
 declare module './types/theories.js' {
   interface Theories {
@@ -16,10 +16,13 @@ declare module './types/theories.js' {
 }
 
 describe('defineTheory', () => {
-  it('returns the same object', () => {
-    const config = {}
+  it('returns a Theory instance with fields copied from the config', () => {
+    const config = { extends: ['Identity'] as const }
+    const theory = defineTheory(config)
 
-    expect(defineTheory(config)).toBe(config)
+    expect(theory).toBeInstanceOf(Theory)
+    expect(theory.extends).toEqual(config.extends)
+    expect(theory).not.toBe(config)
   })
 
   it('does not register a theory', () => {
@@ -31,11 +34,9 @@ describe('defineTheory', () => {
   })
 
   it('does not write a uri', () => {
-    const config = {}
+    const theory = defineTheory({})
 
-    defineTheory(config)
-
-    expect(metaOf(config).uri).toBeUndefined()
+    expect(metaOf(theory).uri).toBeUndefined()
   })
 })
 
@@ -50,7 +51,7 @@ describe('declareTheory extends', () => {
 
     declareTheory('Composed', { extends: ['Identity'] })
 
-    expect(theoryRefFor('Identity').value).toBe(identityConfig)
+    expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
     expect(definitionRegistry.size).toBe(before + 1)
   })
 
@@ -58,7 +59,7 @@ describe('declareTheory extends', () => {
     declareTheory('Composed', { extends: [theoryRefFor('Identity')] })
 
     expect(theoryRefFor('Composed').value).toBeDefined()
-    expect(theoryRefFor('Identity').value).toBe(identityConfig)
+    expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
   })
 
   it('resolves a value that already carries a uri', () => {
@@ -66,7 +67,7 @@ describe('declareTheory extends', () => {
 
     declareTheory('Composed', { extends: [registered] })
 
-    expect(theoryRefFor('Identity').value).toBe(identityConfig)
+    expect(theoryRefFor('Identity').value).toBe(registered)
   })
 
   it('registers a map entry at canon://theory/Fresh with only uri', () => {

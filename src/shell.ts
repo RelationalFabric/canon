@@ -11,8 +11,8 @@ import { defineCanon } from './canon.js'
 import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, theoryRefFor } from './definitions.js'
 import { objectHash } from './kit.js'
 import { metaOf } from './meta.js'
-import { defineMorphism } from './morphism.js'
-import { defineTheory } from './theory.js'
+import { defineMorphism, Morphism } from './morphism.js'
+import { defineTheory, Theory } from './theory.js'
 
 /**
  * Reset the global registry to empty
@@ -184,9 +184,9 @@ export function declareMorphism<
   },
 ) {
   return allOrNothing(() => {
-    const defined = defineMorphism(config)
     resolveTheoryLabel(String(source))
     resolveTheoryLabel(String(target))
+    const defined = morphismForTheoryLabels(String(source), String(target), config)
     definitionRegistry.register(definitionUri('morphism', `${String(source)}/${String(target)}`), defined)
     return morphismRefFor(String(source), String(target))
   })
@@ -208,7 +208,8 @@ export function registerMorphisms<M extends Record<string, MorphismConfig>>(morp
     validateRegisterMorphisms(morphisms)
 
     for (const [key, config] of Object.entries(morphisms)) {
-      const value = defineMorphism(config)
+      const { source, target } = parseMorphismKey(key)
+      const value = morphismForTheoryLabels(source, target, config)
       definitionRegistry.register(definitionUri('morphism', key), value)
     }
   })
@@ -414,12 +415,41 @@ function parseMorphismKey(key: string): { source: string, target: string } {
   return { source: key.slice(0, slash), target: key.slice(slash + 1) }
 }
 
+function morphismForTheoryLabels(
+  sourceLabel: string,
+  targetLabel: string,
+  config: MorphismConfig,
+): Morphism {
+  const sourceTheory = theoryRefFor(sourceLabel).value
+  const targetTheory = theoryRefFor(targetLabel).value
+  if (!(sourceTheory instanceof Theory) || !(targetTheory instanceof Theory)) {
+    throw new TypeError(`Unresolved theory: ${definitionUri('theory', sourceLabel)} (ADR-0017)`)
+  }
+  return defineMorphism({
+    ...config,
+    source: sourceTheory,
+    target: targetTheory,
+  })
+}
+
+function morphismForTheoryPair(source: Theory, target: Theory): Morphism | undefined {
+  for (const [, value] of definitionRegistry.entries('morphism')) {
+    if (value instanceof Morphism
+      && value.source === source
+      && value.target === target) {
+      return value
+    }
+  }
+  return undefined
+}
+
 function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): void {
   const seen = new Map<MorphismConfig, string>()
   for (const [key, config] of Object.entries(morphisms)) {
     const { source, target } = parseMorphismKey(key)
     resolveTheoryLabel(source)
     resolveTheoryLabel(target)
+    const defined = morphismForTheoryLabels(source, target, config)
     const uri = definitionUri('morphism', key)
     const prior = seen.get(config)
     if (prior !== undefined) {
@@ -430,8 +460,13 @@ function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): v
     if (isDefinitionKey(carried) && definitionRegistry.has(carried) && carried !== uri) {
       throw new Error(`Definition already registered: ${carried}`)
     }
-    const existing = morphismRefFor(source, target).value
-    if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+    const sourceTheory = theoryRefFor(source).value
+    const targetTheory = theoryRefFor(target).value
+    if (!(sourceTheory instanceof Theory) || !(targetTheory instanceof Theory)) {
+      throw new TypeError(`Unresolved theory: ${definitionUri('theory', source)} (ADR-0017)`)
+    }
+    const existing = morphismForTheoryPair(sourceTheory, targetTheory)
+    if (existing !== undefined && objectHash(existing) !== objectHash(defined)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
   }

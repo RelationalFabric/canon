@@ -7,10 +7,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { inferCanon } from './canon.js'
 import { canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf, updateMeta } from './meta.js'
+import { Morphism } from './morphism.js'
 import { declareCanon, declareMorphism, declareTheory, registerCanons, registerMorphisms, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
-import { defineTheory } from './theory.js'
+import { defineTheory, Theory } from './theory.js'
 
 declare module './types/canons.js' {
   interface Canons {
@@ -81,14 +82,14 @@ describe('shell', () => {
       declareCanon('DeclaredCanon', byLabel)
 
       expect(canonRefFor('DeclaredCanon').value).toBe(byLabel)
-      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+      expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
 
       resetRegistry()
       declareTheory('Identity', identityConfig)
       declareCanon('DeclaredCanon', byRef)
 
       expect(canonRefFor('DeclaredCanon').value).toBe(byRef)
-      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+      expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
     })
 
     it('throws on an unknown models label and does not register the canon', () => {
@@ -114,7 +115,7 @@ describe('shell', () => {
 
       const models = canonRefFor('DeclaredCanon').value?.axioms.Owner?.models
       expect(Array.isArray(models) ? models : []).toEqual(['Identity'])
-      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+      expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
     })
 
     it('stores nothing when an axiom map is followed by a missing label', () => {
@@ -178,7 +179,7 @@ describe('shell', () => {
       const ref = declareTheory('DeclaredTheory', config)
 
       expect(ref.key).toBe('canon://theory/DeclaredTheory')
-      expect(ref.value).toBe(config)
+      expect(ref.value).toBeInstanceOf(Theory)
     })
 
     it('records only canon://theory/<Label> on the registered value', () => {
@@ -199,14 +200,12 @@ describe('shell', () => {
     })
 
     it('throws when a different config is declared under the same label and keeps the first value', () => {
-      const original = {}
+      const first = declareTheory('TheoryConflict', {}).value
 
-      declareTheory('TheoryConflict', original)
-
-      expect(() => declareTheory('TheoryConflict', { distinct: true } as Record<string, never>))
+      expect(() => declareTheory('TheoryConflict', { extends: [] }))
         .toThrow('Definition already registered: canon://theory/TheoryConflict (ADR-0017)')
 
-      expect(theoryRefFor('TheoryConflict').value).toBe(original)
+      expect(theoryRefFor('TheoryConflict').value).toBe(first)
     })
 
     it('clears declared theories when the registry is reset', () => {
@@ -232,7 +231,8 @@ describe('shell', () => {
       const ref = declareMorphism('Identity', 'Taxonomy', morphismConfig)
 
       expect(ref.key).toBe('canon://morphism/Identity/Taxonomy')
-      expect(ref.value).toBe(morphismConfig)
+      expect(ref.value).toBeInstanceOf(Morphism)
+      expect((ref.value as Morphism).maps).toEqual(morphismConfig.maps)
     })
 
     it('records only the morphism uri on the registered value', () => {
@@ -251,12 +251,12 @@ describe('shell', () => {
     })
 
     it('throws when a different config is declared for the same pair and keeps the first value', () => {
-      declareMorphism('Identity', 'Taxonomy', morphismConfig)
+      const first = declareMorphism('Identity', 'Taxonomy', morphismConfig).value
 
       expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } }))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
-      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
     })
 
     it('throws on an unknown source or target and does not register the morphism', () => {
@@ -298,7 +298,8 @@ describe('shell', () => {
       registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
 
       const registered = morphismRefFor('Identity', 'Taxonomy').value
-      expect(registered).toBe(morphismConfig)
+      expect(registered).toBeInstanceOf(Morphism)
+      expect((registered as Morphism).maps).toEqual(morphismConfig.maps)
       if (isMetaCarrier(registered)) {
         expect(metaOf(registered)).toEqual({ uri: 'canon://morphism/Identity/Taxonomy' })
       }
@@ -312,11 +313,12 @@ describe('shell', () => {
 
     it('throws when a different config is registered under the same key and keeps the original value', () => {
       registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
+      const first = morphismRefFor('Identity', 'Taxonomy').value
 
       expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } }))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
-      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
     })
 
     it('throws on a missing source theory and does not register the morphism', () => {
@@ -357,19 +359,18 @@ describe('shell', () => {
     })
 
     it('stores nothing new when a registered config is reused under another key', () => {
-      const shared = { maps: { Id: 'Type' } }
-      declareMorphism('Identity', 'Taxonomy', shared)
+      const shared = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as Morphism
 
       expect(() => registerMorphisms({
         'Taxonomy/Identity': shared,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy')
 
       expect(morphismRefFor('Taxonomy', 'Identity').value).toBeUndefined()
-      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(shared)
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeInstanceOf(Morphism)
     })
 
     it('stores nothing when a batch conflicts with an already registered morphism', () => {
-      declareMorphism('Identity', 'Taxonomy', morphismConfig)
+      const registered = declareMorphism('Identity', 'Taxonomy', morphismConfig).value
 
       expect(() => registerMorphisms({
         'Taxonomy/Identity': { maps: { Type: 'Id' } },
@@ -377,7 +378,7 @@ describe('shell', () => {
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
       expect(morphismRefFor('Taxonomy', 'Identity').value).toBeUndefined()
-      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphismConfig)
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(registered)
     })
   })
 
@@ -388,7 +389,7 @@ describe('shell', () => {
       registerTheories({ X: cfg })
 
       const registered = theoryRefFor('X').value
-      expect(registered).toBe(cfg)
+      expect(registered).toBeInstanceOf(Theory)
       if (isMetaCarrier(registered)) {
         expect(metaOf(registered)).toEqual({ uri: 'canon://theory/X' })
       }
@@ -408,13 +409,13 @@ describe('shell', () => {
     })
 
     it('keeps the original config when a conflicting registration throws', () => {
-      const original = {}
-      registerTheories({ X: original })
+      registerTheories({ X: {} })
+      const first = theoryRefFor('X').value
 
       expect(() => registerTheories({ X: { extends: [] } }))
         .toThrow('Definition already registered: canon://theory/X (ADR-0017)')
 
-      expect(theoryRefFor('X').value).toBe(original)
+      expect(theoryRefFor('X').value).toBe(first)
     })
 
     it('registers a map-form extends value and the theory that composes it', () => {
@@ -506,7 +507,7 @@ describe('shell', () => {
 
       registerTheories({ Y: { extends: ['Identity'] } })
 
-      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+      expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
       expect(theoryRefFor('Y').key).toBe('canon://theory/Y')
 
       expect(() => registerTheories({ Z: { extends: ['Missing'] } }))
@@ -521,7 +522,7 @@ describe('shell', () => {
 
       registerCanons({ X: { axioms: {}, models: ['Identity'] } })
 
-      expect(theoryRefFor('Identity').value).toBe(identityConfig)
+      expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
       expect(canonRefFor('X').value).toBeDefined()
 
       expect(() => registerCanons({ Z: { axioms: {}, models: ['Missing'] } }))
@@ -989,8 +990,8 @@ describe('shell', () => {
 
       expect(theoryRefFor('Ghost').value).toBeUndefined()
       expect(metaOf(ghost).uri).toBeUndefined()
-      expect(theoryRefFor('T').value).toBe(outer)
-      expect(metaOf(outer).uri).toBe('canon://theory/T')
+      expect(theoryRefFor('T').value).toBeInstanceOf(Theory)
+      expect(metaOf(theoryRefFor('T').value as Theory).uri).toBe('canon://theory/T')
     })
 
     it('restores the outer stamp after an inner restamp, and the original metadata if the outer fails', () => {

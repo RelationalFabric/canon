@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { definitionRegistry, theoryRefFor } from '../definitions.js'
 import { declareTheory } from '../shell.js'
 import { invariant } from '../testing.js'
+import { Theory } from '../theory.js'
 import { config as identityConfig } from './identity.js'
 import { config as taxonomyConfig } from './taxonomy.js'
 import { config as typedEntityConfig } from './typed-entity.js'
@@ -31,7 +32,9 @@ describe('typed entity theory', () => {
 
   it('registers at canon://theory/TypedEntity', () => {
     expect(theoryRefFor('TypedEntity').key).toBe('canon://theory/TypedEntity')
-    expect(theoryRefFor('TypedEntity').value).toBe(typedEntityConfig)
+    const registered = theoryRefFor('TypedEntity').value as Theory
+    expect(registered).toBeInstanceOf(Theory)
+    expect(registered.extends).toEqual(typedEntityConfig.extends)
   })
 
   it('registers Identity and Taxonomy when the module is evaluated on its own', async () => {
@@ -49,7 +52,7 @@ describe('typed entity theory', () => {
     const resolved = definitionRegistry.resolve('theory', config.extends)
 
     expect(resolved).toHaveLength(2)
-    expect(resolved[0]?.value).toBe(identityConfig)
-    expect(resolved[1]?.value).toBe(taxonomyConfig)
+    expect(resolved[0]?.value).toBe(theoryRefFor('Identity').value)
+    expect(resolved[1]?.value).toBe(theoryRefFor('Taxonomy').value)
   })
 })
