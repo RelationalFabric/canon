@@ -21,7 +21,9 @@ import {
   processBlockComment,
 } from './markdown.js'
 import { parseExampleFile } from './parser.js'
-import { formatTestStatus } from './test-status.js'
+import { formatTestStatus, getTestStatusForFile } from './test-status.js'
+
+type TestReport = Parameters<typeof getTestStatusForFile>[0]
 
 const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/examples'
 
@@ -62,6 +64,8 @@ export async function renderTutorialBody(
   testStatusMap: TestStatusMap,
   exampleRoot: string,
   parentDepthState?: HeaderDepthState,
+  testReport: TestReport = null,
+  rootDir = '',
 ): Promise<string> {
   const lines: string[] = []
 
@@ -170,11 +174,14 @@ export async function renderTutorialBody(
           if (includePath.endsWith('.ts')) {
             const includedParsed = parseExampleFile(absolutePath)
             const includedRoot = dirname(absolutePath)
+            const includedStatus = getTestStatusForFile(testReport, absolutePath, rootDir)
             const includedBody = await renderTutorialBody(
               includedParsed,
-              testStatusMap,
+              includedStatus,
               includedRoot,
               depthState,
+              testReport,
+              rootDir,
             )
 
             lines.push('--')
@@ -279,6 +286,8 @@ export async function renderExample(
   parsed: ParsedExample,
   testStatusMap: TestStatusMap,
   exampleRoot: string,
+  testReport: TestReport = null,
+  rootDir = '',
 ): Promise<string> {
   const lines: string[] = []
 
@@ -295,7 +304,7 @@ export async function renderExample(
   }
 
   // Tutorial body
-  const body = await renderTutorialBody(parsed, testStatusMap, exampleRoot)
+  const body = await renderTutorialBody(parsed, testStatusMap, exampleRoot, undefined, testReport, rootDir)
   lines.push(body)
 
   // Footer
@@ -325,7 +334,9 @@ export async function generateExampleDoc(
   filePath: string,
   testStatusMap: TestStatusMap,
   exampleRoot: string,
+  testReport: TestReport = null,
+  rootDir = '',
 ): Promise<string> {
   const parsed = parseExampleFile(filePath)
-  return renderExample(parsed, testStatusMap, exampleRoot)
+  return renderExample(parsed, testStatusMap, exampleRoot, testReport, rootDir)
 }

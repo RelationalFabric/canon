@@ -65,6 +65,8 @@ export const mongoDbCanon = defineCanon({
 expect(mongoDbCanon.axioms.Id.key).toBe('_id')
 ```
 
+_Status:_ ✅ pass
+
 **The canon metadata specifies objectid type and hex format.:**
 
 ```ts
@@ -72,6 +74,8 @@ const meta = mongoDbCanon.axioms.Id.$meta as Record<string, unknown>
 expect(meta.type).toBe('objectid')
 expect(meta.format).toBe('hex')
 ```
+
+_Status:_ ✅ pass
 --
 
 ## Using the Canon
