@@ -6,7 +6,7 @@ import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { inferCanon } from './canon.js'
 import { canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
-import { metaOf } from './meta.js'
+import { metaOf, updateMeta } from './meta.js'
 import { declareCanon, declareMorphism, declareTheory, registerCanons, registerMorphisms, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
@@ -787,6 +787,129 @@ describe('shell', () => {
       expect(definitionRegistry.size).toBe(size)
       expect(uris()).toEqual(keys)
       expect(metaOf(fresh).uri).toBeUndefined()
+    })
+
+    it('leaves an equal-hash clone unstamped so it can be declared later', () => {
+      const original = defineTheory({})
+      declareTheory('Fresh', original)
+      declareCanon('DeclaredCanon', { axioms: {} })
+      const clone = defineTheory({})
+
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } => true,
+            key: 'id',
+          },
+        },
+        models: { Fresh: clone },
+      })).toThrow('Definition already registered: canon://canon/DeclaredCanon (ADR-0017)')
+
+      expect(metaOf(clone).uri).toBeUndefined()
+      expect(() => declareTheory('T', clone)).not.toThrow()
+    })
+
+    it('keeps one object under two URIs in the same order after a failing call', () => {
+      const shared = defineTheory({})
+      declareTheory('DeclaredTheory', {})
+      declareTheory('One', shared)
+      updateMeta(shared, (current) => {
+        if (current === undefined) {
+          return undefined
+        }
+        const next = { ...current }
+        delete next.uri
+        return Object.keys(next).length === 0 ? undefined : next
+      })
+      declareTheory('Two', shared)
+      const keys = uris()
+
+      expect(() => registerTheories({
+        T: { extends: { Alias: shared } },
+      })).toThrow('Definition already registered: canon://theory/Two')
+
+      expect(uris()).toEqual(keys)
+      expect(keys).toEqual([
+        'canon://theory/DeclaredTheory',
+        'canon://theory/One',
+        'canon://theory/Two',
+      ])
+    })
+
+    it('restores a uri that was not a live registry entry', () => {
+      const value = defineTheory({})
+      updateMeta(value, () => ({ uri: 'canon://theory/NotLive' }))
+      declareCanon('DeclaredCanon', { axioms: {} })
+
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } => true,
+            key: 'id',
+          },
+        },
+        models: { Fresh: value },
+      })).toThrow('Definition already registered: canon://canon/DeclaredCanon (ADR-0017)')
+
+      expect(metaOf(value).uri).toBe('canon://theory/NotLive')
+    })
+
+    it('restores a value that had no metadata to having none', () => {
+      const value = defineTheory({})
+      declareCanon('DeclaredCanon', { axioms: {} })
+      let before: unknown
+      updateMeta(value, (current) => {
+        before = current
+        return current
+      })
+
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } => true,
+            key: 'id',
+          },
+        },
+        models: { Fresh: value },
+      })).toThrow('Definition already registered: canon://canon/DeclaredCanon (ADR-0017)')
+
+      let after: unknown
+      updateMeta(value, (current) => {
+        after = current
+        return current
+      })
+      expect(before).toBeUndefined()
+      expect(after).toBeUndefined()
+    })
+
+    it('leaves metadata after resetRegistry unchanged by a later failing call', () => {
+      const value = defineTheory({})
+      declareTheory('Fresh', value)
+      resetRegistry()
+      expect(metaOf(value).uri).toBeUndefined()
+      let afterReset: unknown
+      updateMeta(value, (current) => {
+        afterReset = current
+        return current
+      })
+      declareCanon('DeclaredCanon', { axioms: {} })
+
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } => true,
+            key: 'id',
+          },
+        },
+        models: { Fresh: value },
+      })).toThrow('Definition already registered: canon://canon/DeclaredCanon (ADR-0017)')
+
+      let afterFail: unknown
+      updateMeta(value, (current) => {
+        afterFail = current
+        return current
+      })
+      expect(afterFail).toEqual(afterReset)
     })
   })
 })

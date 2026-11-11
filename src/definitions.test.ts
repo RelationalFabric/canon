@@ -166,7 +166,7 @@ describe('definition registry', () => {
 
     expect(registry.value(uri)).toBe(replacement)
     expect(metaOf(replacement).uri).toBe(uri)
-    expect(metaOf(original).uri).toBe(uri)
+    expect(metaOf(original).uri).toBeUndefined()
   })
 
   describe('resolve', () => {

@@ -2,9 +2,16 @@
  * Definition URIs and the shared definition registry (ADR-0017).
  */
 
-import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri } from './types/index.js'
+import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri, Metadata } from './types/index.js'
 import { objectHash } from './kit.js'
 import { metaOf, updateMeta } from './meta.js'
+
+let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
+
+let restoreEntries: (
+  registry: DefinitionRegistry,
+  snapshot: Map<DefinitionUri | LexiconTermUri, unknown>,
+) => void
 
 /**
  * Build a definition URI. A definition's formal identity is `canon://${kind}/${name}` (ADR-0017).
@@ -43,6 +50,15 @@ export function lexiconTermUri(lexiconOrTerm: string, term?: string): LexiconTer
 export class DefinitionRegistry {
   readonly #definitions = new Map<DefinitionUri | LexiconTermUri, unknown>()
 
+  static {
+    restoreEntries = (registry, snapshot) => {
+      registry.#definitions.clear()
+      for (const [uri, value] of snapshot) {
+        registry.#definitions.set(uri, value)
+      }
+    }
+  }
+
   /**
    * Register a value at a definition or lexicon URI.
    * A registered value carries that URI in its metadata.
@@ -70,6 +86,14 @@ export class DefinitionRegistry {
       this.#definitions.set(uri, value)
     }
     if (isMetaCarrier(value)) {
+      if (stampLog !== undefined && !stampLog.some(entry => entry.target === value)) {
+        let prior: Metadata | undefined
+        updateMeta(value, (current) => {
+          prior = current
+          return current
+        })
+        stampLog.push({ target: value, prior })
+      }
       updateMeta(value, metadata => ({
         ...metadata,
         uri,
@@ -99,9 +123,21 @@ export class DefinitionRegistry {
   }
 
   /**
-   * Remove every registered definition (ADR-0017).
+   * Remove every registered definition and the uri stamp on each value (ADR-0017).
    */
   clear(): void {
+    for (const [, value] of this.#definitions) {
+      if ((typeof value === 'object' || typeof value === 'function') && value !== null && typeof metaOf(value).uri === 'string') {
+        updateMeta(value, (metadata) => {
+          if (metadata === undefined) {
+            return undefined
+          }
+          const next = { ...metadata }
+          delete next.uri
+          return Object.keys(next).length === 0 ? undefined : next
+        })
+      }
+    }
     this.#definitions.clear()
   }
 
@@ -225,6 +261,33 @@ function carriedUri(value: unknown): string | undefined {
  * Internal export: not re-exported from the package entry.
  */
 export const definitionRegistry = new DefinitionRegistry()
+
+/**
+ * A failed declare or register call restores the registry entries and every uri stamp it made (ADR-0017).
+ */
+export function allOrNothing<T>(write: () => T): T {
+  if (stampLog !== undefined) {
+    return write()
+  }
+  const before = new Map(definitionRegistry.entries())
+  stampLog = []
+  try {
+    return write()
+  } catch (error) {
+    const log = stampLog
+    for (let index = log.length - 1; index >= 0; index--) {
+      const entry = log[index]
+      if (entry === undefined) {
+        continue
+      }
+      updateMeta(entry.target, () => entry.prior)
+    }
+    restoreEntries(definitionRegistry, before)
+    throw error
+  } finally {
+    stampLog = undefined
+  }
+}
 
 /**
  * Lazy reference whose `value` reads the shared definition registry (ADR-0017).
