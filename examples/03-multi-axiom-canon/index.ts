@@ -1,6 +1,6 @@
 /**
  * @document.title Multi-Axiom Canon
- * @document.description Working with complex entities that implement multiple axioms (Id, Type, Version, Timestamps, References)
+ * @document.description Working with complex entities that implement multiple axioms (Id, Type, Version, Timestamps)
  * @document.keywords multi-axiom, comprehensive, entity, timestamps, version
  * @document.difficulty intermediate
  */
@@ -8,7 +8,7 @@
 /*
 Real-world entities often have multiple attributes that need universal extraction: IDs, types, versions, timestamps. Canon's multi-axiom system lets you work with all of these through a single, comprehensive canon.
 
-In this example, we'll work with entities that implement all five core axioms and see how Canon provides unified access to their data.
+In this example, we'll work with entities that implement the four current core axioms (Id, Type, Version, Timestamps) and see how Canon provides unified access to their data.
 */
 
 // ```
@@ -24,7 +24,7 @@ import './comprehensive-canon.js'
 /*
 # Sample Entities
 
-Let's define some sample entities that implement all five axioms.
+Let's define some sample entities that implement the four current core axioms.
 */
 
 // ```
@@ -68,11 +68,12 @@ const productAnalysis = analyzeEntity(productEntity)
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
 
-  it('The user analysis extracts all five axioms correctly.', () => {
+  it('The user analysis extracts the four core axioms and createdBy linkage correctly.', () => {
     expect(userAnalysis.id).toBe('user-123')
     expect(userAnalysis.type).toBe('user')
     expect(userAnalysis.version).toBe(5)
     expect(userAnalysis.timestamps).toHaveLength(2)
+    // `references` is derived from createdBy, not the deprecated References axiom (ADR-0018).
     expect(userAnalysis.references).toHaveLength(1)
   })
 
@@ -107,7 +108,7 @@ if (import.meta.vitest) {
 }
 
 /*
-# Working with Timestamps and References
+# Working with Timestamps
 
 Canon provides flexible conversion utilities for timestamps.
 */
@@ -119,6 +120,7 @@ if (import.meta.vitest) {
     expect(() => demonstrateTimestampConversion()).not.toThrow()
   })
 
+  // demonstrateReferenceConversion shows legacy reference shapes; the References axiom is deprecated per ADR-0018.
   it('The reference utilities demonstrate conversion patterns.', () => {
     expect(() => demonstrateReferenceConversion()).not.toThrow()
   })
@@ -127,7 +129,7 @@ if (import.meta.vitest) {
 /*
 # Key Takeaways
 
-- **Comprehensive canons** implement all five core axioms in one definition
+- **Comprehensive canons** implement the four current core axioms (Id, Type, Version, Timestamps) in one definition
 - **Unified extraction** - Get all axiom values with consistent APIs
 - **Version control** - Automatic version tracking for entity updates
 - **Flexible conversions** - Timestamps support multiple formats
