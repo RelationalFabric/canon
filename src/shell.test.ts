@@ -18,6 +18,14 @@ declare module '@relational-fabric/canon' {
   }
 }
 
+interface RegisteredCanon {
+  axioms?: {
+    Owner?: {
+      models?: unknown
+    }
+  }
+}
+
 declare module '@relational-fabric/canon' {
   interface Theories {
     DeclaredTheory: Record<string, never>
@@ -112,7 +120,7 @@ describe('shell', () => {
 
       declareCanon('DeclaredCanon', config)
 
-      const models = canonRefFor('DeclaredCanon').value?.axioms.Owner?.models
+      const models = (canonRefFor('DeclaredCanon').value as RegisteredCanon | undefined)?.axioms?.Owner?.models
       expect(Array.isArray(models) ? models : []).toEqual(['Identity'])
       expect(theoryRefFor('Identity').value).toBe(identityConfig)
     })
@@ -174,7 +182,7 @@ describe('shell', () => {
 
       declareTheory('TheoryConflict', original)
 
-      expect(() => declareTheory('TheoryConflict', { distinct: true } as Record<string, never>))
+      expect(() => declareTheory('TheoryConflict', { distinct: true } as unknown as Record<string, never>))
         .toThrow('Definition already registered: canon://theory/TheoryConflict (ADR-0017)')
 
       expect(theoryRefFor('TheoryConflict').value).toBe(original)
