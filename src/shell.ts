@@ -191,8 +191,8 @@ export function declareMorphism<
  * @param morphisms - Object mapping `<Source>/<Target>` keys to morphism configs
  * @param morphisms.maps - Term mappings from source to target
  */
-export function registerMorphisms(morphisms: {
-  [Key in string]: Key extends `${infer Source extends keyof Theories}/${infer Target extends keyof Theories}`
+export function registerMorphisms<M extends Record<string, MorphismConfig>>(morphisms: M & {
+  [Key in keyof M & string]: Key extends `${infer Source extends keyof Theories}/${infer Target extends keyof Theories}`
     ? { maps: { [K in keyof Theories[Source] & string]: keyof Theories[Target] & string } }
     : MorphismConfig
 }): void {
