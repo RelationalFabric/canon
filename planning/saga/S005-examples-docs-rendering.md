@@ -247,6 +247,7 @@ Scoped checks for every unit are `npm run check:all`. U1, U2, U3, and U4 also ru
 
 ### Notes
 
+- U3: rendered included `.ts` files through `parseExampleFile` and `renderTutorialBody`; non-`.ts` includes unchanged. Regenerated `docs/examples/`; only `02-module-style-canon.md` changed.
 - U2: printed each parsed JSDoc description as a paragraph before the declaration fence. Regenerated `docs/examples/`. The Markdown diff is those description lines only. Removed unused `dedent`.
 - U1: stopped `dedent` and the fence `trim()` that flattened indent. Regenerated `docs/examples/`. The Markdown diff is indentation only.
 - Planning commit. Inventory is in this file. No implementation unit started. No source file changed. Findings 1 and 3 are confirmed and are not units, because the example syntax guide describes the current behavior and this saga does not choose against that guide.

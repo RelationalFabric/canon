@@ -10,9 +10,12 @@ import type {
   ParsedExample,
   TestStatusMap,
 } from './types.js'
+import { dirname } from 'node:path'
 import {
   applyHeaderControl,
+  getIncludeDisplayName,
   processInclude,
+  resolveIncludePath,
 } from './includes.js'
 import {
   processBlockComment,
@@ -58,16 +61,22 @@ export async function renderTutorialBody(
   parsed: ParsedExample,
   testStatusMap: TestStatusMap,
   exampleRoot: string,
+  parentDepthState?: HeaderDepthState,
 ): Promise<string> {
   const lines: string[] = []
 
   // Initialize depth state
   // If document has a title, document level becomes 2 (since H1 is used for title)
-  const documentLevel = parsed.metadata.title ? 2 : 1
-  const depthState: HeaderDepthState = {
-    documentLevel,
-    currentLevel: documentLevel,
-  }
+  const documentLevel = parentDepthState?.documentLevel ?? (parsed.metadata.title ? 2 : 1)
+  const depthState: HeaderDepthState = parentDepthState
+    ? {
+        documentLevel: parentDepthState.documentLevel,
+        currentLevel: parentDepthState.currentLevel,
+      }
+    : {
+        documentLevel,
+        currentLevel: documentLevel,
+      }
 
   for (const section of parsed.sections) {
     switch (section.type) {
@@ -155,15 +164,36 @@ export async function renderTutorialBody(
         const { includePath } = section.metadata || {}
 
         if (includePath) {
-          const includeContent = processInclude(
-            parsed.sourcePath,
-            includePath,
-            exampleRoot,
-          )
+          const absolutePath = resolveIncludePath(parsed.sourcePath, includePath)
+          const displayName = getIncludeDisplayName(absolutePath, exampleRoot)
 
-          if (includeContent) {
-            lines.push(includeContent)
+          if (includePath.endsWith('.ts')) {
+            const includedParsed = parseExampleFile(absolutePath)
+            const includedRoot = dirname(absolutePath)
+            const includedBody = await renderTutorialBody(
+              includedParsed,
+              testStatusMap,
+              includedRoot,
+              depthState,
+            )
+
+            lines.push('--')
+            lines.push(`Supporting File (\`${displayName}\`)`)
             lines.push('')
+            lines.push(includedBody)
+            lines.push('--')
+            lines.push('')
+          } else {
+            const includeContent = processInclude(
+              parsed.sourcePath,
+              includePath,
+              exampleRoot,
+            )
+
+            if (includeContent) {
+              lines.push(includeContent)
+              lines.push('')
+            }
           }
         }
         break
