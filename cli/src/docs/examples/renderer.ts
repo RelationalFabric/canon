@@ -92,7 +92,12 @@ export async function renderTutorialBody(
 
       case 'jsdoc': {
         // Render JSDoc declaration
-        const { params, returns } = section.metadata || {}
+        const { description, params, returns } = section.metadata || {}
+
+        if (description) {
+          lines.push(description)
+          lines.push('')
+        }
 
         // Render parameter table if there are params
         if (params && params.length > 0) {

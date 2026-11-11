@@ -2,6 +2,8 @@
 
 Gracefully handling errors, edge cases, and validation in Canon applications
 
+Valid entity with all required fields
+
 ```ts
 const validEntity = {
   id: 'user-123',
@@ -12,12 +14,16 @@ const validEntity = {
 }
 ```
 
+Entity with missing required fields
+
 ```ts
 const missingFields = {
   name: 'Incomplete User',
   email: 'incomplete@example.com',
 }
 ```
+
+Entity with wrong field types
 
 ```ts
 const wrongTypes = {
@@ -27,6 +33,8 @@ const wrongTypes = {
 }
 ```
 
+Entity with null values
+
 ```ts
 const nullValues = {
   id: null,
@@ -34,13 +42,19 @@ const nullValues = {
 }
 ```
 
+Empty object
+
 ```ts
 const emptyObject = {}
 ```
 
+Non-object value
+
 ```ts
 const nonObject = 'not an object'
 ```
+
+Nested object with valid data in wrong location
 
 ```ts
 const nestedObject = {

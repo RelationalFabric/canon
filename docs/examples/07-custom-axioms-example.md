@@ -2,6 +2,8 @@
 
 Creating and using custom axioms (Email, Currency, Status, Priority) for domain-specific requirements
 
+Customer entity with custom axioms
+
 ```ts
 const customerWithCustomFields = {
   id: 'cust-123',
@@ -23,6 +25,8 @@ const customerWithCustomFields = {
 }
 ```
 
+Product entity with custom axioms
+
 ```ts
 const _productWithCustomFields = {
   id: 'prod-456',
@@ -39,6 +43,8 @@ const _productWithCustomFields = {
   createdBy: 'admin-789',
 }
 ```
+
+Order entity with custom axioms
 
 ```ts
 const orderWithCustomFields = {

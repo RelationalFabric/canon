@@ -2,6 +2,8 @@
 
 Converting data between different formats (REST API, MongoDB, JSON-LD) using Canon's universal type system
 
+REST API user entity
+
 ```ts
 const restApiUser = {
   id: 'user-123',
@@ -14,6 +16,8 @@ const restApiUser = {
 }
 ```
 
+MongoDB user entity
+
 ```ts
 const mongoDbUser = {
   _id: '507f1f77bcf86cd799439011',
@@ -25,6 +29,8 @@ const mongoDbUser = {
   createdBy: 'admin-789',
 }
 ```
+
+JSON-LD user entity
 
 ```ts
 const jsonLdUser = {

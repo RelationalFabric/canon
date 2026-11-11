@@ -329,7 +329,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
             sections.push({
               type: 'jsdoc',
               content: node.getText(sourceFile),
-              metadata: { params: info.params, returns: info.returns },
+              metadata: { description: info.description, params: info.params, returns: info.returns },
             })
             processedLines.add(nodeLine)
           }
