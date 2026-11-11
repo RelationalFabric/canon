@@ -6,7 +6,7 @@ This directory contains CI/CD workflows for the Canon project.
 
 ### PR Checks (`pr-checks.yml`)
 
-Runs on pull requests to `main` and `develop` branches. This workflow ensures all code quality checks pass before merging.
+Runs on pull requests to `main`, `develop` and `feature/**` branches (so stacked PRs are checked too). This workflow ensures all code quality checks pass before merging.
 
 **Jobs:**
 
