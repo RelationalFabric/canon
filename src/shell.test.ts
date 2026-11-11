@@ -30,9 +30,11 @@ declare module '@relational-fabric/canon' {
   interface Theories {
     DeclaredTheory: Record<string, never>
     Fresh: Record<string, never>
+    One: Record<string, never>
     Other: Record<string, never>
     T: Record<string, never>
     TheoryConflict: Record<string, never>
+    Two: Record<string, never>
   }
 }
 
