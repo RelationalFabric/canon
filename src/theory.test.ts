@@ -3,16 +3,23 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest'
-import { definitionRegistry, definitionUri, theoryRefFor } from './definitions.js'
+import { canonRefFor, definitionRegistry, definitionUri, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { declareMorphism, declareTheory, resetRegistry } from './shell.js'
+import { declareCanon, declareMorphism, declareTheory, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { defineTheory, Theory } from './theory.js'
+
+declare module './types/canons.js' {
+  interface Canons {
+    Aliased: Record<string, never>
+  }
+}
 
 declare module './types/theories.js' {
   interface Theories {
     Composed: Record<string, never>
     Fresh: Record<string, never>
+    Other: Record<string, never>
   }
 }
 
@@ -90,6 +97,24 @@ describe('declareTheory extends', () => {
     expect(theoryRefFor('Fresh').value).toBeInstanceOf(Theory)
 
     expect(() => declareMorphism('Fresh', 'Identity', { maps: {} })).not.toThrow()
+  })
+
+  it('keeps registered map entries on the parent composition', () => {
+    declareTheory('Composed', { extends: { Fresh: {} } })
+
+    const composed = theoryRefFor('Composed').value as Theory
+    const fresh = theoryRefFor('Fresh').value
+
+    expect((composed.extends as Record<string, unknown>).Fresh).toBe(fresh)
+  })
+
+  it('does not wrap a definition that already carries a uri', () => {
+    declareTheory('Identity', identityConfig)
+    declareCanon('Aliased', { axioms: {} })
+    const canon = canonRefFor('Aliased').value
+
+    expect(() => declareTheory('Composed', { extends: { Other: canon } }))
+      .toThrow('Definition already registered: canon://canon/Aliased')
   })
 
   it('throws when a map is not the last list item', () => {
