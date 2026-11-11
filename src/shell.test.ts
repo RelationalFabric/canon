@@ -263,7 +263,7 @@ describe('shell', () => {
     it('throws when a different config is declared for the same pair and keeps the first value', () => {
       declareMorphism('Identity', 'Taxonomy', morphismConfig)
 
-      // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+      // @ts-expect-error runtime guard test, map names a wrong target term for this pair
       expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } } as const))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
@@ -324,7 +324,7 @@ describe('shell', () => {
     it('throws when a different config is registered under the same key and keeps the original value', () => {
       registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
 
-      // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+      // @ts-expect-error runtime guard test, map names a wrong target term for this pair
       expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } as const }))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
@@ -387,7 +387,7 @@ describe('shell', () => {
 
       expect(() => registerMorphisms({
         'Taxonomy/Identity': { maps: { Type: 'Id' } } as const,
-        // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+        // @ts-expect-error runtime guard test, map names a wrong target term for this pair
         'Identity/Taxonomy': { maps: { Id: 'Id' } } as const,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
