@@ -20,8 +20,8 @@
 | [ADR-0014](./0014-rollup-optional-dependencies-transparent-fix.md) | Rollup Optional Dependencies Transparent Fix | 🟢 Accepted | 2025-01-27 |
 | [ADR-0015](./0015-protocol-system.md) | Protocol System | 🟣 Obsolescent | 2025-01-28 |
 | [ADR-0016](./0016-lazy-module-pattern.md) | Lazy Module Pattern | 🟢 Accepted | 2025-01-28 |
-| [ADR-0017](./0017-definitions-as-values.md) | Definitions as Values | 🟡 Proposed | 2026-11-02 (revised 2026-11-11) |
-| [ADR-0018](./0018-theories-and-morphisms.md) | Theories and Morphisms | 🟡 Proposed | 2026-11-01 (revised 2026-11-02, 2026-11-11) |
+| [ADR-0017](./0017-definitions-as-values.md) | Definitions as Values | 🟢 Accepted | 2026-11-02 (revised 2026-11-11) |
+| [ADR-0018](./0018-theories-and-morphisms.md) | Theories and Morphisms | 🟢 Accepted | 2026-11-01 (revised 2026-11-02, 2026-11-11) |
 | [ADR-0019](./0019-nygard-adr-format.md) | Nygard ADR Format | 🟡 Proposed | 2026-11-01 |
 
 ## ADR Process

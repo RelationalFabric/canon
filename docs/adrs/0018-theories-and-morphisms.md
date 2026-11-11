@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 Date: 2026-11-01 (revised 2026-11-02, 2026-11-11)
 
@@ -43,7 +43,7 @@ A **Theory** is a named, reusable bundle of axiom requirements that sits above c
 - A Theory is a type made of keys and the expected axiom kind at each key, plus its laws. For now it declares nothing else: no data shape, claims or per-axiom rules.
 - Laws are part of a Theory. Type-level laws are written as canon invariants (`invariant<Expect<...>>()` from `src/testing.ts`) next to the Theory. Value-level laws are left to downstream packages; canon assumes nothing about them.
 - A Canon models a Theory by having its canon type inherit from the Theory's type. It may narrow that type, for example by giving a more specific kind at a key.
-- A Theory's runtime form is a `Theory` instance holding its terms and the Theories it composes, produced by `defineTheory` or `declareTheory` (below). Its `terms` field is a map from each term name to a description of that term, `{ [name]: string }`. The runtime terms hold no types or structure. The value carries only the Theory's own terms, not those it inherits, so each term exists in one place. `termsOf(theory)` returns the Theory's own terms together with those inherited through `extends`, and caches the result on the instance. The instance has its own constructor so that protocols, which dispatch on a value's constructor, can target Theories. The runtime value carries no name; a Theory is named when it is declared under a label or bound under a name.
+- A Theory's runtime form is a `Theory` instance holding its terms and the Theories it composes, produced by `defineTheory` or `declareTheory` (below). Its `terms` field is a map from each term name to a description of that term, `{ [name]: string }`. The runtime terms hold no types or structure. The value carries only the Theory's own terms, not those it inherits, so each term exists in one place. `termsOf(theory)` returns the Theory's own terms together with those inherited through `extends`, and caches the result. The cache is not part of `terms`, is not enumerable, and plays no part in equality or hashing, so it does not change the Theory's value. The instance has its own constructor so that protocols, which dispatch on a value's constructor, can target Theories. The runtime value carries no name; a Theory is named when it is declared under a label or bound under a name.
 - Types do not matter to the runtime value. They stay in the compile-time TypeScript layer, where a Theory's keys and the axiom kind at each key live. A value's shape is handled by protocols, which dispatch on the value's constructor, and by Morphisms. Further runtime machinery is added only when the type system can't express something.
 - The types that protocols dispatch on, Theory and Morphism, are themselves Theories, since a Theory is just a type. Canon therefore describes itself, and its registry is seeded with these Theories before any other Theory is registered. This is implemented together with the `Theory` and `Morphism` constructors, not later.
 - Theories are optional. A canon that models no Theory works exactly as it does today, so existing canons are unaffected.
@@ -60,7 +60,7 @@ A **Theory** is a named, reusable bundle of axiom requirements that sits above c
 Canon gets `defineTheory` and `declareTheory`, mirroring `defineCanon` and `declareCanon`.
 
 - A global `Theories` interface, extended by module augmentation in the same way as `Canons` and `Axioms`, carries each Theory's TypeScript type, keyed by label.
-- The config adds only the runtime information the type implies: its terms and the Theories it composes. The `terms` field is optional in config. When a Theory is registered without it, the registry sets it to empty terms, `{}`, so every registered Theory carries terms. The name is not part of the value: with `declareTheory` it comes from the label, and a value from `defineTheory` is named when it is bound under a name or registered.
+- The config adds only the runtime information the type implies: its terms and the Theories it composes. The `terms` field is optional in config. When a Theory is registered without it, the registry sets it to empty terms, `{}`, before the value is hashed and stored, so every registered Theory carries terms and registering the same Theory again is not a clash. The name is not part of the value: with `declareTheory` it comes from the label, and a value from `defineTheory` is named when it is bound under a name or registered.
 - `defineTheory` produces the Theory value; `declareTheory` also registers it under a label, matching `declareCanon`.
 - Composed Theories may be given as labels or Theory values. Identity, registration and label resolution follow ADR-0017: Definitions as Values.
 
@@ -90,7 +90,7 @@ An interpretation is a set of Theories plus claims, including situational claims
 
 ### Morphism
 
-A **Morphism** is a mapping from one Theory's terms into another's. Canon defines, applies and type-checks Morphisms. A Morphism's name is derived from its source and target Theories, so there is one registered Morphism per pair, and it can be found and dispatched by that pair on demand. Finding a Morphism by its pair is a registry lookup, so it needs the Morphism to be registered (ADR-0017). A Morphism value carries its own source and target, so applying or composing a Morphism already in hand does not need registration. A Morphism value is a `Morphism` instance, for the same dispatch reason as a Theory. Its `source` and `target` fields hold Theory values, not labels, and two pairs are the same when their Theory values are the same. The derived name comes from the names the two Theories are registered under, so declaring or registering a Morphism needs both Theories to be registered first.
+A **Morphism** is a mapping from one Theory's terms into another's. Canon defines, applies and type-checks Morphisms. A Morphism's name is derived from its source and target Theories, so there is one registered Morphism per pair, and it can be found and dispatched by that pair on demand. Finding a Morphism by its pair is a registry lookup, so it needs the Morphism to be registered (ADR-0017). A Morphism value carries its own source and target, so applying or composing a Morphism already in hand does not need registration. A Morphism value is a `Morphism` instance, for the same dispatch reason as a Theory. Its `source` and `target` fields hold Theory values, not labels, and two pairs are the same when they hold the same Theory instances, compared by reference. The derived name comes from the names the two Theories are registered under, so declaring or registering a Morphism needs both Theories to be registered first.
 
 A Morphism is a homomorphism by definition. It is one-way, from source to target, complete, and structure-preserving through the axioms at each key. It is not required to be a monomorphism or an isomorphism. Those are properties a particular Morphism may have. An isomorphism is a pair of Morphisms that are inverses.
 
@@ -125,6 +125,7 @@ Easier:
 - Meaning is kept intact across bounded contexts (for example, a consumer application's ontology and a DCSGS Theory) through Morphisms.
 - Clear separation: axiom kinds, axioms and canons keep their current meaning; usage lives in interpretations, left to downstream packages.
 - Type-level laws sit next to their Theory as canon invariants, checked by the existing type tests.
+- Registering a Morphism replaces its source and target with the registered Theory instances, so a pair is always compared by reference.
 
 Harder:
 
