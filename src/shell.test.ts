@@ -2,7 +2,7 @@
  * Tests for global shell
  */
 
-import type { CanonConfig } from './types/index.js'
+import type { CanonConfig, Metadata } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { inferCanon } from './canon.js'
 import { canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
@@ -925,6 +925,183 @@ describe('shell', () => {
         return current
       })
       expect(afterFail).toEqual(afterReset)
+    })
+
+    it('does not keep Ghost when a caught inner declare runs from extends', () => {
+      declareCanon('DeclaredCanon', { axioms: {} })
+      const ghost = defineTheory({})
+      const caught = {
+        get extends() {
+          try {
+            declareCanon('DeclaredCanon', {
+              axioms: {
+                Id: {
+                  $basis: (v: unknown): v is { id: string } => true,
+                  key: 'id',
+                },
+              },
+              models: { Ghost: ghost },
+            })
+          } catch {
+            // The inner failure is caught inside the getter.
+          }
+          return undefined
+        },
+      }
+      const failing = {
+        get extends() {
+          try {
+            declareCanon('DeclaredCanon', {
+              axioms: {
+                Id: {
+                  $basis: (v: unknown): v is { id: string } => true,
+                  key: 'id',
+                },
+              },
+              models: { Ghost: ghost },
+            })
+          } catch {
+            // The inner failure is caught inside the getter.
+          }
+          throw new Error('outer fails')
+        },
+      }
+
+      declareTheory('T', caught)
+      expect(theoryRefFor('Ghost').value).toBeUndefined()
+      expect(metaOf(ghost).uri).toBeUndefined()
+
+      resetRegistry()
+      declareCanon('DeclaredCanon', { axioms: {} })
+      expect(() => declareTheory('T', failing)).toThrow('outer fails')
+      expect(theoryRefFor('Ghost').value).toBeUndefined()
+      expect(metaOf(ghost).uri).toBeUndefined()
+    })
+
+    it('commits the outer write after a caught inner failure rolls back', () => {
+      declareCanon('DeclaredCanon', { axioms: {} })
+      const ghost = defineTheory({})
+      const outer = {
+        get extends() {
+          try {
+            declareCanon('DeclaredCanon', {
+              axioms: {
+                Id: {
+                  $basis: (v: unknown): v is { id: string } => true,
+                  key: 'id',
+                },
+              },
+              models: { Ghost: ghost },
+            })
+          } catch {
+            // Caught inner failure.
+          }
+          return undefined
+        },
+      }
+
+      declareTheory('T', outer)
+
+      expect(theoryRefFor('Ghost').value).toBeUndefined()
+      expect(metaOf(ghost).uri).toBeUndefined()
+      expect(theoryRefFor('T').value).toBe(outer)
+      expect(metaOf(outer).uri).toBe('canon://theory/T')
+    })
+
+    it('restores the outer stamp after an inner restamp, and the original metadata if the outer fails', () => {
+      declareCanon('DeclaredCanon', { axioms: {} })
+      const kept = defineTheory({})
+      let keptReads = 0
+      let outerStamp: Metadata | undefined
+      registerTheories({
+        Fresh: kept,
+        Outer: {
+          get extends() {
+            keptReads += 1
+            if (keptReads === 1) {
+              return undefined
+            }
+            updateMeta(kept, (current) => {
+              outerStamp = current
+              return current
+            })
+            try {
+              declareCanon('DeclaredCanon', {
+                axioms: {
+                  Id: {
+                    $basis: (v: unknown): v is { id: string } => true,
+                    key: 'id',
+                  },
+                },
+                models: { Fresh: kept },
+              })
+            } catch {
+              // Inner restamp of the outer value is rolled back.
+            }
+            return undefined
+          },
+        },
+      })
+      expect(metaOf(kept).uri).toBe('canon://theory/Fresh')
+      let afterInner: Metadata | undefined
+      updateMeta(kept, (current) => {
+        afterInner = current
+        return current
+      })
+      expect(afterInner).toBe(outerStamp)
+
+      resetRegistry()
+      declareCanon('DeclaredCanon', { axioms: {} })
+      const reverted = defineTheory({})
+      let revertedReads = 0
+      expect(() => registerTheories({
+        Fresh: reverted,
+        Outer: {
+          get extends() {
+            revertedReads += 1
+            if (revertedReads === 1) {
+              return undefined
+            }
+            try {
+              declareCanon('DeclaredCanon', {
+                axioms: {
+                  Id: {
+                    $basis: (v: unknown): v is { id: string } => true,
+                    key: 'id',
+                  },
+                },
+                models: { Fresh: reverted },
+              })
+            } catch {
+              // Inner restamp of the outer value is rolled back.
+            }
+            throw new Error('outer fails')
+          },
+        },
+      })).toThrow('outer fails')
+      let after: unknown
+      updateMeta(reverted, (current) => {
+        after = current
+        return current
+      })
+      expect(after).toBeUndefined()
+    })
+
+    it('keeps symbol-only metadata when resetRegistry removes uri', () => {
+      const mark = Symbol('mark')
+      const value = defineTheory({})
+      updateMeta(value, () => ({ [mark]: true }))
+      declareTheory('Fresh', value)
+
+      resetRegistry()
+
+      let after: Metadata | undefined
+      updateMeta(value, (current) => {
+        after = current
+        return current
+      })
+      expect(after?.[mark]).toBe(true)
+      expect(after?.uri).toBeUndefined()
     })
   })
 })
