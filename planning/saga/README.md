@@ -20,13 +20,23 @@ Claims are marked [code] (file:line), [doc], or [inference].
 
 Dispatch already exists and is constructor-based. `defineProtocol` and `extendProtocol` store implementations on the constructor and look them up from the first argument's constructor [code: `src/protocol.ts:125-156`, `src/protocol.ts:171-173`, `src/protocol.ts:235-254`, `src/protocol.ts:289-306`]. A plain object uses `Object` (or `ObjectFallback` when there is no constructor) [code: `src/protocol.ts:145-152`]. A Morphism config is a plain object today, so an implementation hung on `Object` would apply to every plain object [inference from those lines]. A dedicated constructor is what lets `extendProtocol` target Morphisms alone. `Protocols` is its own interface, not `Axioms` [code: `src/types/protocols.d.ts:142`]. ADR-0015 is Obsolescent and still describes protocols as axioms [doc: `docs/adrs/0015-protocol-system.md`]. ADR-0017 line 45 puts protocols in the shared registry "later". Line 99 says that after Theories, "protocols will be brought into line with this ADR" [doc]. Decision 2 forbids that. `docs/theories.md` still says Morphisms are not implemented [doc: `docs/theories.md:3`], which the #87 code has passed.
 
-### Category and Functor
+### SimpleCategory and SimpleFunctor
 
 Bahul, 11 Nov 2026, 15:17–15:18 London, decided:
 
 5. Compose and apply are separate protocols, not one. Composition is what every category has. Application is extra structure (acting on values), so some kinds will compose without applying. Morphisms implement both.
 
-6. The protocols are named after the algebra: `Category` (compose) and `Functor` (apply). Bahul explicitly does not want the Pxyz prefix pattern (`PSeq` and the like).
+6. The protocols are named after the algebra. Bahul explicitly does not want the Pxyz prefix pattern (`PSeq` and the like).
+
+Bahul, 11 Nov 2026, 15:19 London, decided:
+
+7. "Theoretical dispatch comes later." For S006, `SimpleCategory` and `SimpleFunctor` dispatch only on the value's constructor via the existing `defineProtocol`. Deferred, out of S006 scope: `Functor` mapping Theories (the object side), dispatch on Theories, and algebraic law checks.
+
+Bahul, 11 Nov 2026, 15:20 London, decided:
+
+8. The S006 protocols are `SimpleCategory` (compose) and `SimpleFunctor` (apply). The names `Category` and `Functor` are reserved for the later, Theory-aware versions, deferred with theoretical dispatch.
+
+9. `SimpleCategory` has an identity method as well as compose. Its method name is still open.
 
 No new dispatcher, registry, or `defineProtocol` option is in scope.
 
@@ -36,7 +46,7 @@ Each unit is one commit. Later units stay off this branch until the open questio
 
 1. **Morphism constructor.** Introduce a constructor and make `defineMorphism` return an instance of it, copying `maps` onto that instance. `declareMorphism` and `registerMorphisms` keep registering that instance so the `canon://morphism/<Source>/<Target>` stamp still lands on the value [code: `src/definitions.ts:99-102`]. Update the `defineMorphism` tests that expect the identical input object [code: `src/morphism.test.ts:48-53`]. Do not add compose or apply behaviour here. Constructor name: open question 1.
 
-2. **Category and Functor for Morphisms.** Define `Category` and `Functor` with the existing `defineProtocol`, and implement both for the Morphism constructor with `extendProtocol`, moving the behaviour that is now in `composeMorphisms` and `applyMorphism` (chain check, map join, key copy, missing-term error, no mutation of the input). Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Tests in this unit call the protocols. Method names: open question 2. This unit does not register the composed value (unit 4).
+2. **SimpleCategory and SimpleFunctor for Morphisms.** Define `SimpleCategory` and `SimpleFunctor` with the existing `defineProtocol`, and implement both for the Morphism constructor with `extendProtocol`. `SimpleCategory` carries compose and identity. `SimpleFunctor` carries apply. Move the behaviour that is now in `composeMorphisms` and `applyMorphism` (chain check, map join, key copy, missing-term error, no mutation of the input) into those implementations. Keep calling `defineProtocol` / `extendProtocol` only. Dispatch only on the value's constructor. Do not export the old function names. Do not implement Theory mapping, dispatch on Theories, or algebraic law checks. Tests in this unit call the protocols. Method names: open question 2. This unit does not register the composed value (unit 4).
 
 3. **Remove the #87 operations.** Delete `composeMorphisms` and `applyMorphism` and their `src/index.ts` exports. Delete their tests from `src/morphism.test.ts` once unit 2's protocol tests cover the same cases. `defineMorphism` stays.
 
@@ -47,8 +57,8 @@ Each unit is one commit. Later units stay off this branch until the open questio
 ### Open questions
 
 1. What is the exported name of the Morphism constructor? Candidate `Morphism` (unapproved).
-2. What are the method names inside each protocol? Candidates `compose` on `Category` and `apply` on `Functor` (unapproved).
-3. Do `Category` and `Functor` go into the `Protocols` interface? Unapproved.
+2. What are the method names? Candidates `compose` and `identity` on `SimpleCategory`, and `apply` on `SimpleFunctor` (unapproved). `map` is the usual Functor name.
+3. Do `SimpleCategory` and `SimpleFunctor` go into the `Protocols` interface? Unapproved.
 4. Must a composed Morphism be registered under `canon://morphism/<Source>/<Target>` before it can be applied or composed again? The code rejects an unregistered result today and does not store endpoints anywhere except the uri. The constructor does not answer this.
 5. How should Architecture amend ADR-0017 lines 45 and 99 so they no longer schedule protocols into the shared definition registry? This saga will not make that edit.
 
