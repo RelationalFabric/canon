@@ -34,7 +34,7 @@ Bahul, 11 Nov 2026, 15:19 London, decided:
 
 Bahul, 11 Nov 2026, 15:20 London, decided:
 
-8. The S006 protocols are `SimpleCategory` (compose) and `SimpleFunctor` (apply). The names `Category` and `Functor` are reserved for the later, Theory-aware versions, deferred with theoretical dispatch.
+8. The S006 protocols are `SimpleCategory` (compose) and `SimpleFunctor` (map). The names `Category` and `Functor` are reserved for the later, Theory-aware versions, deferred with theoretical dispatch.
 
 9. `SimpleCategory` has an identity method as well as compose.
 
