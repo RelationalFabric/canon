@@ -8,13 +8,13 @@ Thank you for your interest in contributing to Canon! This document outlines the
 
 #### Axiom Keys
 
-- Use **PascalCase** for axiom keys: `Id`, `Type`, `Version`, `Timestamps`, `References`
-- Use **plural form** for general concepts that can contain multiple values: `Timestamps` (not `Timestamp`), `References` (not `Reference`)
+- Use **PascalCase** for axiom keys: `Id`, `Type`, `Version`, `Timestamps`
+- Use **plural form** for general concepts that can contain multiple values: `Timestamps` (not `Timestamp`)
 - Use **singular form** for specific concepts that represent a single value: `Id`, `Type`, `Version`
 
 #### Function Names
 
-- Use **relational `*Of` pattern** for axiom functions: `idOf()`, `typeOf()`, `timestampsOf()`, `referencesOf()`
+- Use **relational `*Of` pattern** for axiom functions: `idOf()`, `typeOf()`, `timestampsOf()`
 - Avoid imperative `get*` patterns: use `idOf()` not `getId()`
 - Use **camelCase** for utility functions: `inferAxiom()`, `declareCanon()`
 

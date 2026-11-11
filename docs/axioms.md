@@ -64,6 +64,7 @@ type RepresentationAxiom<T, C = unknown> = Axiom<
 // Other axiom types for meta-type level concepts that might vary between codebases
 type TimestampsAxiom = RepresentationAxiom<number | string | Date, Date>
 
+// Deprecated. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
 // Canonical reference type for entity relationships
 interface EntityReference<R, T = unknown> {
   ref: R
@@ -85,7 +86,7 @@ declare module '@relational-fabric/canon' {
     Type: KeyNameAxiom // Type concept - might be 'type', '@type', '_type', etc.
     Version: KeyNameAxiom // Version concept - might be 'version', 'v', 'rev', etc.
     Timestamps: TimestampsAxiom // Timestamps concept - might be number, string, Date, etc.
-    References: ReferencesAxiom // References concept - might be string, object, array, etc.
+    References: ReferencesAxiom // Deprecated. Do not register References.
   }
 }
 ```

@@ -219,4 +219,5 @@ Scoped checks for every unit are `npm run check:all`. U2 also runs `npm run buil
 
 ### Notes
 
+- U1 done. `npm run check:all` passed: lint, `check:types:src`, `check:types:examples`, `check:types:tests`, 240 tests passed and 2 skipped, radar valid. `referencesOf` under `docs/` is only `docs/reference/api.md` and `docs/reference/axioms.md`, in the deprecated sections.
 - Planning commit. Inventory is in this file. No implementation unit started. No source file changed. No radar entry and no changelog: the repo has no changelog, and radar hold entries are not package API deprecations.
