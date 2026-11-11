@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { definitionRegistry, definitionUri, morphismRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { applyMorphism, composeMorphisms, defineMorphism } from './morphism.js'
-import { declareMorphism, declareTheory, resetRegistry } from './shell.js'
+import { declareMorphism, declareTheory, registerMorphisms, resetRegistry } from './shell.js'
 import { invariant } from './testing.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
@@ -26,6 +26,24 @@ invariant<Expect<{}, IdentityToTaxonomy>>()
 
 // @ts-expect-error Id must map to a Taxonomy key
 invariant<Expect<{ Id: 'Nope' }, IdentityToTaxonomy>>()
+
+function completenessFixtures(): void {
+  // @ts-expect-error incomplete maps
+  declareMorphism('Identity', 'Taxonomy', { maps: {} })
+
+  // @ts-expect-error wrong target term
+  declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Nope' } })
+
+  // @ts-expect-error incomplete maps
+  registerMorphisms({ 'Identity/Taxonomy': { maps: {} } })
+
+  // @ts-expect-error wrong target term
+  registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Nope' } } })
+
+  registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Type' } } })
+}
+
+void completenessFixtures
 
 describe('defineMorphism', () => {
   it('returns the same object', () => {
