@@ -14,7 +14,7 @@ declare module '@relational-fabric/canon' {
         $basis: { id: string }
       }
     }
-    Canon1: Record<string, never>
+    Canon1: Record<never, never>
   }
 }
 

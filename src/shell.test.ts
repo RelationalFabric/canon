@@ -14,7 +14,7 @@ import { defineTheory } from './theory.js'
 
 declare module '@relational-fabric/canon' {
   interface Canons {
-    DeclaredCanon: Record<string, never>
+    DeclaredCanon: Record<never, never>
   }
 }
 
