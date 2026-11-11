@@ -8,9 +8,9 @@ import type { MorphismConfig } from './morphism.js'
 import type { TheoryConfig } from './theory.js'
 import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
-import { canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, theoryRefFor } from './definitions.js'
+import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, theoryRefFor } from './definitions.js'
 import { objectHash } from './kit.js'
-import { metaOf, updateMeta } from './meta.js'
+import { metaOf } from './meta.js'
 import { defineMorphism } from './morphism.js'
 import { defineTheory } from './theory.js'
 
@@ -234,37 +234,6 @@ export function registerTheories(theories: Record<string, TheoryConfig>): void {
       resolveExtends(value)
     }
   })
-}
-
-/**
- * A failed declare or register call leaves the registry as it was before the call (ADR-0017).
- */
-function allOrNothing<T>(write: () => T): T {
-  const before = new Map(definitionRegistry.entries())
-  try {
-    return write()
-  } catch (error) {
-    for (const [uri, value] of definitionRegistry.entries()) {
-      if (before.has(uri)) {
-        continue
-      }
-      if ((typeof value === 'object' || typeof value === 'function') && value !== null && metaOf(value).uri === uri) {
-        updateMeta(value, (metadata) => {
-          if (metadata === undefined) {
-            return undefined
-          }
-          const next = { ...metadata }
-          delete next.uri
-          return next
-        })
-      }
-    }
-    definitionRegistry.clear()
-    for (const [uri, value] of before) {
-      definitionRegistry.register(uri, value)
-    }
-    throw error
-  }
 }
 
 /**
