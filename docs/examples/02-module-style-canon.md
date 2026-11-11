@@ -112,6 +112,8 @@ const userId = idOf(userDocument) // Returns: "507f1f77bcf86cd799439011"
 expect(userId).toBe('507f1f77bcf86cd799439011')
 ```
 
+_Status:_ ✅ pass
+
 **The function works with any MongoDB document structure.:**
 
 ```ts
@@ -123,6 +125,8 @@ const productDocument = {
 
 expect(idOf(productDocument)).toBe('abc123def456')
 ```
+
+_Status:_ ✅ pass
 
 ## Key Takeaways
 

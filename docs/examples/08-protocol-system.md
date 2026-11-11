@@ -73,11 +73,15 @@ const wasEmptyString = PSeq.isEmpty('')
 expect(firstNumber).toBe(1)
 ```
 
+_Status:_ ✅ pass
+
 **rest() returns [2,3,4,5] for the array [1,2,3,4,5]:**
 
 ```ts
 expect(restNumbers).toEqual([2, 3, 4, 5])
 ```
+
+_Status:_ ✅ pass
 
 **isEmpty() returns false for a non-empty array:**
 
@@ -85,11 +89,15 @@ expect(restNumbers).toEqual([2, 3, 4, 5])
 expect(wasEmptyNumbers).toBe(false)
 ```
 
+_Status:_ ✅ pass
+
 **first() returns "H" for the string "Hello":**
 
 ```ts
 expect(firstChar).toBe('H')
 ```
+
+_Status:_ ✅ pass
 
 **rest() returns "ello" for the string "Hello":**
 
@@ -97,11 +105,15 @@ expect(firstChar).toBe('H')
 expect(restChars).toBe('ello')
 ```
 
+_Status:_ ✅ pass
+
 **isEmpty() returns true for an empty string:**
 
 ```ts
 expect(wasEmptyString).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 ## Handling Null and Undefined
 
@@ -131,17 +143,23 @@ const undefinedWasEmpty = PSeq.isEmpty(undefined)
 expect(nullFirst).toBe(undefined)
 ```
 
+_Status:_ ✅ pass
+
 **isEmpty() returns true for null:**
 
 ```ts
 expect(nullWasEmpty).toBe(true)
 ```
 
+_Status:_ ✅ pass
+
 **isEmpty() returns true for undefined:**
 
 ```ts
 expect(undefinedWasEmpty).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 ## Object Fallback
 
@@ -169,17 +187,23 @@ const wasEmptyRecord = PSeq.isEmpty({})
 expect(firstValue).toBe(1)
 ```
 
+_Status:_ ✅ pass
+
 **rest() returns the remaining key-value pairs:**
 
 ```ts
 expect(restRecord).toEqual({ b: 2, c: 3 })
 ```
 
+_Status:_ ✅ pass
+
 **isEmpty() returns true for an empty object:**
 
 ```ts
 expect(wasEmptyRecord).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 ## Checking Protocol Support
 
@@ -196,11 +220,15 @@ const mapSupported = satisfiesProtocol(new Map(), PSeq) // Map uses ObjectFallba
 expect(arraySupported).toBe(true)
 ```
 
+_Status:_ ✅ pass
+
 **returns true for Map (via ObjectFallback):**
 
 ```ts
 expect(mapSupported).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 ## Writing Generic Functions
 
@@ -230,17 +258,23 @@ const firstThreeFromObject = take({ a: 1, b: 2, c: 3, d: 4 }, 3)
 expect(firstThreeNumbers).toEqual([1, 2, 3])
 ```
 
+_Status:_ ✅ pass
+
 **takes first 3 characters from a string:**
 
 ```ts
 expect(firstThreeChars).toEqual(['H', 'e', 'l'])
 ```
 
+_Status:_ ✅ pass
+
 **takes first 3 values from an object:**
 
 ```ts
 expect(firstThreeFromObject).toEqual([1, 2, 3])
 ```
+
+_Status:_ ✅ pass
 
 ## Key Takeaways
 

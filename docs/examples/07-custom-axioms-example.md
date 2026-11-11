@@ -75,12 +75,16 @@ const email = emailOf(customerWithCustomFields)
 expect(email).toBe('alice@example.com')
 ```
 
+_Status:_ ✅ pass
+
 **validates email format:**
 
 ```ts
 const invalidCustomer = { ...customerWithCustomFields, email: 'invalid-email' }
 expect(() => emailOf(invalidCustomer)).toThrow('Invalid email format')
 ```
+
+_Status:_ ✅ pass
 
 **converts currency from different formats:**
 
@@ -98,6 +102,8 @@ const currency3 = currencyOf({ amount: 200, currency: 'EUR' })
 expect(currency3).toEqual({ amount: 200, currency: 'EUR' })
 ```
 
+_Status:_ ✅ pass
+
 **extracts and validates status:**
 
 ```ts
@@ -105,12 +111,16 @@ const status = statusOf(customerWithCustomFields)
 expect(status).toBe('active')
 ```
 
+_Status:_ ✅ pass
+
 **validates status transitions:**
 
 ```ts
 const invalidStatus = { ...customerWithCustomFields, status: 'invalid' }
 expect(() => statusOf(invalidStatus)).toThrow('Invalid status')
 ```
+
+_Status:_ ✅ pass
 
 **converts priority from different formats:**
 
@@ -128,6 +138,8 @@ const priority3 = priorityOf({ level: 4, label: 'critical' })
 expect(priority3).toEqual({ level: 4, label: 'critical' })
 ```
 
+_Status:_ ✅ pass
+
 **processes customer registration with custom validation:**
 
 ```ts
@@ -140,6 +152,8 @@ expect(result.status).toBe('active')
 expect(result.priority.level).toBe(3)
 ```
 
+_Status:_ ✅ pass
+
 **calculates order total with currency conversion:**
 
 ```ts
@@ -151,6 +165,8 @@ expect(result.total.amount).toBeCloseTo(215.978, 2)
 expect(result.subtotal.currency).toBe('USD')
 ```
 
+_Status:_ ✅ pass
+
 **validates status transitions:**
 
 ```ts
@@ -161,6 +177,8 @@ expect(result.oldStatus).toBe('active')
 expect(result.newStatus).toBe('inactive')
 ```
 
+_Status:_ ✅ pass
+
 **rejects invalid status transitions:**
 
 ```ts
@@ -169,6 +187,8 @@ const result = updateEntityStatus(customerWithCustomFields, 'draft')
 expect(result.success).toBe(false)
 expect(result.error).toContain('Invalid transition')
 ```
+
+_Status:_ ✅ pass
 
 ---
 

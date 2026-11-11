@@ -61,12 +61,16 @@ expect(defaultInfo.name).toBe('$fallback')
 expect(defaultInfo.score).toBe(CapabilityScores.FALLBACK)
 ```
 
+_Status:_ ✅ pass
+
 **produces a hash value:**
 
 ```ts
 expect(typeof simpleHash).toBe('string')
 expect(simpleHash.length).toBeGreaterThan(0)
 ```
+
+_Status:_ ✅ pass
 
 ## Registering Better Implementations
 
@@ -124,6 +128,8 @@ const newDefaultInfo = hash.getDefault()
 expect(newDefaultInfo.score).toBeGreaterThan(CapabilityScores.FALLBACK as number)
 ```
 
+_Status:_ ✅ pass
+
 ## Selecting Specific Implementations
 
 Use `.select(opts)` to get an implementation that best matches specific options.
@@ -143,6 +149,8 @@ expect(typeof djb2Result).toBe('string')
 expect(djb2Result.length).toBeGreaterThan(0)
 ```
 
+_Status:_ ✅ pass
+
 **selects FNV-1a when algorithm is fnv1a:**
 
 ```ts
@@ -150,11 +158,15 @@ expect(typeof fnv1aResult).toBe('string')
 expect(fnv1aResult.length).toBeGreaterThan(0)
 ```
 
+_Status:_ ✅ pass
+
 **produces different hashes for different algorithms:**
 
 ```ts
 expect(djb2Result).not.toBe(fnv1aResult)
 ```
+
+_Status:_ ✅ pass
 
 ## Understanding Capability Scores
 
@@ -186,6 +198,8 @@ const allScores = {
 expect(allScores.unsupported).toBe(undefined)
 ```
 
+_Status:_ ✅ pass
+
 **scores are ordered from RISKY to OPTIMAL:**
 
 ```ts
@@ -194,6 +208,8 @@ expect(allScores.fallback).toBeLessThan(allScores.baseline as number)
 expect(allScores.baseline).toBeLessThan(allScores.good as number)
 expect(allScores.good).toBeLessThan(allScores.optimal as number)
 ```
+
+_Status:_ ✅ pass
 
 ## Listing Implementations
 
@@ -212,12 +228,16 @@ expect(implNames).toContain('djb2')
 expect(implNames).toContain('fnv1a')
 ```
 
+_Status:_ ✅ pass
+
 **includes the fallback implementation:**
 
 ```ts
 const fallback = implementations.find(i => i.name === '$fallback')
 expect(fallback).toBeDefined()
 ```
+
+_Status:_ ✅ pass
 
 ## Key Takeaways
 

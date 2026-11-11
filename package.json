@@ -59,7 +59,7 @@
     "build:adr": "npm run build:adr:index",
     "build:adr:index": "./bin/canon adr",
     "build:docs": "npm run build:docs:examples && ./bin/canon docs:rename-readmes && npx vitepress build && ./bin/canon docs:rename-readmes --restore",
-    "build:docs:examples": "./bin/canon docs:examples",
+    "build:docs:examples": "npm run check:test:json && ./bin/canon docs:examples",
     "build:docs:restore": "./bin/canon docs:rename-readmes --restore",
     "export:pdf": "npm run build:docs && vitepress-export-pdf export docs",
     "export:pdf:prod": "vitepress-export-pdf export docs --urlOrigin https://relationalfabric.github.io/canon",
