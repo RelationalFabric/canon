@@ -4,7 +4,7 @@
 
 Proposed
 
-Date: 2026-11-01 (revised 2026-11-02)
+Date: 2026-11-01 (revised 2026-11-02, 2026-11-11)
 
 ## Context
 
@@ -43,8 +43,8 @@ A **Theory** is a named, reusable bundle of axiom requirements that sits above c
 - A Theory is a type made of keys and the expected axiom kind at each key, plus its laws. For now it declares nothing else: no data shape, claims or per-axiom rules.
 - Laws are part of a Theory. Type-level laws are written as canon invariants (`invariant<Expect<...>>()` from `src/testing.ts`) next to the Theory. Value-level laws are left to downstream packages; canon assumes nothing about them.
 - A Canon models a Theory by having its canon type inherit from the Theory's type. It may narrow that type, for example by giving a more specific kind at a key.
-- For now, a Theory's runtime form is only its name and the Theories it composes, produced by `defineTheory` or `declareTheory` (below).
-- The type system handles everything beyond a Theory's runtime name and composition, until we find something it can't express. Runtime machinery is added only then.
+- For now, a Theory's runtime form is only the Theories it composes, produced by `defineTheory` or `declareTheory` (below). The runtime value carries no name; a Theory is named when it is declared under a label or bound under a name.
+- The type system handles everything beyond a Theory's composition, until we find something it can't express. Runtime machinery is added only then.
 - Theories are optional. A canon that models no Theory works exactly as it does today, so existing canons are unaffected.
 - A Theory earns its place only when several canons must agree on what its keys mean. A shape that only one subsystem reads is a plain TypeScript type, enforced by the implementation that consumes it. It may be promoted to a Theory later if a second consumer needs the shared meaning.
 - A Canon **models** a Theory when its canon type inherits from (and may narrow) the Theory's type.
@@ -59,7 +59,7 @@ A **Theory** is a named, reusable bundle of axiom requirements that sits above c
 Canon gets `defineTheory` and `declareTheory`, mirroring `defineCanon` and `declareCanon`.
 
 - A global `Theories` interface, extended by module augmentation in the same way as `Canons` and `Axioms`, carries each Theory's TypeScript type, keyed by label.
-- The config adds only the runtime information the type implies: the Theory's name and the Theories it composes. With `declareTheory` the name comes from the label; with `defineTheory` it comes from the config.
+- The config adds only the runtime information the type implies: the Theories it composes. The name is not part of the value: with `declareTheory` it comes from the label, and a value from `defineTheory` is named when it is bound under a name or registered.
 - `defineTheory` produces the Theory value; `declareTheory` also registers it under a label, matching `declareCanon`.
 - Composed Theories may be given as labels or Theory values. Identity, registration and label resolution follow ADR-0017: Definitions as Values.
 
@@ -89,7 +89,7 @@ An interpretation is a set of Theories plus claims, including situational claims
 
 ### Morphism
 
-A **Morphism** is a mapping from one Theory's terms into another's. Canon defines, applies and type-checks Morphisms. A Morphism's name is derived from its source and target Theories, so there is one Morphism per pair, and it can be found and dispatched by that pair on demand.
+A **Morphism** is a mapping from one Theory's terms into another's. Canon defines, applies and type-checks Morphisms. A Morphism's name is derived from its source and target Theories, so there is one registered Morphism per pair, and it can be found and dispatched by that pair on demand. Finding a Morphism by its pair is a registry lookup, so it needs the Morphism to be registered (ADR-0017). A Morphism value carries its own source and target, so applying or composing a Morphism already in hand does not need registration.
 
 A Morphism is a homomorphism by definition. It is one-way, from source to target, complete, and structure-preserving through the axioms at each key. It is not required to be a monomorphism or an isomorphism. Those are properties a particular Morphism may have. An isomorphism is a pair of Morphisms that are inverses.
 
@@ -97,7 +97,7 @@ The only requirement on a Morphism is that it is **complete**: every term of the
 
 A Morphism assumes the representation is the same on both sides of a mapped key, unless either side's axiom is a `RepresentationAxiom`, or one or both sides are patched with a representation for that mapping. Patching is optional and is never forced; it covers a conversion that the base axiom doesn't supply.
 
-Composition follows: two complete Morphisms A→B and B→C compose into a complete Morphism A→C.
+Composition follows: two complete Morphisms A→B and B→C compose into a complete Morphism A→C. The composed Morphism carries A and C as its source and target, so it can be composed and applied again. It is not registered automatically.
 
 ### Relationship to existing concepts
 
