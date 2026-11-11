@@ -41,6 +41,7 @@ function resolveModels(config: CanonConfig): void {
  */
 export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig) {
   const defined = defineCanon(config)
+  preflightCanonModels(defined, new Map())
   resolveModels(defined)
   resolveAxiomModels(defined)
   definitionRegistry.register(definitionUri('canon', label), defined)
@@ -55,12 +56,33 @@ export function declareCanon<Label extends keyof Canons>(label: Label, config: C
  */
 export function registerCanons(canons: Record<string, CanonConfig>): void {
   const defined = Object.entries(canons).map(([label, config]) => [label, defineCanon(config)] as const)
+  const provided = new Map<string, unknown>()
+  for (const [, config] of defined) {
+    preflightCanonModels(config, provided)
+  }
   for (const [, config] of defined) {
     resolveAxiomModels(config)
   }
   for (const [label, config] of defined) {
     resolveModels(config)
     definitionRegistry.register(definitionUri('canon', label), config)
+  }
+}
+
+/**
+ * Check canon-level and axiom-level `models` before any theory or canon is stored.
+ */
+function preflightCanonModels(config: CanonConfig, provided: Map<string, unknown>): void {
+  const batchKeys = new Set<string>()
+  if (config.models !== undefined) {
+    validateTheoryConfig({ extends: config.models }, batchKeys, provided)
+  }
+  for (const axiom of Object.values(config.axioms)) {
+    const models = theoryModels(axiom.models)
+    if (models === undefined) {
+      continue
+    }
+    validateTheoryConfig({ extends: models }, batchKeys, provided)
   }
 }
 

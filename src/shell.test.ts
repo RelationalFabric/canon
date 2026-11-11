@@ -117,6 +117,35 @@ describe('shell', () => {
       expect(theoryRefFor('Identity').value).toBe(identityConfig)
     })
 
+    it('stores nothing when an axiom map is followed by a missing label', () => {
+      const basis = (v: unknown): v is { id: string } => true
+      const config: CanonConfig = {
+        axioms: {
+          Owner: { $basis: basis, models: { Fresh: defineTheory({}) } },
+          Other: { $basis: basis, models: ['Missing'] },
+        },
+      }
+
+      expect(() => declareCanon('DeclaredCanon', config))
+        .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(canonRefFor('DeclaredCanon').value).toBeUndefined()
+      expect(theoryRefFor('Fresh').value).toBeUndefined()
+    })
+
+    it('stores nothing when the canon models map is followed by a missing label', () => {
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {
+          Other: {
+            $basis: (v: unknown): v is { id: string } => true,
+            models: ['Missing'],
+          },
+        },
+        models: { Fresh: defineTheory({}) },
+      })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+      expect(canonRefFor('DeclaredCanon').value).toBeUndefined()
+      expect(theoryRefFor('Fresh').value).toBeUndefined()
+    })
+
     it('throws on an unknown axiom models label and does not register the canon', () => {
       const config: CanonConfig = {
         axioms: {
@@ -474,6 +503,29 @@ describe('shell', () => {
       expect(() => registerCanons({ Z: { axioms: {}, models: ['Missing'] } }))
         .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
       expect(canonRefFor('Z').value).toBeUndefined()
+    })
+
+    it('stores nothing when a later canon has a missing models label', () => {
+      expect(() => registerCanons({
+        canon1: { axioms: {}, models: { Fresh: defineTheory({}) } },
+        canon2: { axioms: {}, models: ['Missing'] },
+      })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+
+      expect(canonRefFor('canon1').value).toBeUndefined()
+      expect(canonRefFor('canon2').value).toBeUndefined()
+      expect(theoryRefFor('Fresh').value).toBeUndefined()
+    })
+
+    it('stores nothing when a map-form models key conflicts with a registered value', () => {
+      declareTheory('Fresh', {})
+
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {},
+        models: { Fresh: defineTheory({ extends: [] }) },
+      })).toThrow('Definition already registered: canon://theory/Fresh (ADR-0017)')
+
+      expect(canonRefFor('DeclaredCanon').value).toBeUndefined()
+      expect(theoryRefFor('Fresh').value).toEqual({})
     })
 
     it('stores no canon when one axiom models label is missing', () => {
