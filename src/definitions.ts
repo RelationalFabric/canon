@@ -130,6 +130,14 @@ export class DefinitionRegistry {
   clear(): void {
     for (const [, value] of this.#definitions) {
       if ((typeof value === 'object' || typeof value === 'function') && value !== null && typeof metaOf(value).uri === 'string') {
+        if (stampLog !== undefined && !stampLog.slice(savepointStart).some(entry => entry.target === value)) {
+          let prior: Metadata | undefined
+          updateMeta(value, (current) => {
+            prior = current
+            return current
+          })
+          stampLog.push({ target: value, prior })
+        }
         updateMeta(value, (metadata) => {
           if (metadata === undefined) {
             return undefined
@@ -286,12 +294,19 @@ export function allOrNothing<T>(write: () => T): T {
         if (entry === undefined) {
           continue
         }
-        updateMeta(entry.target, () => entry.prior)
+        try {
+          updateMeta(entry.target, () => entry.prior)
+        } catch {
+          // A failed restore must not hide the original error; keep restoring the rest.
+        }
       }
     } finally {
-      restoreEntries(definitionRegistry, before)
+      try {
+        restoreEntries(definitionRegistry, before)
+      } finally {
+        log.length = logStart
+      }
     }
-    log.length = logStart
     throw error
   } finally {
     savepointStart = previousStart

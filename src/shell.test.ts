@@ -3,14 +3,33 @@
  */
 
 import type { CanonConfig, Metadata } from './types/index.js'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { inferCanon } from './canon.js'
-import { canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
+import { allOrNothing, canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf, updateMeta } from './meta.js'
 import { declareCanon, declareMorphism, declareTheory, registerCanons, registerMorphisms, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
 import { defineTheory } from './theory.js'
+
+const rollbackArm = vi.hoisted(() => ({ value: false }))
+
+vi.mock('./meta.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./meta.js')>()
+  return {
+    ...actual,
+    updateMeta: <T extends object, M extends Metadata = Metadata>(
+      obj: T,
+      updater: (metadata?: M) => M | undefined,
+    ): T => {
+      if (rollbackArm.value) {
+        rollbackArm.value = false
+        throw new Error('restore failed')
+      }
+      return actual.updateMeta(obj, updater)
+    },
+  }
+})
 
 declare module './types/canons.js' {
   interface Canons {
@@ -1087,6 +1106,53 @@ describe('shell', () => {
       })
       expect(after?.[mark]).toBe(true)
       expect(after?.uri).toBeUndefined()
+    })
+
+    it('restores uri stamps stripped by a reset inside a caught nested call', () => {
+      const kept = defineTheory({})
+      declareTheory('Fresh', kept)
+      const uri = metaOf(kept).uri
+      const entriesBefore = [...definitionRegistry.entries()]
+      const outer = {
+        get extends(): undefined {
+          try {
+            allOrNothing(() => {
+              resetRegistry()
+              throw new Error('inner reset')
+            })
+          } catch {
+            // The inner failure is caught inside the getter.
+          }
+          return undefined
+        },
+      }
+
+      declareTheory('T', outer)
+
+      for (const [key, value] of entriesBefore) {
+        expect(definitionRegistry.value(key)).toBe(value)
+      }
+      expect(metaOf(kept).uri).toBe(uri)
+      expect(metaOf(outer).uri).toBe('canon://theory/T')
+    })
+
+    it('keeps the original error when a metadata restore throws', () => {
+      const original = new Error('original failure')
+
+      try {
+        expect(() => allOrNothing(() => {
+          declareTheory('Other', defineTheory({}))
+          rollbackArm.value = true
+          throw original
+        })).toThrow(original)
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(definitionRegistry.size).toBe(0)
+      expect(theoryRefFor('Other').value).toBeUndefined()
+      declareTheory('Other', defineTheory({}))
+      expect(theoryRefFor('Other').value).toBeDefined()
     })
   })
 })
