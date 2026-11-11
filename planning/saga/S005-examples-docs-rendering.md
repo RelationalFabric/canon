@@ -247,6 +247,7 @@ Scoped checks for every unit are `npm run check:all`. U1, U2, U3, and U4 also ru
 
 ### Notes
 
+- U5: examples sidebar lists Protocol System and Lazy Module Pattern after Custom Axioms.
 - U4b: included `.ts` files use `getTestStatusForFile` on their own path. Page 02 gained the two supporting-file status lines and nothing else.
 - U4: `build:docs:examples` runs `check:test:json` first, so pages get `_Status:_` lines. The included-file titles in page 02 have no status yet. U4b fixes this.
 - U3: rendered included `.ts` files through `parseExampleFile` and `renderTutorialBody`; non-`.ts` includes unchanged. Regenerated `docs/examples/`; only `02-module-style-canon.md` changed.
