@@ -931,7 +931,7 @@ describe('shell', () => {
       declareCanon('DeclaredCanon', { axioms: {} })
       const ghost = defineTheory({})
       const caught = {
-        get extends() {
+        get extends(): undefined {
           try {
             declareCanon('DeclaredCanon', {
               axioms: {
@@ -949,7 +949,7 @@ describe('shell', () => {
         },
       }
       const failing = {
-        get extends() {
+        get extends(): undefined {
           try {
             declareCanon('DeclaredCanon', {
               axioms: {
@@ -982,7 +982,7 @@ describe('shell', () => {
       declareCanon('DeclaredCanon', { axioms: {} })
       const ghost = defineTheory({})
       const outer = {
-        get extends() {
+        get extends(): undefined {
           try {
             declareCanon('DeclaredCanon', {
               axioms: {
