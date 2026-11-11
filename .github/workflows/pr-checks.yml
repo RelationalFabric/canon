@@ -65,7 +65,9 @@ jobs:
 
       - name: Run TypeScript type checking
         if: steps.pr-check.outputs.skip != 'true'
-        run: npx tsc --noEmit --pretty false 2>&1 | tee typescript.log || true
+        run: |
+          npx tsc --noEmit --pretty false 2>&1 | tee typescript.log || true
+          npx tsc --noEmit --pretty false --project tsconfig.test.json 2>&1 | tee -a typescript.log || true
 
       - name: Setup reviewdog for TypeScript
         uses: reviewdog/action-setup@v1

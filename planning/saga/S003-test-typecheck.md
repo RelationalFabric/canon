@@ -180,11 +180,23 @@ Do not add the file to `files` or `exports`. Do not edit `vitest.config.ts`. Do 
 
 **Done check:** `npm run check:types` passes, including the new script. `npm run check:all` passes. `git diff` for this commit does not touch `src/`.
 
-### U5 — Drop the parked radar risk
+### U5 — Run the test project in CI
+
+**Rating:** M
+
+**Depends on:** U4.
+
+**Files:** `.github/workflows/pr-checks.yml`.
+
+**Work:** In the step `Run TypeScript type checking`, keep the existing `npx tsc --noEmit --pretty false 2>&1 | tee typescript.log || true` line unchanged and add a second line after it: `npx tsc --noEmit --pretty false --project tsconfig.test.json 2>&1 | tee -a typescript.log || true`. Change nothing else in any workflow.
+
+**Done check:** The workflow step runs both `tsc` commands into `typescript.log`.
+
+### U6 — Drop the parked radar risk
 
 **Rating:** S
 
-**Depends on:** U4.
+**Depends on:** U5.
 
 **Files:** `planning/radar/data.yaml`.
 
@@ -207,11 +219,13 @@ Gates are configuration. They are not a progress tick.
 | U3 | required | required | N/A | required | required | required | N/A |
 | U4 | required | required | N/A | required | required | required | N/A |
 | U5 | required | required | N/A | required | required | required | N/A |
+| U6 | required | required | N/A | required | required | required | N/A |
 
-Scoped checks for U1–U3 are `npm run check:all` plus the throwaway `tsc --noEmit` described in the unit. The throwaway file is not committed. Scoped checks for U4 are `npm run check:types`. Scoped checks for U5 are `npm run check:radar`.
+Scoped checks for U1–U3 are `npm run check:all` plus the throwaway `tsc --noEmit` described in the unit. The throwaway file is not committed. Scoped checks for U4 are `npm run check:types`. Scoped checks for U6 are `npm run check:radar`.
 
 ### Notes
 
+- U5 done. The `Run TypeScript type checking` step in `.github/workflows/pr-checks.yml` appends the test-project `tsc` to `typescript.log`. `npm run check:all` is the full-check gate for this pause.
 - U4 done. `tsconfig.test.json` is in the tree and `check:types:all` runs `check:types:tests`. `npm run check:types` and `npm run check:all` are the full-check gates for this pause.
 - U3 done. `src/theories/identity.test.ts` asserts `IsFalse<Expect<Incompatible, WrongIdKind>>`. `src/shell.test.ts` reads `models` through an unexported `RegisteredCanon`, and the conflicting theory config is asserted through `unknown`. Throwaway `tsc --noEmit --project tsconfig.test.json` reported 0 errors. The throwaway file was deleted before commit. `npm run check:all` is the full-check gate for this pause.
 - U2 done. `DeclaredCanon` in `src/shell.test.ts` and `Canon1` in `src/registry.test.ts` are `Record<never, never>`. Theory placeholders stay `Record<string, never>`. Throwaway `tsc --noEmit --project tsconfig.test.json` reported 3 errors: `src/shell.test.ts:115`, `src/shell.test.ts:177`, `src/theories/identity.test.ts:30`. `src/axioms/references.ts` and `src/axioms/timestamps.ts` were absent. The throwaway file was deleted before commit. `npm run check:all` is the full-check gate for this pause.
