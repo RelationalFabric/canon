@@ -8,7 +8,7 @@ import { metaOf, updateMeta } from './meta.js'
 
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
 
-const unrestoredEntries = new WeakSet<object>()
+const unrestoredEntries = new WeakMap<object, unknown>()
 
 const incompleteRollbacks = new WeakSet<AggregateError>()
 
@@ -279,7 +279,7 @@ export const definitionRegistry = new DefinitionRegistry()
 /**
  * Each call, nested or not, rolls back its own writes and uri stamps on failure (ADR-0017).
  * A failed restore is reported as an AggregateError whose first error and cause are the original error.
- * A call does not commit while a caught inner rollback left stamps unrestored; it retries them first and fails if they still can't be restored.
+ * A call cannot commit while a caught inner rollback left stamps unrestored in its range; it rolls back instead and throws an AggregateError.
  */
 export function allOrNothing<T>(write: () => T): T {
   const outermost = stampLog === undefined
@@ -293,26 +293,15 @@ export function allOrNothing<T>(write: () => T): T {
   savepointStart = logStart
   try {
     const result = write()
-    const retryErrors: unknown[] = []
-    for (let index = log.length - 1; index >= logStart; index--) {
+    for (let index = logStart; index < log.length; index++) {
       const entry = log[index]
-      if (entry === undefined || !unrestoredEntries.has(entry)) {
-        continue
+      if (entry !== undefined && unrestoredEntries.has(entry)) {
+        throw new AggregateError(
+          [unrestoredEntries.get(entry)],
+          'allOrNothing cannot commit: rollback incomplete',
+          { cause: unrestoredEntries.get(entry) },
+        )
       }
-      const supersededLater = log.slice(index + 1).some(later => later.target === entry.target)
-      if (supersededLater) {
-        retryErrors.push(new Error('allOrNothing cannot retry a restore that a later stamp superseded'))
-        continue
-      }
-      try {
-        updateMeta(entry.target, () => entry.prior)
-        unrestoredEntries.delete(entry)
-      } catch (retryError) {
-        retryErrors.push(retryError)
-      }
-    }
-    if (retryErrors.length > 0) {
-      throw new AggregateError(retryErrors, 'allOrNothing cannot commit: an earlier rollback left unrestored stamps')
     }
     return result
   } catch (error) {
@@ -329,7 +318,7 @@ export function allOrNothing<T>(write: () => T): T {
       } catch (restoreError) {
         restoreErrors.push(restoreError)
         unrestored.unshift(entry)
-        unrestoredEntries.add(entry)
+        unrestoredEntries.set(entry, restoreError)
       }
     }
     try {
