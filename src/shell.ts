@@ -6,7 +6,7 @@
 
 import type { MorphismConfig } from './morphism.js'
 import type { TheoryConfig } from './theory.js'
-import type { CanonConfig, Canons, Theories } from './types/index.js'
+import type { CanonConfig, Canons, DefinitionUri, LexiconTermUri, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
 import { canonRefFor, definitionRegistry, definitionUri, morphismRefFor, theoryRefFor } from './definitions.js'
 import { objectHash } from './kit.js'
@@ -57,7 +57,12 @@ export function declareCanon<Label extends keyof Canons>(label: Label, config: C
 export function registerCanons(canons: Record<string, CanonConfig>): void {
   const defined = Object.entries(canons).map(([label, config]) => [label, defineCanon(config)] as const)
   const provided = new Map<string, unknown>()
-  for (const [, config] of defined) {
+  for (const [label, config] of defined) {
+    const uri = definitionUri('canon', label)
+    const existing = canonRefFor(label).value
+    if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+      throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
+    }
     preflightCanonModels(config, provided)
   }
   for (const [, config] of defined) {
@@ -377,6 +382,20 @@ function registerTheoriesOrder(theories: Record<string, TheoryConfig>): string[]
   return order
 }
 
+function isRegisteredDefinitionUri(value: unknown): value is DefinitionUri | LexiconTermUri {
+  if (typeof value !== 'string') {
+    return false
+  }
+  const uri = value as DefinitionUri | LexiconTermUri
+  return (
+    value.startsWith('canon://canon/')
+    || value.startsWith('canon://axiom/')
+    || value.startsWith('canon://theory/')
+    || value.startsWith('canon://morphism/')
+    || value.startsWith('canon://lexicon/')
+  ) && definitionRegistry.has(uri)
+}
+
 function parseMorphismKey(key: string): { source: string, target: string } {
   const slash = key.indexOf('/')
   if (slash === -1) {
@@ -386,11 +405,21 @@ function parseMorphismKey(key: string): { source: string, target: string } {
 }
 
 function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): void {
+  const seen = new Map<MorphismConfig, string>()
   for (const [key, config] of Object.entries(morphisms)) {
     const { source, target } = parseMorphismKey(key)
     resolveTheoryLabel(source)
     resolveTheoryLabel(target)
     const uri = definitionUri('morphism', key)
+    const prior = seen.get(config)
+    if (prior !== undefined) {
+      throw new Error(`Definition already registered: ${prior}`)
+    }
+    seen.set(config, uri)
+    const carried = metaOf(config).uri
+    if (isRegisteredDefinitionUri(carried) && carried !== uri) {
+      throw new Error(`Definition already registered: ${carried}`)
+    }
     const existing = morphismRefFor(source, target).value
     if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)

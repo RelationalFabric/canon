@@ -344,6 +344,30 @@ describe('shell', () => {
       expect(morphismRefFor('Missing', 'Taxonomy').value).toBeUndefined()
     })
 
+    it('stores nothing when one config object is used under two keys', () => {
+      const shared = { maps: { Id: 'Type' } }
+
+      expect(() => registerMorphisms({
+        'Identity/Taxonomy': shared,
+        'Taxonomy/Identity': shared,
+      })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy')
+
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+      expect(morphismRefFor('Taxonomy', 'Identity').value).toBeUndefined()
+    })
+
+    it('stores nothing new when a registered config is reused under another key', () => {
+      const shared = { maps: { Id: 'Type' } }
+      declareMorphism('Identity', 'Taxonomy', shared)
+
+      expect(() => registerMorphisms({
+        'Taxonomy/Identity': shared,
+      })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy')
+
+      expect(morphismRefFor('Taxonomy', 'Identity').value).toBeUndefined()
+      expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(shared)
+    })
+
     it('stores nothing when a batch conflicts with an already registered morphism', () => {
       declareMorphism('Identity', 'Taxonomy', morphismConfig)
 
@@ -503,6 +527,25 @@ describe('shell', () => {
       expect(() => registerCanons({ Z: { axioms: {}, models: ['Missing'] } }))
         .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
       expect(canonRefFor('Z').value).toBeUndefined()
+    })
+
+    it('stores nothing when a later canon conflicts with an existing registration', () => {
+      registerCanons({ canon2: { axioms: {} } })
+
+      expect(() => registerCanons({
+        canon1: { axioms: {} },
+        canon2: {
+          axioms: {
+            Id: {
+              $basis: (v: unknown): v is { id: string } => true,
+              key: 'id',
+            },
+          },
+        },
+      })).toThrow('Definition already registered: canon://canon/canon2 (ADR-0017)')
+
+      expect(canonRefFor('canon1').value).toBeUndefined()
+      expect(canonRefFor('canon2').value).toEqual({ axioms: {} })
     })
 
     it('stores nothing when a later canon has a missing models label', () => {
