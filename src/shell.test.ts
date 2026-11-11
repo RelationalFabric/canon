@@ -5,7 +5,7 @@
 import type { CanonConfig } from './types/index.js'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { inferCanon } from './canon.js'
-import { canonRefFor, morphismRefFor, theoryRefFor } from './definitions.js'
+import { canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { declareCanon, declareMorphism, declareTheory, registerCanons, registerMorphisms, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
@@ -663,6 +663,130 @@ describe('shell', () => {
       })).toThrow('Definition already registered: canon://canon/X (ADR-0017)')
 
       expect(canonRefFor('X').value).toBe(original)
+    })
+  })
+
+  describe('all-or-nothing', () => {
+    function uris(): string[] {
+      return [...definitionRegistry.entries()].map(([uri]) => uri)
+    }
+
+    it('rolls back declareCanon when a different config follows a models map', () => {
+      declareCanon('DeclaredCanon', { axioms: {} })
+      const fresh = defineTheory({})
+      const size = definitionRegistry.size
+      const keys = uris()
+
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } => true,
+            key: 'id',
+          },
+        },
+        models: { Fresh: fresh },
+      })).toThrow('Definition already registered: canon://canon/DeclaredCanon (ADR-0017)')
+
+      expect(definitionRegistry.size).toBe(size)
+      expect(uris()).toEqual(keys)
+      expect(metaOf(fresh).uri).toBeUndefined()
+    })
+
+    it('rolls back declareCanon when a models map reuses a value registered under another name', () => {
+      const alias = defineTheory({})
+      declareTheory('Other', alias)
+      declareCanon('DeclaredCanon', { axioms: {} })
+      const fresh = defineTheory({})
+      const size = definitionRegistry.size
+      const keys = uris()
+
+      expect(() => declareCanon('DeclaredCanon', {
+        axioms: {
+          Id: {
+            $basis: (v: unknown): v is { id: string } => true,
+            key: 'id',
+          },
+        },
+        models: { Fresh: fresh, Alias: alias },
+      })).toThrow('Definition already registered: canon://theory/Other')
+
+      expect(definitionRegistry.size).toBe(size)
+      expect(uris()).toEqual(keys)
+      expect(metaOf(fresh).uri).toBeUndefined()
+      expect(metaOf(alias).uri).toBe('canon://theory/Other')
+    })
+
+    it('rolls back registerCanons when a later list has a ref map that is not last', () => {
+      declareTheory('Identity', identityConfig)
+      const fresh = defineTheory({})
+      const size = definitionRegistry.size
+      const keys = uris()
+
+      expect(() => registerCanons({
+        canon1: { axioms: {}, models: { Fresh: fresh } },
+        canon2: { axioms: {}, models: [{ Later: defineTheory({}) }, 'Identity'] },
+      })).toThrow('A definition ref map is only allowed as the last item (ADR-0017)')
+
+      expect(definitionRegistry.size).toBe(size)
+      expect(uris()).toEqual(keys)
+      expect(metaOf(fresh).uri).toBeUndefined()
+    })
+
+    it('rolls back declareTheory when an existing label gains a map-form extends', () => {
+      declareTheory('DeclaredTheory', {})
+      const fresh = defineTheory({})
+      const size = definitionRegistry.size
+      const keys = uris()
+
+      expect(() => declareTheory('DeclaredTheory', { extends: { Fresh: fresh } }))
+        .toThrow('Definition already registered: canon://theory/DeclaredTheory (ADR-0017)')
+
+      expect(definitionRegistry.size).toBe(size)
+      expect(uris()).toEqual(keys)
+      expect(metaOf(fresh).uri).toBeUndefined()
+    })
+
+    it('rolls back when Fresh and an already-registered Alias are provided together', () => {
+      const alias = defineTheory({})
+      declareTheory('Other', alias)
+      const fresh = defineTheory({})
+      const size = definitionRegistry.size
+      const keys = uris()
+
+      expect(() => registerTheories({
+        T: { extends: { Fresh: fresh, Alias: alias } },
+      })).toThrow('Definition already registered: canon://theory/Other')
+
+      expect(definitionRegistry.size).toBe(size)
+      expect(uris()).toEqual(keys)
+      expect(metaOf(fresh).uri).toBeUndefined()
+
+      const freshAgain = defineTheory({})
+      const sizeAgain = definitionRegistry.size
+      const keysAgain = uris()
+
+      expect(() => declareTheory('T', { extends: { Fresh: freshAgain, Alias: alias } }))
+        .toThrow('Definition already registered: canon://theory/Other')
+
+      expect(definitionRegistry.size).toBe(sizeAgain)
+      expect(uris()).toEqual(keysAgain)
+      expect(metaOf(freshAgain).uri).toBeUndefined()
+      expect(metaOf(alias).uri).toBe('canon://theory/Other')
+    })
+
+    it('rolls back registerTheories when a ref map is not the last list item', () => {
+      declareTheory('Identity', identityConfig)
+      const fresh = defineTheory({})
+      const size = definitionRegistry.size
+      const keys = uris()
+
+      expect(() => registerTheories({
+        T: { extends: [{ Fresh: fresh }, 'Identity'] },
+      })).toThrow('A definition ref map is only allowed as the last item (ADR-0017)')
+
+      expect(definitionRegistry.size).toBe(size)
+      expect(uris()).toEqual(keys)
+      expect(metaOf(fresh).uri).toBeUndefined()
     })
   })
 })
