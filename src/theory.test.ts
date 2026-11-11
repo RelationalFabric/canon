@@ -5,13 +5,14 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { definitionRegistry, definitionUri, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { declareTheory, resetRegistry } from './shell.js'
+import { declareMorphism, declareTheory, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { defineTheory, Theory } from './theory.js'
 
 declare module './types/theories.js' {
   interface Theories {
     Composed: Record<string, never>
+    Fresh: Record<string, never>
   }
 }
 
@@ -76,9 +77,19 @@ describe('declareTheory extends', () => {
     const fresh = theoryRefFor('Fresh').value
     expect(theoryRefFor('Fresh').key).toBe('canon://theory/Fresh')
     expect(fresh).toBeDefined()
+    expect(fresh).toBeInstanceOf(Theory)
     if (isMetaCarrier(fresh)) {
       expect(metaOf(fresh)).toEqual({ uri: 'canon://theory/Fresh' })
     }
+  })
+
+  it('registers map-form theories as Theory instances usable in morphisms', () => {
+    declareTheory('Identity', identityConfig)
+    declareTheory('Composed', { extends: { Fresh: {} } })
+
+    expect(theoryRefFor('Fresh').value).toBeInstanceOf(Theory)
+
+    expect(() => declareMorphism('Fresh', 'Identity', { maps: {} })).not.toThrow()
   })
 
   it('throws when a map is not the last list item', () => {

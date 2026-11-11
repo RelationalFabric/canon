@@ -140,12 +140,50 @@ function resolveExtends(config: TheoryConfig): void {
   if (config.extends === undefined) {
     return
   }
-  const resolved = definitionRegistry.resolve('theory', config.extends)
+  const refs = extendsRefsForTheoryResolve(config.extends)
+  const resolved = definitionRegistry.resolve('theory', refs)
   for (const entry of resolved) {
     if (entry.value === undefined) {
       throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
     }
   }
+}
+
+/**
+ * Map-form theory values are constructed before the registry stores them.
+ */
+function extendsRefsForTheoryResolve(
+  extendsValue: NonNullable<TheoryConfig['extends']>,
+): NonNullable<TheoryConfig['extends']> {
+  if (Array.isArray(extendsValue)) {
+    const last = extendsValue[extendsValue.length - 1]
+    if (isRefMap(last)) {
+      return [...extendsValue.slice(0, -1), theoryMapForResolve(last)]
+    }
+    return extendsValue
+  }
+  if (isNameMap(extendsValue)) {
+    return theoryMapForResolve(extendsValue)
+  }
+  return extendsValue
+}
+
+function theoryMapForResolve(composition: Record<string, unknown>): Record<string, unknown> {
+  const mapped: Record<string, unknown> = {}
+  for (const [name, value] of Object.entries(composition)) {
+    mapped[name] = asTheoryInstance(value)
+  }
+  return mapped
+}
+
+function asTheoryInstance(value: unknown): Theory {
+  if (value instanceof Theory) {
+    return value
+  }
+  if (isTheoryConfig(value)) {
+    return defineTheory(value)
+  }
+  throw new Error('A definition ref map value must be a theory config (ADR-0017)')
 }
 
 /**
@@ -421,9 +459,12 @@ function morphismForTheoryLabels(
   config: MorphismConfig,
 ): Morphism {
   const sourceTheory = theoryRefFor(sourceLabel).value
-  const targetTheory = theoryRefFor(targetLabel).value
-  if (!(sourceTheory instanceof Theory) || !(targetTheory instanceof Theory)) {
+  if (!(sourceTheory instanceof Theory)) {
     throw new TypeError(`Unresolved theory: ${definitionUri('theory', sourceLabel)} (ADR-0017)`)
+  }
+  const targetTheory = theoryRefFor(targetLabel).value
+  if (!(targetTheory instanceof Theory)) {
+    throw new TypeError(`Unresolved theory: ${definitionUri('theory', targetLabel)} (ADR-0017)`)
   }
   return defineMorphism({
     ...config,
@@ -460,12 +501,7 @@ function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): v
     if (isDefinitionKey(carried) && definitionRegistry.has(carried) && carried !== uri) {
       throw new Error(`Definition already registered: ${carried}`)
     }
-    const sourceTheory = theoryRefFor(source).value
-    const targetTheory = theoryRefFor(target).value
-    if (!(sourceTheory instanceof Theory) || !(targetTheory instanceof Theory)) {
-      throw new TypeError(`Unresolved theory: ${definitionUri('theory', source)} (ADR-0017)`)
-    }
-    const existing = morphismForTheoryPair(sourceTheory, targetTheory)
+    const existing = morphismForTheoryPair(defined.source!, defined.target!)
     if (existing !== undefined && objectHash(existing) !== objectHash(defined)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
