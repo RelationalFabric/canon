@@ -286,7 +286,7 @@ function definitionKeyOf(value: unknown): DefinitionUri | LexiconTermUri | undef
 /**
  * Whether a string is a definition or lexicon term URI.
  */
-function isDefinitionKey(value: unknown): value is DefinitionUri | LexiconTermUri {
+export function isDefinitionKey(value: unknown): value is DefinitionUri | LexiconTermUri {
   return typeof value === 'string' && (
     value.startsWith('canon://canon/')
     || value.startsWith('canon://axiom/')

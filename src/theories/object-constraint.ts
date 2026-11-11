@@ -4,6 +4,11 @@
 
 import type { ObjectConstraintAxiom, Theories } from '../types/index.js'
 
+// @ts-expect-error ObjectConstraintAxiom takes Theories only
+type NotATheoryConstraint = ObjectConstraintAxiom<[{ NotATheory: string }]>
+
+void 0 as unknown as NotATheoryConstraint
+
 interface ConstrainedCanon {
   Owner: ObjectConstraintAxiom<[Theories['Identity']]>
 }
