@@ -159,7 +159,8 @@ export function declareTheory<Label extends keyof Theories>(label: Label, config
 }
 
 /**
- * Declare a morphism in the global registry
+ * Declare a morphism in the global registry.
+ * Completeness is checked at the type level only, because a Theory has no runtime key inventory to check against.
  *
  * @param source - The source theory label
  * @param target - The target theory label
@@ -169,7 +170,13 @@ export function declareTheory<Label extends keyof Theories>(label: Label, config
 export function declareMorphism<
   Source extends keyof Theories,
   Target extends keyof Theories,
->(source: Source, target: Target, config: MorphismConfig) {
+>(
+  source: Source,
+  target: Target,
+  config: {
+    maps: { [K in keyof Theories[Source] & string]: keyof Theories[Target] & string }
+  },
+) {
   const defined = defineMorphism(config)
   resolveTheoryLabel(String(source))
   resolveTheoryLabel(String(target))
@@ -178,12 +185,17 @@ export function declareMorphism<
 }
 
 /**
- * Register multiple morphisms at once (for module-style registration)
+ * Register multiple morphisms at once (for module-style registration).
+ * Completeness is checked at the type level only, because a Theory has no runtime key inventory to check against.
  *
  * @param morphisms - Object mapping `<Source>/<Target>` keys to morphism configs
  * @param morphisms.maps - Term mappings from source to target
  */
-export function registerMorphisms(morphisms: Record<string, MorphismConfig>): void {
+export function registerMorphisms(morphisms: {
+  [Key in string]: Key extends `${infer Source extends keyof Theories}/${infer Target extends keyof Theories}`
+    ? { maps: { [K in keyof Theories[Source] & string]: keyof Theories[Target] & string } }
+    : MorphismConfig
+}): void {
   validateRegisterMorphisms(morphisms)
 
   for (const [key, config] of Object.entries(morphisms)) {

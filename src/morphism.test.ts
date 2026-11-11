@@ -27,6 +27,16 @@ invariant<Expect<{}, IdentityToTaxonomy>>()
 // @ts-expect-error Id must map to a Taxonomy key
 invariant<Expect<{ Id: 'Nope' }, IdentityToTaxonomy>>()
 
+function completenessFixtures(): void {
+  // @ts-expect-error incomplete maps
+  declareMorphism('Identity', 'Taxonomy', { maps: {} })
+
+  // @ts-expect-error wrong target term
+  declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Nope' } })
+}
+
+void completenessFixtures
+
 describe('defineMorphism', () => {
   it('returns the same object', () => {
     const config = { maps: { Id: 'Id' } }
