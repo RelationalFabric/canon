@@ -264,17 +264,12 @@ interface EntityReference<R, T = unknown> {
 type ReferencesAxiom = RepresentationAxiom<string | object, EntityReference<string, unknown>>
 ```
 
-**Registration**:
+**Registration** (deprecated; see `src/axioms/references.ts`):
 
 ```typescript
 declare module '@relational-fabric/canon' {
   interface Axioms {
-    References: {
-      $basis: string | object | TypeGuard<unknown>
-      isCanonicalReference: (
-        value: string | object | TypeGuard<unknown>,
-      ) => value is EntityReference<string, unknown>
-    }
+    References: RepresentationAxiom<string | object, EntityReference<string, unknown>>
   }
 }
 ```
@@ -285,23 +280,41 @@ declare module '@relational-fabric/canon' {
 - Object references: `object` (reference objects with metadata)
 - URI references: `string` (URI-formatted references)
 
-**API Functions**:
+**API Functions** (deprecated; matches `src/axioms/references.ts`):
 
 ```typescript
-function referencesOf<T extends Satisfies<'References'>>(x: T): AxiomValue<'References'> {
+function referencesOf<T extends Satisfies<'References'>>(
+  x: T,
+): EntityReference<string, unknown> {
   const config = inferAxiom('References', x)
-  return config.isCanonicalReference(x) ? x : { ref: x as string, resolved: false }
+  if (!config) {
+    throw new Error('No matching canon found for References axiom')
+  }
+  if (isCanonicalReference(x)) {
+    return x
+  }
+  if (typeof x === 'string') {
+    return { ref: x, resolved: false }
+  }
+  // Objects: scan ref/id/reference/uri/url fields, else TypeError
+  // ...
 }
 ```
 
-**Implementation**:
+**Implementation** (deprecated; matches `src/axioms/references.ts`):
 
 ```typescript
-// Reference canonical type guard
 function isCanonicalReference(
-  value: string | object | TypeGuard<unknown>,
+  value: string | object,
 ): value is EntityReference<string, unknown> {
-  return typeof value === 'object' && value !== null && 'ref' in value && 'resolved' in value
+  return (
+    typeof value === 'object'
+    && value !== null
+    && 'ref' in value
+    && 'resolved' in value
+    && typeof (value as EntityReference<string, unknown>).ref === 'string'
+    && typeof (value as EntityReference<string, unknown>).resolved === 'boolean'
+  )
 }
 ```
 
