@@ -72,6 +72,10 @@ Bahul, 11 Nov 2026, 16:18–23:53 London, decided:
 23. Registering a Morphism replaces its `source` and `target` with the registered Theory instances when they are not already the same objects, so comparison by reference holds.
 24. `SimpleNode.identity(A)` returns a Morphism A→A whose maps send each term in `termsOf(A)` to itself. `SimpleCategory.compose` composes maps by substitution and returns a Morphism A→C. Identity is the unit of compose on both sides.
 
+Bahul, 12 Nov 2026, decided:
+
+25. Theories may not shadow inherited terms. Declaring or registering a Theory whose own terms include a name already inherited through `extends` is an error, including when the description is identical. It is thrown before any registry write. The error type follows unit 5's open decision (built-in TypeError vs a canon error class). This closes open question 4.
+
 No new dispatcher, registry, or `defineProtocol` option is in scope.
 
 ### Units
@@ -90,6 +94,8 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 
 5. **Reject `/` in Theory labels.** `canon://morphism/A/B/C` is ambiguous otherwise (Architecture review of #87). Thrown from theory declare and register, before the registry write. `src` has no error class, only `throw new Error`, so the error type and the message are **TBD for Bahul**.
 
+8. **Reject shadowed terms.** Ordered after unit 5 and before unit 6. Blocked on unit 5's error type. Declaring or registering a Theory whose own `terms` include a name already inherited through `extends` throws, including when the description is identical (decision 25). Thrown before the registry write. A batch that includes a shadow leaves no partial state. The current behaviour, own terms winning in `termsOf`, and its test [code: `src/theory.test.ts:224-231`] are replaced by tests that assert the error for both list-form and map-form `extends`.
+
 6. **SimpleCategory, SimpleFunctor and SimpleNode.** Blocked on open question 3. Define `SimpleCategory` (`compose`) and `SimpleFunctor` (`map`) for `Morphism`, and `SimpleNode` (`identity`) for `Theory`, all via `defineProtocol` and `extendProtocol`. Add the type aliases `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`, and the `Protocols` entries `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, and `SimpleNode: PSimpleNode`. The existing `Seq` entry is a comment edit only: `src/types/protocols.d.ts:134-138` shows `PSeq: Protocol<Seq>` in JSDoc. Change that example to `Seq: PSeq` together with a `PSeq` alias, and update any uses of the old `PSeq` key. Also update `examples/08`, the `src/protocol.ts` JSDoc, and the article, because decision 17 flips today's PSeq-as-value convention. `compose` and `map` read `source` and `target` from the value and compare Theory values for the chain. `SimpleNode.identity` dispatches on the Theory constructor and uses `termsOf` (decision 24). `compose` is substitution and throws when a middle term is missing, because ADR-0018 requires complete Morphisms. Today a missing middle term is dropped [code: `src/morphism.ts:74-78`]. Acceptance: `compose` and `map` work on an unregistered composed Morphism, and the identity laws hold on both sides. `identity(A)` is unregistered (decisions 11 and 24). Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Do not implement Theory mapping beyond this, the rest of dispatch on Theories, or algebraic law checks.
 
 7. **Remove the #87 operations.** Delete `composeMorphisms` and `applyMorphism` and their `src/index.ts` exports, including the registered-only gate [code: `src/morphism.ts:106-110`]. Delete their tests from `src/morphism.test.ts` once unit 6's protocol tests cover the same cases. `defineMorphism` stays. `compose` throwing on a missing middle term closes the radar item "composeMorphisms silent term drop" [code: `planning/radar/data.yaml:191`]. `composeMorphisms` and `applyMorphism` were never released (added 10 Nov, last tag `v1.2.0`), so there is no deprecation step.
@@ -99,7 +105,7 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 1. Closed by decision 17. `SimpleCategory`, `SimpleFunctor`, and `SimpleNode` go into the `Protocols` interface under unprefixed keys, mapped to `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`. `Protocols` is protocol-only type augmentation [code: `src/types/protocols.d.ts:142`], not the definition registry.
 2. Closed. [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`. ADR-0017 and ADR-0018 are Accepted.
 3. Do the public protocol names (`SimpleCategory`, `SimpleFunctor`, `SimpleNode`, `compose`, `map`, `identity`, and the P-prefix on the type) need a protocol ADR before they ship? They are in no ADR, and ADR-0015 is Obsolescent. For Bahul. Unit 6 is blocked on this answer.
-4. Inherited term override rule: when a theory's own `terms` and an inherited term share a name with different descriptions, runtime behaviour uses own terms for `termsOf` today; the long-term override rule is undecided. For Bahul.
+4. Closed by decision 25. Theories may not shadow inherited terms, including when the description is identical. The earlier `termsOf` behaviour, own terms winning, is replaced by unit 8.
 
 ## Ledger
 
@@ -110,6 +116,7 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 | 3 | required | required | required | required | required | required | N/A |
 | 4 | required | required | required | required | required | required | N/A |
 | 5 | required | required | required | required | required | required | N/A |
+| 8 | required | required | required | required | required | required | N/A |
 | 6 | required | required | required | required | required | required | N/A |
 | 7 | required | required | required | required | required | required | N/A |
 
