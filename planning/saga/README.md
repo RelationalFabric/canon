@@ -106,7 +106,7 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 | unit | commit | push | scoped tests | scoped checks | full tests | full checks | smoke |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | required | required | required | required | required | required | N/A |
-| 2 | done | required | required | required | required | required | N/A |
+| 2 | required | required | required | required | required | required | N/A |
 | 3 | required | required | required | required | required | required | N/A |
 | 4 | required | required | required | required | required | required | N/A |
 | 5 | required | required | required | required | required | required | N/A |

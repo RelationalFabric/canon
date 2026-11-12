@@ -12,7 +12,7 @@ import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinit
 import { objectHash } from './kit.js'
 import { metaOf } from './meta.js'
 import { defineMorphism, Morphism } from './morphism.js'
-import { defineTheory, regularizeTheoryTerms, Theory } from './theory.js'
+import { clashHash, defineTheory, Theory } from './theory.js'
 
 /**
  * Reset the global registry to empty
@@ -63,7 +63,7 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
     for (const [label, config] of defined) {
       const uri = definitionUri('canon', label)
       const existing = canonRefFor(label).value
-      if (existing !== undefined && hashForClash(existing) !== hashForClash(config)) {
+      if (existing !== undefined && clashHash(existing) !== clashHash(config)) {
         throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
       }
       preflightCanonModels(config, provided)
@@ -176,26 +176,29 @@ function materializeExtendsRef(item: unknown): unknown {
   if (typeof item === 'string') {
     return theoryRefFor(item).value
   }
-  if (carriedDefinitionUri(item) !== undefined) {
-    return item
+  if (isTheoryKeyRef(item)) {
+    return item.value
   }
   return item
+}
+
+function isTheoryKeyRef(value: unknown): value is { readonly value: unknown } {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  if (!('key' in value) || !('value' in value)) {
+    return false
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(value, 'value')
+  return typeof descriptor?.get === 'function' && isDefinitionKey(value.key)
 }
 
 function materializeExtendsMap(composition: Record<string, unknown>): Record<string, unknown> {
   const mapped: Record<string, unknown> = {}
   for (const [name, value] of Object.entries(composition)) {
-    const registered = theoryRefFor(name).value
-    mapped[name] = registered ?? materializeExtendsRef(value)
+    mapped[name] = materializeExtendsRef(value)
   }
   return mapped
-}
-
-function hashForClash(value: unknown): string {
-  if (value instanceof Theory) {
-    regularizeTheoryTerms(value)
-  }
-  return objectHash(value)
 }
 
 /**
@@ -429,11 +432,11 @@ function validateProvidedNames(
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     const existing = theoryRefFor(name).value
-    if (existing !== undefined && hashForClash(existing) !== hashForClash(value)) {
+    if (existing !== undefined && clashHash(existing) !== clashHash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     const prior = provided.get(name)
-    if (prior !== undefined && hashForClash(prior) !== hashForClash(value)) {
+    if (prior !== undefined && clashHash(prior) !== clashHash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     provided.set(name, value)

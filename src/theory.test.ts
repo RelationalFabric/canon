@@ -160,6 +160,29 @@ describe('runtime terms', () => {
     expect(() => declareTheory('FillIn', { terms: {} })).not.toThrow()
   })
 
+  it('returns a frozen termsOf result', () => {
+    const theory = defineTheory({ terms: { Id: 'identifier' } })
+    const terms = termsOf(theory)
+
+    expect(Object.isFrozen(terms)).toBe(true)
+    expect(() => {
+      (terms as { Id: string }).Id = 'changed'
+    }).toThrow(TypeError)
+    expect(terms.Id).toBe('identifier')
+    expect(termsOf(theory)).toBe(terms)
+  })
+
+  it('throws on an unresolved extends parent and does not cache a partial result', () => {
+    const theory = defineTheory({
+      extends: ['Missing'],
+      terms: { Own: 'own' },
+    })
+
+    const unresolved = new TypeError('Unresolved theory in extends (ADR-0018)')
+    expect(() => termsOf(theory)).toThrow(unresolved)
+    expect(() => termsOf(theory)).toThrow(unresolved)
+  })
+
   it('unions inherited terms through extends across two levels', () => {
     declareTheory('Identity', identityConfig)
     declareTheory('Taxonomy', taxonomyConfig)

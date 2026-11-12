@@ -475,6 +475,39 @@ describe('shell', () => {
       expect(theoryRefFor('Fresh').value).toBeDefined()
     })
 
+    it('leaves a passed-in theory without terms when the batch fails', () => {
+      const fresh = defineTheory({})
+
+      expect(() => registerTheories({
+        T: { extends: { Fresh: fresh } },
+        Other: { extends: ['Missing'] },
+      })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+
+      expect(Object.hasOwn(fresh, 'terms')).toBe(false)
+      expect(theoryRefFor('Fresh').value).toBeUndefined()
+    })
+
+    it('re-declares a map-form theory from the original config', () => {
+      const fresh = defineTheory({})
+      const config = { extends: { Fresh: fresh } }
+
+      declareTheory('T', config)
+
+      expect(() => declareTheory('T', config)).not.toThrow()
+    })
+
+    it('keeps the bound theory when a map key matches a registered label', () => {
+      declareTheory('Identity', identityConfig)
+      const bound = defineTheory({ terms: identityConfig.terms })
+
+      declareTheory('T', { extends: { Identity: bound } })
+
+      const registered = theoryRefFor('T').value as Theory
+      const composition = registered.extends as Record<string, Theory>
+      expect(composition.Identity).toBe(bound)
+      expect(composition.Identity).not.toBe(theoryRefFor('Identity').value)
+    })
+
     it('stores nothing when a map-form entry shares a batch with a missing list label', () => {
       expect(() => registerTheories({
         T: { extends: { Fresh: defineTheory({}) } },

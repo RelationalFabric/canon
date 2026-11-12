@@ -2,6 +2,8 @@
  * Theory API
  */
 
+import { objectHash } from './kit.js'
+
 /**
  * Runtime theory value. `extends` lists the theories this one composes.
  * The type stays in this module.
@@ -18,7 +20,7 @@ const termsOfCache = new WeakMap<Theory, Readonly<Record<string, string>>>()
  */
 export class Theory implements TheoryConfig {
   extends?: Record<string, unknown> | readonly unknown[]
-  terms?: { [name: string]: string }
+  declare terms?: { [name: string]: string }
 
   constructor(config: TheoryConfig) {
     if (config.extends !== undefined) {
@@ -31,12 +33,39 @@ export class Theory implements TheoryConfig {
 }
 
 /**
- * Ensure a theory value about to be registered has its own `terms` map (ADR-0018).
+ * Ensure a theory value about to be stored has its own `terms` map (ADR-0018).
+ * Call this only after the clash check has passed, and only for the value being stored.
  */
 export function regularizeTheoryTerms(theory: Theory): void {
   if (theory.terms === undefined) {
     theory.terms = {}
   }
+}
+
+/**
+ * Hash a value for a definition clash check.
+ * A missing `terms` is read as `{}` and the input is not written to.
+ */
+export function clashHash(value: unknown): string {
+  const views = new WeakMap<Theory, Theory>()
+  const viewOf = (theory: Theory): Theory => {
+    if (theory.terms !== undefined) {
+      return theory
+    }
+    const existing = views.get(theory)
+    if (existing !== undefined) {
+      return existing
+    }
+    const view = new Theory({
+      extends: theory.extends,
+      terms: {},
+    })
+    views.set(theory, view)
+    return view
+  }
+  return objectHash(value, {
+    replacer: current => current instanceof Theory ? viewOf(current) : current,
+  })
 }
 
 /**
@@ -55,18 +84,20 @@ export function termsOf(theory: Theory): Readonly<Record<string, string>> {
   if (composition !== undefined) {
     const parents = Array.isArray(composition) ? composition : Object.values(composition)
     for (const parent of parents) {
-      if (parent instanceof Theory) {
-        for (const [name, description] of Object.entries(termsOf(parent))) {
-          if (!(name in merged)) {
-            merged[name] = description
-          }
+      if (!(parent instanceof Theory)) {
+        throw new TypeError('Unresolved theory in extends (ADR-0018)')
+      }
+      for (const [name, description] of Object.entries(termsOf(parent))) {
+        if (!(name in merged)) {
+          merged[name] = description
         }
       }
     }
   }
 
-  termsOfCache.set(theory, merged)
-  return merged
+  const frozen = Object.freeze(merged)
+  termsOfCache.set(theory, frozen)
+  return frozen
 }
 
 /**

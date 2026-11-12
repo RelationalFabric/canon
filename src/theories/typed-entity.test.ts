@@ -50,6 +50,10 @@ describe('typed entity theory', () => {
     expect(freshRef('TypedEntity').key).toBe('canon://theory/TypedEntity')
   })
 
+  it('re-declares from the original list-form config without a clash', () => {
+    expect(() => declareTheory('TypedEntity', typedEntityConfig)).not.toThrow()
+  })
+
   it('keeps extends as registered Identity and Taxonomy in order', () => {
     const registered = theoryRefFor('TypedEntity').value as Theory
     const composition = registered.extends as readonly Theory[]
