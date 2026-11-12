@@ -122,3 +122,4 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 - `df48dea`: unit 2 done (runtime terms).
 - `802015a` unit 2 review fixes
 - `3b002b3`: unit 4 done (registration swap)
+- `f7c2950`: unit 4 swap waits until register succeeds
