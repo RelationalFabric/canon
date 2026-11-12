@@ -583,6 +583,19 @@ describe('shell', () => {
       expect(canonRefFor('Later').value).toEqual({ axioms: {} })
     })
 
+    it('resolves a list-form models label supplied by a sibling map in the same batch', () => {
+      const sibling = defineTheory({})
+
+      registerCanons({
+        Source: { axioms: {}, models: { Sibling: sibling } },
+        User: { axioms: {}, models: ['Sibling'] },
+      })
+
+      expect(canonRefFor('Source').value).toBeDefined()
+      expect(canonRefFor('User').value).toBeDefined()
+      expect(theoryRefFor('Sibling').value).toBe(sibling)
+    })
+
     it('stores nothing when a later canon has a missing models label', () => {
       expect(() => registerCanons({
         Earlier: { axioms: {}, models: { Fresh: defineTheory({}) } },
