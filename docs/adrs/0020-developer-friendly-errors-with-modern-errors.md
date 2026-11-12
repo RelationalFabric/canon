@@ -29,10 +29,10 @@ Alternatives considered: keep built-in errors and a convention for message text 
 
 ## Decision
 
-1. We will bless `modern-errors` into canon's kit, following ADR-0008 and ADR-0006 as they stand, and set no new third-party policy. That means:
-   - a transparent re-export at `src/_/modern-errors.ts`;
-   - an opinionated entry in `src/kit.ts` under a kit-facing name `<KitName>`;
-   - declaration in both `dependencies` and `optionalDependencies`, as ADR-0006 requires.
+1. We will bless `modern-errors` into canon's kit, following ADR-0008 and ADR-0006 as they stand, and set no new third-party policy. The rule for the line between the kit and `_/` is: whatever canon itself uses comes from the kit. Every part of `modern-errors` that canon uses, plugins included, is exposed through `src/kit.ts` under opinionated kit-facing names (`<KitName>` and, per plugin used, `<PluginKitName>`). `src/_/modern-errors.ts` is a transparent re-export that only forwards the library for what canon does not use. In practice:
+   - `src/_/modern-errors.ts` forwards the library unchanged, per ADR-0008;
+   - `src/kit.ts` gets the entries canon uses;
+   - the library is declared in both `dependencies` and `optionalDependencies`, as ADR-0006 requires.
 
 2. Canon's own errors are built through the kit, not by importing `modern-errors` directly. Canon has one base error, `<BaseError>`, and every canon error is a subclass composed from it.
 
@@ -48,9 +48,9 @@ Alternatives considered: keep built-in errors and a convention for message text 
 
 5. S006 units 5 (no `/` in Theory labels) and 8 (no shadowed inherited terms, decision 25) are the first users of the kit's errors. This ADR must be Accepted and merged before either implements it. The remaining throw sites migrate in a later unit, planned in the saga and not here.
 
-6. Plugins are taken only where a consumer need is shown, and none is decided here (open question 5).
+6. Plugins are taken only where canon needs one, and none is decided here (open question 4).
 
-7. Whether errors are themselves described as Theories is left open (open question 6). Nothing in this ADR depends on the answer.
+7. Whether errors are themselves described as Theories is left open (open question 5). Nothing in this ADR depends on the answer.
 
 This ADR sets direction only. Class layout, the property schema, the code catalogue and the migration order are tactical and go in the saga.
 
@@ -73,9 +73,8 @@ Harder, and risks:
 
 Open questions (for approval before any name or choice is final; placeholders above stand until answered):
 
-1. Is `modern-errors` blessed for consumers (kit entry and transparent re-export both public), or internal to canon only?
-2. What is the kit-facing name, `<KitName>`? The existing kit names are opinionated (`Immutable`, `objectHash`, `Files`).
-3. What is the base class name, `<BaseError>`, and what are the subclass names? The first two subclasses are needed by units 5 and 8.
-4. What is the format of the stable code, `<code format>`? For example, whether it carries the ADR number.
-5. Which plugins, if any? `modern-errors-serialize` (errors crossing a process or network boundary) and `modern-errors-cli` (canon's own CLI) are the two considered, with the cost above.
-6. Are errors described as Theories, in line with S006 decision 22 (Theory and Morphism are themselves Theories)? Or are they plain classes with no Theory?
+1. What are the kit-facing names, `<KitName>` and one per plugin used? The existing kit names are opinionated (`Immutable`, `objectHash`, `Files`).
+2. What is the base class name, `<BaseError>`, and what are the subclass names? The first two subclasses are needed by units 5 and 8.
+3. What is the format of the stable code, `<code format>`? For example, whether it carries the ADR number.
+4. Which plugins, if any? Any plugin canon uses is exposed through the kit. `modern-errors-serialize` (errors crossing a process or network boundary) and `modern-errors-cli` (canon's own CLI) are the two considered, with the cost above.
+5. Are errors described as Theories, in line with S006 decision 22 (Theory and Morphism are themselves Theories)? Or are they plain classes with no Theory?
