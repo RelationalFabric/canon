@@ -83,7 +83,7 @@ export function demonstrateTimestampConversion(): void {
 }
 
 /**
- * Log the current reference shape `{ ref, resolved, value? }`.
+ * Log the deprecated `EntityReference` shape `{ ref, resolved, value? }`.
  */
 export function demonstrateReferenceConversion(): void {
   logger.info('=== Reference Conversion Examples ===')
