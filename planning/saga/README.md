@@ -120,3 +120,4 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 - Follow-ups outside S006, from Architecture's #87/#92 review: (a) after a double rollback failure followed by a successful outer repair, `definitions.ts` throws 'rollback incomplete' instead of rethrowing the original error (use `error.cause`; add a test); (b) `clear()` rescans `stampLog` for each value, which is quadratic; (c) in `registerCanons`, a theory that refers to a sibling listed later in the same batch may still fail preflight. (d) Closed: `tsconfig.test.json` includes `src/**`, and #88 covers `morphism.test.ts`.
 - `de3564f`: unit 1 done (Theory and Morphism constructors). Follow-ups `74acbbe`, `56be5d8`.
 - `df48dea`: unit 2 done (runtime terms).
+- `802015a` unit 2 review fixes
