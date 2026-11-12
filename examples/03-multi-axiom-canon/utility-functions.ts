@@ -5,12 +5,13 @@
  * entities that implement multiple axioms.
  */
 
-import type { EntityReference, Satisfies } from '@relational-fabric/canon'
-import { createLogger, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
+import type { Satisfies } from '@relational-fabric/canon'
+import { createLogger, idOf, typeOf, versionOf } from '@relational-fabric/canon'
 
-type MultiAxiomEntity = Satisfies<'Id'> & Satisfies<'Type'> & Satisfies<'Version'> & Satisfies<'References'> & {
+type MultiAxiomEntity = Satisfies<'Id'> & Satisfies<'Type'> & Satisfies<'Version'> & {
   createdAt?: Date
   updatedAt?: Date
+  createdBy?: string
 }
 
 function ensureEntity(entity: unknown): MultiAxiomEntity {
@@ -47,8 +48,9 @@ export function analyzeEntity(input: unknown): {
   if (entity.updatedAt instanceof Date)
     timestamps.push(entity.updatedAt)
 
-  const references = referencesOf(entity)
-  const referenceList: EntityReference<string, unknown>[] = Array.isArray(references) ? references : [references]
+  const referenceList = typeof entity.createdBy === 'string'
+    ? [{ ref: entity.createdBy, resolved: false }]
+    : []
 
   return {
     id,

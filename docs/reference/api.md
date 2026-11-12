@@ -124,6 +124,8 @@ Predicate used by `timestampsOf` to detect already canonical inputs.
 
 #### `referencesOf`
 
+Deprecated. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
+
 ```ts
 function referencesOf<T extends Satisfies<'References'>>(
   value: T,
@@ -133,6 +135,8 @@ function referencesOf<T extends Satisfies<'References'>>(
 Normalises reference values (strings, objects, canonical references) to the `EntityReference` shape.
 
 #### `isCanonicalReference`
+
+Deprecated. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
 
 ```ts
 function isCanonicalReference(
@@ -250,6 +254,8 @@ function defineAxiom(config: AxiomConfig): AxiomConfig
 Identity helper for publishing reusable axiom configurations.
 
 #### `EntityReference`
+
+Deprecated. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
 
 ```ts
 interface EntityReference<R, T = unknown> {

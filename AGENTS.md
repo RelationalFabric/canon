@@ -71,7 +71,7 @@ Canons are universal type blueprints that implement axioms for specific data for
 
 ### Core Axioms
 
-The system includes five essential axioms: Id, Type, Version, Timestamps, and References. See [docs/reference/axioms.md](./docs/reference/axioms.md) for detailed specifications.
+The core axioms are Id, Type, Version, and Timestamps. A key that says its value has an identity uses `ObjectConstraintAxiom` and `Theories['Identity']`. The `References` axiom and `EntityReference` remain exported and are deprecated. See [docs/reference/axioms.md](./docs/reference/axioms.md).
 
 ### Canonical Data Structures
 
@@ -89,7 +89,7 @@ Canon provides standardized types and APIs for working with data structures, rec
 
 Follow the conventions outlined in [CONTRIBUTING.md](./CONTRIBUTING.md):
 
-- **Axiom Keys**: PascalCase, plural for general concepts (`Timestamps`, `References`), singular for specific concepts (`Id`, `Type`)
+- **Axiom Keys**: PascalCase, plural for general concepts (`Timestamps`), singular for specific concepts (`Id`, `Type`)
 - **Function Names**: Use relational `*Of` pattern (`idOf()`, `typeOf()`) not imperative `get*` patterns
 - **Type Names**: PascalCase for all type definitions
 - **Variables**: camelCase for all variables and parameters

@@ -42,22 +42,32 @@ vi.mock('./meta.js', async (importOriginal) => {
   }
 })
 
-declare module './types/canons.js' {
+declare module '@relational-fabric/canon' {
   interface Canons {
-    DeclaredCanon: Record<string, never>
+    DeclaredCanon: Record<never, never>
   }
 }
 
-declare module './types/theories.js' {
+interface RegisteredCanon {
+  axioms?: {
+    Owner?: {
+      models?: unknown
+    }
+  }
+}
+
+declare module '@relational-fabric/canon' {
   interface Theories {
     DeclaredTheory: Record<string, never>
     Fresh: Record<string, never>
+    One: Record<string, never>
     A: Record<string, never>
     B: Record<string, never>
     C: Record<string, never>
     Other: Record<string, never>
     T: Record<string, never>
     TheoryConflict: Record<string, never>
+    Two: Record<string, never>
   }
 }
 
@@ -148,7 +158,7 @@ describe('shell', () => {
 
       declareCanon('DeclaredCanon', config)
 
-      const models = canonRefFor('DeclaredCanon').value?.axioms.Owner?.models
+      const models = (canonRefFor('DeclaredCanon').value as RegisteredCanon | undefined)?.axioms?.Owner?.models
       expect(Array.isArray(models) ? models : []).toEqual(['Identity'])
       expect(theoryRefFor('Identity').value).toBeInstanceOf(Theory)
     })
@@ -255,7 +265,7 @@ describe('shell', () => {
   })
 
   describe('declareMorphism', () => {
-    const morphismConfig = { maps: { Id: 'Type' } }
+    const morphismConfig = { maps: { Id: 'Type' } } as const
 
     beforeEach(() => {
       declareTheory('Identity', identityConfig)
@@ -288,7 +298,8 @@ describe('shell', () => {
     it('throws when a different config is declared for the same pair and keeps the first value', () => {
       const first = declareMorphism('Identity', 'Taxonomy', morphismConfig).value
 
-      expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } }))
+      // @ts-expect-error runtime guard test, map names a wrong target term for this pair
+      expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } } as const))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
       expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
@@ -322,7 +333,7 @@ describe('shell', () => {
   })
 
   describe('registerMorphisms', () => {
-    const morphismConfig = { maps: { Id: 'Type' } }
+    const morphismConfig = { maps: { Id: 'Type' } } as const
 
     beforeEach(() => {
       declareTheory('Identity', identityConfig)
@@ -350,7 +361,8 @@ describe('shell', () => {
       registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
       const first = morphismRefFor('Identity', 'Taxonomy').value
 
-      expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } }))
+      // @ts-expect-error runtime guard test, map names a wrong target term for this pair
+      expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } as const }))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
       expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
@@ -382,10 +394,11 @@ describe('shell', () => {
     })
 
     it('stores nothing when one config object is used under two keys', () => {
-      const shared = { maps: { Id: 'Type' } }
+      const shared = { maps: { Id: 'Type' } } as const
 
       expect(() => registerMorphisms({
         'Identity/Taxonomy': shared,
+        // @ts-expect-error runtime guard test, map deliberately not complete for this pair
         'Taxonomy/Identity': shared,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy')
 
@@ -397,6 +410,7 @@ describe('shell', () => {
       const shared = declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } }).value as Morphism
 
       expect(() => registerMorphisms({
+        // @ts-expect-error runtime guard test, map deliberately not complete for this pair
         'Taxonomy/Identity': shared,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy')
 
@@ -408,8 +422,9 @@ describe('shell', () => {
       const registered = declareMorphism('Identity', 'Taxonomy', morphismConfig).value
 
       expect(() => registerMorphisms({
-        'Taxonomy/Identity': { maps: { Type: 'Id' } },
-        'Identity/Taxonomy': { maps: { Id: 'Id' } },
+        'Taxonomy/Identity': { maps: { Type: 'Id' } } as const,
+        // @ts-expect-error runtime guard test, map names a wrong target term for this pair
+        'Identity/Taxonomy': { maps: { Id: 'Id' } } as const,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
       expect(morphismRefFor('Taxonomy', 'Identity').value).toBeUndefined()
@@ -965,7 +980,7 @@ describe('shell', () => {
       declareCanon('DeclaredCanon', { axioms: {} })
       const ghost = defineTheory({})
       const caught = {
-        get extends() {
+        get extends(): undefined {
           try {
             declareCanon('DeclaredCanon', {
               axioms: {
@@ -983,7 +998,7 @@ describe('shell', () => {
         },
       }
       const failing = {
-        get extends() {
+        get extends(): undefined {
           try {
             declareCanon('DeclaredCanon', {
               axioms: {
@@ -1016,7 +1031,7 @@ describe('shell', () => {
       declareCanon('DeclaredCanon', { axioms: {} })
       const ghost = defineTheory({})
       const outer = {
-        get extends() {
+        get extends(): undefined {
           try {
             declareCanon('DeclaredCanon', {
               axioms: {

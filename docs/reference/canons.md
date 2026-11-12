@@ -46,11 +46,6 @@ export type JsonLdCanon = Canon<{
     toCanonical: (value: JsonLdDate) => Date
     fromCanonical: (value: Date) => JsonLdDate
   }
-  References: {
-    $basis: TypeGuard<JsonLdReference>
-    toCanonical: (value: JsonLdReference) => EntityReference<string, unknown>
-    fromCanonical: (value: EntityReference<string, unknown>) => JsonLdReference
-  }
 }>
 
 // Export the canon configuration using proper TypeGuard patterns
@@ -85,19 +80,6 @@ export default defineCanon<JsonLdCanon>({
         '@value': value.toISOString(),
         '@type': 'xsd:dateTime' as const,
       }),
-    },
-    References: {
-      $basis: <U extends JsonLdReference>(value: U | unknown): value is U =>
-        isPojo(value) && pojoHas(value, '@id') && typeof value['@id'] === 'string',
-      toCanonical: (value: JsonLdReference) => {
-        return {
-          ref: value['@id'],
-          resolved: false,
-        }
-      },
-      fromCanonical: (value: EntityReference<string, unknown>) => {
-        return { '@id': value.ref }
-      },
     },
   },
 })

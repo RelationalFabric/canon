@@ -16,9 +16,10 @@ interface Axioms {
   Type: KeyNameAxiom
   Version: KeyNameAxiom
   Timestamps: RepresentationAxiom<number | string | Date | TypeGuard<unknown>>
-  References: RepresentationAxiom<string | object | string[] | TypeGuard<unknown>>
 }
 ```
+
+The `References` member still exists on `Axioms` and is deprecated. Do not add it to a new canon.
 
 **Usage Example**:
 

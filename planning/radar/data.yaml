@@ -183,11 +183,6 @@ entries:
         justification: Essential for modern bundling and consumer bundle optimization
 
     assess:
-      - name: Test-file type fixtures
-        description: 'tsconfig.json excludes *.test.ts and Vitest has no typecheck, so invariant and @ts-expect-error in test files are not verified by CI'
-        isNew: true
-        justification: U5 morphism completeness and similar fixtures need a separate typecheck project; parked work after Phase 3
-
       - name: Map-form models preflight registration
         description: 'When axiom or canon models uses map form, definitionRegistry.resolve registers theories during preflight before the canon is stored'
         isNew: true
