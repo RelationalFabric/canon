@@ -176,6 +176,55 @@ describe('registration swap', () => {
     expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
   })
 
+  it('leaves a clashing declare with the passed-in endpoints', () => {
+    declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } })
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Id' },
+      source,
+      target,
+    })
+
+    expect(() => declareMorphism('Identity', 'Taxonomy', morphism as unknown as { maps: { Id: 'Type' } }))
+      .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
+    expect(morphism.source).toBe(source)
+    expect(morphism.target).toBe(target)
+  })
+
+  it('restores an earlier morphism when a later batch entry fails', () => {
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const earlier = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+    const laterSource = defineTheory({ terms: taxonomyConfig.terms })
+    const laterTarget = defineTheory({ terms: identityConfig.terms })
+    const later = defineMorphism({
+      maps: { Type: 'Id' },
+      source: laterSource,
+      target: laterTarget,
+    })
+    Object.defineProperty(later, 'source', {
+      configurable: true,
+      enumerable: true,
+      get: () => laterSource,
+      set: () => {
+        throw new Error('later fails')
+      },
+    })
+
+    expect(() => registerMorphisms({
+      'Identity/Taxonomy': earlier as { maps: { Id: 'Type' } },
+      'Taxonomy/Identity': later as { maps: { Type: 'Id' } },
+    })).toThrow('later fails')
+    expect(earlier.source).toBe(source)
+    expect(earlier.target).toBe(target)
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+  })
+
   it('keeps the unresolved-theory error and does not register', () => {
     resetRegistry()
     declareTheory('Taxonomy', taxonomyConfig)

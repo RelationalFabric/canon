@@ -2,6 +2,7 @@
  * Definition URIs and the shared definition registry (ADR-0017).
  */
 
+import type { Morphism } from './morphism.js'
 import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri, Metadata } from './types/index.js'
 import { metaOf, updateMeta } from './meta.js'
 import { clashHash, regularizeTheoryTerms, Theory } from './theory.js'
@@ -9,6 +10,12 @@ import { clashHash, regularizeTheoryTerms, Theory } from './theory.js'
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
 
 let termsFilled: Theory[] | undefined
+
+let endpointSwaps: Array<{
+  morphism: Morphism
+  source: Theory | undefined
+  target: Theory | undefined
+}> | undefined
 
 const unrestoredEntries = new WeakMap<object, unknown>()
 
@@ -300,15 +307,46 @@ function undoFilledTerms(from: number): void {
   termsFilled.length = from
 }
 
+/**
+ * Point a stored Morphism at the registered theories.
+ * The previous endpoints are restored if this `allOrNothing` rolls back.
+ */
+export function recordMorphismEndpoints(morphism: Morphism, source: Theory, target: Theory): void {
+  if (morphism.source === source && morphism.target === target) {
+    return
+  }
+  const priorSource = morphism.source
+  const priorTarget = morphism.target
+  morphism.source = source
+  morphism.target = target
+  endpointSwaps?.push({ morphism, source: priorSource, target: priorTarget })
+}
+
+function undoEndpointSwaps(from: number): void {
+  if (endpointSwaps === undefined) {
+    return
+  }
+  for (let index = endpointSwaps.length - 1; index >= from; index--) {
+    const entry = endpointSwaps[index]
+    if (entry !== undefined) {
+      entry.morphism.source = entry.source
+      entry.morphism.target = entry.target
+    }
+  }
+  endpointSwaps.length = from
+}
+
 export function allOrNothing<T>(write: () => T): T {
   const outermost = stampLog === undefined
   if (outermost) {
     stampLog = []
     termsFilled = []
+    endpointSwaps = []
   }
   const log = stampLog!
   const logStart = log.length
   const termsStart = termsFilled?.length ?? 0
+  const endpointStart = endpointSwaps?.length ?? 0
   const before = new Map(definitionRegistry.entries())
   const previousStart = savepointStart
   savepointStart = logStart
@@ -331,6 +369,7 @@ export function allOrNothing<T>(write: () => T): T {
     return result
   } catch (error) {
     undoFilledTerms(termsStart)
+    undoEndpointSwaps(endpointStart)
     const restoreErrors: unknown[] = []
     const unrestored: typeof log = []
     for (let index = log.length - 1; index >= logStart; index--) {
@@ -376,6 +415,7 @@ export function allOrNothing<T>(write: () => T): T {
     if (outermost) {
       stampLog = undefined
       termsFilled = undefined
+      endpointSwaps = undefined
     }
   }
 }
