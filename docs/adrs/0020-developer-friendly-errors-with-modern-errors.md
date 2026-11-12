@@ -21,9 +21,9 @@ Canon already has a policy for third-party libraries, and this ADR follows it wi
 `modern-errors` fits that policy. Facts checked against the npm registry on 2026-11-12:
 
 - Version 7.1.4, MIT licence, published 2025-10-09, the `latest` dist-tag. ESM only, `engines.node >=18.18.0` (canon requires Node 22 or later, ADR-0009). It ships TypeScript types.
-- 10 direct dependencies and 13 packages in total. A clean install is about 275 KB of files, of which `modern-errors` itself is 97,459 bytes unpacked.
+- 10 direct dependencies, 14 packages in all including itself. A clean install is about 275 KB of files, of which `modern-errors` itself is 97,459 bytes unpacked.
 - It supports error classes composed by subclassing, per-error `props`, wrapping an inner error through the standard `cause` option, and an `errors` option that aggregates several errors into one, for any error class and not only `AggregateError`.
-- Plugins are separate packages, each with `modern-errors` as a peer dependency. `modern-errors-serialize` 6.1.1 is MIT and adds 3 packages and about 117 KB. `modern-errors-cli` 6.0.0 is MIT and adds 8 packages and about 178 KB. `modern-errors-http` and `modern-errors-bugs` also exist. Others (clean, process, switch, winston, beautiful) are not considered.
+- Plugins are separate packages, each with `modern-errors` as a peer dependency, all MIT. Nine official ones are listed upstream: serialize, cli, beautiful, bugs, clean, http, process, switch and winston. Each adds between 1 and 33 packages (the PR description has the measured cost table). Five work in both Node and browsers (core, serialize, bugs, http, switch). Four are Node-only (cli, beautiful, clean, process), and winston is Node-only and needs the `winston` peer.
 
 Alternatives considered: keep built-in errors and a convention for message text (no structure, nothing enforces it); hand-write a canon error base class (reimplements cause merging, aggregation and props, which this library already covers and tests).
 
@@ -55,11 +55,17 @@ Alternatives considered: keep built-in errors and a convention for message text 
    - one defines an error kind from a code, a message template and a hint. Canon and consumers use it alike, and canon's own errors are defined only this way;
    - one collects failures and throws once, as an aggregate error holding every problem, with the original failures kept as `cause`. `allOrNothing` and any other batch use it. A batch that fails leaves no partial state, as today.
 
-6. The `modern-errors-serialize` plugin is part of the kit from the start. Canon uses it, so under the rule in decision 1 it comes from the kit. The `cli`, `http` and `bugs` plugins stay behind `src/_/` until canon uses them, at which point they move to the kit. Other plugins are not considered.
+6. The kit pre-wires, as out-of-the-box defaults, the official plugins that are small and work in both Node and browsers, because canon's errors are used in both:
+   - `serialize`: errors survive crossing a process, worker or network boundary and can be parsed back. Canon uses it.
+   - `http`: an error becomes a standard problem-details HTTP response, so a consumer's API reports canon errors consistently.
+   - `bugs`: an error says where to report it, which suits a library whose errors can point at its own tracker.
+   - `switch`: handle errors by class in one place, which is how callers act on the kinds in decision 2.
+
+   Anything canon itself uses comes from the kit (decision 1), and a plugin is not left out only because canon does not use it yet. `winston`, a single logger's integration with a large footprint, stays behind `src/_/`, forwarded unchanged. The Node-only plugins (`cli`, `beautiful`, `clean`, `process`) are borderline and are open question 5, because the kit is shared with browser code and `process` installs process-wide handlers.
 
 7. S006 units 5 (no `/` in Theory labels) and 8 (no shadowed inherited terms, decision 25) are the first users. This ADR must be Accepted and merged before either implements it. The remaining throw sites migrate in a later unit, planned in the saga and not here.
 
-8. Whether errors are themselves described as Theories is left open (open question 5). Nothing in this ADR depends on the answer.
+8. Whether errors are themselves described as Theories is left open (open question 6). Nothing in this ADR depends on the answer.
 
 This ADR sets direction only. Class layout, the property schema, the hint representation, the code catalogue and the migration order are tactical and go in the saga.
 
@@ -75,7 +81,7 @@ Easier:
 
 Harder, and risks:
 
-- One more runtime dependency: 13 packages and about 275 KB installed, all MIT. Because canon ships its TypeScript source (ADR-0006), consumers install it with canon. The serialize plugin adds 3 packages and about 117 KB. The `cli`, `http` and `bugs` plugins add nothing until canon uses them.
+- One more runtime dependency, all MIT: 14 packages and about 275 KB installed for the library alone. The four pre-wired plugins together bring the total to 22 packages and about 482 KB, measured in one clean install. Because canon ships its TypeScript source (ADR-0006), consumers install this with canon.
 - Error codes become public contract, for canon and for each consumer that defines its own.
 - Hints are open to new kinds, so the hint model must stay stable while the set of kinds grows.
 - The library is ESM only. Canon is ESM, so this is not a constraint today.
@@ -84,10 +90,11 @@ Harder, and risks:
 
 Open questions (for approval before any name or choice is final; placeholders above stand until answered):
 
-1. What are the names of the kit-facing entries (the library, and the serialize plugin), of the two helpers (define an error kind, collect and throw once), and of the reference property? The existing kit names are opinionated (`Immutable`, `objectHash`, `Files`).
+1. What are the names of the kit-facing entries (the library and each pre-wired plugin), of the two helpers (define an error kind, collect and throw once), and of the reference property? The existing kit names are opinionated (`Immutable`, `objectHash`, `Files`).
 2. What is the base class name, `<BaseError>`, and what are the subclass names? The first two subclasses are needed by units 5 and 8.
 3. What is the format of the stable code, `<code format>`? For example, whether it carries the ADR number.
 4. What are the names of the hint kinds (plain-text fix, suggested value, applicable edit, documentation link, example snippet, related locations), and of the property that holds the hints?
-5. Are errors described as Theories, in line with S006 decision 22 (Theory and Morphism are themselves Theories)? Or are they plain classes with no Theory?
+5. Which of the borderline Node-only plugins, if any, does the kit also pre-wire: `cli` (handle errors in a CLI and exit; canon's own CLI uses oclif), `beautiful` (readable terminal output; `cli` includes it), `clean` (strip Node internals and working-directory paths from stacks), `process` (log uncaught errors and rejections, installs process-wide handlers)? The browser and Node boundary is the deciding factor.
+6. Are errors described as Theories, in line with S006 decision 22 (Theory and Morphism are themselves Theories)? Or are they plain classes with no Theory?
 
-Decided here, not open: the serialize plugin is in the kit; `cli`, `http` and `bugs` stay behind `src/_/` until canon uses them.
+Decided here, not open: the library plus `serialize`, `http`, `bugs` and `switch` are in the kit as defaults; `winston` stays behind `src/_/`.
