@@ -18,10 +18,6 @@ interface JsonLdEntity {
   '@version'?: string | number
 }
 
-interface JsonLdReference {
-  '@id': string
-}
-
 interface JsonLdDate {
   '@value': string
   '@type': 'xsd:dateTime' | 'xsd:date' | 'xsd:time'
