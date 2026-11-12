@@ -15,7 +15,11 @@ declare module '@relational-fabric/canon' {
   }
 }
 
-const config: Record<string, never> = {}
+const config = {
+  terms: {
+    Type: 'Holds the kind or classification of an entity.',
+  },
+}
 
 declareTheory('Taxonomy', config)
 

@@ -495,7 +495,7 @@ describe('shell', () => {
       })).toThrow('Definition already registered: canon://theory/Fresh (ADR-0017)')
 
       expect(theoryRefFor('T').value).toBeUndefined()
-      expect(theoryRefFor('Fresh').value).toEqual({})
+      expect(theoryRefFor('Fresh').value).toEqual(new Theory({ terms: {} }))
     })
 
     it('registers a theory and a trailing list-form map entry', () => {
@@ -518,7 +518,7 @@ describe('shell', () => {
       })).toThrow('Definition already registered: canon://theory/Fresh (ADR-0017)')
 
       expect(theoryRefFor('T').value).toBeUndefined()
-      expect(theoryRefFor('Fresh').value).toEqual({})
+      expect(theoryRefFor('Fresh').value).toEqual(new Theory({ terms: {} }))
     })
 
     it('resolves a theory that extends another theory in the same call', () => {
@@ -529,7 +529,8 @@ describe('shell', () => {
 
       expect(theoryRefFor('Parent').key).toBe('canon://theory/Parent')
       expect(theoryRefFor('Child').key).toBe('canon://theory/Child')
-      expect(theoryRefFor('Child').value).toEqual({ extends: ['Parent'] })
+      const parent = theoryRefFor('Parent').value
+      expect(theoryRefFor('Child').value).toEqual(new Theory({ extends: [parent], terms: {} }))
     })
 
     it('leaves the registry unchanged when a batch references a missing label', () => {
@@ -632,7 +633,7 @@ describe('shell', () => {
       })).toThrow('Definition already registered: canon://theory/Fresh (ADR-0017)')
 
       expect(canonRefFor('DeclaredCanon').value).toBeUndefined()
-      expect(theoryRefFor('Fresh').value).toEqual({})
+      expect(theoryRefFor('Fresh').value).toEqual(new Theory({ terms: {} }))
     })
 
     it('stores no canon when one axiom models label is missing', () => {

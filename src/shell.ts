@@ -12,7 +12,7 @@ import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinit
 import { objectHash } from './kit.js'
 import { metaOf } from './meta.js'
 import { defineMorphism, Morphism } from './morphism.js'
-import { defineTheory, Theory } from './theory.js'
+import { defineTheory, regularizeTheoryTerms, Theory } from './theory.js'
 
 /**
  * Reset the global registry to empty
@@ -63,7 +63,7 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
     for (const [label, config] of defined) {
       const uri = definitionUri('canon', label)
       const existing = canonRefFor(label).value
-      if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+      if (existing !== undefined && hashForClash(existing) !== hashForClash(config)) {
         throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
       }
       preflightCanonModels(config, provided)
@@ -147,6 +147,55 @@ function resolveExtends(config: TheoryConfig): void {
       throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
     }
   }
+  if (config instanceof Theory) {
+    config.extends = materializeTheoryExtends(config.extends)
+  }
+}
+
+function materializeTheoryExtends(
+  extendsValue: NonNullable<TheoryConfig['extends']>,
+): NonNullable<TheoryConfig['extends']> {
+  if (Array.isArray(extendsValue)) {
+    const last = extendsValue[extendsValue.length - 1]
+    if (isRefMap(last)) {
+      const head = extendsValue.slice(0, -1).map(materializeExtendsRef)
+      return [...head, materializeExtendsMap(last)]
+    }
+    return extendsValue.map(materializeExtendsRef)
+  }
+  if (isNameMap(extendsValue)) {
+    return materializeExtendsMap(extendsValue)
+  }
+  return extendsValue
+}
+
+function materializeExtendsRef(item: unknown): unknown {
+  if (item instanceof Theory) {
+    return item
+  }
+  if (typeof item === 'string') {
+    return theoryRefFor(item).value
+  }
+  if (carriedDefinitionUri(item) !== undefined) {
+    return item
+  }
+  return item
+}
+
+function materializeExtendsMap(composition: Record<string, unknown>): Record<string, unknown> {
+  const mapped: Record<string, unknown> = {}
+  for (const [name, value] of Object.entries(composition)) {
+    const registered = theoryRefFor(name).value
+    mapped[name] = registered ?? materializeExtendsRef(value)
+  }
+  return mapped
+}
+
+function hashForClash(value: unknown): string {
+  if (value instanceof Theory) {
+    regularizeTheoryTerms(value)
+  }
+  return objectHash(value)
 }
 
 /**
@@ -198,25 +247,29 @@ function asTheoryInstance(value: unknown): unknown {
 }
 
 function prepareTheoryConfigForResolve(config: TheoryConfig): TheoryConfig {
+  const terms = config.terms
+
   if (config instanceof Theory) {
     if (config.extends === undefined) {
       return config
     }
     return new Theory({
       extends: extendsRefsForTheoryResolve(config.extends),
+      ...(terms !== undefined ? { terms } : {}),
     })
   }
 
   // One read. A getter must not run again while the value is copied onto a Theory.
   if (!('extends' in config)) {
-    return new Theory({})
+    return new Theory(terms !== undefined ? { terms } : {})
   }
   const extendsValue = config.extends
   if (extendsValue === undefined) {
-    return new Theory({})
+    return new Theory(terms !== undefined ? { terms } : {})
   }
   return new Theory({
     extends: extendsRefsForTheoryResolve(extendsValue),
+    ...(terms !== undefined ? { terms } : {}),
   })
 }
 
@@ -376,11 +429,11 @@ function validateProvidedNames(
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     const existing = theoryRefFor(name).value
-    if (existing !== undefined && objectHash(existing) !== objectHash(value)) {
+    if (existing !== undefined && hashForClash(existing) !== hashForClash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     const prior = provided.get(name)
-    if (prior !== undefined && objectHash(prior) !== objectHash(value)) {
+    if (prior !== undefined && hashForClash(prior) !== hashForClash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     provided.set(name, value)

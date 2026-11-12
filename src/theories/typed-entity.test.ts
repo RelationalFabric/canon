@@ -5,7 +5,7 @@
 import type { Expect } from '../testing.js'
 import type { KeyNameAxiom, Theories } from '../types/index.js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { definitionRegistry, theoryRefFor } from '../definitions.js'
+import { theoryRefFor } from '../definitions.js'
 import { declareTheory } from '../shell.js'
 import { invariant } from '../testing.js'
 import { Theory } from '../theory.js'
@@ -34,7 +34,10 @@ describe('typed entity theory', () => {
     expect(theoryRefFor('TypedEntity').key).toBe('canon://theory/TypedEntity')
     const registered = theoryRefFor('TypedEntity').value as Theory
     expect(registered).toBeInstanceOf(Theory)
-    expect(registered.extends).toEqual(typedEntityConfig.extends)
+    expect(registered.extends).toEqual([
+      theoryRefFor('Identity').value,
+      theoryRefFor('Taxonomy').value,
+    ])
   })
 
   it('registers Identity and Taxonomy when the module is evaluated on its own', async () => {
@@ -47,12 +50,12 @@ describe('typed entity theory', () => {
     expect(freshRef('TypedEntity').key).toBe('canon://theory/TypedEntity')
   })
 
-  it('resolves extends to Identity and Taxonomy in order', () => {
-    const config = theoryRefFor('TypedEntity').value as { extends: readonly string[] }
-    const resolved = definitionRegistry.resolve('theory', config.extends)
+  it('keeps extends as registered Identity and Taxonomy in order', () => {
+    const registered = theoryRefFor('TypedEntity').value as Theory
+    const composition = registered.extends as readonly Theory[]
 
-    expect(resolved).toHaveLength(2)
-    expect(resolved[0]?.value).toBe(theoryRefFor('Identity').value)
-    expect(resolved[1]?.value).toBe(theoryRefFor('Taxonomy').value)
+    expect(composition).toHaveLength(2)
+    expect(composition[0]).toBe(theoryRefFor('Identity').value)
+    expect(composition[1]).toBe(theoryRefFor('Taxonomy').value)
   })
 })

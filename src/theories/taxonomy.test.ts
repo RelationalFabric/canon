@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { theoryRefFor } from '../definitions.js'
 import { metaOf } from '../meta.js'
 import { declareTheory } from '../shell.js'
-import { Theory } from '../theory.js'
+import { termsOf, Theory } from '../theory.js'
 import { config } from './taxonomy.js'
 
 describe('taxonomy theory', () => {
@@ -28,6 +28,11 @@ describe('taxonomy theory', () => {
     if (isMetaCarrier(registered)) {
       expect(metaOf(registered)).toEqual({ uri: 'canon://theory/Taxonomy' })
     }
+  })
+
+  it('exposes the Type term', () => {
+    const registered = theoryRefFor('Taxonomy').value as Theory
+    expect(termsOf(registered)).toHaveProperty('Type')
   })
 })
 

@@ -5,6 +5,7 @@
 import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri, Metadata } from './types/index.js'
 import { objectHash } from './kit.js'
 import { metaOf, updateMeta } from './meta.js'
+import { regularizeTheoryTerms, Theory } from './theory.js'
 
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
 
@@ -73,6 +74,9 @@ export class DefinitionRegistry {
    * A `uri` left on a value after `clear` is stale and is replaced.
    */
   register(uri: DefinitionUri | LexiconTermUri, value: unknown): void {
+    if (value instanceof Theory) {
+      regularizeTheoryTerms(value)
+    }
     const alreadyRegistered = this.#definitions.has(uri)
     if (alreadyRegistered && objectHash(this.#definitions.get(uri)) !== objectHash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)

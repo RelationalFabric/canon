@@ -105,7 +105,7 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 | unit | commit | push | scoped tests | scoped checks | full tests | full checks | smoke |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | required | required | required | required | required | required | N/A |
-| 2 | required | required | required | required | required | required | N/A |
+| 2 | done | required | required | required | required | required | N/A |
 | 3 | required | required | required | required | required | required | N/A |
 | 4 | required | required | required | required | required | required | N/A |
 | 5 | required | required | required | required | required | required | N/A |
@@ -118,3 +118,4 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 - ADR docs item, for Architecture: [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`, with ADR-0017 and ADR-0018 Accepted. The `docs/theories.md` line 3 fix, and the stale text in `docs/definitions.md` and `docs/theories.md`, remain.
 - Follow-ups outside S006, from Architecture's #87/#92 review: (a) after a double rollback failure followed by a successful outer repair, `definitions.ts` throws 'rollback incomplete' instead of rethrowing the original error (use `error.cause`; add a test); (b) `clear()` rescans `stampLog` for each value, which is quadratic; (c) in `registerCanons`, a theory that refers to a sibling listed later in the same batch may still fail preflight. (d) Closed: `tsconfig.test.json` includes `src/**`, and #88 covers `morphism.test.ts`.
 - `de3564f`: unit 1 done (Theory and Morphism constructors). Follow-ups `74acbbe`, `56be5d8`.
+- unit 2 done (runtime terms); commit sha recorded at push.
