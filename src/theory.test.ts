@@ -9,7 +9,7 @@ import { declareCanon, declareMorphism, declareTheory, resetRegistry } from './s
 import { config as identityConfig } from './theories/identity.js'
 import { defineTheory, Theory } from './theory.js'
 
-declare module './types/canons.js' {
+declare module '@relational-fabric/canon' {
   interface Canons {
     Aliased: Record<string, never>
   }

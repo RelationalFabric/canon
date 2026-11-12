@@ -72,7 +72,7 @@ describe('defineMorphism', () => {
 })
 
 describe('declareMorphism registration', () => {
-  const morphismConfig = { maps: { Id: 'Type' } }
+  const morphismConfig = { maps: { Id: 'Type' } } as const
 
   beforeEach(() => {
     resetRegistry()
