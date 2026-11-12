@@ -30,7 +30,7 @@ Supporting File (`mongodb-canon.ts`)
 
 Type-level configuration for MongoDB documents
 
-MongoDB uses '_id' as its primary key field
+MongoDB uses '\_id' as its primary key field
 
 ```ts
 export type MongoDbCanon = Canon<{
