@@ -1,8 +1,8 @@
 /**
  * Comprehensive Canon Definition
  *
- * This file defines a comprehensive canon that implements all five core axioms
- * (Id, Type, Version, Timestamps, References) and shows how they work together.
+ * This file defines a comprehensive canon that implements four core axioms
+ * (Id, Type, Version, Timestamps) and shows how they work together.
  */
 
 import type { Canon } from '@relational-fabric/canon'
@@ -13,7 +13,7 @@ import { declareCanon, pojoWithOfType } from '@relational-fabric/canon'
 // =============================================================================
 
 /**
- * A comprehensive canon that implements all five core axioms.
+ * A comprehensive canon that implements four core axioms: Id, Type, Version, Timestamps.
  * This represents a typical internal data format for a modern application.
  */
 type ComprehensiveCanon = Canon<{
@@ -36,11 +36,6 @@ type ComprehensiveCanon = Canon<{
     $basis: number | string | Date
     isCanonical: (value: unknown) => value is Date
     $meta: { format: string, timezone: string }
-  }
-  References: {
-    $basis: string | object
-    isCanonical: (value: unknown) => value is { ref: string, resolved: boolean, value?: unknown }
-    $meta: { format: string, validation: string }
   }
 }>
 
@@ -73,13 +68,6 @@ declareCanon('ComprehensiveCanon', {
         typeof v === 'number' || typeof v === 'string' || v instanceof Date,
       isCanonical: (v: unknown): v is Date => v instanceof Date,
       $meta: { format: 'iso8601', timezone: 'UTC' },
-    },
-    References: {
-      $basis: (v: unknown): v is string | object =>
-        typeof v === 'string' || (typeof v === 'object' && v !== null),
-      isCanonical: (v: unknown): v is { ref: string, resolved: boolean, value?: unknown } =>
-        typeof v === 'object' && v !== null && 'ref' in v && 'resolved' in v,
-      $meta: { format: 'uuid', validation: 'strict' },
     },
   },
 })

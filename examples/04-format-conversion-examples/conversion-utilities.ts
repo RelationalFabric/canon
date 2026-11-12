@@ -6,7 +6,7 @@
  */
 
 import type { Satisfies } from '@relational-fabric/canon'
-import { createLogger, idOf, referencesOf, typeOf, versionOf } from '@relational-fabric/canon'
+import { createLogger, idOf, typeOf, versionOf } from '@relational-fabric/canon'
 
 // =============================================================================
 // Format Conversion Functions
@@ -20,16 +20,17 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
     const id = idOf(entity as Satisfies<'Id'>)
     const type = typeOf(entity as Satisfies<'Type'>)
     const version = versionOf(entity as Satisfies<'Version'>)
-    const references = referencesOf(entity as Satisfies<'References'>)
-
     // Handle timestamps manually
     const timestamps: Date[] = []
+    let createdBy = 'unknown'
     if (typeof entity === 'object' && entity !== null) {
       const obj = entity as Record<string, unknown>
       if (obj.createdAt instanceof Date)
         timestamps.push(obj.createdAt)
       if (obj.updatedAt instanceof Date)
         timestamps.push(obj.updatedAt)
+      if (typeof obj.createdBy === 'string')
+        createdBy = obj.createdBy
     }
 
     // Convert timestamps to Unix timestamps
@@ -48,7 +49,7 @@ export function convertToMongoDb(entity: unknown): Record<string, unknown> {
       createdAt: timestamps[0]?.toISOString(),
       updatedAt: timestamps[1]?.toISOString(),
       ...(entity as Record<string, unknown>),
-      createdBy: references.ref,
+      createdBy,
     }
   } catch {
     // Fallback for entities that don't match the canon
@@ -72,16 +73,17 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
     const id = idOf(entity as Satisfies<'Id'>)
     const type = typeOf(entity as Satisfies<'Type'>)
     const version = versionOf(entity as Satisfies<'Version'>)
-    const references = referencesOf(entity as Satisfies<'References'>)
-
     // Handle timestamps manually
     const timestamps: Date[] = []
+    let createdBy = 'unknown'
     if (typeof entity === 'object' && entity !== null) {
       const obj = entity as Record<string, unknown>
       if (obj.createdAt instanceof Date)
         timestamps.push(obj.createdAt)
       if (obj.updatedAt instanceof Date)
         timestamps.push(obj.updatedAt)
+      if (typeof obj.createdBy === 'string')
+        createdBy = obj.createdBy
     }
 
     return {
@@ -97,7 +99,7 @@ export function convertToJsonLd(entity: unknown): Record<string, unknown> {
       'createdAt': timestamps[0]?.toISOString(),
       'updatedAt': timestamps[1]?.toISOString(),
       ...(entity as Record<string, unknown>),
-      'createdBy': references.ref,
+      'createdBy': createdBy,
     }
   } catch {
     // Fallback for entities that don't match the canon

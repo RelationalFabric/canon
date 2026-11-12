@@ -14,6 +14,8 @@ declare module '@relational-fabric/canon' {
   interface Axioms {
     /**
      * References concept - might be string, object, etc.
+     *
+     * @deprecated Describes usage, not what an object can express. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
      */
     References: RepresentationAxiom<string | object, EntityReference<string, unknown>>
   }
@@ -21,6 +23,8 @@ declare module '@relational-fabric/canon' {
 
 /**
  * Check if a value is a canonical reference (EntityReference object)
+ *
+ * @deprecated Describes usage, not what an object can express. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
  *
  * @param value - The value to check
  * @returns True if the value is an EntityReference object
@@ -40,6 +44,8 @@ export function isCanonicalReference(
 
 /**
  * Extract and convert reference data to canonical EntityReference format
+ *
+ * @deprecated Describes usage, not what an object can express. A key that says its value has an identity uses ObjectConstraintAxiom with Theories['Identity'].
  *
  * @param x - The reference value to convert
  * @returns The reference as an EntityReference object
