@@ -4,12 +4,14 @@
  * Singleton registry instance with convenience API.
  */
 
+import type { MorphismConfig } from './morphism.js'
 import type { TheoryConfig } from './theory.js'
 import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
-import { canonRefFor, definitionRegistry, definitionUri, theoryRefFor } from './definitions.js'
+import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, theoryRefFor } from './definitions.js'
 import { objectHash } from './kit.js'
 import { metaOf } from './meta.js'
+import { defineMorphism } from './morphism.js'
 import { defineTheory } from './theory.js'
 
 /**
@@ -38,10 +40,14 @@ function resolveModels(config: CanonConfig): void {
  * @param config.models - Theories this canon models, as a map or a list
  */
 export function declareCanon<Label extends keyof Canons>(label: Label, config: CanonConfig) {
-  const defined = defineCanon(config)
-  resolveModels(defined)
-  definitionRegistry.register(definitionUri('canon', label), defined)
-  return canonRefFor(label)
+  return allOrNothing(() => {
+    const defined = defineCanon(config)
+    preflightCanonModels(defined, new Map())
+    resolveModels(defined)
+    resolveAxiomModels(defined)
+    definitionRegistry.register(definitionUri('canon', label), defined)
+    return canonRefFor(label)
+  })
 }
 
 /**
@@ -51,10 +57,78 @@ export function declareCanon<Label extends keyof Canons>(label: Label, config: C
  * @param canons.models - Theories each canon models, as a map or a list
  */
 export function registerCanons(canons: Record<string, CanonConfig>): void {
-  for (const [label, config] of Object.entries(canons)) {
-    const defined = defineCanon(config)
-    resolveModels(defined)
-    definitionRegistry.register(definitionUri('canon', label), defined)
+  allOrNothing(() => {
+    const defined = Object.entries(canons).map(([label, config]) => [label, defineCanon(config)] as const)
+    const provided = new Map<string, unknown>()
+    for (const [label, config] of defined) {
+      const uri = definitionUri('canon', label)
+      const existing = canonRefFor(label).value
+      if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+        throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
+      }
+      preflightCanonModels(config, provided)
+    }
+    for (const [, config] of defined) {
+      resolveAxiomModels(config)
+    }
+    for (const [label, config] of defined) {
+      resolveModels(config)
+      definitionRegistry.register(definitionUri('canon', label), config)
+    }
+  })
+}
+
+/**
+ * Check canon-level and axiom-level `models` before any theory or canon is stored.
+ */
+function preflightCanonModels(config: CanonConfig, provided: Map<string, unknown>): void {
+  const batchKeys = new Set<string>()
+  if (config.models !== undefined) {
+    validateTheoryConfig({ extends: config.models }, batchKeys, provided)
+  }
+  for (const axiom of Object.values(config.axioms)) {
+    const models = theoryModels(axiom.models)
+    if (models === undefined) {
+      continue
+    }
+    validateTheoryConfig({ extends: models }, batchKeys, provided)
+  }
+}
+
+/**
+ * Resolve `models` on each axiom config as kind `theory`.
+ * A missing label throws before the canon is stored.
+ */
+function resolveAxiomModels(config: CanonConfig): void {
+  for (const axiom of Object.values(config.axioms)) {
+    const models = theoryModels(axiom.models)
+    if (models === undefined) {
+      continue
+    }
+    resolveExtends({ extends: models })
+  }
+}
+
+function theoryModels(value: unknown): TheoryConfig['extends'] | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+  if (Array.isArray(value)) {
+    return value
+  }
+  if (value !== null && typeof value === 'object') {
+    return value as Record<string, unknown>
+  }
+  throw new Error('Definition refs must be a map or a list (ADR-0017)')
+}
+
+/** Throw when a theory label is not registered. */
+function resolveTheoryLabel(label: string): void {
+  const resolved = definitionRegistry.resolve('theory', [label])
+  for (const entry of resolved) {
+    if (entry.value === undefined) {
+      throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
+    }
   }
 }
 
@@ -82,10 +156,62 @@ function resolveExtends(config: TheoryConfig): void {
  * @param config.extends - Theories this one composes, as a map or a list
  */
 export function declareTheory<Label extends keyof Theories>(label: Label, config: TheoryConfig) {
-  const defined = defineTheory(config)
-  resolveExtends(defined)
-  definitionRegistry.register(definitionUri('theory', label), defined)
-  return theoryRefFor(label)
+  return allOrNothing(() => {
+    const defined = defineTheory(config)
+    resolveExtends(defined)
+    definitionRegistry.register(definitionUri('theory', label), defined)
+    return theoryRefFor(label)
+  })
+}
+
+/**
+ * Declare a morphism in the global registry.
+ * Completeness is checked at the type level only, because a Theory has no runtime key inventory to check against.
+ *
+ * @param source - The source theory label
+ * @param target - The target theory label
+ * @param config - The morphism value
+ * @param config.maps - Term mappings from source to target
+ */
+export function declareMorphism<
+  Source extends keyof Theories,
+  Target extends keyof Theories,
+>(
+  source: Source,
+  target: Target,
+  config: {
+    maps: { [K in keyof Theories[Source] & string]: keyof Theories[Target] & string }
+  },
+) {
+  return allOrNothing(() => {
+    const defined = defineMorphism(config)
+    resolveTheoryLabel(String(source))
+    resolveTheoryLabel(String(target))
+    definitionRegistry.register(definitionUri('morphism', `${String(source)}/${String(target)}`), defined)
+    return morphismRefFor(String(source), String(target))
+  })
+}
+
+/**
+ * Register multiple morphisms at once (for module-style registration).
+ * Completeness is checked at the type level only, because a Theory has no runtime key inventory to check against.
+ *
+ * @param morphisms - Object mapping `<Source>/<Target>` keys to morphism configs
+ * @param morphisms.maps - Term mappings from source to target
+ */
+export function registerMorphisms<M extends Record<string, MorphismConfig>>(morphisms: M & {
+  [Key in keyof M & string]: Key extends `${infer Source extends keyof Theories}/${infer Target extends keyof Theories}`
+    ? { maps: { [K in keyof Theories[Source] & string]: keyof Theories[Target] & string } }
+    : MorphismConfig
+}): void {
+  allOrNothing(() => {
+    validateRegisterMorphisms(morphisms)
+
+    for (const [key, config] of Object.entries(morphisms)) {
+      const value = defineMorphism(config)
+      definitionRegistry.register(definitionUri('morphism', key), value)
+    }
+  })
 }
 
 /**
@@ -95,17 +221,19 @@ export function declareTheory<Label extends keyof Theories>(label: Label, config
  * @param theories.extends - Theories each entry composes, as a map or a list
  */
 export function registerTheories(theories: Record<string, TheoryConfig>): void {
-  validateRegisterTheories(theories)
+  allOrNothing(() => {
+    validateRegisterTheories(theories)
 
-  for (const label of registerTheoriesOrder(theories)) {
-    const config = theories[label]
-    if (config === undefined) {
-      continue
+    for (const label of registerTheoriesOrder(theories)) {
+      const config = theories[label]
+      if (config === undefined) {
+        continue
+      }
+      const value = defineTheory(config)
+      definitionRegistry.register(definitionUri('theory', label), value)
+      resolveExtends(value)
     }
-    const value = defineTheory(config)
-    definitionRegistry.register(definitionUri('theory', label), value)
-    resolveExtends(value)
-  }
+  })
 }
 
 /**
@@ -136,7 +264,7 @@ function validateTheoryConfig(
   provided: Map<string, unknown>,
 ): void {
   for (const label of extendsLabels(config)) {
-    if (!batchKeys.has(label) && theoryRefFor(label).value === undefined) {
+    if (!batchKeys.has(label) && !provided.has(label) && theoryRefFor(label).value === undefined) {
       throw new Error(`Unresolved theory: ${definitionUri('theory', label)} (ADR-0017)`)
     }
   }
@@ -276,4 +404,35 @@ function registerTheoriesOrder(theories: Record<string, TheoryConfig>): string[]
   }
 
   return order
+}
+
+function parseMorphismKey(key: string): { source: string, target: string } {
+  const slash = key.indexOf('/')
+  if (slash === -1) {
+    throw new Error(`Invalid morphism name: ${key} (ADR-0018)`)
+  }
+  return { source: key.slice(0, slash), target: key.slice(slash + 1) }
+}
+
+function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): void {
+  const seen = new Map<MorphismConfig, string>()
+  for (const [key, config] of Object.entries(morphisms)) {
+    const { source, target } = parseMorphismKey(key)
+    resolveTheoryLabel(source)
+    resolveTheoryLabel(target)
+    const uri = definitionUri('morphism', key)
+    const prior = seen.get(config)
+    if (prior !== undefined) {
+      throw new Error(`Definition already registered: ${prior}`)
+    }
+    seen.set(config, uri)
+    const carried = metaOf(config).uri
+    if (isDefinitionKey(carried) && definitionRegistry.has(carried) && carried !== uri) {
+      throw new Error(`Definition already registered: ${carried}`)
+    }
+    const existing = morphismRefFor(source, target).value
+    if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+      throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
+    }
+  }
 }

@@ -32,6 +32,8 @@ export * from './lazy-module.js'
 // Metadata helpers
 export * from './meta.js'
 
+export { applyMorphism, composeMorphisms, defineMorphism } from './morphism.js'
+
 // Protocol System (ADR-0015)
 export * from './protocol.js'
 
