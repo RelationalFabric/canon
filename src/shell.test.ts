@@ -565,11 +565,11 @@ describe('shell', () => {
     })
 
     it('stores nothing when a later canon conflicts with an existing registration', () => {
-      registerCanons({ canon2: { axioms: {} } })
+      registerCanons({ Later: { axioms: {} } })
 
       expect(() => registerCanons({
-        canon1: { axioms: {} },
-        canon2: {
+        Earlier: { axioms: {} },
+        Later: {
           axioms: {
             Id: {
               $basis: (v: unknown): v is { id: string } => true,
@@ -577,20 +577,20 @@ describe('shell', () => {
             },
           },
         },
-      })).toThrow('Definition already registered: canon://canon/canon2 (ADR-0017)')
+      })).toThrow('Definition already registered: canon://canon/Later (ADR-0017)')
 
-      expect(canonRefFor('canon1').value).toBeUndefined()
-      expect(canonRefFor('canon2').value).toEqual({ axioms: {} })
+      expect(canonRefFor('Earlier').value).toBeUndefined()
+      expect(canonRefFor('Later').value).toEqual({ axioms: {} })
     })
 
     it('stores nothing when a later canon has a missing models label', () => {
       expect(() => registerCanons({
-        canon1: { axioms: {}, models: { Fresh: defineTheory({}) } },
-        canon2: { axioms: {}, models: ['Missing'] },
+        Earlier: { axioms: {}, models: { Fresh: defineTheory({}) } },
+        Later: { axioms: {}, models: ['Missing'] },
       })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
 
-      expect(canonRefFor('canon1').value).toBeUndefined()
-      expect(canonRefFor('canon2').value).toBeUndefined()
+      expect(canonRefFor('Earlier').value).toBeUndefined()
+      expect(canonRefFor('Later').value).toBeUndefined()
       expect(theoryRefFor('Fresh').value).toBeUndefined()
     })
 
@@ -758,8 +758,8 @@ describe('shell', () => {
       const keys = uris()
 
       expect(() => registerCanons({
-        canon1: { axioms: {}, models: { Fresh: fresh } },
-        canon2: { axioms: {}, models: [{ Later: defineTheory({}) }, 'Identity'] },
+        Earlier: { axioms: {}, models: { Fresh: fresh } },
+        Trailing: { axioms: {}, models: [{ Later: defineTheory({}) }, 'Identity'] },
       })).toThrow('A definition ref map is only allowed as the last item (ADR-0017)')
 
       expect(definitionRegistry.size).toBe(size)
