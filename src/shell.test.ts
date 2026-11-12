@@ -3,14 +3,43 @@
  */
 
 import type { CanonConfig, Metadata } from './types/index.js'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { inferCanon } from './canon.js'
-import { canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
+import { allOrNothing, canonRefFor, definitionRegistry, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf, updateMeta } from './meta.js'
 import { declareCanon, declareMorphism, declareTheory, registerCanons, registerMorphisms, registerTheories, resetRegistry } from './shell.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
 import { defineTheory } from './theory.js'
+
+const rollbackArm = vi.hoisted(() => ({ value: false, errors: undefined as string[] | undefined, index: 0 }))
+
+vi.mock('./meta.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./meta.js')>()
+  return {
+    ...actual,
+    updateMeta: <T extends object, M extends Metadata = Metadata>(
+      obj: T,
+      updater: (metadata?: M) => M | undefined,
+    ): T => {
+      if (rollbackArm.value) {
+        if (rollbackArm.errors !== undefined) {
+          const message = rollbackArm.errors[rollbackArm.index]
+          if (message !== undefined) {
+            rollbackArm.index += 1
+            if (rollbackArm.index >= rollbackArm.errors.length) {
+              rollbackArm.value = false
+            }
+            throw new Error(message)
+          }
+        }
+        rollbackArm.value = false
+        throw new Error('restore failed')
+      }
+      return actual.updateMeta(obj, updater)
+    },
+  }
+})
 
 declare module '@relational-fabric/canon' {
   interface Canons {
@@ -31,6 +60,9 @@ declare module '@relational-fabric/canon' {
     DeclaredTheory: Record<string, never>
     Fresh: Record<string, never>
     One: Record<string, never>
+    A: Record<string, never>
+    B: Record<string, never>
+    C: Record<string, never>
     Other: Record<string, never>
     T: Record<string, never>
     TheoryConflict: Record<string, never>
@@ -46,6 +78,9 @@ describe('shell', () => {
   afterEach(() => {
     // Just clear - isolated tests don't need full restoration
     resetRegistry()
+    rollbackArm.value = false
+    rollbackArm.errors = undefined
+    rollbackArm.index = 0
   })
 
   describe('resetRegistry', () => {
@@ -263,7 +298,7 @@ describe('shell', () => {
     it('throws when a different config is declared for the same pair and keeps the first value', () => {
       declareMorphism('Identity', 'Taxonomy', morphismConfig)
 
-      // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+      // @ts-expect-error runtime guard test, map names a wrong target term for this pair
       expect(() => declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Id' } } as const))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
@@ -324,7 +359,7 @@ describe('shell', () => {
     it('throws when a different config is registered under the same key and keeps the original value', () => {
       registerMorphisms({ 'Identity/Taxonomy': morphismConfig })
 
-      // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+      // @ts-expect-error runtime guard test, map names a wrong target term for this pair
       expect(() => registerMorphisms({ 'Identity/Taxonomy': { maps: { Id: 'Id' } } as const }))
         .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
@@ -387,7 +422,7 @@ describe('shell', () => {
 
       expect(() => registerMorphisms({
         'Taxonomy/Identity': { maps: { Type: 'Id' } } as const,
-        // @ts-expect-error runtime guard test, map deliberately not complete for this pair
+        // @ts-expect-error runtime guard test, map names a wrong target term for this pair
         'Identity/Taxonomy': { maps: { Id: 'Id' } } as const,
       })).toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
 
@@ -545,11 +580,11 @@ describe('shell', () => {
     })
 
     it('stores nothing when a later canon conflicts with an existing registration', () => {
-      registerCanons({ canon2: { axioms: {} } })
+      registerCanons({ Later: { axioms: {} } })
 
       expect(() => registerCanons({
-        canon1: { axioms: {} },
-        canon2: {
+        Earlier: { axioms: {} },
+        Later: {
           axioms: {
             Id: {
               $basis: (v: unknown): v is { id: string } => true,
@@ -557,20 +592,33 @@ describe('shell', () => {
             },
           },
         },
-      })).toThrow('Definition already registered: canon://canon/canon2 (ADR-0017)')
+      })).toThrow('Definition already registered: canon://canon/Later (ADR-0017)')
 
-      expect(canonRefFor('canon1').value).toBeUndefined()
-      expect(canonRefFor('canon2').value).toEqual({ axioms: {} })
+      expect(canonRefFor('Earlier').value).toBeUndefined()
+      expect(canonRefFor('Later').value).toEqual({ axioms: {} })
+    })
+
+    it('resolves a list-form models label supplied by a sibling map in the same batch', () => {
+      const sibling = defineTheory({})
+
+      registerCanons({
+        Source: { axioms: {}, models: { Sibling: sibling } },
+        User: { axioms: {}, models: ['Sibling'] },
+      })
+
+      expect(canonRefFor('Source').value).toBeDefined()
+      expect(canonRefFor('User').value).toBeDefined()
+      expect(theoryRefFor('Sibling').value).toBe(sibling)
     })
 
     it('stores nothing when a later canon has a missing models label', () => {
       expect(() => registerCanons({
-        canon1: { axioms: {}, models: { Fresh: defineTheory({}) } },
-        canon2: { axioms: {}, models: ['Missing'] },
+        Earlier: { axioms: {}, models: { Fresh: defineTheory({}) } },
+        Later: { axioms: {}, models: ['Missing'] },
       })).toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
 
-      expect(canonRefFor('canon1').value).toBeUndefined()
-      expect(canonRefFor('canon2').value).toBeUndefined()
+      expect(canonRefFor('Earlier').value).toBeUndefined()
+      expect(canonRefFor('Later').value).toBeUndefined()
       expect(theoryRefFor('Fresh').value).toBeUndefined()
     })
 
@@ -738,8 +786,8 @@ describe('shell', () => {
       const keys = uris()
 
       expect(() => registerCanons({
-        canon1: { axioms: {}, models: { Fresh: fresh } },
-        canon2: { axioms: {}, models: [{ Later: defineTheory({}) }, 'Identity'] },
+        Earlier: { axioms: {}, models: { Fresh: fresh } },
+        Trailing: { axioms: {}, models: [{ Later: defineTheory({}) }, 'Identity'] },
       })).toThrow('A definition ref map is only allowed as the last item (ADR-0017)')
 
       expect(definitionRegistry.size).toBe(size)
@@ -1102,6 +1150,339 @@ describe('shell', () => {
       })
       expect(after?.[mark]).toBe(true)
       expect(after?.uri).toBeUndefined()
+    })
+
+    it('restores uri stamps stripped by a reset inside a caught nested call', () => {
+      const kept = defineTheory({})
+      declareTheory('Fresh', kept)
+      const uri = metaOf(kept).uri
+      const entriesBefore = [...definitionRegistry.entries()]
+      const outer = {
+        get extends(): undefined {
+          try {
+            allOrNothing(() => {
+              resetRegistry()
+              throw new Error('inner reset')
+            })
+          } catch {
+            // The inner failure is caught inside the getter.
+          }
+          return undefined
+        },
+      }
+
+      declareTheory('T', outer)
+
+      for (const [key, value] of entriesBefore) {
+        expect(definitionRegistry.value(key)).toBe(value)
+      }
+      expect(metaOf(kept).uri).toBe(uri)
+      expect(metaOf(outer).uri).toBe('canon://theory/T')
+    })
+
+    it('keeps the original error when a metadata restore throws', () => {
+      const original = new Error('original failure')
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => {
+          declareTheory('Other', defineTheory({}))
+          rollbackArm.value = true
+          throw original
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      const aggregate = thrown as AggregateError
+      expect(aggregate.errors[0]).toBe(original)
+      expect(aggregate.cause).toBe(original)
+      expect(definitionRegistry.size).toBe(0)
+      expect(theoryRefFor('Other').value).toBeUndefined()
+      declareTheory('Other', defineTheory({}))
+      expect(theoryRefFor('Other').value).toBeDefined()
+    })
+
+    it('surfaces a failed restore with the original error', () => {
+      const a = defineTheory({})
+      const b = defineTheory({})
+      declareTheory('A', a)
+      declareTheory('B', b)
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => {
+          resetRegistry()
+          rollbackArm.value = true
+          throw new Error('boom')
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      const aggregate = thrown as AggregateError
+      expect(aggregate.errors[0]).toMatchObject({ message: 'boom' })
+      expect(aggregate.cause).toBe(aggregate.errors[0])
+      expect(aggregate.errors).toHaveLength(2)
+      expect(definitionRegistry.value(theoryRefFor('A').key)).toBe(a)
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(a).uri).toBe('canon://theory/A')
+      expect(metaOf(b).uri).toBeUndefined()
+    })
+
+    it('replays a failed inner restore when the outer savepoint fails', () => {
+      const kept = defineTheory({})
+      declareTheory('Fresh', kept)
+      let innerError: unknown
+      let outerError: unknown
+
+      try {
+        allOrNothing(() => {
+          try {
+            allOrNothing(() => {
+              resetRegistry()
+              rollbackArm.value = true
+              throw new Error('inner')
+            })
+          } catch (error) {
+            innerError = error
+          }
+          throw new Error('outer')
+        })
+      } catch (error) {
+        outerError = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(innerError).toBeInstanceOf(AggregateError)
+      expect(outerError).toBeInstanceOf(Error)
+      expect(outerError).not.toBeInstanceOf(AggregateError)
+      expect(outerError).toMatchObject({ message: 'outer' })
+      expect(definitionRegistry.value(theoryRefFor('Fresh').key)).toBe(kept)
+      expect(metaOf(kept).uri).toBe('canon://theory/Fresh')
+    })
+
+    it('cannot commit while an inner rollback is incomplete', () => {
+      const b = defineTheory({})
+      declareTheory('B', b)
+      let thrown: unknown
+
+      try {
+        declareTheory('T', {
+          get extends() {
+            try {
+              allOrNothing(() => {
+                resetRegistry()
+                rollbackArm.value = true
+                throw new Error('inner')
+              })
+            } catch {
+              // The inner rollback failure is caught inside the getter.
+            }
+            return undefined
+          },
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({ message: expect.stringContaining('cannot commit') })
+      expect(theoryRefFor('T').value).toBeUndefined()
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(b).uri).toBe('canon://theory/B')
+      expect(() => declareTheory('A', b)).toThrow()
+    })
+
+    it('cannot commit reports every unrestored failure, in log order', () => {
+      const b = defineTheory({})
+      const c = defineTheory({})
+      declareTheory('B', b)
+      declareTheory('C', c)
+      let thrown: unknown
+
+      try {
+        declareTheory('T', {
+          get extends() {
+            try {
+              allOrNothing(() => {
+                resetRegistry()
+                rollbackArm.errors = ['e2', 'e1']
+                rollbackArm.index = 0
+                rollbackArm.value = true
+                throw new Error('inner')
+              })
+            } catch {
+              // The inner rollback failure is caught inside the getter.
+            }
+            return undefined
+          },
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+        rollbackArm.errors = undefined
+        rollbackArm.index = 0
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      const aggregate = thrown as AggregateError
+      expect(aggregate.message).toContain('rollback incomplete')
+      expect(aggregate.errors).toHaveLength(2)
+      expect(aggregate.errors[0]).toMatchObject({ message: 'e1' })
+      expect(aggregate.errors[1]).toMatchObject({ message: 'e2' })
+      expect(aggregate.cause).toMatchObject({ message: 'e1' })
+    })
+
+    it('cannot commit when the outer write maps a fresh name to an unrestored object', () => {
+      const b = defineTheory({})
+      declareTheory('B', b)
+      let reads = 0
+      let thrown: unknown
+
+      try {
+        declareTheory('T', {
+          get extends() {
+            reads += 1
+            if (reads === 1) {
+              try {
+                allOrNothing(() => {
+                  resetRegistry()
+                  rollbackArm.value = true
+                  throw new Error('inner')
+                })
+              } catch {
+                // The inner rollback failure is caught inside the getter.
+              }
+            }
+            return { A: b }
+          },
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({
+        message: expect.stringContaining('cannot commit'),
+        cause: { message: 'restore failed' },
+      })
+      expect(theoryRefFor('A').value).toBeUndefined()
+      expect(theoryRefFor('T').value).toBeUndefined()
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(b).uri).toBe('canon://theory/B')
+    })
+
+    it('cannot commit after a second reset hides an unrestored stamp', () => {
+      const b = defineTheory({})
+      const other = defineTheory({ extends: [] })
+      declareTheory('B', b)
+      let thrown: unknown
+
+      try {
+        declareTheory('T', {
+          get extends() {
+            try {
+              allOrNothing(() => {
+                resetRegistry()
+                rollbackArm.value = true
+                throw new Error('inner')
+              })
+            } catch {
+              // The inner rollback failure is caught inside the getter.
+            }
+            resetRegistry()
+            return undefined
+          },
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({
+        message: expect.stringContaining('cannot commit'),
+        cause: { message: 'restore failed' },
+      })
+      expect(theoryRefFor('T').value).toBeUndefined()
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(b).uri).toBe('canon://theory/B')
+      expect(() => declareTheory('B', other)).toThrow()
+    })
+
+    it('a parent cannot commit when the cannot-commit replay is itself incomplete', () => {
+      const b = defineTheory({})
+      declareTheory('B', b)
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => {
+          try {
+            allOrNothing(() => {
+              try {
+                allOrNothing(() => {
+                  resetRegistry()
+                  rollbackArm.value = true
+                  throw new Error('inner')
+                })
+              } catch {
+                // The inner rollback failure is caught inside the middle frame.
+              }
+              rollbackArm.value = true
+              return 'middle'
+            })
+          } catch {
+            // The middle cannot-commit replay is incomplete.
+          }
+          return 'outer'
+        })
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({ message: expect.stringContaining('cannot commit') })
+      expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
+      expect(metaOf(b).uri).toBe('canon://theory/B')
+    })
+
+    it('rethrows the original error when an outer replay repairs an incomplete rollback', () => {
+      const kept = defineTheory({})
+      declareTheory('Fresh', kept)
+      let thrown: unknown
+
+      try {
+        allOrNothing(() => allOrNothing(() => {
+          resetRegistry()
+          rollbackArm.value = true
+          throw new Error('inner')
+        }))
+      } catch (error) {
+        thrown = error
+      } finally {
+        rollbackArm.value = false
+      }
+
+      expect(thrown).toBeInstanceOf(Error)
+      expect(thrown).not.toBeInstanceOf(AggregateError)
+      expect(thrown).toMatchObject({ message: 'inner' })
+      expect(metaOf(kept).uri).toBe('canon://theory/Fresh')
     })
   })
 })
