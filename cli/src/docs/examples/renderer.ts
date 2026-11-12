@@ -108,8 +108,11 @@ export async function renderTutorialBody(
         const { description, params, returns } = section.metadata || {}
 
         if (description) {
-          lines.push(description)
-          lines.push('')
+          const markdown = await processBlockComment(description, depthState, parsed.sourcePath)
+          if (markdown) {
+            lines.push(markdown)
+            lines.push('')
+          }
         }
 
         // Render parameter table if there are params
