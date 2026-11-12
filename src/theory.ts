@@ -42,22 +42,6 @@ export function regularizeTheoryTerms(theory: Theory): void {
   }
 }
 
-let clashStandIn: { from: object, as: object } | undefined
-
-/**
- * Hash `write` as if `from` were `as`, without changing `from`.
- * Used so a Morphism clash check sees the endpoints registration will store.
- */
-export function withClashStandIn<T>(from: object, as: object, write: () => T): T {
-  const previous = clashStandIn
-  clashStandIn = { from, as }
-  try {
-    return write()
-  } finally {
-    clashStandIn = previous
-  }
-}
-
 /**
  * Hash a value for a definition clash check.
  * A missing `terms` is read as `{}` and the input is not written to.
@@ -80,12 +64,7 @@ export function clashHash(value: unknown): string {
     return view
   }
   return objectHash(value, {
-    replacer: (current) => {
-      if (clashStandIn !== undefined && current === clashStandIn.from) {
-        return clashStandIn.as
-      }
-      return current instanceof Theory ? viewOf(current) : current
-    },
+    replacer: current => current instanceof Theory ? viewOf(current) : current,
   })
 }
 

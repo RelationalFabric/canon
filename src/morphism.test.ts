@@ -165,15 +165,20 @@ describe('registration swap', () => {
       }) as { maps: { Id: 'Type' } },
     })
     const first = morphismRefFor('Identity', 'Taxonomy').value
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const second = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
 
     expect(() => registerMorphisms({
-      'Identity/Taxonomy': defineMorphism({
-        maps: { Id: 'Type' },
-        source: defineTheory({ terms: identityConfig.terms }),
-        target: defineTheory({ terms: taxonomyConfig.terms }),
-      }) as { maps: { Id: 'Type' } },
+      'Identity/Taxonomy': second as { maps: { Id: 'Type' } },
     })).not.toThrow()
     expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
+    expect(second.source).toBe(source)
+    expect(second.target).toBe(target)
   })
 
   it('leaves a clashing declare with the passed-in endpoints', () => {

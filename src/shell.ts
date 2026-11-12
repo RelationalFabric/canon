@@ -9,10 +9,9 @@ import type { TheoryConfig } from './theory.js'
 import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
 import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, recordMorphismEndpoints, theoryRefFor } from './definitions.js'
-import { objectHash } from './kit.js'
 import { metaOf } from './meta.js'
 import { defineMorphism, Morphism } from './morphism.js'
-import { clashHash, defineTheory, Theory, withClashStandIn } from './theory.js'
+import { clashHash, defineTheory, Theory } from './theory.js'
 
 /**
  * Reset the global registry to empty
@@ -578,20 +577,17 @@ function registerBoundMorphism(
     return defined
   }
   const needsSwap = config.source !== sourceTheory || config.target !== targetTheory
-  const register = () => {
-    definitionRegistry.register(uri, config)
+  const clashAs = needsSwap
+    ? new Morphism({
+        maps: config.maps,
+        source: sourceTheory,
+        target: targetTheory,
+      })
+    : undefined
+  definitionRegistry.register(uri, config, clashAs === undefined ? undefined : { clashAs })
+  if (definitionRegistry.value(uri) === config) {
+    recordMorphismEndpoints(config, sourceTheory, targetTheory)
   }
-  if (needsSwap) {
-    const standIn = new Morphism({
-      maps: config.maps,
-      source: sourceTheory,
-      target: targetTheory,
-    })
-    withClashStandIn(config, standIn, register)
-  } else {
-    register()
-  }
-  recordMorphismEndpoints(config, sourceTheory, targetTheory)
   return config as MorphismWithTheories
 }
 
@@ -648,7 +644,7 @@ function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): v
       throw new Error(`Definition already registered: ${carried}`)
     }
     const existing = morphismForTheoryPair(defined.source, defined.target)
-    if (existing !== undefined && objectHash(existing) !== objectHash(defined)) {
+    if (existing !== undefined && clashHash(existing) !== clashHash(defined)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
   }

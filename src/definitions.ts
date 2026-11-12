@@ -78,12 +78,18 @@ export class DefinitionRegistry {
    * Register a value at a definition or lexicon URI.
    * A registered value carries that URI in its metadata.
    * Re-registering the same URI is idempotent when the values hash equal, and throws otherwise.
+   * When `clashAs` is set, that view is hashed instead of `value`.
    * A value already registered at a different live URI also throws (ADR-0017).
    * A `uri` left on a value after `clear` is stale and is replaced.
    */
-  register(uri: DefinitionUri | LexiconTermUri, value: unknown): void {
+  register(
+    uri: DefinitionUri | LexiconTermUri,
+    value: unknown,
+    options?: { clashAs?: unknown },
+  ): void {
     const alreadyRegistered = this.#definitions.has(uri)
-    if (alreadyRegistered && clashHash(this.#definitions.get(uri)) !== clashHash(value)) {
+    const hashed = options?.clashAs ?? value
+    if (alreadyRegistered && clashHash(this.#definitions.get(uri)) !== clashHash(hashed)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     if (isMetaCarrier(value)) {
