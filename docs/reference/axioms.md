@@ -6,12 +6,13 @@ This document defines the core set of axioms that form the foundation of the Can
 
 ## Core Axiom Set
 
-The core axiom set consists of five essential axioms that cover the fundamental concepts found in most data-centric applications:
+The core axiom set consists of four essential axioms that cover the fundamental concepts found in most data-centric applications:
 
 1. **Id** - Unique identifiers for entities
 2. **Type** - Entity classification and schema information
 3. **Version** - Data versioning for optimistic concurrency control
 4. **Timestamps** - Time-based data with format conversion
+
 ## Axiom Types
 
 ```typescript

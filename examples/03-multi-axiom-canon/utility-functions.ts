@@ -83,23 +83,23 @@ export function demonstrateTimestampConversion(): void {
 }
 
 /**
- * Demonstrate reference conversion from different formats
+ * Log the current reference shape `{ ref, resolved, value? }`.
  */
 export function demonstrateReferenceConversion(): void {
   logger.info('=== Reference Conversion Examples ===')
 
-  // String reference
+  // { ref, resolved: false }
   const stringRef = 'user-123'
   const stringConverted = { ref: stringRef, resolved: false }
-  logger.log(`String reference "${stringRef}" ->`, stringConverted)
+  logger.log(`{ ref, resolved: false } from "${stringRef}" ->`, stringConverted)
 
-  // Object reference
+  // { ref, resolved }
   const objectRef = { ref: 'product-456', resolved: false }
-  logger.log('Object reference ->', objectRef)
+  logger.log('{ ref, resolved } ->', objectRef)
 
-  // Complex object
+  // { ref, resolved, value }
   const complexRef = { ref: 'order-789', resolved: false, value: undefined }
-  logger.log('Complex object ->', complexRef)
+  logger.log('{ ref, resolved, value } ->', complexRef)
 }
 
 /**
