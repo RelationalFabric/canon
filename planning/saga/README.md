@@ -123,3 +123,4 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 - `802015a` unit 2 review fixes
 - `3b002b3`: unit 4 done (registration swap)
 - `f7c2950`: unit 4 swap waits until register succeeds
+- `24e4941`: unit 4 clash view is an argument to register
