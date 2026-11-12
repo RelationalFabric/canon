@@ -2,63 +2,69 @@
 
 Creating and using custom axioms (Email, Currency, Status, Priority) for domain-specific requirements
 
+Customer entity with custom axioms
+
 ```ts
 const customerWithCustomFields = {
-id: 'cust-123',
-type: 'customer',
-version: 3,
-createdAt: new Date('2024-01-15T10:30:00Z'),
-updatedAt: new Date('2024-01-20T14:45:00Z'),
-email: 'alice@example.com',
-status: 'active',
-priority: 3,
-profile: {
-  name: 'Alice Johnson',
-  phone: '+1-555-0123',
-},
-preferences: {
-  currency: 'USD',
-  language: 'en',
-},
+  id: 'cust-123',
+  type: 'customer',
+  version: 3,
+  createdAt: new Date('2024-01-15T10:30:00Z'),
+  updatedAt: new Date('2024-01-20T14:45:00Z'),
+  email: 'alice@example.com',
+  status: 'active',
+  priority: 3,
+  profile: {
+    name: 'Alice Johnson',
+    phone: '+1-555-0123',
+  },
+  preferences: {
+    currency: 'USD',
+    language: 'en',
+  },
 }
 ```
+
+Product entity with custom axioms
 
 ```ts
 const _productWithCustomFields = {
-id: 'prod-456',
-type: 'product',
-version: 7,
-createdAt: new Date('2024-01-10T09:00:00Z'),
-updatedAt: new Date('2024-01-25T16:20:00Z'),
-name: 'Canon Framework License',
-price: 99.99, // Will be converted to currency
-currency: 'USD',
-status: 'active',
-priority: 2, // Numeric priority
-category: 'software',
-createdBy: 'admin-789',
+  id: 'prod-456',
+  type: 'product',
+  version: 7,
+  createdAt: new Date('2024-01-10T09:00:00Z'),
+  updatedAt: new Date('2024-01-25T16:20:00Z'),
+  name: 'Canon Framework License',
+  price: 99.99, // Will be converted to currency
+  currency: 'USD',
+  status: 'active',
+  priority: 2, // Numeric priority
+  category: 'software',
+  createdBy: 'admin-789',
 }
 ```
 
+Order entity with custom axioms
+
 ```ts
 const orderWithCustomFields = {
-id: 'order-789',
-type: 'order',
-version: 2,
-createdAt: new Date('2024-01-15T09:30:00Z'),
-updatedAt: new Date('2024-01-15T11:45:00Z'),
-status: 'active',
-priority: { level: 2, label: 'medium' },
-total: '$199.98', // Currency string
-currency: 'USD',
-customerId: 'cust-123',
-items: [
-  {
-    productId: 'prod-456',
-    quantity: 2,
-    price: 99.99,
-  },
-],
+  id: 'order-789',
+  type: 'order',
+  version: 2,
+  createdAt: new Date('2024-01-15T09:30:00Z'),
+  updatedAt: new Date('2024-01-15T11:45:00Z'),
+  status: 'active',
+  priority: { level: 2, label: 'medium' },
+  total: '$199.98', // Currency string
+  currency: 'USD',
+  customerId: 'cust-123',
+  items: [
+    {
+      productId: 'prod-456',
+      quantity: 2,
+      price: 99.99,
+    },
+  ],
 }
 ```
 
@@ -69,12 +75,16 @@ const email = emailOf(customerWithCustomFields)
 expect(email).toBe('alice@example.com')
 ```
 
+_Status:_ ✅ pass
+
 **validates email format:**
 
 ```ts
 const invalidCustomer = { ...customerWithCustomFields, email: 'invalid-email' }
 expect(() => emailOf(invalidCustomer)).toThrow('Invalid email format')
 ```
+
+_Status:_ ✅ pass
 
 **converts currency from different formats:**
 
@@ -92,6 +102,8 @@ const currency3 = currencyOf({ amount: 200, currency: 'EUR' })
 expect(currency3).toEqual({ amount: 200, currency: 'EUR' })
 ```
 
+_Status:_ ✅ pass
+
 **extracts and validates status:**
 
 ```ts
@@ -99,12 +111,16 @@ const status = statusOf(customerWithCustomFields)
 expect(status).toBe('active')
 ```
 
+_Status:_ ✅ pass
+
 **validates status transitions:**
 
 ```ts
 const invalidStatus = { ...customerWithCustomFields, status: 'invalid' }
 expect(() => statusOf(invalidStatus)).toThrow('Invalid status')
 ```
+
+_Status:_ ✅ pass
 
 **converts priority from different formats:**
 
@@ -122,6 +138,8 @@ const priority3 = priorityOf({ level: 4, label: 'critical' })
 expect(priority3).toEqual({ level: 4, label: 'critical' })
 ```
 
+_Status:_ ✅ pass
+
 **processes customer registration with custom validation:**
 
 ```ts
@@ -134,6 +152,8 @@ expect(result.status).toBe('active')
 expect(result.priority.level).toBe(3)
 ```
 
+_Status:_ ✅ pass
+
 **calculates order total with currency conversion:**
 
 ```ts
@@ -145,6 +165,8 @@ expect(result.total.amount).toBeCloseTo(215.978, 2)
 expect(result.subtotal.currency).toBe('USD')
 ```
 
+_Status:_ ✅ pass
+
 **validates status transitions:**
 
 ```ts
@@ -155,6 +177,8 @@ expect(result.oldStatus).toBe('active')
 expect(result.newStatus).toBe('inactive')
 ```
 
+_Status:_ ✅ pass
+
 **rejects invalid status transitions:**
 
 ```ts
@@ -163,6 +187,8 @@ const result = updateEntityStatus(customerWithCustomFields, 'draft')
 expect(result.success).toBe(false)
 expect(result.error).toContain('Invalid transition')
 ```
+
+_Status:_ ✅ pass
 
 ---
 

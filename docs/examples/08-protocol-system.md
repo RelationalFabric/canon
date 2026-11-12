@@ -10,12 +10,12 @@ In this example, we'll create a sequence protocol that works with arrays, string
 
 ```ts
 import {
-defineProtocol,
-extendProtocol,
-Null,
-ObjectFallback,
-satisfiesProtocol,
-Undefined,
+  defineProtocol,
+  extendProtocol,
+  Null,
+  ObjectFallback,
+  satisfiesProtocol,
+  Undefined,
 } from '@relational-fabric/canon'
 ```
 
@@ -27,9 +27,9 @@ The naming convention uses `P` prefix for protocol values (e.g., `PSeq` for a se
 
 ```ts
 const PSeq = defineProtocol({
-first: 'Returns the first item of the sequence',
-rest: 'Returns the rest of the sequence after the first item',
-isEmpty: 'Returns true if the sequence is empty',
+  first: 'Returns the first item of the sequence',
+  rest: 'Returns the rest of the sequence after the first item',
+  isEmpty: 'Returns true if the sequence is empty',
 })
 ```
 
@@ -40,16 +40,16 @@ Use `extendProtocol()` to add implementations for specific types. Here we extend
 ```ts
 // Arrays are natural sequences
 extendProtocol(PSeq, Array, {
-first: (arr: unknown) => (arr as unknown[])[0],
-rest: (arr: unknown) => (arr as unknown[]).slice(1),
-isEmpty: (arr: unknown) => (arr as unknown[]).length === 0,
+  first: (arr: unknown) => (arr as unknown[])[0],
+  rest: (arr: unknown) => (arr as unknown[]).slice(1),
+  isEmpty: (arr: unknown) => (arr as unknown[]).length === 0,
 })
 
 // Strings can also be treated as sequences of characters
 extendProtocol(PSeq, String, {
-first: (str: unknown) => (str as string)[0],
-rest: (str: unknown) => (str as string).slice(1),
-isEmpty: (str: unknown) => (str as string).length === 0,
+  first: (str: unknown) => (str as string)[0],
+  rest: (str: unknown) => (str as string).slice(1),
+  isEmpty: (str: unknown) => (str as string).length === 0,
 })
 ```
 
@@ -73,11 +73,15 @@ const wasEmptyString = PSeq.isEmpty('')
 expect(firstNumber).toBe(1)
 ```
 
+_Status:_ ✅ pass
+
 **rest() returns [2,3,4,5] for the array [1,2,3,4,5]:**
 
 ```ts
 expect(restNumbers).toEqual([2, 3, 4, 5])
 ```
+
+_Status:_ ✅ pass
 
 **isEmpty() returns false for a non-empty array:**
 
@@ -85,11 +89,15 @@ expect(restNumbers).toEqual([2, 3, 4, 5])
 expect(wasEmptyNumbers).toBe(false)
 ```
 
+_Status:_ ✅ pass
+
 **first() returns "H" for the string "Hello":**
 
 ```ts
 expect(firstChar).toBe('H')
 ```
+
+_Status:_ ✅ pass
 
 **rest() returns "ello" for the string "Hello":**
 
@@ -97,11 +105,15 @@ expect(firstChar).toBe('H')
 expect(restChars).toBe('ello')
 ```
 
+_Status:_ ✅ pass
+
 **isEmpty() returns true for an empty string:**
 
 ```ts
 expect(wasEmptyString).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 ## Handling Null and Undefined
 
@@ -109,15 +121,15 @@ For types without natural constructors (null and undefined), Canon provides cons
 
 ```ts
 extendProtocol(PSeq, Null, {
-first: _ => undefined,
-rest: _ => null,
-isEmpty: _ => true,
+  first: _ => undefined,
+  rest: _ => null,
+  isEmpty: _ => true,
 })
 
 extendProtocol(PSeq, Undefined, {
-first: _ => undefined,
-rest: _ => undefined,
-isEmpty: _ => true,
+  first: _ => undefined,
+  rest: _ => undefined,
+  isEmpty: _ => true,
 })
 
 const nullFirst = PSeq.first(null)
@@ -131,11 +143,15 @@ const undefinedWasEmpty = PSeq.isEmpty(undefined)
 expect(nullFirst).toBe(undefined)
 ```
 
+_Status:_ ✅ pass
+
 **isEmpty() returns true for null:**
 
 ```ts
 expect(nullWasEmpty).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 **isEmpty() returns true for undefined:**
 
@@ -143,18 +159,20 @@ expect(nullWasEmpty).toBe(true)
 expect(undefinedWasEmpty).toBe(true)
 ```
 
+_Status:_ ✅ pass
+
 ## Object Fallback
 
 Use `ObjectFallback` to provide a default implementation for any plain object that doesn't have a more specific implementation. `ObjectFallback()` returns `{}` (empty object).
 
 ```ts
 extendProtocol(PSeq, ObjectFallback, {
-first: (obj: unknown) => Object.values(obj as object)[0],
-rest: (obj: unknown) => {
-  const entries = Object.entries(obj as object).slice(1)
-  return Object.fromEntries(entries)
-},
-isEmpty: (obj: unknown) => Object.keys(obj as object).length === 0,
+  first: (obj: unknown) => Object.values(obj as object)[0],
+  rest: (obj: unknown) => {
+    const entries = Object.entries(obj as object).slice(1)
+    return Object.fromEntries(entries)
+  },
+  isEmpty: (obj: unknown) => Object.keys(obj as object).length === 0,
 })
 
 const record = { a: 1, b: 2, c: 3 }
@@ -169,17 +187,23 @@ const wasEmptyRecord = PSeq.isEmpty({})
 expect(firstValue).toBe(1)
 ```
 
+_Status:_ ✅ pass
+
 **rest() returns the remaining key-value pairs:**
 
 ```ts
 expect(restRecord).toEqual({ b: 2, c: 3 })
 ```
 
+_Status:_ ✅ pass
+
 **isEmpty() returns true for an empty object:**
 
 ```ts
 expect(wasEmptyRecord).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 ## Checking Protocol Support
 
@@ -196,11 +220,15 @@ const mapSupported = satisfiesProtocol(new Map(), PSeq) // Map uses ObjectFallba
 expect(arraySupported).toBe(true)
 ```
 
+_Status:_ ✅ pass
+
 **returns true for Map (via ObjectFallback):**
 
 ```ts
 expect(mapSupported).toBe(true)
 ```
+
+_Status:_ ✅ pass
 
 ## Writing Generic Functions
 
@@ -208,15 +236,15 @@ Protocols enable truly generic functions that work with any type that implements
 
 ```ts
 function take<T>(seq: T, n: number): unknown[] {
-const result: unknown[] = []
-let current: unknown = seq
+  const result: unknown[] = []
+  let current: unknown = seq
 
-for (let i = 0; i < n && !PSeq.isEmpty(current); i++) {
-  result.push(PSeq.first(current))
-  current = PSeq.rest(current)
-}
+  for (let i = 0; i < n && !PSeq.isEmpty(current); i++) {
+    result.push(PSeq.first(current))
+    current = PSeq.rest(current)
+  }
 
-return result
+  return result
 }
 
 const firstThreeNumbers = take([1, 2, 3, 4, 5], 3)
@@ -230,17 +258,23 @@ const firstThreeFromObject = take({ a: 1, b: 2, c: 3, d: 4 }, 3)
 expect(firstThreeNumbers).toEqual([1, 2, 3])
 ```
 
+_Status:_ ✅ pass
+
 **takes first 3 characters from a string:**
 
 ```ts
 expect(firstThreeChars).toEqual(['H', 'e', 'l'])
 ```
 
+_Status:_ ✅ pass
+
 **takes first 3 values from an object:**
 
 ```ts
 expect(firstThreeFromObject).toEqual([1, 2, 3])
 ```
+
+_Status:_ ✅ pass
 
 ## Key Takeaways
 

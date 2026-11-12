@@ -12,8 +12,8 @@ Each implementation reports a "capability score" and the highest-scoring impleme
 
 ```ts
 import {
-CapabilityScores,
-createLazyModule,
+  CapabilityScores,
+  createLazyModule,
 } from '@relational-fabric/canon'
 ```
 
@@ -25,21 +25,21 @@ Let's create a simple hash module that can have multiple implementations. Every 
 type HashFn = (data: string) => string
 
 interface HashOptions extends Record<string, unknown> {
-algorithm?: 'simple' | 'djb2' | 'fnv1a'
+  algorithm?: 'simple' | 'djb2' | 'fnv1a'
 }
 
 const { module: hash, register: registerHash } = createLazyModule<HashFn, HashOptions>({
-name: 'hash',
-defaultOptions: { algorithm: 'simple' },
-fallback: () => (data: string) => {
-  // Simple hash - always available as fallback
-  let hash = 0
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) - hash) + data.charCodeAt(i)
-    hash = hash & hash // Convert to 32-bit integer
-  }
-  return hash.toString(16)
-},
+  name: 'hash',
+  defaultOptions: { algorithm: 'simple' },
+  fallback: () => (data: string) => {
+    // Simple hash - always available as fallback
+    let hash = 0
+    for (let i = 0; i < data.length; i++) {
+      hash = ((hash << 5) - hash) + data.charCodeAt(i)
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    return hash.toString(16)
+  },
 })
 ```
 
@@ -61,12 +61,16 @@ expect(defaultInfo.name).toBe('$fallback')
 expect(defaultInfo.score).toBe(CapabilityScores.FALLBACK)
 ```
 
+_Status:_ ✅ pass
+
 **produces a hash value:**
 
 ```ts
 expect(typeof simpleHash).toBe('string')
 expect(simpleHash.length).toBeGreaterThan(0)
 ```
+
+_Status:_ ✅ pass
 
 ## Registering Better Implementations
 
@@ -75,39 +79,39 @@ Register implementations with higher scores to override the fallback. The `suppo
 ```ts
 // DJB2 hash - a well-known string hash algorithm
 registerHash({
-name: 'djb2',
-supports: (opts) => {
-  if (opts?.algorithm === 'djb2')
-    return CapabilityScores.OPTIMAL // 1.0
-  return CapabilityScores.BASELINE // 0.0 - available but not preferred
-},
-implementation: () => (data: string) => {
-  let hash = 5381
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) + hash) + data.charCodeAt(i)
-  }
-  return (hash >>> 0).toString(16)
-},
+  name: 'djb2',
+  supports: (opts) => {
+    if (opts?.algorithm === 'djb2')
+      return CapabilityScores.OPTIMAL // 1.0
+    return CapabilityScores.BASELINE // 0.0 - available but not preferred
+  },
+  implementation: () => (data: string) => {
+    let hash = 5381
+    for (let i = 0; i < data.length; i++) {
+      hash = ((hash << 5) + hash) + data.charCodeAt(i)
+    }
+    return (hash >>> 0).toString(16)
+  },
 })
 
 // FNV-1a hash - another well-known algorithm
 registerHash({
-name: 'fnv1a',
-supports: (opts) => {
-  if (opts?.algorithm === 'fnv1a')
-    return CapabilityScores.OPTIMAL // 1.0
-  if (opts?.algorithm === 'simple')
-    return undefined // Not supported for 'simple'
-  return CapabilityScores.GOOD // 0.5 - good general choice
-},
-implementation: () => (data: string) => {
-  let hash = 2166136261
-  for (let i = 0; i < data.length; i++) {
-    hash ^= data.charCodeAt(i)
-    hash = (hash * 16777619) >>> 0
-  }
-  return hash.toString(16)
-},
+  name: 'fnv1a',
+  supports: (opts) => {
+    if (opts?.algorithm === 'fnv1a')
+      return CapabilityScores.OPTIMAL // 1.0
+    if (opts?.algorithm === 'simple')
+      return undefined // Not supported for 'simple'
+    return CapabilityScores.GOOD // 0.5 - good general choice
+  },
+  implementation: () => (data: string) => {
+    let hash = 2166136261
+    for (let i = 0; i < data.length; i++) {
+      hash ^= data.charCodeAt(i)
+      hash = (hash * 16777619) >>> 0
+    }
+    return hash.toString(16)
+  },
 })
 ```
 
@@ -123,6 +127,8 @@ const newDefaultInfo = hash.getDefault()
 // With 'simple' as default, DJB2 returns BASELINE (0.0) which beats FALLBACK (-0.1)
 expect(newDefaultInfo.score).toBeGreaterThan(CapabilityScores.FALLBACK as number)
 ```
+
+_Status:_ ✅ pass
 
 ## Selecting Specific Implementations
 
@@ -143,6 +149,8 @@ expect(typeof djb2Result).toBe('string')
 expect(djb2Result.length).toBeGreaterThan(0)
 ```
 
+_Status:_ ✅ pass
+
 **selects FNV-1a when algorithm is fnv1a:**
 
 ```ts
@@ -150,11 +158,15 @@ expect(typeof fnv1aResult).toBe('string')
 expect(fnv1aResult.length).toBeGreaterThan(0)
 ```
 
+_Status:_ ✅ pass
+
 **produces different hashes for different algorithms:**
 
 ```ts
 expect(djb2Result).not.toBe(fnv1aResult)
 ```
+
+_Status:_ ✅ pass
 
 ## Understanding Capability Scores
 
@@ -171,12 +183,12 @@ The scoring system determines implementation priority:
 
 ```ts
 const allScores = {
-unsupported: CapabilityScores.UNSUPPORTED,
-risky: CapabilityScores.RISKY,
-fallback: CapabilityScores.FALLBACK,
-baseline: CapabilityScores.BASELINE,
-good: CapabilityScores.GOOD,
-optimal: CapabilityScores.OPTIMAL,
+  unsupported: CapabilityScores.UNSUPPORTED,
+  risky: CapabilityScores.RISKY,
+  fallback: CapabilityScores.FALLBACK,
+  baseline: CapabilityScores.BASELINE,
+  good: CapabilityScores.GOOD,
+  optimal: CapabilityScores.OPTIMAL,
 }
 ```
 
@@ -186,6 +198,8 @@ optimal: CapabilityScores.OPTIMAL,
 expect(allScores.unsupported).toBe(undefined)
 ```
 
+_Status:_ ✅ pass
+
 **scores are ordered from RISKY to OPTIMAL:**
 
 ```ts
@@ -194,6 +208,8 @@ expect(allScores.fallback).toBeLessThan(allScores.baseline as number)
 expect(allScores.baseline).toBeLessThan(allScores.good as number)
 expect(allScores.good).toBeLessThan(allScores.optimal as number)
 ```
+
+_Status:_ ✅ pass
 
 ## Listing Implementations
 
@@ -212,12 +228,16 @@ expect(implNames).toContain('djb2')
 expect(implNames).toContain('fnv1a')
 ```
 
+_Status:_ ✅ pass
+
 **includes the fallback implementation:**
 
 ```ts
 const fallback = implementations.find(i => i.name === '$fallback')
 expect(fallback).toBeDefined()
 ```
+
+_Status:_ ✅ pass
 
 ## Key Takeaways
 

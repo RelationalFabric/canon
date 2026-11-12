@@ -64,6 +64,7 @@ export interface TutorialSection {
   /** Optional metadata specific to section type */
   metadata?: {
     /** For JSDoc sections: parameter and return info */
+    description?: string
     params?: Array<{ name: string, type: string, description: string }>
     returns?: { type: string, description: string }
     /** For test sections: test title and status */
