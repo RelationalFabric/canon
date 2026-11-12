@@ -2,7 +2,7 @@
  * Tests for the Identity theory
  */
 
-import type { Expect } from '../testing.js'
+import type { Expect, IsFalse } from '../testing.js'
 import type { RepresentationAxiom, Theories } from '../types/index.js'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { theoryRefFor } from '../definitions.js'
@@ -27,7 +27,7 @@ interface Incompatible extends IdentityTheory, WrongIdKind {}
 type ClashLegal = Clash
 
 invariant<Expect<ClashLegal, IdentityTheory>>()
-invariant<Expect<Incompatible, WrongIdKind>>()
+invariant<IsFalse<Expect<Incompatible, WrongIdKind>>>()
 
 describe('identity theory', () => {
   beforeEach(() => {
