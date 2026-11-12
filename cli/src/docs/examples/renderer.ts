@@ -191,6 +191,7 @@ export async function renderTutorialBody(
             lines.push(`Supporting File (\`${displayName}\`)`)
             lines.push('')
             lines.push(includedBody)
+            lines.push('')
             lines.push('--')
             lines.push('')
           } else {

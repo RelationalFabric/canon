@@ -76,6 +76,7 @@ expect(meta.format).toBe('hex')
 ```
 
 _Status:_ ✅ pass
+
 --
 
 ## Using the Canon
