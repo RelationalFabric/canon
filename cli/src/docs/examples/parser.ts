@@ -157,7 +157,7 @@ function extractTestBlocks(node: ts.Node, sourceFile: ts.SourceFile): TutorialSe
           if (ts.isArrowFunction(bodyArg) || ts.isFunctionExpression(bodyArg)) {
             const functionBody = bodyArg.body
             if (ts.isBlock(functionBody))
-              body = functionBody.getText(sourceFile).slice(1, -1).trim()
+              body = stripSharedIndent(dropEdgeBlankLines(functionBody.getText(sourceFile).slice(1, -1)))
             else
               body = functionBody.getText(sourceFile)
           }
@@ -259,7 +259,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
       processedLines.add(item.line)
     } else if (item.type === 'fence-end') {
       const { start, end } = item.data as { start: number, end: number }
-      const code = lines.slice(start + 1, end).join('\n').trim()
+      const code = dropEdgeBlankLines(lines.slice(start + 1, end).join('\n'))
       if (code) {
         sections.push({ type: 'code', content: code })
         for (let i = start; i <= end; i++)
@@ -329,7 +329,7 @@ export function parseExampleFile(filePath: string): ParsedExample {
             sections.push({
               type: 'jsdoc',
               content: node.getText(sourceFile),
-              metadata: { params: info.params, returns: info.returns },
+              metadata: { description: info.description, params: info.params, returns: info.returns },
             })
             processedLines.add(nodeLine)
           }
@@ -340,4 +340,37 @@ export function parseExampleFile(filePath: string): ParsedExample {
   }
 
   return { metadata, sections, referencedFiles, sourcePath: filePath }
+}
+
+/**
+ * Drop blank lines at the ends of a block. Leave every other line's whitespace as it is.
+ */
+function dropEdgeBlankLines(text: string): string {
+  const lines = text.split('\n')
+  let start = 0
+  let end = lines.length
+  while (start < end && lines[start].trim() === '')
+    start++
+  while (end > start && lines[end - 1].trim() === '')
+    end--
+  return lines.slice(start, end).join('\n')
+}
+
+/**
+ * Remove the indent shared by every non-empty line.
+ * A line with no indent keeps the block as written.
+ */
+function stripSharedIndent(text: string): string {
+  const lines = text.split('\n')
+  let shared = Number.POSITIVE_INFINITY
+  for (const line of lines) {
+    if (line.trim() === '')
+      continue
+    const indent = line.match(/^[ \t]*/)?.[0].length ?? 0
+    if (indent < shared)
+      shared = indent
+  }
+  if (!Number.isFinite(shared) || shared === 0)
+    return text
+  return lines.map(line => (line.trim() === '' ? line : line.slice(shared))).join('\n')
 }

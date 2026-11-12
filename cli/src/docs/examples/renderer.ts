@@ -10,16 +10,20 @@ import type {
   ParsedExample,
   TestStatusMap,
 } from './types.js'
-import dedent from 'dedent'
+import { dirname } from 'node:path'
 import {
   applyHeaderControl,
+  getIncludeDisplayName,
   processInclude,
+  resolveIncludePath,
 } from './includes.js'
 import {
   processBlockComment,
 } from './markdown.js'
 import { parseExampleFile } from './parser.js'
-import { formatTestStatus } from './test-status.js'
+import { formatTestStatus, getTestStatusForFile } from './test-status.js'
+
+type TestReport = Parameters<typeof getTestStatusForFile>[0]
 
 const GITHUB_BASE_URL = 'https://github.com/RelationalFabric/canon/tree/main/examples'
 
@@ -59,16 +63,24 @@ export async function renderTutorialBody(
   parsed: ParsedExample,
   testStatusMap: TestStatusMap,
   exampleRoot: string,
+  parentDepthState?: HeaderDepthState,
+  testReport: TestReport = null,
+  rootDir = '',
 ): Promise<string> {
   const lines: string[] = []
 
   // Initialize depth state
   // If document has a title, document level becomes 2 (since H1 is used for title)
-  const documentLevel = parsed.metadata.title ? 2 : 1
-  const depthState: HeaderDepthState = {
-    documentLevel,
-    currentLevel: documentLevel,
-  }
+  const documentLevel = parentDepthState?.documentLevel ?? (parsed.metadata.title ? 2 : 1)
+  const depthState: HeaderDepthState = parentDepthState
+    ? {
+        documentLevel: parentDepthState.documentLevel,
+        currentLevel: parentDepthState.currentLevel,
+      }
+    : {
+        documentLevel,
+        currentLevel: documentLevel,
+      }
 
   for (const section of parsed.sections) {
     switch (section.type) {
@@ -85,7 +97,7 @@ export async function renderTutorialBody(
       case 'code': {
         // Render code as fenced block
         lines.push('```ts')
-        lines.push(dedent(section.content))
+        lines.push(section.content)
         lines.push('```')
         lines.push('')
         break
@@ -93,7 +105,15 @@ export async function renderTutorialBody(
 
       case 'jsdoc': {
         // Render JSDoc declaration
-        const { params, returns } = section.metadata || {}
+        const { description, params, returns } = section.metadata || {}
+
+        if (description) {
+          const markdown = await processBlockComment(description, depthState, parsed.sourcePath)
+          if (markdown) {
+            lines.push(markdown)
+            lines.push('')
+          }
+        }
 
         // Render parameter table if there are params
         if (params && params.length > 0) {
@@ -113,7 +133,7 @@ export async function renderTutorialBody(
 
         // Render code
         lines.push('```ts')
-        lines.push(dedent(section.content))
+        lines.push(section.content)
         lines.push('```')
         lines.push('')
         break
@@ -131,7 +151,7 @@ export async function renderTutorialBody(
 
         // Test body code
         lines.push('```ts')
-        lines.push(dedent(section.content))
+        lines.push(section.content)
         lines.push('```')
         lines.push('')
 
@@ -151,15 +171,40 @@ export async function renderTutorialBody(
         const { includePath } = section.metadata || {}
 
         if (includePath) {
-          const includeContent = processInclude(
-            parsed.sourcePath,
-            includePath,
-            exampleRoot,
-          )
+          const absolutePath = resolveIncludePath(parsed.sourcePath, includePath)
+          const displayName = getIncludeDisplayName(absolutePath, exampleRoot)
 
-          if (includeContent) {
-            lines.push(includeContent)
+          if (includePath.endsWith('.ts')) {
+            const includedParsed = parseExampleFile(absolutePath)
+            const includedRoot = dirname(absolutePath)
+            const includedStatus = getTestStatusForFile(testReport, absolutePath, rootDir)
+            const includedBody = await renderTutorialBody(
+              includedParsed,
+              includedStatus,
+              includedRoot,
+              depthState,
+              testReport,
+              rootDir,
+            )
+
+            lines.push('--')
+            lines.push(`Supporting File (\`${displayName}\`)`)
             lines.push('')
+            lines.push(includedBody)
+            lines.push('')
+            lines.push('--')
+            lines.push('')
+          } else {
+            const includeContent = processInclude(
+              parsed.sourcePath,
+              includePath,
+              exampleRoot,
+            )
+
+            if (includeContent) {
+              lines.push(includeContent)
+              lines.push('')
+            }
           }
         }
         break
@@ -245,6 +290,8 @@ export async function renderExample(
   parsed: ParsedExample,
   testStatusMap: TestStatusMap,
   exampleRoot: string,
+  testReport: TestReport = null,
+  rootDir = '',
 ): Promise<string> {
   const lines: string[] = []
 
@@ -261,7 +308,7 @@ export async function renderExample(
   }
 
   // Tutorial body
-  const body = await renderTutorialBody(parsed, testStatusMap, exampleRoot)
+  const body = await renderTutorialBody(parsed, testStatusMap, exampleRoot, undefined, testReport, rootDir)
   lines.push(body)
 
   // Footer
@@ -291,7 +338,9 @@ export async function generateExampleDoc(
   filePath: string,
   testStatusMap: TestStatusMap,
   exampleRoot: string,
+  testReport: TestReport = null,
+  rootDir = '',
 ): Promise<string> {
   const parsed = parseExampleFile(filePath)
-  return renderExample(parsed, testStatusMap, exampleRoot)
+  return renderExample(parsed, testStatusMap, exampleRoot, testReport, rootDir)
 }

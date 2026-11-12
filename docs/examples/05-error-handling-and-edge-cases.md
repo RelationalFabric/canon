@@ -2,57 +2,71 @@
 
 Gracefully handling errors, edge cases, and validation in Canon applications
 
+Valid entity with all required fields
+
 ```ts
 const validEntity = {
-id: 'user-123',
-type: 'user',
-version: 5,
-createdAt: new Date('2024-01-15T10:30:00Z'),
-createdBy: 'admin-456',
+  id: 'user-123',
+  type: 'user',
+  version: 5,
+  createdAt: new Date('2024-01-15T10:30:00Z'),
+  createdBy: 'admin-456',
 }
 ```
+
+Entity with missing required fields
 
 ```ts
 const missingFields = {
-name: 'Incomplete User',
-email: 'incomplete@example.com',
+  name: 'Incomplete User',
+  email: 'incomplete@example.com',
 }
 ```
+
+Entity with wrong field types
 
 ```ts
 const wrongTypes = {
-id: 123,
-type: true,
-version: 'five',
+  id: 123,
+  type: true,
+  version: 'five',
 }
 ```
 
+Entity with null values
+
 ```ts
 const nullValues = {
-id: null,
-version: 0,
+  id: null,
+  version: 0,
 }
 ```
+
+Empty object
 
 ```ts
 const emptyObject = {}
 ```
 
+Non-object value
+
 ```ts
 const nonObject = 'not an object'
 ```
 
+Nested object with valid data in wrong location
+
 ```ts
 const nestedObject = {
-user: {
-  id: 'user-456',
-  type: 'user',
-  version: 3,
-},
-metadata: {
-  source: 'api',
-  timestamp: '2024-01-15T10:30:00Z',
-},
+  user: {
+    id: 'user-456',
+    type: 'user',
+    version: 3,
+  },
+  metadata: {
+    source: 'api',
+    timestamp: '2024-01-15T10:30:00Z',
+  },
 }
 ```
 
@@ -68,6 +82,8 @@ expect(type).toBe('user')
 expect(version).toBe(5)
 ```
 
+_Status:_ ✅ pass
+
 **handles missing fields gracefully:**
 
 ```ts
@@ -79,6 +95,8 @@ expect(id).toBeUndefined()
 expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
+
+_Status:_ ✅ pass
 
 **handles wrong field types gracefully:**
 
@@ -93,6 +111,8 @@ expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
 
+_Status:_ ✅ pass
+
 **handles null and undefined values:**
 
 ```ts
@@ -106,6 +126,8 @@ expect(type).toBeUndefined()
 expect(version).toBe(0)
 ```
 
+_Status:_ ✅ pass
+
 **handles empty objects:**
 
 ```ts
@@ -118,6 +140,8 @@ expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
 
+_Status:_ ✅ pass
+
 **handles non-object values:**
 
 ```ts
@@ -129,6 +153,8 @@ expect(id).toBeUndefined()
 expect(type).toBeUndefined()
 expect(version).toBeUndefined()
 ```
+
+_Status:_ ✅ pass
 
 **validates entities correctly:**
 
@@ -143,6 +169,8 @@ expect(invalidResult.isValid).toBe(false)
 expect(invalidResult.errors.length).toBeGreaterThan(0)
 ```
 
+_Status:_ ✅ pass
+
 **processes entities safely:**
 
 ```ts
@@ -156,6 +184,8 @@ expect(invalidResult.success).toBe(false)
 expect(invalidResult.errors.length).toBeGreaterThan(0)
 ```
 
+_Status:_ ✅ pass
+
 **processes batch entities correctly:**
 
 ```ts
@@ -165,6 +195,8 @@ expect(batchResult.successful).toBe(1)
 expect(batchResult.failed).toBe(3)
 expect(batchResult.results).toHaveLength(4)
 ```
+
+_Status:_ ✅ pass
 
 **handles timestamp conversion errors:**
 
@@ -176,6 +208,8 @@ expect(validTimestamp).toBeInstanceOf(Date)
 expect(invalidTimestamp).toBeUndefined()
 ```
 
+_Status:_ ✅ pass
+
 **handles reference conversion errors:**
 
 ```ts
@@ -185,6 +219,8 @@ const invalidReference = safeReferenceConversion(123)
 expect(validReference).toEqual({ ref: 'user-123', resolved: false })
 expect(invalidReference).toBeUndefined()
 ```
+
+_Status:_ ✅ pass
 
 ---
 

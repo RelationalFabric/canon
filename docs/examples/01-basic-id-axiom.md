@@ -22,27 +22,27 @@ A canon definition has two parts:
 
 ```ts
 type InternalCanon = Canon<{
-Id: {
-  $basis: { id: string }
-  key: 'id'
-  $meta: { type: string }
-}
+  Id: {
+    $basis: { id: string }
+    key: 'id'
+    $meta: { type: string }
+  }
 }>
 
 declare module '@relational-fabric/canon' {
-interface Canons {
-  Internal: InternalCanon
-}
+  interface Canons {
+    Internal: InternalCanon
+  }
 }
 
 declareCanon('Internal', {
-axioms: {
-  Id: {
-    $basis: pojoWithOfType('id', 'string'),
-    key: 'id',
-    $meta: { type: 'uuid' },
+  axioms: {
+    Id: {
+      $basis: pojoWithOfType('id', 'string'),
+      key: 'id',
+      $meta: { type: 'uuid' },
+    },
   },
-},
 })
 ```
 
@@ -50,9 +50,9 @@ Now we can use `idOf()` with our internal data format. The function automaticall
 
 ```ts
 const user = {
-id: 'user-123',
-name: 'John Doe',
-email: 'john@example.com',
+  id: 'user-123',
+  name: 'John Doe',
+  email: 'john@example.com',
 }
 
 const userId = idOf(user)
@@ -64,33 +64,35 @@ const userId = idOf(user)
 expect(userId).toBe('user-123')
 ```
 
+_Status:_ ✅ pass
+
 ## Supporting External Data Formats
 
 Often you'll receive data from external APIs that use different conventions. JSON-LD, for example, uses `@id` instead of `id`. Let's add support for it.
 
 ```ts
 type JsonLdCanon = Canon<{
-Id: {
-  $basis: { '@id': string }
-  key: '@id'
-  $meta: { type: string, format: string }
-}
+  Id: {
+    $basis: { '@id': string }
+    key: '@id'
+    $meta: { type: string, format: string }
+  }
 }>
 
 declare module '@relational-fabric/canon' {
-interface Canons {
-  JsonLd: JsonLdCanon
-}
+  interface Canons {
+    JsonLd: JsonLdCanon
+  }
 }
 
 declareCanon('JsonLd', {
-axioms: {
-  Id: {
-    $basis: pojoWithOfType('@id', 'string'),
-    key: '@id',
-    $meta: { type: 'uri', format: 'iri' },
+  axioms: {
+    Id: {
+      $basis: pojoWithOfType('@id', 'string'),
+      key: '@id',
+      $meta: { type: 'uri', format: 'iri' },
+    },
   },
-},
 })
 ```
 
@@ -98,10 +100,10 @@ The magic: the **SAME** `idOf()` function now works with JSON-LD data too! Canon
 
 ```ts
 const jsonLdPerson = {
-'@id': 'https://example.com/users/jane-456',
-'@type': 'Person',
-'name': 'Jane Smith',
-'email': 'jane@example.com',
+  '@id': 'https://example.com/users/jane-456',
+  '@type': 'Person',
+  'name': 'Jane Smith',
+  'email': 'jane@example.com',
 }
 
 const personId = idOf(jsonLdPerson)
@@ -113,14 +115,16 @@ const personId = idOf(jsonLdPerson)
 expect(personId).toBe('https://example.com/users/jane-456')
 ```
 
+_Status:_ ✅ pass
+
 ## Writing Universal Code
 
 The real power: write functions that work with **any** format. You don't need to check which format the data is in or write conditional logic. Canon handles it for you.
 
 ```ts
 function displayEntity<T extends Satisfies<'Id'>>(entity: T): string {
-const id = idOf(entity)
-return `Entity with ID: ${id}`
+  const id = idOf(entity)
+  return `Entity with ID: ${id}`
 }
 
 // Works with internal format
@@ -129,9 +133,9 @@ const internalDisplay = displayEntity(internalProduct)
 
 // Works with JSON-LD format
 const jsonLdProduct = {
-'@id': 'https://example.com/products/gadget-999',
-'@type': 'Product',
-'name': 'Gadget',
+  '@id': 'https://example.com/products/gadget-999',
+  '@type': 'Product',
+  'name': 'Gadget',
 }
 const jsonLdDisplay = displayEntity(jsonLdProduct)
 ```
@@ -142,11 +146,15 @@ const jsonLdDisplay = displayEntity(jsonLdProduct)
 expect(internalDisplay).toBe('Entity with ID: product-789')
 ```
 
+_Status:_ ✅ pass
+
 **The same function returns the full IRI for the JSON-LD format.:**
 
 ```ts
 expect(jsonLdDisplay).toBe('Entity with ID: https://example.com/products/gadget-999')
 ```
+
+_Status:_ ✅ pass
 
 ## Key Takeaways
 

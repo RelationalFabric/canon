@@ -323,7 +323,7 @@ export async function generateExamplesDocs(options: GenerateExamplesDocsOptions)
       const testStatusMap = getTestStatusForFile(testReport, relativeEntryPath, rootDir)
       const exampleRoot = dirname(entryFile)
 
-      const docContent = await generateExampleDoc(entryFile, testStatusMap, exampleRoot)
+      const docContent = await generateExampleDoc(entryFile, testStatusMap, exampleRoot, testReport, rootDir)
       const docPath = join(tmpOutputDir, info.docFile)
 
       writeFileSync(docPath, docContent)

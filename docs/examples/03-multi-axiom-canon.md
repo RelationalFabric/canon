@@ -8,10 +8,10 @@ In this example, we'll work with entities that implement the four current core a
 
 ```ts
 import {
-analyzeEntity,
-demonstrateReferenceConversion,
-demonstrateTimestampConversion,
-processEntityUpdate,
+  analyzeEntity,
+  demonstrateReferenceConversion,
+  demonstrateTimestampConversion,
+  processEntityUpdate,
 } from './utility-functions.js'
 import './comprehensive-canon.js'
 ```
@@ -22,28 +22,28 @@ Let's define some sample entities that implement the four current core axioms.
 
 ```ts
 const userEntity = {
-id: 'user-123',
-type: 'user',
-version: 5,
-createdAt: new Date('2024-01-15T10:30:00Z'),
-updatedAt: new Date('2024-01-20T14:45:00Z'),
-profile: {
-  name: 'Alice Johnson',
-  email: 'alice@example.com',
-},
-createdBy: 'admin-456',
+  id: 'user-123',
+  type: 'user',
+  version: 5,
+  createdAt: new Date('2024-01-15T10:30:00Z'),
+  updatedAt: new Date('2024-01-20T14:45:00Z'),
+  profile: {
+    name: 'Alice Johnson',
+    email: 'alice@example.com',
+  },
+  createdBy: 'admin-456',
 }
 
 const productEntity = {
-id: 'product-456',
-type: 'product',
-version: 12,
-createdAt: new Date('2024-01-10T09:00:00Z'),
-updatedAt: new Date('2024-01-25T16:20:00Z'),
-name: 'Canon Framework License',
-price: 99.99,
-category: 'software',
-createdBy: 'user-123',
+  id: 'product-456',
+  type: 'product',
+  version: 12,
+  createdAt: new Date('2024-01-10T09:00:00Z'),
+  updatedAt: new Date('2024-01-25T16:20:00Z'),
+  name: 'Canon Framework License',
+  price: 99.99,
+  category: 'software',
+  createdBy: 'user-123',
 }
 ```
 
@@ -67,6 +67,8 @@ expect(userAnalysis.timestamps).toHaveLength(2)
 expect(userAnalysis.references).toHaveLength(1)
 ```
 
+_Status:_ ✅ pass
+
 **The product analysis also extracts all axioms.:**
 
 ```ts
@@ -76,6 +78,8 @@ expect(productAnalysis.version).toBe(12)
 expect(productAnalysis.timestamps).toHaveLength(2)
 expect(productAnalysis.references).toHaveLength(1)
 ```
+
+_Status:_ ✅ pass
 
 ## Processing Updates
 
@@ -94,6 +98,8 @@ expect(update.newVersion).toBe(13)
 expect(update.updatedAt).toBeInstanceOf(Date)
 ```
 
+_Status:_ ✅ pass
+
 ## Working with Timestamps
 
 Canon provides flexible conversion utilities for timestamps.
@@ -104,11 +110,15 @@ Canon provides flexible conversion utilities for timestamps.
 expect(() => demonstrateTimestampConversion()).not.toThrow()
 ```
 
+_Status:_ ✅ pass
+
 **The reference utilities demonstrate conversion patterns.:**
 
 ```ts
 expect(() => demonstrateReferenceConversion()).not.toThrow()
 ```
+
+_Status:_ ✅ pass
 
 ## Key Takeaways
 

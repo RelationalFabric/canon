@@ -82,6 +82,8 @@ export default {
               link: '/docs/examples/06-real-world-business-scenarios',
             },
             { text: 'Custom Axioms', link: '/docs/examples/07-custom-axioms-example' },
+            { text: 'Protocol System', link: '/docs/examples/08-protocol-system' },
+            { text: 'Lazy Module Pattern', link: '/docs/examples/09-lazy-module-pattern' },
           ],
         },
       ],
