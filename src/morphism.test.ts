@@ -13,7 +13,7 @@ import { declareMorphism, declareTheory, registerMorphisms, resetRegistry } from
 import { invariant } from './testing.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
-import { Theory } from './theory.js'
+import { defineTheory, Theory } from './theory.js'
 
 type IdentityToTaxonomy = {
   [Source in keyof Theories['Identity']]: keyof Theories['Taxonomy']
@@ -98,6 +98,98 @@ describe('declareMorphism registration', () => {
     expect(registered.target).toBe(theoryRefFor('Taxonomy').value)
     expect(registered.source).toBeInstanceOf(Theory)
     expect(registered.target).toBeInstanceOf(Theory)
+  })
+})
+
+describe('registration swap', () => {
+  beforeEach(() => {
+    resetRegistry()
+    declareTheory('Identity', identityConfig)
+    declareTheory('Taxonomy', taxonomyConfig)
+  })
+
+  it('replaces distinct theory objects with the registered instances', () => {
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+
+    registerMorphisms({ 'Identity/Taxonomy': morphism as { maps: { Id: 'Type' } } })
+
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphism)
+    expect(morphism.source).toBe(theoryRefFor('Identity').value)
+    expect(morphism.target).toBe(theoryRefFor('Taxonomy').value)
+  })
+
+  it('replaces distinct theory objects when the morphism is declared', () => {
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+
+    declareMorphism('Identity', 'Taxonomy', morphism as unknown as { maps: { Id: 'Type' } })
+
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphism)
+    expect(morphism.source).toBe(theoryRefFor('Identity').value)
+    expect(morphism.target).toBe(theoryRefFor('Taxonomy').value)
+  })
+
+  it('leaves a morphism that already holds the registered instances unchanged', () => {
+    const source = theoryRefFor('Identity').value as Theory
+    const target = theoryRefFor('Taxonomy').value as Theory
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+
+    registerMorphisms({ 'Identity/Taxonomy': morphism as { maps: { Id: 'Type' } } })
+
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphism)
+    expect(morphism.source).toBe(source)
+    expect(morphism.target).toBe(target)
+  })
+
+  it('does not clash when an identical morphism is registered again', () => {
+    registerMorphisms({
+      'Identity/Taxonomy': defineMorphism({
+        maps: { Id: 'Type' },
+        source: defineTheory({ terms: identityConfig.terms }),
+        target: defineTheory({ terms: taxonomyConfig.terms }),
+      }) as { maps: { Id: 'Type' } },
+    })
+    const first = morphismRefFor('Identity', 'Taxonomy').value
+
+    expect(() => registerMorphisms({
+      'Identity/Taxonomy': defineMorphism({
+        maps: { Id: 'Type' },
+        source: defineTheory({ terms: identityConfig.terms }),
+        target: defineTheory({ terms: taxonomyConfig.terms }),
+      }) as { maps: { Id: 'Type' } },
+    })).not.toThrow()
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
+  })
+
+  it('keeps the unresolved-theory error and does not register', () => {
+    resetRegistry()
+    declareTheory('Taxonomy', taxonomyConfig)
+    const source = defineTheory({ terms: identityConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target: theoryRefFor('Taxonomy').value as Theory,
+    })
+
+    expect(() => registerMorphisms({ 'Missing/Taxonomy': morphism }))
+      .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+    expect(morphismRefFor('Missing', 'Taxonomy').value).toBeUndefined()
+    expect(morphism.source).toBe(source)
   })
 })
 

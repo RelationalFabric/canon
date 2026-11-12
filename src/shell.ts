@@ -314,7 +314,7 @@ export function declareMorphism<
   return allOrNothing(() => {
     resolveTheoryLabel(String(source))
     resolveTheoryLabel(String(target))
-    const defined = morphismForTheoryLabels(String(source), String(target), config)
+    const defined = morphismForTheoryLabels(String(source), String(target), config, true)
     definitionRegistry.register(definitionUri('morphism', `${String(source)}/${String(target)}`), defined)
     return morphismRefFor(String(source), String(target))
   })
@@ -337,7 +337,7 @@ export function registerMorphisms<M extends Record<string, MorphismConfig>>(morp
 
     for (const [key, config] of Object.entries(morphisms)) {
       const { source, target } = parseMorphismKey(key)
-      const value = morphismForTheoryLabels(source, target, config)
+      const value = morphismForTheoryLabels(source, target, config, true)
       definitionRegistry.register(definitionUri('morphism', key), value)
     }
   })
@@ -549,6 +549,7 @@ function morphismForTheoryLabels(
   sourceLabel: string,
   targetLabel: string,
   config: MorphismConfig,
+  write: boolean,
 ): MorphismWithTheories {
   const sourceTheory = theoryRefFor(sourceLabel).value
   if (!(sourceTheory instanceof Theory)) {
@@ -557,6 +558,25 @@ function morphismForTheoryLabels(
   const targetTheory = theoryRefFor(targetLabel).value
   if (!(targetTheory instanceof Theory)) {
     throw new TypeError(`Unresolved theory: ${definitionUri('theory', targetLabel)} (ADR-0017)`)
+  }
+  if (config instanceof Morphism) {
+    if (!write) {
+      if (config.source === sourceTheory && config.target === targetTheory) {
+        return config as MorphismWithTheories
+      }
+      return new Morphism({
+        maps: config.maps,
+        source: sourceTheory,
+        target: targetTheory,
+      }) as MorphismWithTheories
+    }
+    if (config.source !== sourceTheory) {
+      config.source = sourceTheory
+    }
+    if (config.target !== targetTheory) {
+      config.target = targetTheory
+    }
+    return config as MorphismWithTheories
   }
   return defineMorphism({
     ...config,
@@ -582,7 +602,7 @@ function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): v
     const { source, target } = parseMorphismKey(key)
     resolveTheoryLabel(source)
     resolveTheoryLabel(target)
-    const defined = morphismForTheoryLabels(source, target, config)
+    const defined = morphismForTheoryLabels(source, target, config, false)
     const uri = definitionUri('morphism', key)
     const prior = seen.get(config)
     if (prior !== undefined) {
