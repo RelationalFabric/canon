@@ -46,6 +46,7 @@ export function composeMorphisms(left: MorphismConfig, right: MorphismConfig): M
 
   for (const [sourceTerm, middleTerm] of Object.entries(leftMaps)) {
     const targetTerm = rightMaps[middleTerm]
+    // A middle term the right map does not name is dropped. Composition does not invent a target.
     if (targetTerm !== undefined) {
       maps[sourceTerm] = targetTerm
     }

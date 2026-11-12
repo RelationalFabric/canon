@@ -33,7 +33,7 @@ Learn how to create reusable, shareable canons that can be published as npm pack
 
 ### [03-multi-axiom-canon](./03-multi-axiom-canon.md)
 
-Working with complex entities that implement multiple axioms (Id, Type, Version, Timestamps, References)
+Working with complex entities that implement multiple axioms (Id, Type, Version, Timestamps)
 
 **Keywords:** multi-axiom, comprehensive, entity, timestamps, version
 

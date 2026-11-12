@@ -6,6 +6,7 @@
  */
 
 import type { TypeGuard } from './guards.js'
+import type { Theories } from './theories.js'
 
 /**
  * Base axiom type that merges configuration with metadata
@@ -53,7 +54,7 @@ export type RepresentationAxiom<T, C = unknown> = Axiom<
 type UnionToIntersection<U>
   = (U extends unknown ? (argument: U) => void : never) extends (argument: infer I) => void ? I : never
 
-type ObjectConstraintValue<T extends readonly unknown[]>
+type ObjectConstraintValue<T extends readonly Theories[keyof Theories][]>
   = number extends T['length']
     ? { [key: string]: unknown }
     : UnionToIntersection<T[number]>
@@ -62,7 +63,7 @@ type ObjectConstraintValue<T extends readonly unknown[]>
  * A canon value that must model each theory in `T`.
  * The runtime list is `models`.
  */
-export type ObjectConstraintAxiom<T extends readonly unknown[] = readonly unknown[]> = Axiom<
+export type ObjectConstraintAxiom<T extends readonly Theories[keyof Theories][] = readonly Theories[keyof Theories][]> = Axiom<
   {
     $basis: TypeGuard<unknown>
     models: Record<string, unknown> | readonly unknown[]

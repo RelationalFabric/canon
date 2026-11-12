@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - develop
+      - 'feature/**'
     types:
       - opened
       - reopened
@@ -80,7 +81,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -s typescript.log ]; then
-            cat typescript.log | reviewdog -f=tsc -name="TypeScript" -reporter=github-pr-review -level=error -fail-level=error
+            cat typescript.log | reviewdog -f=tsc -name="TypeScript" -reporter=github-pr-review -level=error -fail-level=error -filter-mode=nofilter
           fi
 
       - name: Run ESLint with reviewdog
