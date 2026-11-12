@@ -62,21 +62,35 @@ Bahul, 11 Nov 2026, 15:57–16:00 London, decided:
 
 17. The protocol types are P-prefixed: `PSimpleCategory`, `PSimpleFunctor`, `PSimpleNode`. Each is a type alias, for example `type PSimpleCategory = Protocol<SimpleCategory>`, following the intended `PSeq` pattern `type PSeq = Protocol<Seq>`. The implementations you call are unprefixed: `SimpleCategory`, `SimpleFunctor`, `SimpleNode`. The keys in the `Protocols` interface are unprefixed and map to the P type: `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, `SimpleNode: PSimpleNode`. Likewise `Seq`'s entry should be `Seq: PSeq`. Today `src/types/protocols.d.ts` has `PSeq: Protocol<Seq>` [code: `src/types/protocols.d.ts:136-137`], which departs from this intent. This closes open question 1.
 
+Bahul, 11 Nov 2026, 16:18–23:53 London, decided:
+
+18. A Theory carries its terms at runtime as an optional config field `terms: { [name]: string }`, mapping each term's name to its description. Types are not part of the runtime value; they stay in the TypeScript layer, and protocols and morphisms handle a value's shape. ADR-0018 (merged in #96) holds the strategic decision.
+19. A Theory's runtime value carries only its own terms. The registry regularises a missing `terms` to `{}`, so every registered Theory has terms.
+20. `termsOf(theory)` returns the Theory's own terms plus those inherited through `extends`, cached on the instance. The cache and the `{}` fill-in are excluded from the registry's clash comparison.
+21. Identity gains the term `Id` and Taxonomy gains the term `Type`, each with a description. Typed Entity is unchanged.
+22. Theory and Morphism are themselves Theories ("a Theory is just a type"), registered by a bootstrap seed in the registry, so canon describes itself.
+23. Registering a Morphism replaces its `source` and `target` with the registered Theory instances when they are not already the same objects, so comparison by reference holds.
+24. `SimpleNode.identity(A)` returns a Morphism A→A whose maps send each term in `termsOf(A)` to itself. `SimpleCategory.compose` composes maps by substitution and returns a Morphism A→C. Identity is the unit of compose on both sides.
+
 No new dispatcher, registry, or `defineProtocol` option is in scope.
 
 ### Units
 
 Each unit is one commit. Later units stay off this branch until the open questions they need are answered. This saga file is the planning commit; it is not one of the units.
 
-1. **Theory and Morphism constructors.** Done at `de3564f`. `defineTheory` and `defineMorphism` return instances of `Theory` and `Morphism`. A Morphism carries `source` and `target` (Theory values) and `maps`. This unit only puts those fields on the value. It does not change compose or apply behaviour. Today source and target come only from the uri [code: `src/morphism.ts:33-40`, `src/morphism.ts:87-93`], and `defineTheory` returns its input unchanged [code: `src/theory.ts:22-24`]. Constructor-keyed dispatch is why the constructors are needed: a plain object dispatches as `Object` [code: `src/protocol.ts:145-152`]. `declareMorphism` and `registerMorphisms` derive `canon://morphism/<Source>/<Target>` from the names the two Theories are registered under, and "one registered Morphism per pair" compares the Theory values [code: `src/definitions.ts:99-102`]. Update the `defineMorphism` tests that expect the identical input object [code: `src/morphism.test.ts:48-53`].
+1. **Theory and Morphism constructors.** Done at `de3564f` (plus follow-ups `74acbbe`, `56be5d8`). `defineTheory` and `defineMorphism` return instances of `Theory` and `Morphism`. A Morphism carries `source` and `target` (Theory values) and `maps`. This unit only puts those fields on the value. It does not change compose or apply behaviour. Today source and target come only from the uri [code: `src/morphism.ts:33-40`, `src/morphism.ts:87-93`], and `defineTheory` returns its input unchanged [code: `src/theory.ts:22-24`]. Constructor-keyed dispatch is why the constructors are needed: a plain object dispatches as `Object` [code: `src/protocol.ts:145-152`]. `declareMorphism` and `registerMorphisms` derive `canon://morphism/<Source>/<Target>` from the names the two Theories are registered under, and "one registered Morphism per pair" compares the Theory values [code: `src/definitions.ts:99-102`]. Update the `defineMorphism` tests that expect the identical input object [code: `src/morphism.test.ts:48-53`].
 
-2. **SimpleCategory, SimpleFunctor, and SimpleNode.** Define `SimpleCategory` (`compose`) and `SimpleFunctor` (`map`) for `Morphism`, and `SimpleNode` (`identity`) for `Theory`, all via `defineProtocol` and `extendProtocol`. Add the type aliases `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`, and the `Protocols` entries `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, and `SimpleNode: PSimpleNode`. Fix the existing `Seq` entry to `Seq: PSeq` together with a `PSeq` alias, and update any uses of the old `PSeq` key. `compose` and `map` read `source` and `target` from the value and compare Theory values for the chain. `SimpleNode.identity` dispatches on the Theory constructor. Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Do not implement Theory mapping beyond this, the rest of dispatch on Theories, or algebraic law checks. Tests in this unit call the protocols. This unit does not remove the registered-only gate (unit 4).
+2. **Runtime terms.** Add the optional `terms` field to Theory config (decision 18), registry regularisation to `{}` (19), `termsOf` with per-instance caching excluded from the clash hash (20), and `Id` on Identity and `Type` on Taxonomy (21). Tests: missing terms read as `{}`; `termsOf` unions inherited terms through `extends`; the cached value is reused; re-registering an identical Theory with and without the cache populated does not clash.
 
-3. **Remove the #87 operations.** Delete `composeMorphisms` and `applyMorphism` and their `src/index.ts` exports. Delete their tests from `src/morphism.test.ts` once unit 2's protocol tests cover the same cases. `defineMorphism` stays.
+3. **Self-describing Theories and registration.** Bootstrap seed registering `Theory` and `Morphism` as Theories (22). On Morphism registration, replace `source` and `target` with the registered instances (23). Reject `/` in Theory labels, because `canon://morphism/A/B/C` is ambiguous otherwise (Architecture review of #87). Tests for each.
 
-4. **Composed Morphism, second use.** Remove the registered-only gate and add tests for second use. A Morphism produced by `compose` is usable by `compose` and `map` without being registered. Today the composed value is unregistered and both operations reject it [code: `src/morphism.ts:55`, `src/morphism.ts:79-84`, `src/morphism.test.ts:97-101`].
+4. **SimpleCategory, SimpleFunctor and SimpleNode.** Define `SimpleCategory` (`compose`) and `SimpleFunctor` (`map`) for `Morphism`, and `SimpleNode` (`identity`) for `Theory`, all via `defineProtocol` and `extendProtocol`. Add the type aliases `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`, and the `Protocols` entries `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, and `SimpleNode: PSimpleNode`. Fix the existing `Seq` entry to `Seq: PSeq` together with a `PSeq` alias, and update any uses of the old `PSeq` key. `compose` and `map` read `source` and `target` from the value and compare Theory values for the chain. `SimpleNode.identity` dispatches on the Theory constructor. Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Do not implement Theory mapping beyond this, the rest of dispatch on Theories, or algebraic law checks. Tests in this unit call the protocols. This unit does not remove the registered-only gate (unit 6). Decision 24: `identity` uses `termsOf`; `compose` is substitution; tests that identity is a left and right unit.
 
-5. **ADR-0017 conflict, owned by Architecture.** Do not edit ADR-0017, ADR-0015, or ADR-0018 in the units above. The amendment is [#96](https://github.com/RelationalFabric/canon/pull/96), Architecture's draft ADR-0017/0018 amendment into `develop`. The `docs/theories.md` line 3 fix comes after #87 lands. This saga does not treat protocols as a definition kind and does not call define/declare/register for them.
+5. **Remove the #87 operations.** Delete `composeMorphisms` and `applyMorphism` and their `src/index.ts` exports. Delete their tests from `src/morphism.test.ts` once unit 4's protocol tests cover the same cases. `defineMorphism` stays.
+
+6. **Composed Morphism, second use.** Remove the registered-only gate and add tests for second use. A Morphism produced by `compose` is usable by `compose` and `map` without being registered. Today the composed value is unregistered and both operations reject it [code: `src/morphism.ts:55`, `src/morphism.ts:79-84`, `src/morphism.test.ts:97-101`].
+
+7. **ADR-0017 conflict, owned by Architecture.** Closed. [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`, with ADR-0017 and ADR-0018 Accepted. The `docs/theories.md` line 3 fix, and the stale text in `docs/definitions.md` and `docs/theories.md`, remain a docs item for Architecture. This saga does not treat protocols as a definition kind and does not call define/declare/register for them.
 
 ### Open questions
 
@@ -87,12 +101,16 @@ Each unit is one commit. Later units stay off this branch until the open questio
 
 | unit | commit | push | scoped tests | scoped checks | full tests | full checks | smoke |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | required | required | required | required | required | required | N/A |
+| 1 | done | done | done | done | done | done | done |
 | 2 | required | required | required | required | required | required | N/A |
 | 3 | required | required | required | required | required | required | N/A |
 | 4 | required | required | required | required | required | required | N/A |
-| 5 | required | required | N/A | required | N/A | opt-in | N/A |
+| 5 | required | required | required | required | required | required | N/A |
+| 6 | required | required | required | required | required | required | N/A |
+| 7 | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
 
 ### Notes
 
-- `de3564f`: unit 1 done (Theory and Morphism constructors).
+- Release gate: no release is cut from `develop` while `composeMorphisms` and `applyMorphism` are exported (until unit 5 lands).
+- Follow-ups outside S006, from Architecture's #87/#92 review: (a) after a double rollback failure followed by a successful outer repair, `definitions.ts` throws 'rollback incomplete' instead of rethrowing the original error (use `error.cause`; add a test); (b) `clear()` rescans `stampLog` for each value, which is quadratic; (c) in `registerCanons`, a theory that refers to a sibling listed later in the same batch may still fail preflight; (d) completeness fixtures in `morphism.test.ts` were not type-checked by CI; check whether #88's test type-check now covers them.
+- `de3564f`: unit 1 done (Theory and Morphism constructors). Follow-ups `74acbbe`, `56be5d8`.
