@@ -198,13 +198,26 @@ function asTheoryInstance(value: unknown): unknown {
 }
 
 function prepareTheoryConfigForResolve(config: TheoryConfig): TheoryConfig {
-  if (config.extends === undefined) {
-    return config
+  if (config instanceof Theory) {
+    if (config.extends === undefined) {
+      return config
+    }
+    return new Theory({
+      extends: extendsRefsForTheoryResolve(config.extends),
+    })
   }
-  return {
-    ...config,
-    extends: extendsRefsForTheoryResolve(config.extends),
+
+  // One read. A getter must not run again while the value is copied onto a Theory.
+  if (!('extends' in config)) {
+    return new Theory({})
   }
+  const extendsValue = config.extends
+  if (extendsValue === undefined) {
+    return new Theory({})
+  }
+  return new Theory({
+    extends: extendsRefsForTheoryResolve(extendsValue),
+  })
 }
 
 /**
@@ -324,7 +337,7 @@ function validateTheoryConfig(
   provided: Map<string, unknown>,
 ): void {
   for (const label of extendsLabels(config)) {
-    if (!batchKeys.has(label) && theoryRefFor(label).value === undefined) {
+    if (!batchKeys.has(label) && !provided.has(label) && theoryRefFor(label).value === undefined) {
       throw new Error(`Unresolved theory: ${definitionUri('theory', label)} (ADR-0017)`)
     }
   }
