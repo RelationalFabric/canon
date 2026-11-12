@@ -264,7 +264,7 @@ function validateTheoryConfig(
   provided: Map<string, unknown>,
 ): void {
   for (const label of extendsLabels(config)) {
-    if (!batchKeys.has(label) && theoryRefFor(label).value === undefined) {
+    if (!batchKeys.has(label) && !provided.has(label) && theoryRefFor(label).value === undefined) {
       throw new Error(`Unresolved theory: ${definitionUri('theory', label)} (ADR-0017)`)
     }
   }

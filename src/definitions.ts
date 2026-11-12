@@ -8,6 +8,10 @@ import { metaOf, updateMeta } from './meta.js'
 
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
 
+const unrestoredEntries = new WeakMap<object, unknown>()
+
+const incompleteRollbacks = new WeakSet<AggregateError>()
+
 let savepointStart = 0
 
 let restoreEntries: (
@@ -130,6 +134,14 @@ export class DefinitionRegistry {
   clear(): void {
     for (const [, value] of this.#definitions) {
       if ((typeof value === 'object' || typeof value === 'function') && value !== null && typeof metaOf(value).uri === 'string') {
+        if (stampLog !== undefined && !stampLog.slice(savepointStart).some(entry => entry.target === value)) {
+          let prior: Metadata | undefined
+          updateMeta(value, (current) => {
+            prior = current
+            return current
+          })
+          stampLog.push({ target: value, prior })
+        }
         updateMeta(value, (metadata) => {
           if (metadata === undefined) {
             return undefined
@@ -266,6 +278,8 @@ export const definitionRegistry = new DefinitionRegistry()
 
 /**
  * Each call, nested or not, rolls back its own writes and uri stamps on failure (ADR-0017).
+ * A failed restore is reported as an AggregateError whose first error and cause are the original error.
+ * A call cannot commit while a caught inner rollback left stamps unrestored in its range; it rolls back instead and throws an AggregateError.
  */
 export function allOrNothing<T>(write: () => T): T {
   const outermost = stampLog === undefined
@@ -278,20 +292,62 @@ export function allOrNothing<T>(write: () => T): T {
   const previousStart = savepointStart
   savepointStart = logStart
   try {
-    return write()
-  } catch (error) {
-    try {
-      for (let index = log.length - 1; index >= logStart; index--) {
-        const entry = log[index]
-        if (entry === undefined) {
-          continue
-        }
-        updateMeta(entry.target, () => entry.prior)
+    const result = write()
+    const failures: unknown[] = []
+    for (let index = logStart; index < log.length; index++) {
+      const entry = log[index]
+      if (entry !== undefined && unrestoredEntries.has(entry)) {
+        failures.push(unrestoredEntries.get(entry))
       }
-    } finally {
+    }
+    if (failures.length > 0) {
+      throw new AggregateError(
+        failures,
+        'allOrNothing cannot commit: rollback incomplete',
+        { cause: failures[0] },
+      )
+    }
+    return result
+  } catch (error) {
+    const restoreErrors: unknown[] = []
+    const unrestored: typeof log = []
+    for (let index = log.length - 1; index >= logStart; index--) {
+      const entry = log[index]
+      if (entry === undefined) {
+        continue
+      }
+      try {
+        updateMeta(entry.target, () => entry.prior)
+        unrestoredEntries.delete(entry)
+      } catch (restoreError) {
+        restoreErrors.push(restoreError)
+        unrestored.unshift(entry)
+        unrestoredEntries.set(entry, restoreError)
+      }
+    }
+    try {
       restoreEntries(definitionRegistry, before)
+    } catch (restoreError) {
+      restoreErrors.push(restoreError)
     }
     log.length = logStart
+    log.push(...unrestored)
+    if (restoreErrors.length > 0) {
+      const incomplete = new AggregateError(
+        [error, ...restoreErrors],
+        'allOrNothing rollback incomplete: the registry may be inconsistent',
+        { cause: error },
+      )
+      incompleteRollbacks.add(incomplete)
+      throw incomplete
+    }
+    if (
+      error instanceof AggregateError
+      && incompleteRollbacks.has(error)
+      && error.cause !== undefined
+    ) {
+      throw error.cause
+    }
     throw error
   } finally {
     savepointStart = previousStart
