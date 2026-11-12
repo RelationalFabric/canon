@@ -121,3 +121,4 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 - `de3564f`: unit 1 done (Theory and Morphism constructors). Follow-ups `74acbbe`, `56be5d8`.
 - `df48dea`: unit 2 done (runtime terms).
 - `802015a` unit 2 review fixes
+- `3b002b3`: unit 4 done (registration swap)
