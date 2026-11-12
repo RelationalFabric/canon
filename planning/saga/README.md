@@ -99,6 +99,7 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 1. Closed by decision 17. `SimpleCategory`, `SimpleFunctor`, and `SimpleNode` go into the `Protocols` interface under unprefixed keys, mapped to `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`. `Protocols` is protocol-only type augmentation [code: `src/types/protocols.d.ts:142`], not the definition registry.
 2. Closed. [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`. ADR-0017 and ADR-0018 are Accepted.
 3. Do the public protocol names (`SimpleCategory`, `SimpleFunctor`, `SimpleNode`, `compose`, `map`, `identity`, and the P-prefix on the type) need a protocol ADR before they ship? They are in no ADR, and ADR-0015 is Obsolescent. For Bahul. Unit 6 is blocked on this answer.
+4. Inherited term override rule: when a theory's own `terms` and an inherited term share a name with different descriptions, runtime behaviour uses own terms for `termsOf` today; the long-term override rule is undecided. For Bahul.
 
 ## Ledger
 
@@ -118,4 +119,4 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 - ADR docs item, for Architecture: [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`, with ADR-0017 and ADR-0018 Accepted. The `docs/theories.md` line 3 fix, and the stale text in `docs/definitions.md` and `docs/theories.md`, remain.
 - Follow-ups outside S006, from Architecture's #87/#92 review: (a) after a double rollback failure followed by a successful outer repair, `definitions.ts` throws 'rollback incomplete' instead of rethrowing the original error (use `error.cause`; add a test); (b) `clear()` rescans `stampLog` for each value, which is quadratic; (c) in `registerCanons`, a theory that refers to a sibling listed later in the same batch may still fail preflight. (d) Closed: `tsconfig.test.json` includes `src/**`, and #88 covers `morphism.test.ts`.
 - `de3564f`: unit 1 done (Theory and Morphism constructors). Follow-ups `74acbbe`, `56be5d8`.
-- unit 2 done (runtime terms); commit sha recorded at push.
+- `df48dea`: unit 2 done (runtime terms).

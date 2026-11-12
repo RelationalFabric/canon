@@ -46,7 +46,3 @@ if (!result.isValid) {
 ## Radar Methodology
 
 See [./methodology.md](./methodology.md) for detailed information about how we maintain and update the radar.
-
-## Open questions
-
-- **Inherited term override rule (KE):** When a theory's own `terms` and an inherited term share a name with different descriptions, runtime behaviour uses own terms for `termsOf` today; the long-term override rule is undecided.
