@@ -72,9 +72,9 @@ Bahul, 11 Nov 2026, 16:18–23:53 London, decided:
 23. Registering a Morphism replaces its `source` and `target` with the registered Theory instances when they are not already the same objects, so comparison by reference holds.
 24. `SimpleNode.identity(A)` returns a Morphism A→A whose maps send each term in `termsOf(A)` to itself. `SimpleCategory.compose` composes maps by substitution and returns a Morphism A→C. Identity is the unit of compose on both sides.
 
-Bahul, 12 Nov 2026, decided:
+Bahul, 12 Nov 2026, 15:27 London, decided:
 
-25. Theories may not shadow inherited terms. Declaring or registering a Theory whose own terms include a name already inherited through `extends` is an error, including when the description is identical. It is thrown before any registry write. The error type follows unit 5's open decision (built-in TypeError vs a canon error class). This closes open question 4.
+25. Theories may not shadow inherited terms. Declaring or registering a Theory whose own terms include a name already inherited through `extends` is an error, including when the description is identical. It is thrown before any registry write. The error type is unit 5's. This closes open question 4.
 
 No new dispatcher, registry, or `defineProtocol` option is in scope.
 
@@ -92,7 +92,7 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors.
 
 4. **Registration swap.** On Morphism registration, replace `source` and `target` with the registered Theory instances when they are not already the same objects (decision 23).
 
-5. **Reject `/` in Theory labels.** `canon://morphism/A/B/C` is ambiguous otherwise (Architecture review of #87). Thrown from theory declare and register, before the registry write. `src` has no error class, only `throw new Error`, so the error type and the message are **TBD for Bahul**.
+5. **Reject `/` in Theory labels.** `canon://morphism/A/B/C` is ambiguous otherwise (Architecture review of #87). Thrown from theory declare and register, before the registry write. The error comes from ADR-0020 (modern-errors via kit.ts, [#98](https://github.com/RelationalFabric/canon/pull/98)). Units 5 and 8 are blocked until #98 is Accepted and merged. The base and subclass names and the code format are open there.
 
 8. **Reject shadowed terms.** Ordered after unit 5 and before unit 6. Blocked on unit 5's error type. Declaring or registering a Theory whose own `terms` include a name already inherited through `extends` throws, including when the description is identical (decision 25). Thrown before the registry write. A batch that includes a shadow leaves no partial state. The current behaviour, own terms winning in `termsOf`, and its test [code: `src/theory.test.ts:224-231`] are replaced by tests that assert the error for both list-form and map-form `extends`.
 
