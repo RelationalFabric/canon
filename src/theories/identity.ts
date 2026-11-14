@@ -15,7 +15,11 @@ declare module '@relational-fabric/canon' {
   }
 }
 
-const config: Record<string, never> = {}
+const config = {
+  terms: {
+    Id: 'Holds the stable identifier for an entity.',
+  },
+}
 
 declareTheory('Identity', config)
 

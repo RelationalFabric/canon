@@ -6,13 +6,14 @@ import type { MorphismConfig } from './morphism.js'
 import type { Expect } from './testing.js'
 import type { Theories } from './types/index.js'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { definitionRegistry, definitionUri, morphismRefFor } from './definitions.js'
+import { definitionRegistry, definitionUri, morphismRefFor, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { applyMorphism, composeMorphisms, defineMorphism } from './morphism.js'
+import { applyMorphism, composeMorphisms, defineMorphism, Morphism } from './morphism.js'
 import { declareMorphism, declareTheory, registerMorphisms, resetRegistry } from './shell.js'
 import { invariant } from './testing.js'
 import { config as identityConfig } from './theories/identity.js'
 import { config as taxonomyConfig } from './theories/taxonomy.js'
+import { defineTheory, Theory } from './theory.js'
 
 type IdentityToTaxonomy = {
   [Source in keyof Theories['Identity']]: keyof Theories['Taxonomy']
@@ -46,10 +47,13 @@ function completenessFixtures(): void {
 void completenessFixtures
 
 describe('defineMorphism', () => {
-  it('returns the same object', () => {
+  it('returns a Morphism instance with maps copied from the config', () => {
     const config = { maps: { Id: 'Id' } }
+    const morphism = defineMorphism(config)
 
-    expect(defineMorphism(config)).toBe(config)
+    expect(morphism).toBeInstanceOf(Morphism)
+    expect(morphism.maps).toEqual(config.maps)
+    expect(morphism).not.toBe(config)
   })
 
   it('does not register a morphism', () => {
@@ -61,13 +65,191 @@ describe('defineMorphism', () => {
   })
 
   it('does not write a uri', () => {
-    const config = { maps: { Id: 'Id' } }
+    const morphism = defineMorphism({ maps: { Id: 'Id' } })
 
-    defineMorphism(config)
-
-    expect(metaOf(config).uri).toBeUndefined()
+    expect(metaOf(morphism).uri).toBeUndefined()
   })
 })
+
+describe('declareMorphism registration', () => {
+  const morphismConfig = { maps: { Id: 'Type' } } as const
+
+  beforeEach(() => {
+    resetRegistry()
+    declareTheory('Identity', identityConfig)
+    declareTheory('Taxonomy', taxonomyConfig)
+  })
+
+  it('stamps canon://morphism/<Source>/<Target> on the registered Morphism', () => {
+    declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+    const registered = morphismRefFor('Identity', 'Taxonomy').value
+    expect(registered).toBeInstanceOf(Morphism)
+    if (isMetaCarrier(registered)) {
+      expect(metaOf(registered).uri).toBe('canon://morphism/Identity/Taxonomy')
+    }
+  })
+
+  it('sets source and target to the registered Theory values', () => {
+    declareMorphism('Identity', 'Taxonomy', morphismConfig)
+
+    const registered = morphismRefFor('Identity', 'Taxonomy').value as Morphism
+    expect(registered.source).toBe(theoryRefFor('Identity').value)
+    expect(registered.target).toBe(theoryRefFor('Taxonomy').value)
+    expect(registered.source).toBeInstanceOf(Theory)
+    expect(registered.target).toBeInstanceOf(Theory)
+  })
+})
+
+describe('registration swap', () => {
+  beforeEach(() => {
+    resetRegistry()
+    declareTheory('Identity', identityConfig)
+    declareTheory('Taxonomy', taxonomyConfig)
+  })
+
+  it('replaces distinct theory objects with the registered instances', () => {
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+
+    registerMorphisms({ 'Identity/Taxonomy': morphism as { maps: { Id: 'Type' } } })
+
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphism)
+    expect(morphism.source).toBe(theoryRefFor('Identity').value)
+    expect(morphism.target).toBe(theoryRefFor('Taxonomy').value)
+  })
+
+  it('replaces distinct theory objects when the morphism is declared', () => {
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+
+    declareMorphism('Identity', 'Taxonomy', morphism as unknown as { maps: { Id: 'Type' } })
+
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphism)
+    expect(morphism.source).toBe(theoryRefFor('Identity').value)
+    expect(morphism.target).toBe(theoryRefFor('Taxonomy').value)
+  })
+
+  it('leaves a morphism that already holds the registered instances unchanged', () => {
+    const source = theoryRefFor('Identity').value as Theory
+    const target = theoryRefFor('Taxonomy').value as Theory
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+
+    registerMorphisms({ 'Identity/Taxonomy': morphism as { maps: { Id: 'Type' } } })
+
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(morphism)
+    expect(morphism.source).toBe(source)
+    expect(morphism.target).toBe(target)
+  })
+
+  it('does not clash when an identical morphism is registered again', () => {
+    registerMorphisms({
+      'Identity/Taxonomy': defineMorphism({
+        maps: { Id: 'Type' },
+        source: defineTheory({ terms: identityConfig.terms }),
+        target: defineTheory({ terms: taxonomyConfig.terms }),
+      }) as { maps: { Id: 'Type' } },
+    })
+    const first = morphismRefFor('Identity', 'Taxonomy').value
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const second = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+
+    expect(() => registerMorphisms({
+      'Identity/Taxonomy': second as { maps: { Id: 'Type' } },
+    })).not.toThrow()
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBe(first)
+    expect(second.source).toBe(source)
+    expect(second.target).toBe(target)
+  })
+
+  it('leaves a clashing declare with the passed-in endpoints', () => {
+    declareMorphism('Identity', 'Taxonomy', { maps: { Id: 'Type' } })
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Id' },
+      source,
+      target,
+    })
+
+    expect(() => declareMorphism('Identity', 'Taxonomy', morphism as unknown as { maps: { Id: 'Type' } }))
+      .toThrow('Definition already registered: canon://morphism/Identity/Taxonomy (ADR-0017)')
+    expect(morphism.source).toBe(source)
+    expect(morphism.target).toBe(target)
+  })
+
+  it('restores an earlier morphism when a later batch entry fails', () => {
+    const source = defineTheory({ terms: identityConfig.terms })
+    const target = defineTheory({ terms: taxonomyConfig.terms })
+    const earlier = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target,
+    })
+    const laterSource = defineTheory({ terms: taxonomyConfig.terms })
+    const laterTarget = defineTheory({ terms: identityConfig.terms })
+    const later = defineMorphism({
+      maps: { Type: 'Id' },
+      source: laterSource,
+      target: laterTarget,
+    })
+    Object.defineProperty(later, 'source', {
+      configurable: true,
+      enumerable: true,
+      get: () => laterSource,
+      set: () => {
+        throw new Error('later fails')
+      },
+    })
+
+    expect(() => registerMorphisms({
+      'Identity/Taxonomy': earlier as { maps: { Id: 'Type' } },
+      'Taxonomy/Identity': later as { maps: { Type: 'Id' } },
+    })).toThrow('later fails')
+    expect(earlier.source).toBe(source)
+    expect(earlier.target).toBe(target)
+    expect(morphismRefFor('Identity', 'Taxonomy').value).toBeUndefined()
+  })
+
+  it('keeps the unresolved-theory error and does not register', () => {
+    resetRegistry()
+    declareTheory('Taxonomy', taxonomyConfig)
+    const source = defineTheory({ terms: identityConfig.terms })
+    const morphism = defineMorphism({
+      maps: { Id: 'Type' },
+      source,
+      target: theoryRefFor('Taxonomy').value as Theory,
+    })
+
+    expect(() => registerMorphisms({ 'Missing/Taxonomy': morphism }))
+      .toThrow('Unresolved theory: canon://theory/Missing (ADR-0017)')
+    expect(morphismRefFor('Missing', 'Taxonomy').value).toBeUndefined()
+    expect(morphism.source).toBe(source)
+  })
+})
+
+function isMetaCarrier(value: unknown): value is object {
+  return value !== null && (typeof value === 'object' || typeof value === 'function')
+}
 
 describe('composeMorphisms', () => {
   beforeEach(() => {

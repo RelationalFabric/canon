@@ -8,11 +8,10 @@ import type { MorphismConfig } from './morphism.js'
 import type { TheoryConfig } from './theory.js'
 import type { CanonConfig, Canons, Theories } from './types/index.js'
 import { defineCanon } from './canon.js'
-import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, theoryRefFor } from './definitions.js'
-import { objectHash } from './kit.js'
+import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, recordMorphismEndpoints, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
-import { defineMorphism } from './morphism.js'
-import { defineTheory } from './theory.js'
+import { defineMorphism, Morphism } from './morphism.js'
+import { clashHash, defineTheory, Theory } from './theory.js'
 
 /**
  * Reset the global registry to empty
@@ -63,7 +62,7 @@ export function registerCanons(canons: Record<string, CanonConfig>): void {
     for (const [label, config] of defined) {
       const uri = definitionUri('canon', label)
       const existing = canonRefFor(label).value
-      if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+      if (existing !== undefined && clashHash(existing) !== clashHash(config)) {
         throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
       }
       preflightCanonModels(config, provided)
@@ -140,12 +139,140 @@ function resolveExtends(config: TheoryConfig): void {
   if (config.extends === undefined) {
     return
   }
-  const resolved = definitionRegistry.resolve('theory', config.extends)
+  const refs = extendsRefsForTheoryResolve(config.extends)
+  const resolved = definitionRegistry.resolve('theory', refs)
   for (const entry of resolved) {
     if (entry.value === undefined) {
       throw new Error(`Unresolved theory: ${entry.uri} (ADR-0017)`)
     }
   }
+  if (config instanceof Theory) {
+    config.extends = materializeTheoryExtends(config.extends)
+  }
+}
+
+function materializeTheoryExtends(
+  extendsValue: NonNullable<TheoryConfig['extends']>,
+): NonNullable<TheoryConfig['extends']> {
+  if (Array.isArray(extendsValue)) {
+    const last = extendsValue[extendsValue.length - 1]
+    if (isRefMap(last)) {
+      const head = extendsValue.slice(0, -1).map(materializeExtendsRef)
+      return [...head, materializeExtendsMap(last)]
+    }
+    return extendsValue.map(materializeExtendsRef)
+  }
+  if (isNameMap(extendsValue)) {
+    return materializeExtendsMap(extendsValue)
+  }
+  return extendsValue
+}
+
+function materializeExtendsRef(item: unknown): unknown {
+  if (item instanceof Theory) {
+    return item
+  }
+  if (typeof item === 'string') {
+    return theoryRefFor(item).value
+  }
+  if (isTheoryKeyRef(item)) {
+    return item.value
+  }
+  return item
+}
+
+function isTheoryKeyRef(value: unknown): value is { readonly value: unknown } {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  if (!('key' in value) || !('value' in value)) {
+    return false
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(value, 'value')
+  return typeof descriptor?.get === 'function' && isDefinitionKey(value.key)
+}
+
+function materializeExtendsMap(composition: Record<string, unknown>): Record<string, unknown> {
+  const mapped: Record<string, unknown> = {}
+  for (const [name, value] of Object.entries(composition)) {
+    mapped[name] = materializeExtendsRef(value)
+  }
+  return mapped
+}
+
+/**
+ * Map-form theory values are constructed before the registry stores them.
+ */
+function extendsRefsForTheoryResolve(
+  extendsValue: NonNullable<TheoryConfig['extends']>,
+): NonNullable<TheoryConfig['extends']> {
+  if (Array.isArray(extendsValue)) {
+    const last = extendsValue[extendsValue.length - 1]
+    if (isRefMap(last)) {
+      return [...extendsValue.slice(0, -1), theoryMapForResolve(last)]
+    }
+    return extendsValue
+  }
+  if (isNameMap(extendsValue)) {
+    return theoryMapForResolve(extendsValue)
+  }
+  return extendsValue
+}
+
+function theoryMapForResolve(composition: Record<string, unknown>): Record<string, unknown> {
+  const mapped: Record<string, unknown> = {}
+  for (const [name, value] of Object.entries(composition)) {
+    mapped[name] = asTheoryInstance(value)
+  }
+  return mapped
+}
+
+function carriedDefinitionUri(value: unknown): string | undefined {
+  if (value === null || (typeof value !== 'object' && typeof value !== 'function')) {
+    return undefined
+  }
+  const uri = metaOf(value).uri
+  return typeof uri === 'string' && uri !== '' && isDefinitionKey(uri) ? uri : undefined
+}
+
+function asTheoryInstance(value: unknown): unknown {
+  if (value instanceof Theory) {
+    return value
+  }
+  if (carriedDefinitionUri(value) !== undefined) {
+    return value
+  }
+  if (isTheoryConfig(value)) {
+    return defineTheory(value)
+  }
+  throw new Error('A definition ref map value must be a theory config (ADR-0017)')
+}
+
+function prepareTheoryConfigForResolve(config: TheoryConfig): TheoryConfig {
+  const terms = config.terms
+
+  if (config instanceof Theory) {
+    if (config.extends === undefined) {
+      return config
+    }
+    return new Theory({
+      extends: extendsRefsForTheoryResolve(config.extends),
+      ...(terms !== undefined ? { terms } : {}),
+    })
+  }
+
+  // One read. A getter must not run again while the value is copied onto a Theory.
+  if (!('extends' in config)) {
+    return new Theory(terms !== undefined ? { terms } : {})
+  }
+  const extendsValue = config.extends
+  if (extendsValue === undefined) {
+    return new Theory(terms !== undefined ? { terms } : {})
+  }
+  return new Theory({
+    extends: extendsRefsForTheoryResolve(extendsValue),
+    ...(terms !== undefined ? { terms } : {}),
+  })
 }
 
 /**
@@ -157,7 +284,7 @@ function resolveExtends(config: TheoryConfig): void {
  */
 export function declareTheory<Label extends keyof Theories>(label: Label, config: TheoryConfig) {
   return allOrNothing(() => {
-    const defined = defineTheory(config)
+    const defined = defineTheory(prepareTheoryConfigForResolve(config))
     resolveExtends(defined)
     definitionRegistry.register(definitionUri('theory', label), defined)
     return theoryRefFor(label)
@@ -184,10 +311,14 @@ export function declareMorphism<
   },
 ) {
   return allOrNothing(() => {
-    const defined = defineMorphism(config)
     resolveTheoryLabel(String(source))
     resolveTheoryLabel(String(target))
-    definitionRegistry.register(definitionUri('morphism', `${String(source)}/${String(target)}`), defined)
+    registerBoundMorphism(
+      definitionUri('morphism', `${String(source)}/${String(target)}`),
+      config,
+      String(source),
+      String(target),
+    )
     return morphismRefFor(String(source), String(target))
   })
 }
@@ -208,8 +339,8 @@ export function registerMorphisms<M extends Record<string, MorphismConfig>>(morp
     validateRegisterMorphisms(morphisms)
 
     for (const [key, config] of Object.entries(morphisms)) {
-      const value = defineMorphism(config)
-      definitionRegistry.register(definitionUri('morphism', key), value)
+      const { source, target } = parseMorphismKey(key)
+      registerBoundMorphism(definitionUri('morphism', key), config, source, target)
     }
   })
 }
@@ -229,7 +360,7 @@ export function registerTheories(theories: Record<string, TheoryConfig>): void {
       if (config === undefined) {
         continue
       }
-      const value = defineTheory(config)
+      const value = defineTheory(prepareTheoryConfigForResolve(config))
       definitionRegistry.register(definitionUri('theory', label), value)
       resolveExtends(value)
     }
@@ -303,11 +434,11 @@ function validateProvidedNames(
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     const existing = theoryRefFor(name).value
-    if (existing !== undefined && objectHash(existing) !== objectHash(value)) {
+    if (existing !== undefined && clashHash(existing) !== clashHash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     const prior = provided.get(name)
-    if (prior !== undefined && objectHash(prior) !== objectHash(value)) {
+    if (prior !== undefined && clashHash(prior) !== clashHash(value)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     provided.set(name, value)
@@ -414,12 +545,94 @@ function parseMorphismKey(key: string): { source: string, target: string } {
   return { source: key.slice(0, slash), target: key.slice(slash + 1) }
 }
 
+type MorphismWithTheories = Morphism & Required<Pick<Morphism, 'source' | 'target'>>
+
+function theoryForLabel(label: string): Theory {
+  const theory = theoryRefFor(label).value
+  if (!(theory instanceof Theory)) {
+    throw new TypeError(`Unresolved theory: ${definitionUri('theory', label)} (ADR-0017)`)
+  }
+  return theory
+}
+
+/**
+ * Store `config` with `source` and `target` pointing at the registered theories.
+ * A caller's Morphism is updated only after `register` accepts it.
+ */
+function registerBoundMorphism(
+  uri: ReturnType<typeof definitionUri>,
+  config: MorphismConfig,
+  sourceLabel: string,
+  targetLabel: string,
+): MorphismWithTheories {
+  const sourceTheory = theoryForLabel(sourceLabel)
+  const targetTheory = theoryForLabel(targetLabel)
+  if (!(config instanceof Morphism)) {
+    const defined = defineMorphism({
+      ...config,
+      source: sourceTheory,
+      target: targetTheory,
+    }) as MorphismWithTheories
+    definitionRegistry.register(uri, defined)
+    return defined
+  }
+  const needsSwap = config.source !== sourceTheory || config.target !== targetTheory
+  const clashAs = needsSwap
+    ? new Morphism({
+        maps: config.maps,
+        source: sourceTheory,
+        target: targetTheory,
+      })
+    : undefined
+  definitionRegistry.register(uri, config, clashAs === undefined ? undefined : { clashAs })
+  if (definitionRegistry.value(uri) === config) {
+    recordMorphismEndpoints(config, sourceTheory, targetTheory)
+  }
+  return config as MorphismWithTheories
+}
+
+function morphismForTheoryLabels(
+  sourceLabel: string,
+  targetLabel: string,
+  config: MorphismConfig,
+): MorphismWithTheories {
+  const sourceTheory = theoryForLabel(sourceLabel)
+  const targetTheory = theoryForLabel(targetLabel)
+  if (config instanceof Morphism) {
+    if (config.source === sourceTheory && config.target === targetTheory) {
+      return config as MorphismWithTheories
+    }
+    return new Morphism({
+      maps: config.maps,
+      source: sourceTheory,
+      target: targetTheory,
+    }) as MorphismWithTheories
+  }
+  return defineMorphism({
+    ...config,
+    source: sourceTheory,
+    target: targetTheory,
+  }) as MorphismWithTheories
+}
+
+function morphismForTheoryPair(source: Theory, target: Theory): Morphism | undefined {
+  for (const [, value] of definitionRegistry.entries('morphism')) {
+    if (value instanceof Morphism
+      && value.source === source
+      && value.target === target) {
+      return value
+    }
+  }
+  return undefined
+}
+
 function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): void {
   const seen = new Map<MorphismConfig, string>()
   for (const [key, config] of Object.entries(morphisms)) {
     const { source, target } = parseMorphismKey(key)
     resolveTheoryLabel(source)
     resolveTheoryLabel(target)
+    const defined = morphismForTheoryLabels(source, target, config)
     const uri = definitionUri('morphism', key)
     const prior = seen.get(config)
     if (prior !== undefined) {
@@ -430,8 +643,8 @@ function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): v
     if (isDefinitionKey(carried) && definitionRegistry.has(carried) && carried !== uri) {
       throw new Error(`Definition already registered: ${carried}`)
     }
-    const existing = morphismRefFor(source, target).value
-    if (existing !== undefined && objectHash(existing) !== objectHash(config)) {
+    const existing = morphismForTheoryPair(defined.source, defined.target)
+    if (existing !== undefined && clashHash(existing) !== clashHash(defined)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
   }

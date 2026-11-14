@@ -2,11 +2,20 @@
  * Definition URIs and the shared definition registry (ADR-0017).
  */
 
+import type { Morphism } from './morphism.js'
 import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri, Metadata } from './types/index.js'
-import { objectHash } from './kit.js'
 import { metaOf, updateMeta } from './meta.js'
+import { clashHash, regularizeTheoryTerms, Theory } from './theory.js'
 
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
+
+let termsFilled: Theory[] | undefined
+
+let endpointSwaps: Array<{
+  morphism: Morphism
+  source: Theory | undefined
+  target: Theory | undefined
+}> | undefined
 
 const unrestoredEntries = new WeakMap<object, unknown>()
 
@@ -69,12 +78,18 @@ export class DefinitionRegistry {
    * Register a value at a definition or lexicon URI.
    * A registered value carries that URI in its metadata.
    * Re-registering the same URI is idempotent when the values hash equal, and throws otherwise.
+   * When `clashAs` is set, that view is hashed instead of `value`.
    * A value already registered at a different live URI also throws (ADR-0017).
    * A `uri` left on a value after `clear` is stale and is replaced.
    */
-  register(uri: DefinitionUri | LexiconTermUri, value: unknown): void {
+  register(
+    uri: DefinitionUri | LexiconTermUri,
+    value: unknown,
+    options?: { clashAs?: unknown },
+  ): void {
     const alreadyRegistered = this.#definitions.has(uri)
-    if (alreadyRegistered && objectHash(this.#definitions.get(uri)) !== objectHash(value)) {
+    const hashed = options?.clashAs ?? value
+    if (alreadyRegistered && clashHash(this.#definitions.get(uri)) !== clashHash(hashed)) {
       throw new Error(`Definition already registered: ${uri} (ADR-0017)`)
     }
     if (isMetaCarrier(value)) {
@@ -89,6 +104,10 @@ export class DefinitionRegistry {
       }
     }
     if (!alreadyRegistered) {
+      if (value instanceof Theory && value.terms === undefined) {
+        regularizeTheoryTerms(value)
+        termsFilled?.push(value)
+      }
       this.#definitions.set(uri, value)
     }
     if (isMetaCarrier(value)) {
@@ -281,13 +300,59 @@ export const definitionRegistry = new DefinitionRegistry()
  * A failed restore is reported as an AggregateError whose first error and cause are the original error.
  * A call cannot commit while a caught inner rollback left stamps unrestored in its range; it rolls back instead and throws an AggregateError.
  */
+function undoFilledTerms(from: number): void {
+  if (termsFilled === undefined) {
+    return
+  }
+  for (let index = termsFilled.length - 1; index >= from; index--) {
+    const theory = termsFilled[index]
+    if (theory !== undefined) {
+      delete theory.terms
+    }
+  }
+  termsFilled.length = from
+}
+
+/**
+ * Point a stored Morphism at the registered theories.
+ * The previous endpoints are restored if this `allOrNothing` rolls back.
+ */
+export function recordMorphismEndpoints(morphism: Morphism, source: Theory, target: Theory): void {
+  if (morphism.source === source && morphism.target === target) {
+    return
+  }
+  const priorSource = morphism.source
+  const priorTarget = morphism.target
+  morphism.source = source
+  morphism.target = target
+  endpointSwaps?.push({ morphism, source: priorSource, target: priorTarget })
+}
+
+function undoEndpointSwaps(from: number): void {
+  if (endpointSwaps === undefined) {
+    return
+  }
+  for (let index = endpointSwaps.length - 1; index >= from; index--) {
+    const entry = endpointSwaps[index]
+    if (entry !== undefined) {
+      entry.morphism.source = entry.source
+      entry.morphism.target = entry.target
+    }
+  }
+  endpointSwaps.length = from
+}
+
 export function allOrNothing<T>(write: () => T): T {
   const outermost = stampLog === undefined
   if (outermost) {
     stampLog = []
+    termsFilled = []
+    endpointSwaps = []
   }
   const log = stampLog!
   const logStart = log.length
+  const termsStart = termsFilled?.length ?? 0
+  const endpointStart = endpointSwaps?.length ?? 0
   const before = new Map(definitionRegistry.entries())
   const previousStart = savepointStart
   savepointStart = logStart
@@ -309,6 +374,8 @@ export function allOrNothing<T>(write: () => T): T {
     }
     return result
   } catch (error) {
+    undoFilledTerms(termsStart)
+    undoEndpointSwaps(endpointStart)
     const restoreErrors: unknown[] = []
     const unrestored: typeof log = []
     for (let index = log.length - 1; index >= logStart; index--) {
@@ -353,6 +420,8 @@ export function allOrNothing<T>(write: () => T): T {
     savepointStart = previousStart
     if (outermost) {
       stampLog = undefined
+      termsFilled = undefined
+      endpointSwaps = undefined
     }
   }
 }

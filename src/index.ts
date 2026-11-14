@@ -32,7 +32,7 @@ export * from './lazy-module.js'
 // Metadata helpers
 export * from './meta.js'
 
-export { applyMorphism, composeMorphisms, defineMorphism } from './morphism.js'
+export { applyMorphism, composeMorphisms, defineMorphism, Morphism } from './morphism.js'
 
 // Protocol System (ADR-0015)
 export * from './protocol.js'
@@ -48,7 +48,7 @@ export * from './shell.js'
 // Type testing utilities (compile-time helpers only)
 export * from './testing.js'
 
-export { defineTheory } from './theory.js'
+export { defineTheory, termsOf, Theory } from './theory.js'
 
 // Type system
 export type * from './types/index.js'
