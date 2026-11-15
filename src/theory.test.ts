@@ -183,6 +183,21 @@ describe('runtime terms', () => {
     expect(() => termsOf(theory)).toThrow(unresolved)
   })
 
+  it('unions terms from a list-form extends whose last element is a ref map', () => {
+    declareTheory('Identity', identityConfig)
+    const fresh = defineTheory({ terms: { Fresh: 'from the map' } })
+    declareTheory('Child', {
+      extends: ['Identity', { Fresh: fresh }],
+      terms: { Own: 'own term' },
+    })
+
+    expect(termsOf(theoryRefFor('Child').value as Theory)).toEqual({
+      Own: 'own term',
+      Id: 'Holds the stable identifier for an entity.',
+      Fresh: 'from the map',
+    })
+  })
+
   it('unions inherited terms through extends across two levels', () => {
     declareTheory('Identity', identityConfig)
     declareTheory('Taxonomy', taxonomyConfig)

@@ -3,6 +3,7 @@
  */
 
 import { objectHash } from './kit.js'
+import { metaOf } from './meta.js'
 
 /**
  * Runtime theory value. `extends` lists the theories this one composes.
@@ -82,8 +83,7 @@ export function termsOf(theory: Theory): Readonly<Record<string, string>> {
 
   const composition = theory.extends
   if (composition !== undefined) {
-    const parents = Array.isArray(composition) ? composition : Object.values(composition)
-    for (const parent of parents) {
+    for (const parent of extendsParents(composition)) {
       if (!(parent instanceof Theory)) {
         throw new TypeError('Unresolved theory in extends (ADR-0018)')
       }
@@ -114,4 +114,41 @@ export function defineTheory<T extends TheoryConfig>(config: T): Theory {
     return config
   }
   return new Theory(config)
+}
+
+/**
+ * Parents named by `extends`. A list whose last element is a ref map contributes
+ * the preceding entries and the map's values, the same reading shell uses.
+ */
+function extendsParents(composition: NonNullable<TheoryConfig['extends']>): readonly unknown[] {
+  if (!Array.isArray(composition)) {
+    return Object.values(composition)
+  }
+  const last = composition[composition.length - 1]
+  if (isRefMap(last)) {
+    return [...composition.slice(0, -1), ...Object.values(last)]
+  }
+  return composition
+}
+
+/**
+ * A plain ref map. A Theory, a value that already carries a uri, and a KeyRef are not maps.
+ */
+function isRefMap(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+  const prototype: unknown = Object.getPrototypeOf(value)
+  if (prototype !== Object.prototype && prototype !== null) {
+    return false
+  }
+  const uri = metaOf(value).uri
+  if (typeof uri === 'string' && uri !== '') {
+    return false
+  }
+  const valueDescriptor = Object.getOwnPropertyDescriptor(value, 'value')
+  if ('key' in value && typeof valueDescriptor?.get === 'function') {
+    return false
+  }
+  return true
 }
