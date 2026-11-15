@@ -6,7 +6,7 @@
 - **Goal:** `defineTheory` and `defineMorphism` return instances of `Theory` and `Morphism`. A Morphism carries `source`, `target`, and `maps`, and still receives its registered `canon://` identity when it is registered. `SimpleCategory`, `SimpleFunctor`, and `SimpleNode` are protocol operations on those constructors, implemented with the existing protocol API. The #87 names `composeMorphisms` and `applyMorphism` are no longer exported.
 - **Measure:** A Morphism is recognised by `satisfiesProtocol` for `SimpleCategory` and `SimpleFunctor`, and a Theory for `SimpleNode`. Composition of two Morphisms whose chain matches, and `map` of a Morphism, behave as the current tests describe, called through the protocols. The output of `compose` is composed and mapped again without registration (decision 11). `SimpleNode.identity(A)` acts as a unit for `compose` on both sides. `composeMorphisms` and `applyMorphism` are absent from `src/index.ts`. No new protocol function is added beside `defineProtocol` and `extendProtocol`. `npm run check:all` passes.
 - **ADRs / debt in scope:** ADR-0015 (protocol system, Obsolescent), ADR-0017 (definitions as values; lines 45 and 99 conflict with decision 2), ADR-0018 (Theories and Morphisms; composition and application), `docs/theories.md`. Debt: #87 exports unapproved function names, and a composed Morphism cannot be applied or composed again.
-- **Status:** Units 1, 2, 3, and 4 are done. Units 1, 2, and 4 are reviewed (unit 1 `de3564f`, follow-ups `74acbbe`, `56be5d8`; unit 2 `df48dea`, review fixes `802015a`; unit 4 `3b002b3`, follow-ups `f7c2950`, `24e4941`). Unit 3 is the bootstrap seed: `Theory` with terms `terms` and `extends`, and `Morphism` with terms `source`, `target`, and `maps`, approved by Bahul on 15 Nov 2026. Units 5 and 8 are waiting on [#98](https://github.com/RelationalFabric/canon/pull/98). Unit 6 is waiting on open question 3. Unit 7 comes after unit 6. #87 merged at `a610c26`. Open questions below are closed except open question 3 (the protocol ADR) and open question 5 (whether Morphism extends Theory, and the axiom kinds of the bootstrap terms). Question 5 blocks nothing.
+- **Status:** Units 1, 2, 3, and 4 are done. Units 1, 2, and 4 are reviewed (unit 1 `de3564f`, follow-ups `74acbbe`, `56be5d8`; unit 2 `df48dea`, review fixes `802015a`; unit 4 `3b002b3`, follow-ups `f7c2950`, `24e4941`). Unit 3 is the bootstrap seed: `Theory` with terms `terms` and `extends`, and `Morphism` with terms `source`, `target`, and `maps`, approved by Bahul on 15 Nov 2026. Unit 7 comes after unit 6. #87 merged at `a610c26`.
 
 ## Plan
 
@@ -60,7 +60,7 @@ Bahul, 11 Nov 2026, 15:49–15:54 London, decided:
 
 Bahul, 11 Nov 2026, 15:57–16:00 London, decided:
 
-17. The protocol types are P-prefixed: `PSimpleCategory`, `PSimpleFunctor`, `PSimpleNode`. Each is a type alias, for example `type PSimpleCategory = Protocol<SimpleCategory>`, following the intended `PSeq` pattern `type PSeq = Protocol<Seq>`. The implementations you call are unprefixed: `SimpleCategory`, `SimpleFunctor`, `SimpleNode`. The keys in the `Protocols` interface are unprefixed and map to the P type: `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, `SimpleNode: PSimpleNode`. Likewise `Seq`'s entry should be `Seq: PSeq`. Today `src/types/protocols.d.ts` has `PSeq: Protocol<Seq>` [code: `src/types/protocols.d.ts:136-137`], which departs from this intent. This closes open question 1.
+17. The protocol types are P-prefixed: `PSimpleCategory`, `PSimpleFunctor`, `PSimpleNode`. Each is a type alias, for example `type PSimpleCategory = Protocol<SimpleCategory>`, following the intended `PSeq` pattern `type PSeq = Protocol<Seq>`. The implementations you call are unprefixed: `SimpleCategory`, `SimpleFunctor`, `SimpleNode`. The keys in the `Protocols` interface are unprefixed and map to the P type: `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, `SimpleNode: PSimpleNode`. Likewise `Seq`'s entry should be `Seq: PSeq`. Today `src/types/protocols.d.ts` has `PSeq: Protocol<Seq>` [code: `src/types/protocols.d.ts:136-137`], which departs from this intent.
 
 Bahul, 11 Nov 2026, 16:18–23:53 London, decided:
 
@@ -74,13 +74,13 @@ Bahul, 11 Nov 2026, 16:18–23:53 London, decided:
 
 Bahul, 12 Nov 2026, 15:27 London, decided:
 
-25. Theories may not shadow inherited terms. Declaring or registering a Theory whose own terms include a name already inherited through `extends` is an error, including when the description is identical. It is thrown before any registry write. The error type is unit 5's. This closes open question 4.
+25. Theories may not shadow inherited terms. Declaring or registering a Theory whose own terms include a name already inherited through `extends` is an error, including when the description is identical. It is thrown before any registry write. The error type is unit 5's.
 
 No new dispatcher, registry, or `defineProtocol` option is in scope. The unit 4 review (12 Nov, `24e4941`) added `DefinitionRegistry.register`'s `clashAs` option on purpose, as the one exception, in place of `withClashStandIn`.
 
 ### Units
 
-Each unit is one commit. Later units stay off this branch until the open questions they need are answered. This saga file is the planning commit; it is not one of the units.
+Each unit is one commit. This saga file is the planning commit; it is not one of the units.
 
 Units 1–3 land together. ADR-0018 says the seed lands with the constructors. This PR lands units 1–4 together. Unit 3 is done, so the hold for that seed is lifted.
 
@@ -92,21 +92,13 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors. T
 
 4. **Registration swap.** On Morphism registration, replace `source` and `target` with the registered Theory instances when they are not already the same objects (decision 23).
 
-5. **Reject `/` in Theory labels.** `canon://morphism/A/B/C` is ambiguous otherwise (Architecture review of #87). Thrown from theory declare and register, before the registry write. The error comes from ADR-0020 (modern-errors via kit.ts, [#98](https://github.com/RelationalFabric/canon/pull/98)). Units 5 and 8 are blocked until #98 is Accepted and merged. The base and subclass names and the code format are open there.
+5. **Reject `/` in Theory labels.** `canon://morphism/A/B/C` is ambiguous otherwise (Architecture review of #87). Thrown from theory declare and register, before the registry write. The error comes from ADR-0020 (modern-errors via kit.ts, [#98](https://github.com/RelationalFabric/canon/pull/98)).
 
-8. **Reject shadowed terms.** Ordered after unit 5 and before unit 6. Blocked on unit 5's error type. Declaring or registering a Theory whose own `terms` include a name already inherited through `extends` throws, including when the description is identical (decision 25). Thrown before the registry write. A batch that includes a shadow leaves no partial state. The current behaviour, own terms winning in `termsOf`, and its test [code: `src/theory.test.ts:224-231`] are replaced by tests that assert the error for both list-form and map-form `extends`.
+8. **Reject shadowed terms.** Ordered after unit 5 and before unit 6. Declaring or registering a Theory whose own `terms` include a name already inherited through `extends` throws, including when the description is identical (decision 25). Thrown before the registry write. A batch that includes a shadow leaves no partial state. The current behaviour, own terms winning in `termsOf`, and its test [code: `src/theory.test.ts:224-231`] are replaced by tests that assert the error for both list-form and map-form `extends`.
 
-6. **SimpleCategory, SimpleFunctor and SimpleNode.** Blocked on open question 3. Define `SimpleCategory` (`compose`) and `SimpleFunctor` (`map`) for `Morphism`, and `SimpleNode` (`identity`) for `Theory`, all via `defineProtocol` and `extendProtocol`. Add the type aliases `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`, and the `Protocols` entries `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, and `SimpleNode: PSimpleNode`. The existing `Seq` entry is a comment edit only: `src/types/protocols.d.ts:134-138` shows `PSeq: Protocol<Seq>` in JSDoc. Change that example to `Seq: PSeq` together with a `PSeq` alias, and update any uses of the old `PSeq` key. Also update `examples/08`, the `src/protocol.ts` JSDoc, and the article, because decision 17 flips today's PSeq-as-value convention. `compose` and `map` read `source` and `target` from the value and compare Theory values for the chain. `SimpleNode.identity` dispatches on the Theory constructor and uses `termsOf` (decision 24). `compose` is substitution and throws when a middle term is missing, because ADR-0018 requires complete Morphisms. Today a missing middle term is dropped [code: `src/morphism.ts:74-78`]. Acceptance: `compose` and `map` work on an unregistered composed Morphism, and the identity laws hold on both sides. `identity(A)` is unregistered (decisions 11 and 24). Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Do not implement Theory mapping beyond this, the rest of dispatch on Theories, or algebraic law checks.
+6. **SimpleCategory, SimpleFunctor and SimpleNode.** Define `SimpleCategory` (`compose`) and `SimpleFunctor` (`map`) for `Morphism`, and `SimpleNode` (`identity`) for `Theory`, all via `defineProtocol` and `extendProtocol`. Add the type aliases `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`, and the `Protocols` entries `SimpleCategory: PSimpleCategory`, `SimpleFunctor: PSimpleFunctor`, and `SimpleNode: PSimpleNode`. The existing `Seq` entry is a comment edit only: `src/types/protocols.d.ts:134-138` shows `PSeq: Protocol<Seq>` in JSDoc. Change that example to `Seq: PSeq` together with a `PSeq` alias, and update any uses of the old `PSeq` key. Also update `examples/08`, the `src/protocol.ts` JSDoc, and the article, because decision 17 flips today's PSeq-as-value convention. `compose` and `map` read `source` and `target` from the value and compare Theory values for the chain. `SimpleNode.identity` dispatches on the Theory constructor and uses `termsOf` (decision 24). `compose` is substitution and throws when a middle term is missing, because ADR-0018 requires complete Morphisms. Today a missing middle term is dropped [code: `src/morphism.ts:74-78`]. Acceptance: `compose` and `map` work on an unregistered composed Morphism, and the identity laws hold on both sides. `identity(A)` is unregistered (decisions 11 and 24). Keep calling `defineProtocol` / `extendProtocol` only. Do not export the old function names. Do not implement Theory mapping beyond this, the rest of dispatch on Theories, or algebraic law checks.
 
 7. **Remove the #87 operations.** Delete `composeMorphisms` and `applyMorphism` and their `src/index.ts` exports, including the registered-only gate [code: `src/morphism.ts:106-110`]. Delete their tests from `src/morphism.test.ts` once unit 6's protocol tests cover the same cases. `defineMorphism` stays. `compose` throwing on a missing middle term closes the radar item "composeMorphisms silent term drop" [code: `planning/radar/data.yaml:191`]. `composeMorphisms` and `applyMorphism` were never released (added 10 Nov, last tag `v1.2.0`), so there is no deprecation step.
-
-### Open questions
-
-1. Closed by decision 17. `SimpleCategory`, `SimpleFunctor`, and `SimpleNode` go into the `Protocols` interface under unprefixed keys, mapped to `PSimpleCategory`, `PSimpleFunctor`, and `PSimpleNode`. `Protocols` is protocol-only type augmentation [code: `src/types/protocols.d.ts:142`], not the definition registry.
-2. Closed. [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`. ADR-0017 and ADR-0018 are Accepted.
-3. Do the public protocol names (`SimpleCategory`, `SimpleFunctor`, `SimpleNode`, `compose`, `map`, `identity`, and the P-prefix on the type) need a protocol ADR before they ship? They are in no ADR, and ADR-0015 is Obsolescent. For Bahul. Unit 6 is blocked on this answer.
-4. Closed by decision 25. Theories may not shadow inherited terms, including when the description is identical. The earlier `termsOf` behaviour, own terms winning, is replaced by unit 8.
-5. It is not yet decided whether Morphism extends Theory, or what the axiom kinds of the bootstrap Theories' terms are. They are `unknown` for now. This blocks nothing.
 
 ## Ledger
 
@@ -123,13 +115,11 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors. T
 
 ### Notes
 
-- Release gate, owner RF: no release is cut from `develop` while `composeMorphisms` and `applyMorphism` are exported. It lifts when unit 7 is merged to `develop`.
-- ADR docs item, for Architecture: [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`, with ADR-0017 and ADR-0018 Accepted. The `docs/theories.md` line 3 fix, and the stale text in `docs/definitions.md` and `docs/theories.md`, remain.
-- Follow-ups outside S006, from Architecture's #87/#92 review: (a) after a double rollback failure followed by a successful outer repair, `definitions.ts` throws 'rollback incomplete' instead of rethrowing the original error (use `error.cause`; add a test); (b) `clear()` rescans `stampLog` for each value, which is quadratic; (c) in `registerCanons`, a theory that refers to a sibling listed later in the same batch may still fail preflight. (d) Closed: `tsconfig.test.json` includes `src/**`, and #88 covers `morphism.test.ts`.
+- [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`. ADR-0017 and ADR-0018 are Accepted.
 - `de3564f`: unit 1 done (Theory and Morphism constructors). Follow-ups `74acbbe`, `56be5d8`.
 - `df48dea`: unit 2 done (runtime terms).
 - `802015a` unit 2 review fixes
 - `3b002b3`: unit 4 done (registration swap)
 - `f7c2950`: unit 4 swap waits until register succeeds
 - `24e4941`: unit 4 clash view is an argument to register
-- Units 1, 2, 3, and 4 are done. Units 1, 2, and 4 are reviewed. Unit 3 seeds `Theory` (`terms`, `extends`) and `Morphism` (`source`, `target`, `maps`), approved by Bahul on 15 Nov 2026. Units 5 and 8 are waiting on #98. Unit 6 is waiting on open question 3. Unit 7 comes after unit 6. This PR lands units 1–4 together. Unit 3 is done, so the hold is lifted.
+- Units 1, 2, 3, and 4 are done. Units 1, 2, and 4 are reviewed. Unit 3 seeds `Theory` (`terms`, `extends`) and `Morphism` (`source`, `target`, `maps`), approved by Bahul on 15 Nov 2026. Unit 7 comes after unit 6. This PR lands units 1–4 together. Unit 3 is done, so the hold is lifted.
