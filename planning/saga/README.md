@@ -116,7 +116,6 @@ Units 1–3 land together. ADR-0018 says the seed lands with the constructors. T
 ### Notes
 
 - [#96](https://github.com/RelationalFabric/canon/pull/96) merged into `develop` as `63239c0`. ADR-0017 and ADR-0018 are Accepted.
-- Follow-ups outside S006, from Architecture's #87/#92 review: (d) Closed: `tsconfig.test.json` includes `src/**`, and #88 covers `morphism.test.ts`.
 - `de3564f`: unit 1 done (Theory and Morphism constructors). Follow-ups `74acbbe`, `56be5d8`.
 - `df48dea`: unit 2 done (runtime terms).
 - `802015a` unit 2 review fixes
