@@ -5,7 +5,7 @@
 import type { Morphism } from './morphism.js'
 import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri, Metadata } from './types/index.js'
 import { metaOf, updateMeta } from './meta.js'
-import { clashHash, regularizeTheoryTerms, Theory } from './theory.js'
+import { clashHash, regularizeTerms, Theory } from './theory.js'
 
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined
 
@@ -105,7 +105,7 @@ export class DefinitionRegistry {
     }
     if (!alreadyRegistered) {
       if (value instanceof Theory && value.terms === undefined) {
-        regularizeTheoryTerms(value)
+        regularizeTerms(value)
         termsFilled?.push(value)
       }
       this.#definitions.set(uri, value)
