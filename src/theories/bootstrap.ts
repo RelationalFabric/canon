@@ -18,8 +18,8 @@ declare module '@relational-fabric/canon' {
 }
 
 /**
- * `terms` maps each term name to a description of that term.
- * `extends` is the Theories this one composes.
+ * `terms` maps each term name to a description of that term (`src/theory.ts:14`, the type).
+ * `extends` is the Theories this one composes (`src/theory.ts:9`).
  */
 export const theorySeed = {
   terms: {
@@ -29,8 +29,8 @@ export const theorySeed = {
 }
 
 /**
- * `source` and `target` hold Theory values, not labels.
- * `maps` sends each source term to a target term.
+ * `source` and `target` hold Theory values, not labels (saga unit 1, `planning/saga/README.md:87`).
+ * `maps` sends each source term to a target term (`src/morphism.ts:9`).
  */
 export const morphismSeed = {
   terms: {
