@@ -9,6 +9,7 @@ import { theoryRefFor } from '../definitions.js'
 import { metaOf } from '../meta.js'
 import { declareTheory } from '../shell.js'
 import { invariant } from '../testing.js'
+import { termsOf, Theory } from '../theory.js'
 import { config } from './identity.js'
 import './taxonomy.js'
 
@@ -38,7 +39,7 @@ describe('identity theory', () => {
     const ref = theoryRefFor('Identity')
 
     expect(ref.key).toBe('canon://theory/Identity')
-    expect(ref.value).toBe(config)
+    expect(ref.value).toBeInstanceOf(Theory)
   })
 
   it('records only uri on the registered value', () => {
@@ -48,6 +49,11 @@ describe('identity theory', () => {
     if (isMetaCarrier(registered)) {
       expect(metaOf(registered)).toEqual({ uri: 'canon://theory/Identity' })
     }
+  })
+
+  it('exposes the Id term', () => {
+    const registered = theoryRefFor('Identity').value as Theory
+    expect(termsOf(registered)).toHaveProperty('Id')
   })
 })
 

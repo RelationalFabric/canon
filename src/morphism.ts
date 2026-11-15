@@ -2,6 +2,7 @@
  * Morphism API
  */
 
+import type { Theory } from './theory.js'
 import { metaOf } from './meta.js'
 
 /**
@@ -10,19 +11,45 @@ import { metaOf } from './meta.js'
  */
 export interface MorphismConfig {
   maps?: Record<string, string>
+  source?: Theory
+  target?: Theory
+}
+
+/**
+ * Constructor for morphism runtime values.
+ */
+export class Morphism implements MorphismConfig {
+  maps?: Record<string, string>
+  source?: Theory
+  target?: Theory
+
+  constructor(config: MorphismConfig) {
+    if (config.maps !== undefined) {
+      this.maps = config.maps
+    }
+    if (config.source !== undefined) {
+      this.source = config.source
+    }
+    if (config.target !== undefined) {
+      this.target = config.target
+    }
+  }
 }
 
 /**
  * Define a morphism runtime value.
  *
- * Returns the config unchanged. The name is not read here. Nothing is registered
- * and no metadata is written.
+ * Returns a `Morphism` instance with the config fields copied onto it. The
+ * name is not read here. Nothing is registered and no metadata is written.
  *
  * @param config - The morphism value
- * @returns The same config object
+ * @returns A new `Morphism` instance
  */
-export function defineMorphism<T extends MorphismConfig>(config: T): T {
-  return config
+export function defineMorphism<T extends MorphismConfig>(config: T): Morphism {
+  if (config instanceof Morphism) {
+    return config
+  }
+  return new Morphism(config)
 }
 
 const MORPHISM_URI_PREFIX = 'canon://morphism/'
