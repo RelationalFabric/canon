@@ -31,7 +31,7 @@ Alternatives considered: keep built-in errors and a convention for message text 
 
 1. We will bless `modern-errors` into canon's kit, following ADR-0008 and ADR-0006 as they stand, and set no new third-party policy. The rule for the line between the kit and `_/` is: whatever canon itself uses comes from the kit. The kit entry is `Errors`, and the pre-wired plugins sit under it (`Errors.serialize`, `Errors.clean` and so on). There is no top-level kit name per plugin. `src/_/modern-errors.ts` is a transparent re-export that only forwards the library for what canon does not use. The library is declared in both `dependencies` and `optionalDependencies`, as ADR-0006 requires.
 
-2. Canon's own errors are built through the kit, not by importing `modern-errors` directly. Canon has one base error, `<BaseError>`, and every canon error is a subclass composed from it. The kit is also the supported way for a consumer to define its own errors, so the facilities below are written for canon and consumers alike, not for canon's needs only.
+2. Canon's own errors are built through the kit, not by importing `modern-errors` directly. Canon has one base error, `CanonError`, and every canon error is a subclass composed from it. The first two subclasses are `InvalidLabelError` and `ShadowedTermError`. Bahul, 15 Nov 2026, 17:28 London, answering "Which error classes should canon use?": "Use CanonError with InvalidLabelError and ShadowedTermError". His follow-up message: "Favour semantic names". The kit is also the supported way for a consumer to define its own errors, so the facilities below are written for canon and consumers alike, not for canon's needs only.
 
 3. Each error carries, as machine-readable properties:
    - a stable code, in the format `<code format>`, so callers branch on the code and never on message text;
@@ -108,10 +108,10 @@ Harder, and risks:
 
 Open questions (for approval before any name or choice is final; placeholders above stand until answered):
 
-1. What is the base class name, `<BaseError>`, and what are the subclass names? The first two subclasses are needed by units 5 and 8.
+1. Closed. What is the base class name, and what are the subclass names? Bahul, 15 Nov 2026, 17:28 London, answering "Which error classes should canon use?": "Use CanonError with InvalidLabelError and ShadowedTermError". His follow-up message: "Favour semantic names". The base class is `CanonError`, with subclasses `InvalidLabelError` and `ShadowedTermError` (decision 2).
 2. What is the format of the stable code, `<code format>`? For example, whether it carries the ADR number.
 3. What are the names of the hint kinds (plain-text fix, suggested value, applicable edit, documentation link, example snippet, related locations), and of the property that holds the hints?
 4. Are errors described as Theories, in line with S006 decision 22 (Theory and Morphism are themselves Theories)? Or are they plain classes with no Theory?
 5. How do the Node-only plugins stay out of browser consumers (decision 8)? No existing mechanism covers it, so this needs a decision and any name it introduces.
 
-Decided here, not open: the kit entry is `Errors` with plugins under it; the helpers are `defineError` and `throwAll`; the reference property is `ref`; all official plugins except `winston` are pre-wired, with `process` opt-in to activate; `cli` and oclif coexist as in decision 7.
+Decided here, not open: the base error is `CanonError`, with subclasses `InvalidLabelError` and `ShadowedTermError` (open question 1); the kit entry is `Errors` with plugins under it; the helpers are `defineError` and `throwAll`; the reference property is `ref`; all official plugins except `winston` are pre-wired, with `process` opt-in to activate; `cli` and oclif coexist as in decision 7.
