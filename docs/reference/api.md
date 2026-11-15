@@ -57,7 +57,7 @@ Creates a fresh, empty registry instance.
 function resetRegistry(): void
 ```
 
-Clears the global registry. Handy for tests and long-lived processes.
+Clears the global registry, then registers the bootstrap Theories `Theory` and `Morphism` again, before any other theory. Handy for tests and long-lived processes.
 
 #### `declareCanon`
 

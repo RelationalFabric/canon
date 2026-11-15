@@ -928,6 +928,8 @@ describe('shell', () => {
 
       expect(uris()).toEqual(keys)
       expect(keys).toEqual([
+        'canon://theory/Theory',
+        'canon://theory/Morphism',
         'canon://theory/DeclaredTheory',
         'canon://theory/One',
         'canon://theory/Two',
@@ -1237,7 +1239,10 @@ describe('shell', () => {
       const aggregate = thrown as AggregateError
       expect(aggregate.errors[0]).toBe(original)
       expect(aggregate.cause).toBe(original)
-      expect(definitionRegistry.size).toBe(0)
+      expect([...definitionRegistry.entries()].map(([uri]) => uri)).toEqual([
+        'canon://theory/Theory',
+        'canon://theory/Morphism',
+      ])
       expect(theoryRefFor('Other').value).toBeUndefined()
       declareTheory('Other', defineTheory({}))
       expect(theoryRefFor('Other').value).toBeDefined()
@@ -1270,7 +1275,7 @@ describe('shell', () => {
       expect(definitionRegistry.value(theoryRefFor('A').key)).toBe(a)
       expect(definitionRegistry.value(theoryRefFor('B').key)).toBe(b)
       expect(metaOf(a).uri).toBe('canon://theory/A')
-      expect(metaOf(b).uri).toBeUndefined()
+      expect(metaOf(b).uri).toBe('canon://theory/B')
     })
 
     it('replays a failed inner restore when the outer savepoint fails', () => {
@@ -1381,7 +1386,7 @@ describe('shell', () => {
       expect(aggregate.cause).toMatchObject({ message: 'e1' })
     })
 
-    it('cannot commit when the outer write maps a fresh name to an unrestored object', () => {
+    it('rejects a fresh name for a theory that stayed registered through a failed reset', () => {
       const b = defineTheory({})
       declareTheory('B', b)
       let reads = 0
@@ -1411,10 +1416,9 @@ describe('shell', () => {
         rollbackArm.value = false
       }
 
-      expect(thrown).toBeInstanceOf(AggregateError)
+      expect(thrown).toBeInstanceOf(Error)
       expect(thrown).toMatchObject({
-        message: expect.stringContaining('cannot commit'),
-        cause: { message: 'restore failed' },
+        message: 'Definition already registered: canon://theory/B',
       })
       expect(theoryRefFor('A').value).toBeUndefined()
       expect(theoryRefFor('T').value).toBeUndefined()

@@ -11,13 +11,24 @@ import { defineCanon } from './canon.js'
 import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, recordMorphismEndpoints, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { defineMorphism, Morphism } from './morphism.js'
+import { morphismSeed, theorySeed } from './theories/bootstrap.js'
 import { clashHash, defineTheory, isRefMap, Theory } from './theory.js'
 
 /**
- * Reset the global registry to empty
+ * Clear the global registry and register the bootstrap theories again,
+ * before any other theory.
  */
 export function resetRegistry(): void {
   definitionRegistry.clear()
+  seedTheories()
+}
+
+/**
+ * Register Theory and Morphism before any other theory (ADR-0018).
+ */
+function seedTheories(): void {
+  declareTheory('Theory', theorySeed)
+  declareTheory('Morphism', morphismSeed)
 }
 
 /**
@@ -630,3 +641,5 @@ function validateRegisterMorphisms(morphisms: Record<string, MorphismConfig>): v
     }
   }
 }
+
+seedTheories()
