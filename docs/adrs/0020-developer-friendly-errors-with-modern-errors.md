@@ -41,7 +41,7 @@ Alternatives considered: keep built-in errors and a convention for message text 
 
    A code is part of the public contract of whoever defines it. Changing a released code is a breaking change.
 
-4. Hints are structured and open to new kinds. They are not a single string. An error may carry several hints, of different kinds, and the set of kinds can grow without changing the error model. The kinds we expect to need, described and not named here, are:
+4. Hints are structured and open to new kinds. They are not a single string. An error may carry several hints, of different kinds, and the set of kinds can grow without changing the error model. The kinds we expect to need are:
    - a plain-text fix;
    - a suggested value, for a "did you mean" case;
    - a replacement or edit that a tool could apply;
