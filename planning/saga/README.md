@@ -76,7 +76,7 @@ Bahul, 12 Nov 2026, 15:27 London, decided:
 
 25. Theories may not shadow inherited terms. Declaring or registering a Theory whose own terms include a name already inherited through `extends` is an error, including when the description is identical. It is thrown before any registry write. The error type is unit 5's. This closes open question 4.
 
-No new dispatcher, registry, or `defineProtocol` option is in scope.
+No new dispatcher, registry, or `defineProtocol` option is in scope. The unit 4 review (12 Nov, `22b8e5f`) added `DefinitionRegistry.register`'s `clashAs` option on purpose, as the one exception, in place of `withClashStandIn`.
 
 ### Units
 
