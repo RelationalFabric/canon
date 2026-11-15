@@ -87,7 +87,7 @@ Easier:
 - Each failure points to the rule it comes from and carries structured hints, which a tool can act on as well as a person.
 - Consumers define their own errors in the same way as canon.
 - A batch failure shows every problem at once.
-- Unit 5's error-type choice is closed by this ADR.
+- Unit 5's open error-type choice is closed by this ADR.
 
 Harder, and risks:
 
