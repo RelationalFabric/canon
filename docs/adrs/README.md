@@ -23,6 +23,7 @@
 | [ADR-0017](./0017-definitions-as-values.md) | Definitions as Values | 🟢 Accepted | 2026-11-02 (revised 2026-11-11) |
 | [ADR-0018](./0018-theories-and-morphisms.md) | Theories and Morphisms | 🟢 Accepted | 2026-11-01 (revised 2026-11-02, 2026-11-11) |
 | [ADR-0019](./0019-nygard-adr-format.md) | Nygard ADR Format | 🟡 Proposed | 2026-11-01 |
+| [ADR-0020](./0020-developer-friendly-errors-with-modern-errors.md) | Developer-Friendly Errors with modern-errors | 🟡 Proposed | 2026-11-12 |
 
 ## ADR Process
 
