@@ -10,7 +10,7 @@ Proposed
 
 Canon throws plain `Error` and `TypeError` values. A thrown value carries a message and nothing else. A caller cannot branch on the kind of failure without matching message text. The message does not say which ADR the rule comes from, or how to fix the call. When several things are wrong in one operation, for example a batch that registers many definitions, the caller sees the first failure only.
 
-S006 is about to add two new failures, a `/` in a Theory label (unit 5) and a Theory that shadows an inherited term (unit 8, S006 decision 25). Unit 8 is blocked on unit 5's open choice between a built-in `TypeError` and a canon error class. That choice is better made once, for all errors, than twice for two throw sites.
+S006 is about to add two new failures, a `/` in a Theory label (unit 5) and a Theory that shadows an inherited term (unit 8, S006 decision 25). The error type for those failures is better made once, for all errors, than twice for two throw sites.
 
 Canon already has a policy for third-party libraries, and this ADR follows it without changing it:
 
@@ -34,7 +34,7 @@ Alternatives considered: keep built-in errors and a convention for message text 
 2. Canon's own errors are built through the kit, not by importing `modern-errors` directly. Canon has one base error, `CanonError`, and every canon error is a subclass composed from it. The first two subclasses are `InvalidLabelError` and `ShadowedTermError`. Bahul, 15 Nov 2026, 17:28 London, answering "Which error classes should canon use?": "Use CanonError with InvalidLabelError and ShadowedTermError". His follow-up message: "Favour semantic names". The kit is also the supported way for a consumer to define its own errors, so the facilities below are written for canon and consumers alike, not for canon's needs only.
 
 3. Each error carries, as machine-readable properties:
-   - a stable code, in the format `<code format>`, so callers branch on the code and never on message text;
+   - a stable code, so callers branch on the code and never on message text;
    - details about the failure, as structured data;
    - `ref`, a URI that points to the rule the failure comes from. It may point to a canon ADR or to a consumer's own documentation page. It is a URI and not an ADR number, so consumers can use it;
    - hints on how to fix it (decision 4).
@@ -48,8 +48,6 @@ Alternatives considered: keep built-in errors and a convention for message text 
    - a link to documentation;
    - an example snippet;
    - related locations or URIs.
-
-   The names of the kinds, and of the property that holds the hints, are open (open question 3).
 
 5. There are two helpers, in the kit:
    - `defineError(code, message, hints)` defines an error kind from a code, a message template and hints. Canon and consumers use it alike, and canon's own errors are defined only this way;
@@ -75,15 +73,11 @@ Alternatives considered: keep built-in errors and a convention for message text 
    - at the top-level handler, a canon error is rendered and exited through the `cli` plugin, and any other error goes to oclif's `handle` unchanged;
    - an error a command raises through oclif's own `this.error` keeps oclif's handling.
 
-   How the handler tells the two apart, the exit codes, and the changes to `bin/canon` and `runCli` are tactical and go in the saga.
-
-8. Node-only plugins in the kit must stay out of browser consumers. A browser consumer must be able to use `Errors` and the helpers without loading `clean`, `beautiful`, `cli` or `process`. Today no mechanism provides this: `src/index.ts` re-exports `src/kit.ts`, which already imports Node-only libraries (`@oclif/core`, `fs-extra`, `hygen`, `ts-morph`), and `package.json` has no conditional exports, no Node-only entry and no `sideEffects` field. ADR-0008 sets the kit and `_/` paths and does not address this. The mechanism is therefore an open question (open question 5), and no entry name is proposed here.
+8. Node-only plugins in the kit must stay out of browser consumers. A browser consumer must be able to use `Errors` and the helpers without loading `clean`, `beautiful`, `cli` or `process`.
 
 9. S006 units 5 (no `/` in Theory labels) and 8 (no shadowed inherited terms, decision 25) are the first users. This ADR must be Accepted and merged before either implements it. The remaining throw sites migrate in a later unit, planned in the saga and not here.
 
-10. Whether errors are themselves described as Theories is left open (open question 4). Nothing in this ADR depends on the answer.
-
-This ADR sets direction only. Class layout, the property schema, the hint representation, the code catalogue and the migration order are tactical and go in the saga.
+The base error is `CanonError`, with subclasses `InvalidLabelError` and `ShadowedTermError`. The kit entry is `Errors` with plugins under it. The helpers are `defineError` and `throwAll`. The reference property is `ref`. All official plugins except `winston` are pre-wired, with `process` opt-in to activate. `cli` and oclif coexist as in decision 7.
 
 ## Consequences
 
@@ -93,7 +87,7 @@ Easier:
 - Each failure points to the rule it comes from and carries structured hints, which a tool can act on as well as a person.
 - Consumers define their own errors in the same way as canon.
 - A batch failure shows every problem at once.
-- Unit 5's open error-type choice is closed by this ADR.
+- Unit 5's error-type choice is closed by this ADR.
 
 Harder, and risks:
 
@@ -103,15 +97,4 @@ Harder, and risks:
 - The library is ESM only. Canon is ESM, so this is not a constraint today.
 - Declaring the library in both `dependencies` and `optionalDependencies` follows ADR-0006. In the repository today only `defu` is declared in both, and the other kit libraries are in `dependencies` only. This ADR does not change that, and the existing divergence from ADR-0006 stays a separate matter.
 - The upstream `process` plugin advises libraries to install it as a development dependency, because it is aimed at applications. Canon pre-wires it by decision, with activation left to the consumer. The cost is its two packages for every consumer.
-- Browser consumers are not protected from the Node-only plugins until the mechanism in open question 5 exists.
 - Until the later migration unit lands, canon has two styles of error side by side.
-
-Open questions (for approval before any name or choice is final; placeholders above stand until answered):
-
-1. Closed. What is the base class name, and what are the subclass names? Bahul, 15 Nov 2026, 17:28 London, answering "Which error classes should canon use?": "Use CanonError with InvalidLabelError and ShadowedTermError". His follow-up message: "Favour semantic names". The base class is `CanonError`, with subclasses `InvalidLabelError` and `ShadowedTermError` (decision 2).
-2. What is the format of the stable code, `<code format>`? For example, whether it carries the ADR number.
-3. What are the names of the hint kinds (plain-text fix, suggested value, applicable edit, documentation link, example snippet, related locations), and of the property that holds the hints?
-4. Are errors described as Theories, in line with S006 decision 22 (Theory and Morphism are themselves Theories)? Or are they plain classes with no Theory?
-5. How do the Node-only plugins stay out of browser consumers (decision 8)? No existing mechanism covers it, so this needs a decision and any name it introduces.
-
-Decided here, not open: the base error is `CanonError`, with subclasses `InvalidLabelError` and `ShadowedTermError` (open question 1); the kit entry is `Errors` with plugins under it; the helpers are `defineError` and `throwAll`; the reference property is `ref`; all official plugins except `winston` are pre-wired, with `process` opt-in to activate; `cli` and oclif coexist as in decision 7.
