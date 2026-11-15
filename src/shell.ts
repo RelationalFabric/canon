@@ -11,7 +11,7 @@ import { defineCanon } from './canon.js'
 import { allOrNothing, canonRefFor, definitionRegistry, definitionUri, isDefinitionKey, morphismRefFor, recordMorphismEndpoints, theoryRefFor } from './definitions.js'
 import { metaOf } from './meta.js'
 import { defineMorphism, Morphism } from './morphism.js'
-import { clashHash, defineTheory, Theory } from './theory.js'
+import { clashHash, defineTheory, isRefMap, Theory } from './theory.js'
 
 /**
  * Reset the global registry to empty
@@ -446,25 +446,6 @@ function validateProvidedNames(
       validateTheoryConfig(value, batchKeys, provided)
     }
   }
-}
-
-function isRefMap(value: unknown): value is Record<string, unknown> {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    return false
-  }
-  const prototype: unknown = Object.getPrototypeOf(value)
-  if (prototype !== Object.prototype && prototype !== null) {
-    return false
-  }
-  const uri = metaOf(value).uri
-  if (typeof uri === 'string' && uri !== '') {
-    return false
-  }
-  const valueDescriptor = Object.getOwnPropertyDescriptor(value, 'value')
-  if ('key' in value && typeof valueDescriptor?.get === 'function') {
-    return false
-  }
-  return true
 }
 
 function isTheoryConfig(value: unknown): value is TheoryConfig {

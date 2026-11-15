@@ -136,7 +136,7 @@ function extendsParents(composition: NonNullable<TheoryConfig['extends']>): read
 /**
  * A plain ref map. A Theory, a value that already carries a uri, and a KeyRef are not maps.
  */
-function isRefMap(value: unknown): value is Record<string, unknown> {
+export function isRefMap(value: unknown): value is Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return false
   }
