@@ -2,7 +2,6 @@ import './theories/identity.js'
 import './theories/taxonomy.js'
 import './theories/typed-entity.js'
 
-export { objectHash } from './_/object-hash.js'
 // Axiom and Canon APIs
 export * from './axiom.js'
 // Specific Axioms
