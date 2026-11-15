@@ -259,7 +259,7 @@ function asTheoryInstance(value: unknown): unknown {
   throw new Error('A definition ref map value must be a theory config (ADR-0017)')
 }
 
-function prepareTheoryConfigForResolve(config: TheoryConfig): TheoryConfig {
+function theoryConfigForResolve(config: TheoryConfig): TheoryConfig {
   const terms = config.terms
 
   if (config instanceof Theory) {
@@ -295,7 +295,7 @@ function prepareTheoryConfigForResolve(config: TheoryConfig): TheoryConfig {
  */
 export function declareTheory<Label extends keyof Theories>(label: Label, config: TheoryConfig) {
   return allOrNothing(() => {
-    const defined = defineTheory(prepareTheoryConfigForResolve(config))
+    const defined = defineTheory(theoryConfigForResolve(config))
     resolveExtends(defined)
     definitionRegistry.register(definitionUri('theory', label), defined)
     return theoryRefFor(label)
@@ -371,7 +371,7 @@ export function registerTheories(theories: Record<string, TheoryConfig>): void {
       if (config === undefined) {
         continue
       }
-      const value = defineTheory(prepareTheoryConfigForResolve(config))
+      const value = defineTheory(theoryConfigForResolve(config))
       definitionRegistry.register(definitionUri('theory', label), value)
       resolveExtends(value)
     }
