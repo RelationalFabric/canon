@@ -3,7 +3,7 @@
  */
 
 import type { DefinitionKind, DefinitionUri, KeyRef, LexiconTermUri, Metadata } from './types/index.js'
-import { objectHash } from './kit.js'
+import { objectHash } from './_/object-hash.js'
 import { metaOf, updateMeta } from './meta.js'
 
 let stampLog: Array<{ target: object, prior: Metadata | undefined }> | undefined

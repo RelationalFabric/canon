@@ -1,6 +1,5 @@
 import type { ConsolaInstance } from 'consola'
 import type { FormattingOptions as JsonFormattingOptions, ParseError as JsonParseError } from 'jsonc-parser'
-import type { ObjectHash } from 'object-hash'
 import type { SourceFile as TsMorphSourceFile } from 'ts-morph'
 import { Command as OclifCommand, Flags as OclifFlags, flush as oclifFlush, run as oclifRun } from '@oclif/core'
 import fsExtra from 'fs-extra'
@@ -13,7 +12,6 @@ import {
   parse as jsoncParse,
   printParseErrorCode as jsoncPrintError,
 } from 'jsonc-parser'
-import objectHashDefault from 'object-hash'
 import {
   Project as TsMorphProjectClass,
   QuoteKind as TsMorphQuoteKindEnum,
@@ -25,8 +23,6 @@ import { createLogger as createCanonLogger } from './log.js'
 // Third-party dependencies blessed for consumer use
 export { defu } from 'defu'
 export const Immutable = ImmutableNamespace
-
-export const objectHash: ObjectHash = objectHashDefault
 
 const parseYamlFn = yamlParse
 const HygenLoggerResolved: typeof HygenLoggerModule
