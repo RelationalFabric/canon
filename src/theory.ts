@@ -70,8 +70,10 @@ export function clashHash(value: unknown): string {
 }
 
 /**
- * Inherited and own term descriptions for a theory (ADR-0018). Own terms override
- * inherited names with the same key. The result is cached on the instance.
+ * Term descriptions for a theory: its own `terms` together with those reached
+ * through `extends` (ADR-0018). The result is cached on the instance. Which
+ * description is kept when the same name appears on both is outside this
+ * contract. Unit 8 (decision 25) will make that shadow an error.
  */
 export function termsOf(theory: Theory): Readonly<Record<string, string>> {
   const cached = termsOfCache.get(theory)
